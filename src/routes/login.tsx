@@ -18,9 +18,9 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-const DEMO_ACCOUNTS = [
-  { label: "Demo workspace · mock data", email: "qai@q.agency", password: "demo" },
-  { label: "Production · live (soon)", email: "zlatko@q.agency", password: "password" },
+const QUICK_ACCOUNTS = [
+  { label: "QAI", email: "qai@q.agency", password: "demo" },
+  { label: "Zlatko", email: "zlatko@q.agency", password: "password" },
 ];
 
 function LoginPage() {
@@ -108,10 +108,10 @@ function LoginPage() {
 
             <div className="mt-6 border-t border-border pt-4">
               <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                Demo accounts
+                Quick sign-in
               </p>
               <div className="grid gap-2">
-                {DEMO_ACCOUNTS.map((acct) => (
+                {QUICK_ACCOUNTS.map((acct) => (
                   <button
                     key={acct.email}
                     type="button"

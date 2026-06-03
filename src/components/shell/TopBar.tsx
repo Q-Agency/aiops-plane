@@ -133,21 +133,14 @@ export function TopBar({ user }: { user: AppUser }) {
 
       <div className="mx-1 h-6 w-px bg-border" />
 
-      <div
-        className={cn(
-          "hidden sm:flex items-center h-8 px-2.5 rounded-md border text-[10px] font-semibold uppercase tracking-wider",
-          isReal
-            ? "border-status-waiting/50 bg-status-waiting/10 text-status-waiting"
-            : "border-primary/40 bg-primary/10 text-primary",
-        )}
-        title={
-          isReal
-            ? "Production workspace — live agent data not connected yet (showing mock)"
-            : "Demo workspace — mock data"
-        }
-      >
-        {isReal ? "Live · not connected" : "Demo data"}
-      </div>
+      {isReal && (
+        <div
+          className="hidden sm:flex items-center h-8 px-2.5 rounded-md border border-status-waiting/50 bg-status-waiting/10 text-status-waiting text-[10px] font-semibold uppercase tracking-wider"
+          title="Production workspace — live agent data not connected yet"
+        >
+          Live · not connected
+        </div>
+      )}
 
       <div className="flex items-center gap-2 pl-0.5">
         <div className="hidden md:flex flex-col items-end leading-tight">

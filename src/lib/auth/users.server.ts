@@ -11,8 +11,8 @@ const USERS: StoredUser[] = [
   {
     email: "qai@q.agency",
     password: "demo",
-    name: "QAI Demo",
-    dataMode: "mock",
+    name: "QAI",
+    dataMode: "standard",
   },
   {
     email: "zlatko@q.agency",
