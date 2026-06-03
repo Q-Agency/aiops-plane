@@ -14,6 +14,7 @@ import { Route as PodRouteImport } from './routes/pod'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as OrchestrationRouteImport } from './routes/orchestration'
 import { Route as ObservabilityRouteImport } from './routes/observability'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as FlowRouteImport } from './routes/flow'
@@ -48,6 +49,11 @@ const OrchestrationRoute = OrchestrationRouteImport.update({
 const ObservabilityRoute = ObservabilityRouteImport.update({
   id: '/observability',
   path: '/observability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KnowledgeRoute = KnowledgeRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
   '/knowledge': typeof KnowledgeRoute
+  '/login': typeof LoginRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
   '/knowledge': typeof KnowledgeRoute
+  '/login': typeof LoginRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
   '/knowledge': typeof KnowledgeRoute
+  '/login': typeof LoginRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/flow'
     | '/governance'
     | '/knowledge'
+    | '/login'
     | '/observability'
     | '/orchestration'
     | '/pipeline'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/flow'
     | '/governance'
     | '/knowledge'
+    | '/login'
     | '/observability'
     | '/orchestration'
     | '/pipeline'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/flow'
     | '/governance'
     | '/knowledge'
+    | '/login'
     | '/observability'
     | '/orchestration'
     | '/pipeline'
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   FlowRoute: typeof FlowRoute
   GovernanceRoute: typeof GovernanceRoute
   KnowledgeRoute: typeof KnowledgeRoute
+  LoginRoute: typeof LoginRoute
   ObservabilityRoute: typeof ObservabilityRoute
   OrchestrationRoute: typeof OrchestrationRoute
   PipelineRoute: typeof PipelineRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/observability'
       fullPath: '/observability'
       preLoaderRoute: typeof ObservabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/knowledge': {
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   FlowRoute: FlowRoute,
   GovernanceRoute: GovernanceRoute,
   KnowledgeRoute: KnowledgeRoute,
+  LoginRoute: LoginRoute,
   ObservabilityRoute: ObservabilityRoute,
   OrchestrationRoute: OrchestrationRoute,
   PipelineRoute: PipelineRoute,
@@ -364,3 +385,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

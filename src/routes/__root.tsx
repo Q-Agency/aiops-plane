@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  redirect,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { captureError } from "../lib/error-reporting";
+import { fetchUser } from "../lib/auth/auth";
 import { AppShell } from "../components/shell/AppShell";
 import { Toaster } from "../components/ui/sonner";
 
@@ -75,6 +77,17 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async ({ location }) => {
+    const user = await fetchUser();
+    const onLoginPage = location.pathname === "/login";
+    if (!user && !onLoginPage) {
+      throw redirect({ to: "/login" });
+    }
+    if (user && onLoginPage) {
+      throw redirect({ to: "/" });
+    }
+    return { user };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -119,13 +132,17 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, user } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell>
+      {user ? (
+        <AppShell user={user}>
+          <Outlet />
+        </AppShell>
+      ) : (
         <Outlet />
-      </AppShell>
+      )}
       <Toaster />
     </QueryClientProvider>
   );

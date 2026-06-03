@@ -3,15 +3,16 @@ import { LeftRail } from "./LeftRail";
 import { TopBar } from "./TopBar";
 import { LiveProvider } from "@/hooks/useLiveTicker";
 import { SectionAssistantProvider } from "@/components/assistant/SectionAssistant";
+import type { AppUser } from "@/lib/auth/types";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, user }: { children: ReactNode; user: AppUser }) {
   return (
     <LiveProvider>
       <SectionAssistantProvider>
         <div className="flex h-screen w-full overflow-hidden">
           <LeftRail />
           <div className="flex-1 flex flex-col min-w-0">
-            <TopBar />
+            <TopBar user={user} />
             <main className="flex-1 overflow-auto scrollbar-thin">{children}</main>
           </div>
         </div>
