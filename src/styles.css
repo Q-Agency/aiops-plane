@@ -1,0 +1,245 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+
+  --color-agent-curator: var(--agent-curator);
+  --color-agent-ba: var(--agent-ba);
+  --color-agent-sa: var(--agent-sa);
+  --color-agent-tasklist: var(--agent-tasklist);
+  --color-agent-dev: var(--agent-dev);
+  --color-agent-review: var(--agent-review);
+  --color-agent-qa: var(--agent-qa);
+  --color-agent-pm: var(--agent-pm);
+
+  --color-status-running: var(--status-running);
+  --color-status-waiting: var(--status-waiting);
+  --color-status-done: var(--status-done);
+  --color-status-error: var(--status-error);
+  --color-status-idle: var(--status-idle);
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0.625rem;
+
+  --background: #0a0a12;
+  --foreground: #e6e8ef;
+  --panel: #13131f;
+  --panel-2: #16213e;
+
+  --card: #13131f;
+  --card-foreground: #e6e8ef;
+  --popover: #13131f;
+  --popover-foreground: #e6e8ef;
+
+  --primary: #6c63ff;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a2a;
+  --secondary-foreground: #e6e8ef;
+  --muted: #1a1a2a;
+  --muted-foreground: #8a8fa3;
+  --accent: #1f1f33;
+  --accent-foreground: #e6e8ef;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #6c63ff;
+
+  --agent-curator: #2ecc71;
+  --agent-ba: #3b82f6;
+  --agent-sa: #8b5cf6;
+  --agent-tasklist: #06b6d4;
+  --agent-dev: #0ea5e9;
+  --agent-review: #f59e0b;
+  --agent-qa: #d946ef;
+  --agent-pm: #6c63ff;
+
+  --status-running: #3b82f6;
+  --status-waiting: #f59e0b;
+  --status-done: #22c55e;
+  --status-error: #ef4444;
+  --status-idle: #475569;
+}
+
+.light {
+  --background: #f5f6fa;
+  --foreground: #0f1222;
+  --panel: #ffffff;
+  --panel-2: #eef1f8;
+
+  --card: #ffffff;
+  --card-foreground: #0f1222;
+  --popover: #ffffff;
+  --popover-foreground: #0f1222;
+
+  --primary: #5b54e6;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f6;
+  --secondary-foreground: #0f1222;
+  --muted: #eef0f6;
+  --muted-foreground: #5b6072;
+  --accent: #e6e9f3;
+  --accent-foreground: #0f1222;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(15, 18, 34, 0.10);
+  --input: rgba(15, 18, 34, 0.12);
+  --ring: #5b54e6;
+
+  --agent-curator: #16a34a;
+  --agent-ba: #2563eb;
+  --agent-sa: #7c3aed;
+  --agent-tasklist: #0891b2;
+  --agent-dev: #0284c7;
+  --agent-review: #d97706;
+  --agent-qa: #c026d3;
+  --agent-pm: #5b54e6;
+
+  --status-running: #2563eb;
+  --status-waiting: #d97706;
+  --status-done: #16a34a;
+  --status-error: #dc2626;
+  --status-idle: #94a3b8;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 15% -10%, rgba(108, 99, 255, 0.10), transparent 60%),
+      radial-gradient(900px 500px at 110% 0%, rgba(59, 130, 246, 0.07), transparent 60%),
+      linear-gradient(transparent 95%, rgba(255, 255, 255, 0.025) 95%),
+      linear-gradient(90deg, transparent 95%, rgba(255, 255, 255, 0.025) 95%);
+    background-size: auto, auto, 100% 4px, 4px 100%;
+    background-attachment: fixed;
+  }
+  .light body {
+    background-image:
+      radial-gradient(1200px 600px at 15% -10%, rgba(91, 84, 230, 0.10), transparent 60%),
+      radial-gradient(900px 500px at 110% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
+      linear-gradient(transparent 95%, rgba(15, 18, 34, 0.04) 95%),
+      linear-gradient(90deg, transparent 95%, rgba(15, 18, 34, 0.04) 95%);
+  }
+}
+
+@layer utilities {
+  .font-mono { font-family: var(--font-mono); font-feature-settings: "zero", "ss01"; }
+
+  .glass-panel {
+    background: linear-gradient(180deg, rgba(22, 33, 62, 0.40), rgba(19, 19, 31, 0.70));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    transition: box-shadow .25s ease, border-color .25s ease, transform .25s ease;
+  }
+  .glass-panel:hover {
+    border-color: rgba(108, 99, 255, 0.30);
+    box-shadow: inset 0 0 0 1px rgba(108, 99, 255, 0.10), 0 8px 30px -12px rgba(108, 99, 255, 0.25);
+  }
+  .light .glass-panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(238, 241, 248, 0.75));
+    border: 1px solid rgba(15, 18, 34, 0.08);
+    box-shadow: 0 1px 2px rgba(15, 18, 34, 0.04);
+  }
+  .light .glass-panel:hover {
+    border-color: rgba(91, 84, 230, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(91, 84, 230, 0.08), 0 8px 30px -12px rgba(91, 84, 230, 0.25);
+  }
+  .hover-lift { transition: transform .2s ease, box-shadow .2s ease; }
+  .hover-lift:hover { transform: translateY(-2px); }
+
+  .accent-line {
+    background: linear-gradient(90deg, transparent, rgba(108,99,255,0.6), transparent);
+    height: 1px;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 currentColor, 0 0 10px 0 currentColor; opacity: .95; }
+    50%      { box-shadow: 0 0 0 4px transparent, 0 0 22px 4px currentColor; opacity: 1; }
+  }
+  .glow-pulse { animation: glow-pulse 1.8s ease-in-out infinite; }
+
+  @keyframes edge-flow {
+    0%   { stroke-dashoffset: 28; }
+    100% { stroke-dashoffset: 0; }
+  }
+  .edge-flow { animation: edge-flow 1s linear infinite; }
+
+  @keyframes dot-pulse {
+    0%, 100% { transform: scale(1); opacity: .85; }
+    50%      { transform: scale(1.6); opacity: 1; }
+  }
+  .dot-pulse { animation: dot-pulse 1.4s ease-in-out infinite; }
+
+  @keyframes slide-in-down {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim-in { animation: slide-in-down .35s ease-out both; }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  .light .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(15,18,34,0.15); }
+}
+
+/* Light-mode remap: the app uses `bg-white/X` and `hover:bg-white/X`
+   utilities everywhere as subtle surface tints. In light mode those would
+   be invisible on a white background, so we remap them to a dark tint. */
+.light [class*="bg-white/"] {
+  background-color: rgba(15, 18, 34, 0.04) !important;
+}
+.light [class*="hover:bg-white/"]:hover {
+  background-color: rgba(15, 18, 34, 0.07) !important;
+}
+
+/* Shadcn overlays: the default bg-black/80 is too heavy over a light page */
+.light [data-slot="dialog-overlay"],
+.light [data-slot="alert-dialog-overlay"],
+.light [data-slot="sheet-overlay"],
+.light [data-slot="drawer-overlay"] {
+  background-color: rgba(15, 18, 34, 0.45) !important;
+}
+
