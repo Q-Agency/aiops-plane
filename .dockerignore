@@ -1,0 +1,29 @@
+# Dependencies & build artifacts (rebuilt inside the image)
+node_modules
+.output
+.nitro
+.vinxi
+.tanstack
+dist
+dist-ssr
+
+# VCS
+.git
+.gitignore
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Logs & local secrets
+*.log
+.env
+.env.*
+.dev.vars
+.wrangler
+
+# Docker assets (not needed in the build context)
+Dockerfile
+.dockerignore
+redeploy.sh
