@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { captureError } from "../lib/error-reporting";
 import { AppShell } from "../components/shell/AppShell";
 import { Toaster } from "../components/ui/sonner";
 
@@ -40,7 +40,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    captureError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -85,9 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "Agency OS · Command Center" },
       { property: "og:description", content: "AI Agency OS — mission control for an agentic software pipeline." },
       { name: "twitter:description", content: "AI Agency OS — mission control for an agentic software pipeline." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cf459bbf-9bc1-4c64-9d1a-c82440483829/id-preview-03627329--e133e05e-836e-4edb-b919-f9b6b0562d4c.lovable.app-1780136626767.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cf459bbf-9bc1-4c64-9d1a-c82440483829/id-preview-03627329--e133e05e-836e-4edb-b919-f9b6b0562d4c.lovable.app-1780136626767.png" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:type", content: "website" },
     ],
     links: [
