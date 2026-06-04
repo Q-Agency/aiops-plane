@@ -109,6 +109,18 @@ a run/event/HITL API (`agent.run(...)`, `run.emit(...)`, `run.request_approval(.
 **BA is the first implementation** (extracted from its existing plumbing); KA and
 SA adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-brief.md).
 
+**Packaging & ownership (sequenced):**
+- **Now:** build it as a **standalone, extractable package inside the BA repo**
+  (`packages/agency-agent-sdk/`, zero BA-specific imports) — clean boundaries, but
+  no separate-repo/CI ceremony for an N=1 consumer.
+- **At agent #2** (SA/KA): **extract it to its own git repo** and `pip install` it
+  version-pinned. Because it was built extractable, that's a `git mv` + publish,
+  not a refactor.
+- **The canonical schema travels with it:** `agent-contract.schema.json` lives in
+  this repo today and is copied into the SDK version-pinned; when the SDK gets its
+  own repo, the canonical schema moves there (or a tiny `agent-contract` package)
+  and the dashboard pins/copies it. One source of truth — everyone derives.
+
 ---
 
 ## 4. Deployment & data
