@@ -40,7 +40,7 @@ SSE, `/agent/health`, HITL via `waiting_for_input`) — so for BA this is mostly
 - Python ≥ 3.12, **Pydantic v2**, **FastAPI** (match the agents' stack).
 
 ### A.1 Contract types (Pydantic v2, domain-agnostic)
-Define a `SCHEMA_VERSION = "0.1"` constant, stamped on every emitted payload.
+Define a `SCHEMA_VERSION = "0.2"` constant, stamped on every emitted payload.
 **Domain-specific data must ride in `metadata` / event `data` — never as core
 fields.** (BA's `completeness`, EARS, `spec_version` etc. go in `metadata`.)
 
@@ -51,12 +51,17 @@ fields.** (BA's `completeness`, EARS, `spec_version` etc. go in `metadata`.)
 > here as the reference shape, not a second source of truth.
 
 ```python
+class ProjectRef(BaseModel):   # scope a run / work item belongs to (SDLC: a project)
+    id: str
+    name: str
+
 class WorkItem(BaseModel):     # the unit of work flowing through the pipeline
     id: str                    # e.g. the Teamwork task id / BA session id
     type: str                  # "ticket" | "session" | "incident" | ...
     title: str | None = None
     stage: str | None = None
     status: str | None = None
+    project: ProjectRef | None = None   # one shared agent serves many projects
     metadata: dict = {}
 
 class Run(BaseModel):          # one execution of the agent against a work item
@@ -75,6 +80,7 @@ class Run(BaseModel):          # one execution of the agent against a work item
     outcome: str | None = None # "success" | "error" | "cancelled"
     error: str | None = None
     parent_run_id: str | None = None
+    project: ProjectRef | None = None   # project this run belongs to
     schema_version: str = SCHEMA_VERSION
     metadata: dict = {}        # ← domain payload (e.g. {"completeness": 92})
 
@@ -268,6 +274,10 @@ codebase — these are from an earlier read and may have moved):
 **Move BA-domain fields into `metadata`:** `completeness` (6-dim), EARS criteria,
 `spec_version`, validation errors → `Run.metadata` / event `data`. They must
 **not** become core SDK fields.
+
+**Project is a first-class field, not metadata:** map BA's `project_id` /
+`project_name` (it enriches `/runs/all`) → `Run.project` (`ProjectRef`). It's the
+SDLC scope dimension the dashboard filters by.
 
 **Refactor BA to:** instantiate `Agent(id="ba", produces=["spec"], consumes=["task"], sources=[…])`,
 mount `agent.router()` (or replace its routers with the SDK's), and replace inline

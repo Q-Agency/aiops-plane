@@ -8,10 +8,17 @@
 // in sync by hand for now; codegen later). The Python SDK's Pydantic models must
 // conform to the same schema — verified by the conformance suite. See README.md.
 
-export const SCHEMA_VERSION = "0.1" as const;
+export const SCHEMA_VERSION = "0.2" as const;
 
 /** ISO-8601 timestamp, e.g. "2026-06-04T12:00:00Z". */
 export type ISODateTime = string;
+
+/** The scope a work item / run belongs to. SDLC calls this a "project"
+ *  (product / codebase); a shared agent serves many. */
+export interface ProjectRef {
+  id: string;
+  name: string;
+}
 
 export interface WorkItem {
   id: string;
@@ -20,6 +27,7 @@ export interface WorkItem {
   title?: string;
   stage?: string;
   status?: string;
+  project?: ProjectRef;
   metadata?: Record<string, unknown>;
 }
 
@@ -43,6 +51,8 @@ export interface Run {
   outcome?: RunOutcome;
   error?: string;
   parent_run_id?: string;
+  /** project this run belongs to (one shared agent serves many projects) */
+  project?: ProjectRef;
   schema_version: string;
   /** domain payload, e.g. { completeness: 92 } */
   metadata?: Record<string, unknown>;

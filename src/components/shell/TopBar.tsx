@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { AssistantTriggerButton } from "@/components/assistant/SectionAssistant";
 import { logoutFn } from "@/lib/auth/auth";
 import type { AppUser } from "@/lib/auth/types";
+import { ProjectSwitcher } from "./ProjectSwitcher";
 
 function useUtcClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -53,15 +54,21 @@ export function TopBar({ user }: { user: AppUser }) {
   return (
     <header className="h-14 border-b border-border bg-panel/40 backdrop-blur-md flex items-center px-4 gap-4">
 
-      <button className="flex items-center gap-2 px-3 h-9 rounded-md bg-white/5 border border-border hover:border-primary/40 transition-colors cursor-pointer text-sm">
-        <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" />
-        <span className="font-medium">{project.name}</span>
-        <ChevronDown className="size-3.5 text-muted-foreground" />
-      </button>
+      {isReal ? (
+        <ProjectSwitcher />
+      ) : (
+        <>
+          <button className="flex items-center gap-2 px-3 h-9 rounded-md bg-white/5 border border-border hover:border-primary/40 transition-colors cursor-pointer text-sm">
+            <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" />
+            <span className="font-medium">{project.name}</span>
+            <ChevronDown className="size-3.5 text-muted-foreground" />
+          </button>
 
-      <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground font-mono">
-        {projects.length} projects · 3 codebases
-      </div>
+          <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground font-mono">
+            {projects.length} projects · 3 codebases
+          </div>
+        </>
+      )}
 
       <div className="flex-1" />
 

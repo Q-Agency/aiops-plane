@@ -3,8 +3,14 @@
   "$id": "https://agency-os/contract/v0/agent-contract.schema.json",
   "title": "Agency OS Agent Contract",
   "description": "Canonical, language-neutral wire contract a compliant agent emits. The dashboard's TS types and the Python SDK's Pydantic models both derive from this. Domain-specific data rides in `metadata`/`data`.",
-  "x-contract-version": "0.1",
+  "x-contract-version": "0.2",
   "$defs": {
+    "ProjectRef": {
+      "type": "object",
+      "description": "Scope a work item/run belongs to (SDLC: a project/codebase).",
+      "required": ["id", "name"],
+      "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+    },
     "WorkItem": {
       "type": "object",
       "required": ["id", "type"],
@@ -14,6 +20,7 @@
         "title": { "type": "string" },
         "stage": { "type": "string" },
         "status": { "type": "string" },
+        "project": { "$ref": "#/$defs/ProjectRef" },
         "metadata": { "type": "object" }
       }
     },
@@ -36,6 +43,7 @@
         "outcome": { "enum": ["success", "error", "cancelled"] },
         "error": { "type": "string" },
         "parent_run_id": { "type": "string" },
+        "project": { "$ref": "#/$defs/ProjectRef" },
         "schema_version": { "type": "string" },
         "metadata": { "type": "object", "description": "domain payload, e.g. { completeness: 92 }" }
       }

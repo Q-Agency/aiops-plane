@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import type { AgentHealth, Run } from "@/contract";
@@ -34,5 +35,33 @@ export const getRunsFn = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<Run[]> => {
     const system = getSystem(data.systemId);
     if (!system) return [];
-    return adapterFor(system.id).getRuns(system);
+    const runs = await adapterFor(system.id).getRuns(system);
+    // Scope by the selected project (aiops_project cookie), if any.
+    let project: string | undefined;
+    try {
+      project = getCookie("aiops_project") || undefined;
+    } catch {
+      /* no request context */
+    }
+    return project ? runs.filter((r) => r.project?.id === project) : runs;
   });
+
+/** Distinct projects across the fleet's runs → powers the project switcher. */
+export const getProjectsFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ id: string; name: string; count: number }[]> => {
+    const systems = getSystems();
+    const settled = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getRuns(s)));
+    const byId = new Map<string, { id: string; name: string; count: number }>();
+    for (const res of settled) {
+      if (res.status !== "fulfilled") continue;
+      for (const r of res.value) {
+        const p = r.project;
+        if (!p?.id) continue;
+        const e = byId.get(p.id) ?? { id: p.id, name: p.name || p.id, count: 0 };
+        e.count += 1;
+        byId.set(p.id, e);
+      }
+    }
+    return [...byId.values()].sort((a, b) => b.count - a.count);
+  },
+);

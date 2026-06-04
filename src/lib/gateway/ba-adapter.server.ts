@@ -48,6 +48,11 @@ function mapRun(r: any, agentId: string): Run {
     outcome: running ? undefined : succeeded ? "success" : "error",
     error: r.error_message ?? undefined,
     parent_run_id: undefined,
+    // BA enriches /runs/all with project_id/project_name (VERIFY field names):
+    project:
+      r.project_id || r.project_name
+        ? { id: String(r.project_id ?? r.project_name), name: r.project_name ?? String(r.project_id) }
+        : undefined,
     schema_version: SCHEMA_VERSION,
     // domain payload — kept out of the kernel fields:
     metadata: {

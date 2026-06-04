@@ -36,5 +36,10 @@ v0, internal. Lives in `src/` for convenient imports, but is meant to be a
 **neutral artifact** — extract into a standalone, versioned package once a second
 agent (KA/SA) consumes it, so neither the dashboard nor any agent "owns" it.
 
+**Changelog**
+- **0.2** — added optional `project` (`ProjectRef`) to `Run`/`WorkItem` for
+  project scoping (SDLC agents are shared but tag each run with its project).
+- **0.1** — initial kernel.
+
 See `docs/architecture.md` (§3a–3d) and `docs/agent-sdk-brief.md` for the full
 design and the producer-side build brief.

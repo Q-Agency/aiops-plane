@@ -209,6 +209,29 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
 
 ---
 
+## 11. Project scope
+
+SDLC agents are **project-scoped** (model **B**): one shared agent instance
+serves many projects, and each run/work-item carries the project it belongs to
+(e.g. BA tags every session with `project_id`/`project_name`). So "project" is a
+**scoping dimension orthogonal to "agent"** — a run belongs to *(agent, project)*.
+
+- **Contract:** `Run` and `WorkItem` carry an optional `project { id, name }`
+  (`ProjectRef`, schema v0.2). Each adapter populates it (BA from its
+  `project_id`/`project_name`).
+- **Derived, not declared:** the dashboard derives the project list from the
+  federated runs (distinct projects + counts) — no project registry.
+- **Scoping:** the TopBar **project switcher** sets the selected project (an
+  `aiops_project` cookie, read server-side); the gateway filters runs to it.
+  Fleet/agent health shows across all projects (a shared agent serves many); the
+  project-specific data (runs, pipeline, traceability) is filtered.
+- **Naming:** `project` is the SDLC name for a general **scope**; the domain
+  manifest relabels it for non-SDLC agents (or it's simply unset).
+- **Per-project deployments (model A)** still work: such an agent declares its
+  project in its card; nothing else changes.
+
+---
+
 ## Open questions / deferred
 
 - **Productization** (multi-org tenancy, RBAC, billing, data-residency) — deferred
