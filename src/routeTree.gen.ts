@@ -19,6 +19,7 @@ import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as FlowRouteImport } from './routes/flow'
 import { Route as EconomicsRouteImport } from './routes/economics'
+import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as CommsRouteImport } from './routes/comms'
 import { Route as ApprovalsRouteImport } from './routes/approvals'
@@ -76,6 +77,11 @@ const EconomicsRoute = EconomicsRouteImport.update({
   path: '/economics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConnectionsRoute = ConnectionsRouteImport.update({
+  id: '/connections',
+  path: '/connections',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComplianceRoute = ComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/approvals': typeof ApprovalsRoute
   '/comms': typeof CommsRoute
   '/compliance': typeof ComplianceRoute
+  '/connections': typeof ConnectionsRoute
   '/economics': typeof EconomicsRoute
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/approvals': typeof ApprovalsRoute
   '/comms': typeof CommsRoute
   '/compliance': typeof ComplianceRoute
+  '/connections': typeof ConnectionsRoute
   '/economics': typeof EconomicsRoute
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/approvals': typeof ApprovalsRoute
   '/comms': typeof CommsRoute
   '/compliance': typeof ComplianceRoute
+  '/connections': typeof ConnectionsRoute
   '/economics': typeof EconomicsRoute
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/comms'
     | '/compliance'
+    | '/connections'
     | '/economics'
     | '/flow'
     | '/governance'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/comms'
     | '/compliance'
+    | '/connections'
     | '/economics'
     | '/flow'
     | '/governance'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/comms'
     | '/compliance'
+    | '/connections'
     | '/economics'
     | '/flow'
     | '/governance'
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   ApprovalsRoute: typeof ApprovalsRoute
   CommsRoute: typeof CommsRoute
   ComplianceRoute: typeof ComplianceRoute
+  ConnectionsRoute: typeof ConnectionsRoute
   EconomicsRoute: typeof EconomicsRoute
   FlowRoute: typeof FlowRoute
   GovernanceRoute: typeof GovernanceRoute
@@ -309,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EconomicsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/connections': {
+      id: '/connections'
+      path: '/connections'
+      fullPath: '/connections'
+      preLoaderRoute: typeof ConnectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compliance': {
       id: '/compliance'
       path: '/compliance'
@@ -371,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApprovalsRoute: ApprovalsRoute,
   CommsRoute: CommsRoute,
   ComplianceRoute: ComplianceRoute,
+  ConnectionsRoute: ConnectionsRoute,
   EconomicsRoute: EconomicsRoute,
   FlowRoute: FlowRoute,
   GovernanceRoute: GovernanceRoute,
