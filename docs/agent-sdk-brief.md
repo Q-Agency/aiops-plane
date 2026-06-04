@@ -44,6 +44,12 @@ Define a `SCHEMA_VERSION = "0.1"` constant, stamped on every emitted payload.
 **Domain-specific data must ride in `metadata` / event `data` — never as core
 fields.** (BA's `completeness`, EARS, `spec_version` etc. go in `metadata`.)
 
+> **Canonical schema:** the authoritative contract is **`agent-contract.schema.json`**
+> (it lives in the Agency OS repo at `src/contract/`; copy it into this repo
+> **version-pinned**). The Pydantic models below must **conform to / be generated
+> from** that schema — the conformance suite (A.7) verifies it. Treat the models
+> here as the reference shape, not a second source of truth.
+
 ```python
 class WorkItem(BaseModel):     # the unit of work flowing through the pipeline
     id: str                    # e.g. the Teamwork task id / BA session id

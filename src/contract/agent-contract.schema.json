@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agency-os/contract/v0/agent-contract.schema.json",
+  "title": "Agency OS Agent Contract",
+  "description": "Canonical, language-neutral wire contract a compliant agent emits. The dashboard's TS types and the Python SDK's Pydantic models both derive from this. Domain-specific data rides in `metadata`/`data`.",
+  "x-contract-version": "0.1",
+  "$defs": {
+    "WorkItem": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "description": "ticket | session | incident | … (domain-defined)" },
+        "title": { "type": "string" },
+        "stage": { "type": "string" },
+        "status": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "Run": {
+      "type": "object",
+      "required": ["id", "agent_id", "type", "status", "started_at", "schema_version"],
+      "properties": {
+        "id": { "type": "string" },
+        "agent_id": { "type": "string" },
+        "work_item_id": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "enum": ["running", "succeeded", "failed", "cancelled"] },
+        "started_at": { "type": "string", "format": "date-time" },
+        "ended_at": { "type": "string", "format": "date-time" },
+        "duration_ms": { "type": "integer" },
+        "model": { "type": "string" },
+        "tokens_in": { "type": "integer" },
+        "tokens_out": { "type": "integer" },
+        "cost_usd": { "type": "number" },
+        "outcome": { "enum": ["success", "error", "cancelled"] },
+        "error": { "type": "string" },
+        "parent_run_id": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "metadata": { "type": "object", "description": "domain payload, e.g. { completeness: 92 }" }
+      }
+    },
+    "Step": {
+      "type": "object",
+      "required": ["id", "run_id", "name", "kind", "started_at"],
+      "properties": {
+        "id": { "type": "string" },
+        "run_id": { "type": "string" },
+        "name": { "type": "string" },
+        "kind": { "enum": ["tool", "llm", "stage"] },
+        "started_at": { "type": "string", "format": "date-time" },
+        "duration_ms": { "type": "integer" },
+        "tokens": { "type": "integer" },
+        "cost_usd": { "type": "number" },
+        "input": {},
+        "output": {},
+        "parent_id": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "EventType": {
+      "enum": [
+        "run.started", "run.completed", "run.error",
+        "step.started", "step.completed",
+        "tool.called", "tool.result",
+        "hitl.requested", "hitl.resolved",
+        "metric.update", "log"
+      ]
+    },
+    "AgentEvent": {
+      "type": "object",
+      "required": ["ts", "agent_id", "type", "schema_version"],
+      "properties": {
+        "ts": { "type": "string", "format": "date-time" },
+        "agent_id": { "type": "string" },
+        "type": { "$ref": "#/$defs/EventType" },
+        "run_id": { "type": "string" },
+        "level": { "enum": ["info", "warning", "error"] },
+        "data": { "type": "object", "description": "domain-specific payload" },
+        "schema_version": { "type": "string" }
+      }
+    },
+    "HITLGate": {
+      "type": "object",
+      "required": ["id", "kind", "state", "prompt", "opened_at"],
+      "properties": {
+        "id": { "type": "string" },
+        "work_item_id": { "type": "string" },
+        "run_id": { "type": "string" },
+        "kind": { "enum": ["approval", "clarification"] },
+        "state": { "enum": ["open", "resolved", "expired"] },
+        "prompt": { "type": "string" },
+        "channel": { "type": "string" },
+        "opened_at": { "type": "string", "format": "date-time" },
+        "resolved_at": { "type": "string", "format": "date-time" },
+        "resolved_by": { "type": "string" },
+        "decision": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "AgentHealth": {
+      "type": "object",
+      "required": ["agent_id", "name", "state", "healthy", "active_runs", "schema_version", "last_seen"],
+      "properties": {
+        "agent_id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "state": { "enum": ["idle", "running", "waiting", "error"] },
+        "healthy": { "type": "boolean" },
+        "active_runs": { "type": "integer" },
+        "version": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "last_seen": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AgentCard": {
+      "type": "object",
+      "description": "A2A-aligned discovery doc at /.well-known/agent-card.json",
+      "required": ["name", "description", "version", "url", "x-agency"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "version": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "streaming": { "type": "boolean" },
+            "pushNotifications": { "type": "boolean" },
+            "stateTransitionHistory": { "type": "boolean" }
+          }
+        },
+        "authentication": {
+          "type": "object",
+          "properties": { "schemes": { "type": "array", "items": { "type": "string" } } }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "x-agency": {
+          "type": "object",
+          "required": ["id", "domain", "contractVersion", "produces", "consumes", "sources", "endpoints"],
+          "properties": {
+            "id": { "type": "string" },
+            "domain": { "type": "string" },
+            "contractVersion": { "type": "string" },
+            "produces": { "type": "array", "items": { "type": "string" } },
+            "consumes": { "type": "array", "items": { "type": "string" } },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["system", "mode"],
+                "properties": {
+                  "system": { "type": "string" },
+                  "mode": { "type": "string" }
+                }
+              }
+            },
+            "endpoints": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}
