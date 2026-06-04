@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aiops",
+      "runtimeExecutable": "/Users/zlatko.matokanovic/.bun/bin/bun",
+      "runtimeArgs": ["run", "--bun", "dev", "--port", "5180"],
+      "port": 5180
+    }
+  ]
+}
