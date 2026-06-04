@@ -1,9 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import { FlowRiver } from "@/components/command-center/FlowRiver";
 import { KpiStrip } from "@/components/command-center/KpiStrip";
 import { AgentStatusGrid } from "@/components/command-center/AgentStatusGrid";
 import { ApprovalsQueue } from "@/components/command-center/ApprovalsQueue";
 import { ActivityFeed } from "@/components/command-center/ActivityFeed";
+import { RealCommandCenter } from "@/components/command-center/RealCommandCenter";
+import { getFleetHealthFn, getRunsFn } from "@/lib/api/fleet.functions";
+import type { AgentHealth, Run } from "@/contract";
+
+type CommandData = { mode: "mock" } | { mode: "real"; fleet: AgentHealth[]; runs: Run[] };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -12,10 +18,31 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Bird's-eye view of the AI agency pipeline." },
     ],
   }),
+  // In "real" mode, fetch live fleet data through the gateway (SSR'd here, so the
+  // empty/connected state renders server-side). "standard"/mock mode is untouched.
+  loader: async ({ context }): Promise<CommandData> => {
+    if (context.user?.dataMode !== "real") return { mode: "mock" };
+    try {
+      const fleet = await getFleetHealthFn();
+      const first = fleet[0]?.agent_id;
+      const runs = first ? await getRunsFn({ data: { systemId: first } }) : [];
+      return { mode: "real", fleet, runs };
+    } catch {
+      return { mode: "real", fleet: [], runs: [] };
+    }
+  },
   component: CommandCenter,
 });
 
 function CommandCenter() {
+  const data = Route.useLoaderData();
+  if (data.mode === "real") {
+    return <RealCommandCenter fleet={data.fleet} runs={data.runs} />;
+  }
+  return <MockCommandCenter />;
+}
+
+function MockCommandCenter() {
   return (
     <div className="p-4 lg:p-6 grid gap-4 lg:gap-5 xl:grid-cols-[1fr_360px]">
       <div className="space-y-4 lg:space-y-5 min-w-0">
