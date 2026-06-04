@@ -25,7 +25,15 @@ export const Route = createFileRoute("/")({
     try {
       const fleet = await getFleetHealthFn();
       const first = fleet[0]?.agent_id;
-      const runs = first ? await getRunsFn({ data: { systemId: first } }) : [];
+      let runs: Run[] = [];
+      if (first) {
+        // best-effort: one unreachable agent shouldn't blank the whole fleet
+        try {
+          runs = await getRunsFn({ data: { systemId: first } });
+        } catch {
+          /* keep the fleet tiles, drop runs */
+        }
+      }
       return { mode: "real", fleet, runs };
     } catch {
       return { mode: "real", fleet: [], runs: [] };

@@ -17,9 +17,15 @@ import type { RegisteredSystem } from "./systems.server";
 async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
   const headers: Record<string, string> = { accept: "application/json" };
   if (system.apiKey) headers[system.authHeader ?? "X-API-Key"] = system.apiKey;
-  const res = await fetch(`${system.baseUrl}${path}`, { headers });
-  if (!res.ok) throw new Error(`BA ${path} -> HTTP ${res.status}`);
-  return res.json();
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(`${system.baseUrl}${path}`, { headers, signal: ctrl.signal });
+    if (!res.ok) throw new Error(`BA ${path} -> HTTP ${res.status}`);
+    return res.json();
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 /** BA RunResponse → contract Run. VERIFY field names against a live response. */

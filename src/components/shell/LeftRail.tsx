@@ -14,6 +14,7 @@ import {
   Network,
   Megaphone,
   ShieldCheck,
+  PlugZap,
   ChevronLeft,
 } from "lucide-react";
 import { useState } from "react";
@@ -34,6 +35,7 @@ const items = [
   { to: "/compliance", label: "Compliance & Audit", icon: ShieldCheck },
   { to: "/observability", label: "Observability", icon: Activity },
   { to: "/approvals", label: "Approvals", icon: CheckCircle2 },
+  { to: "/connections", label: "Connections", icon: PlugZap },
 ] as const;
 
 export function LeftRail() {
