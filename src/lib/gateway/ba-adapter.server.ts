@@ -70,6 +70,16 @@ export async function getRuns(system: RegisteredSystem): Promise<Run[]> {
   return rows.map((r) => mapRun(r, system.id));
 }
 
+/** Count an array-ish payload regardless of how the agent wraps it. */
+function countItems(x: any): number {
+  if (Array.isArray(x)) return x.length;
+  if (typeof x?.count === "number") return x.count;
+  for (const k of ["sessions", "active", "interrupted", "items", "runs", "data"]) {
+    if (Array.isArray(x?.[k])) return x[k].length;
+  }
+  return 0;
+}
+
 export async function getHealth(system: RegisteredSystem): Promise<AgentHealth> {
   let healthy = true;
   let body: any = {};
@@ -79,21 +89,39 @@ export async function getHealth(system: RegisteredSystem): Promise<AgentHealth> 
     healthy = false;
   }
 
-  let activeRuns = 0;
+  // Derive "running" from the runs themselves, so the card always agrees with
+  // the runs list (rather than guessing the shape of /agent/active).
+  let runningCount = 0;
   try {
-    const active = await baFetch(system, "/agent/active");
-    activeRuns = Array.isArray(active) ? active.length : (active?.count ?? 0);
+    const runs = await getRuns(system);
+    runningCount = runs.filter((r) => r.status === "running").length;
   } catch {
     /* non-fatal */
   }
+
+  // Human-blocked (waiting for input) takes priority on the badge. Best-effort.
+  let waitingCount = 0;
+  try {
+    waitingCount = countItems(await baFetch(system, "/agent/interrupted"));
+  } catch {
+    /* non-fatal */
+  }
+
+  const state: AgentHealth["state"] = !healthy
+    ? "error"
+    : waitingCount > 0
+      ? "waiting"
+      : runningCount > 0
+        ? "running"
+        : "idle";
 
   return {
     agent_id: system.id,
     name: body?.name ?? system.label,
     role: body?.role,
-    state: !healthy ? "error" : activeRuns > 0 ? "running" : "idle",
+    state,
     healthy,
-    active_runs: activeRuns,
+    active_runs: runningCount,
     version: body?.version,
     schema_version: SCHEMA_VERSION,
     last_seen: new Date().toISOString(),
