@@ -6,10 +6,12 @@ import { AgentStatusGrid } from "@/components/command-center/AgentStatusGrid";
 import { ApprovalsQueue } from "@/components/command-center/ApprovalsQueue";
 import { ActivityFeed } from "@/components/command-center/ActivityFeed";
 import { RealCommandCenter } from "@/components/command-center/RealCommandCenter";
-import { getFleetHealthFn, getRunsFn } from "@/lib/api/fleet.functions";
-import type { AgentHealth, Run } from "@/contract";
+import { getApprovalsFn, getFleetHealthFn, getRunsFn } from "@/lib/api/fleet.functions";
+import type { AgentHealth, HITLGate, Run } from "@/contract";
 
-type CommandData = { mode: "mock" } | { mode: "real"; fleet: AgentHealth[]; runs: Run[] };
+type CommandData =
+  | { mode: "mock" }
+  | { mode: "real"; fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,18 +27,14 @@ export const Route = createFileRoute("/")({
     try {
       const fleet = await getFleetHealthFn();
       const first = fleet[0]?.agent_id;
-      let runs: Run[] = [];
-      if (first) {
-        // best-effort: one unreachable agent shouldn't blank the whole fleet
-        try {
-          runs = await getRunsFn({ data: { systemId: first } });
-        } catch {
-          /* keep the fleet tiles, drop runs */
-        }
-      }
-      return { mode: "real", fleet, runs };
+      // best-effort: one unreachable agent/endpoint shouldn't blank the fleet
+      const [runs, approvals] = await Promise.all([
+        first ? getRunsFn({ data: { systemId: first } }).catch(() => []) : Promise.resolve([]),
+        getApprovalsFn().catch(() => []),
+      ]);
+      return { mode: "real", fleet, runs, approvals };
     } catch {
-      return { mode: "real", fleet: [], runs: [] };
+      return { mode: "real", fleet: [], runs: [], approvals: [] };
     }
   },
   component: CommandCenter,
@@ -45,7 +43,7 @@ export const Route = createFileRoute("/")({
 function CommandCenter() {
   const data = Route.useLoaderData();
   if (data.mode === "real") {
-    return <RealCommandCenter fleet={data.fleet} runs={data.runs} />;
+    return <RealCommandCenter fleet={data.fleet} runs={data.runs} approvals={data.approvals} />;
   }
   return <MockCommandCenter />;
 }

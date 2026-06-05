@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-import type { AgentHealth, Run } from "@/contract";
+import type { AgentHealth, HITLGate, Run } from "@/contract";
 import { getSystem, getSystems } from "../gateway/systems.server";
 import * as ba from "../gateway/ba-adapter.server";
 
@@ -63,5 +63,14 @@ export const getProjectsFn = createServerFn({ method: "GET" }).handler(
       }
     }
     return [...byId.values()].sort((a, b) => b.count - a.count);
+  },
+);
+
+/** Open human gates across the fleet → the approvals queue. */
+export const getApprovalsFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<HITLGate[]> => {
+    const systems = getSystems();
+    const settled = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getApprovals(s)));
+    return settled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
   },
 );

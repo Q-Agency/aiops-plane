@@ -11,7 +11,13 @@
 // External API responses are untyped on the wire, so `any` is intentional here.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { SCHEMA_VERSION, type AgentCard, type AgentHealth, type Run } from "@/contract";
+import {
+  SCHEMA_VERSION,
+  type AgentCard,
+  type AgentHealth,
+  type HITLGate,
+  type Run,
+} from "@/contract";
 import type { RegisteredSystem } from "./systems.server";
 
 async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
@@ -135,4 +141,29 @@ export async function getCard(system: RegisteredSystem): Promise<AgentCard | nul
   } catch {
     return null;
   }
+}
+
+/** Open human gates → contract HITLGate[]. Maps BA's /agent/interrupted
+ *  (sessions paused waiting for input). VERIFY the shape against live BA. */
+export async function getApprovals(system: RegisteredSystem): Promise<HITLGate[]> {
+  let data: any;
+  try {
+    data = await baFetch(system, "/agent/interrupted");
+  } catch {
+    return [];
+  }
+  const items: any[] = Array.isArray(data)
+    ? data
+    : (data?.sessions ?? data?.interrupted ?? data?.items ?? data?.data ?? []);
+  return items.map((s: any, i: number): HITLGate => ({
+    id: String(s?.id ?? s?.gate_id ?? s?.session_id ?? `${system.id}-gate-${i}`),
+    work_item_id: s?.work_item_id ?? s?.session_id ?? s?.teamwork_task_id ?? undefined,
+    run_id: s?.run_id ?? undefined,
+    kind: s?.kind === "approval" ? "approval" : "clarification",
+    state: "open",
+    prompt: s?.prompt ?? s?.question ?? s?.title ?? "Awaiting human input",
+    channel: s?.channel ?? "slack",
+    opened_at: s?.opened_at ?? s?.created_at ?? s?.updated_at ?? new Date().toISOString(),
+    metadata: { agent_id: system.id, agent_name: system.label },
+  }));
 }

@@ -1,6 +1,7 @@
-import { PlugZap, Activity } from "lucide-react";
+import type { ReactNode } from "react";
+import { PlugZap, Activity, CheckCircle2, Clock, Cpu, DollarSign, Layers } from "lucide-react";
 
-import type { AgentHealth, AgentState, Run, RunStatus } from "@/contract";
+import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
 import { cn } from "@/lib/utils";
 
 const AGENT_STATE_DOT: Record<AgentState, string> = {
@@ -23,10 +24,8 @@ const fmtDur = (ms?: number) => {
   const s = ms / 1000;
   return s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
 };
-const fmtTokens = (a?: number, b?: number) => {
-  const t = (a ?? 0) + (b ?? 0);
-  return t ? t.toLocaleString("en-US") : "—";
-};
+const tokenSum = (a?: number, b?: number) => (a ?? 0) + (b ?? 0);
+const fmtTokens = (n: number) => (n ? n.toLocaleString("en-US") : "—");
 // UTC-based so server and client render identically (no hydration mismatch).
 const fmtTimeUTC = (iso?: string) => {
   if (!iso) return "—";
@@ -36,119 +35,315 @@ const fmtTimeUTC = (iso?: string) => {
   return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())} UTC`;
 };
 
-export function RealCommandCenter({ fleet, runs }: { fleet: AgentHealth[]; runs: Run[] }) {
+type Props = { fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
+
+export function RealCommandCenter({ fleet, runs, approvals }: Props) {
   if (fleet.length === 0) return <EmptyFleet />;
 
-  const healthy = fleet.filter((a) => a.healthy).length;
+  const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
+  const succeeded = runs.filter((r) => r.status === "succeeded").length;
+  const successRate = terminal.length ? Math.round((succeeded / terminal.length) * 100) : null;
+  const totalCost = runs.reduce((s, r) => s + (r.cost_usd ?? 0), 0);
+  const totalTokens = runs.reduce((s, r) => s + tokenSum(r.tokens_in, r.tokens_out), 0);
   const activeRuns = fleet.reduce((n, a) => n + (a.active_runs ?? 0), 0);
+  const healthy = fleet.filter((a) => a.healthy).length;
 
   return (
-    <div className="p-4 lg:p-6 space-y-5">
-      <section className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
-            Live fleet
-          </div>
-          <div className="text-sm font-semibold">
-            {fleet.length} connected agent{fleet.length === 1 ? "" : "s"}
-          </div>
-        </div>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">
-          <span>
-            {healthy}/{fleet.length} healthy
-          </span>
-          <span>
-            {activeRuns} active run{activeRuns === 1 ? "" : "s"}
-          </span>
-        </div>
-      </section>
+    <div className="grid gap-4 p-4 lg:gap-5 lg:p-6 xl:grid-cols-[1fr_360px]">
+      <div className="min-w-0 space-y-4 lg:space-y-5">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Kpi label="Connected" value={String(fleet.length)} sub={`${healthy} healthy`} icon={<Cpu className="size-3.5" />} />
+          <Kpi label="Active runs" value={String(activeRuns)} accent={activeRuns > 0} icon={<Activity className="size-3.5" />} />
+          <Kpi label="Success" value={successRate == null ? "—" : `${successRate}%`} sub={`${terminal.length} done`} icon={<CheckCircle2 className="size-3.5" />} />
+          <Kpi label="Cost" value={fmtCost(totalCost)} sub={totalTokens ? `${Math.round(totalTokens / 1000)}k tok` : undefined} icon={<DollarSign className="size-3.5" />} />
+        </section>
 
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {fleet.map((a) => (
-          <div key={a.agent_id} className="glass-panel p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{a.name}</div>
-                <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">
-                  {a.role ?? a.agent_id}
-                  {a.version ? ` · ${a.version}` : ""}
-                </div>
-              </div>
-              <span className="inline-flex items-center gap-1.5 rounded border border-border bg-white/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider">
-                <span className={cn("size-1.5 rounded-full", AGENT_STATE_DOT[a.state])} />
-                {a.state}
-              </span>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 font-mono text-[11px]">
-              <div className="flex items-center justify-between rounded-md border border-border bg-white/5 px-2 py-1.5">
-                <span className="text-muted-foreground">Health</span>
-                <span className={a.healthy ? "text-status-done" : "text-status-error"}>
-                  {a.healthy ? "OK" : "DOWN"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-md border border-border bg-white/5 px-2 py-1.5">
-                <span className="text-muted-foreground">Active</span>
-                <span className="text-foreground">{a.active_runs ?? 0}</span>
-              </div>
-            </div>
+        <section>
+          <SectionHead>Agent status</SectionHead>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {fleet.map((a) => (
+              <AgentCard key={a.agent_id} agent={a} runs={runs.filter((r) => r.agent_id === a.agent_id)} />
+            ))}
           </div>
-        ))}
-      </section>
+        </section>
 
-      <section>
-        <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-          <Activity className="size-3.5" /> Recent runs · {fleet[0]?.name}
-        </div>
-        {runs.length === 0 ? (
-          <div className="glass-panel p-6 text-center text-sm text-muted-foreground">
-            No runs yet.
-          </div>
-        ) : (
-          <div className="glass-panel overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                <tr className="border-b border-border">
-                  <th className="px-3 py-2 text-left font-medium">Run</th>
-                  <th className="px-3 py-2 text-left font-medium">Type</th>
-                  <th className="px-3 py-2 text-left font-medium">Status</th>
-                  <th className="px-3 py-2 text-left font-medium">Started</th>
-                  <th className="px-3 py-2 text-right font-medium">Duration</th>
-                  <th className="px-3 py-2 text-right font-medium">Tokens</th>
-                  <th className="px-3 py-2 text-right font-medium">Cost</th>
-                </tr>
-              </thead>
-              <tbody className="font-mono">
-                {runs.slice(0, 20).map((r) => (
-                  <tr key={r.id} className="border-b border-border/60 last:border-0">
-                    <td className="max-w-[8rem] truncate px-3 py-2 text-muted-foreground">{r.id}</td>
-                    <td className="px-3 py-2">{r.type}</td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={cn(
-                          "inline-block rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
-                          RUN_STATUS_STYLE[r.status],
-                        )}
-                      >
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-muted-foreground" title={r.started_at}>
-                      {fmtTimeUTC(r.started_at)}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{fmtDur(r.duration_ms)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {fmtTokens(r.tokens_in, r.tokens_out)}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{fmtCost(r.cost_usd)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+        <section>
+          <SectionHead icon={<Activity className="size-3.5" />}>Recent runs · {fleet[0]?.name}</SectionHead>
+          {runs.length === 0 ? <Empty>No runs yet.</Empty> : <RunsTable runs={runs} />}
+        </section>
+
+        <section className="glass-panel flex items-start gap-3 p-4 text-sm text-muted-foreground">
+          <Layers className="mt-0.5 size-4 shrink-0" />
+          <span>
+            Pipeline flow, traceability, and unit economics light up as you connect downstream
+            agents (Software Architect, Dev, QA). Today the BA / spec slice is live.
+          </span>
+        </section>
+      </div>
+
+      <aside className="min-w-0 space-y-4 self-start lg:space-y-5 xl:sticky xl:top-4">
+        <ApprovalsQueue approvals={approvals} />
+        <ActivityFeed runs={runs} approvals={approvals} fleet={fleet} />
+      </aside>
     </div>
   );
+}
+
+function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
+  const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
+  const succeeded = runs.filter((r) => r.status === "succeeded").length;
+  const pct = terminal.length ? Math.round((succeeded / terminal.length) * 100) : null;
+  const running = runs.find((r) => r.status === "running");
+  const cost = runs.reduce((s, r) => s + (r.cost_usd ?? 0), 0);
+  const durations = runs.filter((r) => r.duration_ms != null);
+  const avgDur = durations.length
+    ? durations.reduce((s, r) => s + (r.duration_ms ?? 0), 0) / durations.length
+    : undefined;
+
+  return (
+    <div className="glass-panel p-4">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold">{a.name}</div>
+          <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+            {a.role ?? a.agent_id}
+            {a.version ? ` · ${a.version}` : ""}
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded border border-border bg-white/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider">
+          <span className={cn("size-1.5 rounded-full", AGENT_STATE_DOT[a.state])} />
+          {a.state}
+        </span>
+      </div>
+
+      <div className="mt-3 flex items-center gap-3">
+        <Ring pct={pct} />
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Working on</div>
+          <div className="truncate font-mono text-sm text-foreground">{running?.work_item_id ?? "—"}</div>
+          <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
+            {a.healthy ? "operational" : "unreachable"}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-1 font-mono text-[10px] text-muted-foreground">
+        <Stat icon={<Activity className="size-3" />} value={String(runs.length)} label="runs" />
+        <Stat icon={<Clock className="size-3" />} value={fmtDur(avgDur)} label="avg" />
+        <Stat icon={<DollarSign className="size-3" />} value={cost ? cost.toFixed(2) : "—"} label="cost" />
+      </div>
+    </div>
+  );
+}
+
+function Ring({ pct }: { pct: number | null }) {
+  const deg = (pct ?? 0) * 3.6;
+  return (
+    <div
+      className="relative size-14 shrink-0 rounded-full"
+      style={{
+        background: `conic-gradient(var(--primary) 0deg ${deg}deg, rgba(255,255,255,0.08) ${deg}deg 360deg)`,
+      }}
+    >
+      <div className="absolute inset-[3px] grid place-items-center rounded-full bg-card font-mono text-[11px]">
+        {pct == null ? "—" : `${pct}%`}
+      </div>
+    </div>
+  );
+}
+
+function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-0.5 rounded-md border border-border bg-white/5 py-1.5">
+      <span className="flex items-center gap-1 text-foreground">
+        {icon}
+        {value}
+      </span>
+      <span className="uppercase tracking-wider">{label}</span>
+    </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  sub,
+  icon,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon?: ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <div className="glass-panel p-3">
+      <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <div className={cn("mt-1 font-mono text-xl tabular-nums", accent ? "text-primary" : "text-foreground")}>
+        {value}
+      </div>
+      {sub && <div className="mt-0.5 text-[10px] text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
+
+function RunsTable({ runs }: { runs: Run[] }) {
+  return (
+    <div className="glass-panel overflow-x-auto">
+      <table className="w-full text-xs">
+        <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <tr className="border-b border-border">
+            <th className="px-3 py-2 text-left font-medium">Run</th>
+            <th className="px-3 py-2 text-left font-medium">Type</th>
+            <th className="px-3 py-2 text-left font-medium">Status</th>
+            <th className="px-3 py-2 text-left font-medium">Started</th>
+            <th className="px-3 py-2 text-right font-medium">Duration</th>
+            <th className="px-3 py-2 text-right font-medium">Tokens</th>
+            <th className="px-3 py-2 text-right font-medium">Cost</th>
+          </tr>
+        </thead>
+        <tbody className="font-mono">
+          {runs.slice(0, 20).map((r) => (
+            <tr key={r.id} className="border-b border-border/60 last:border-0">
+              <td className="max-w-[8rem] truncate px-3 py-2 text-muted-foreground">{r.id}</td>
+              <td className="px-3 py-2">{r.type}</td>
+              <td className="px-3 py-2">
+                <span
+                  className={cn(
+                    "inline-block rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
+                    RUN_STATUS_STYLE[r.status],
+                  )}
+                >
+                  {r.status}
+                </span>
+              </td>
+              <td className="px-3 py-2 text-muted-foreground" title={r.started_at}>
+                {fmtTimeUTC(r.started_at)}
+              </td>
+              <td className="px-3 py-2 text-right tabular-nums">{fmtDur(r.duration_ms)}</td>
+              <td className="px-3 py-2 text-right tabular-nums">
+                {fmtTokens(tokenSum(r.tokens_in, r.tokens_out))}
+              </td>
+              <td className="px-3 py-2 text-right tabular-nums">{fmtCost(r.cost_usd)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ApprovalsQueue({ approvals }: { approvals: HITLGate[] }) {
+  return (
+    <div className="glass-panel p-4">
+      <SectionHead icon={<CheckCircle2 className="size-3.5" />}>Human gates ({approvals.length})</SectionHead>
+      {approvals.length === 0 ? (
+        <div className="py-4 text-center text-xs text-muted-foreground">No pending approvals.</div>
+      ) : (
+        <div className="space-y-2">
+          {approvals.slice(0, 8).map((g) => (
+            <div key={g.id} className="rounded-md border border-status-waiting/30 bg-status-waiting/5 p-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-status-waiting">{g.kind}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">{fmtTimeUTC(g.opened_at)}</span>
+              </div>
+              <div className="mt-1 line-clamp-2 text-xs text-foreground">{g.prompt}</div>
+              <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
+                {[g.metadata?.agent_name as string | undefined, g.work_item_id, g.channel]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type ActivityItem = { ts: string; kind: "run" | "approval"; status?: RunStatus; agent: string; message: string };
+
+function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[]): ActivityItem[] {
+  const nameOf = (id: string) => fleet.find((a) => a.agent_id === id)?.name ?? id;
+  const fromRuns: ActivityItem[] = runs.map((r) => {
+    const target = r.work_item_id ? ` for ${r.work_item_id}` : "";
+    const message =
+      r.status === "running"
+        ? `started ${r.type}${target}`
+        : r.status === "succeeded"
+          ? `completed ${r.type}${target}`
+          : r.status === "failed"
+            ? `failed ${r.type}${r.error ? ` — ${r.error}` : ""}`
+            : `${r.status} ${r.type}`;
+    return { ts: r.ended_at ?? r.started_at, kind: "run", status: r.status, agent: nameOf(r.agent_id), message };
+  });
+  const fromGates: ActivityItem[] = approvals.map((g) => ({
+    ts: g.opened_at,
+    kind: "approval",
+    agent: (g.metadata?.agent_name as string) ?? "",
+    message: `awaiting human ${g.kind}${g.work_item_id ? ` on ${g.work_item_id}` : ""}`,
+  }));
+  return [...fromRuns, ...fromGates]
+    .filter((a) => a.ts)
+    .sort((a, b) => (a.ts < b.ts ? 1 : -1))
+    .slice(0, 15);
+}
+
+function ActivityFeed({ runs, approvals, fleet }: { runs: Run[]; approvals: HITLGate[]; fleet: AgentHealth[] }) {
+  const items = buildActivity(runs, approvals, fleet);
+  return (
+    <div className="glass-panel p-4">
+      <SectionHead icon={<Activity className="size-3.5" />}>Activity</SectionHead>
+      {items.length === 0 ? (
+        <div className="py-4 text-center text-xs text-muted-foreground">No activity yet.</div>
+      ) : (
+        <div className="space-y-2.5">
+          {items.map((a, i) => (
+            <div key={i} className="flex gap-2.5 text-xs">
+              <span
+                className={cn(
+                  "mt-1 size-2 shrink-0 rounded-full",
+                  a.kind === "approval"
+                    ? "bg-status-waiting"
+                    : a.status === "succeeded"
+                      ? "bg-status-done"
+                      : a.status === "failed"
+                        ? "bg-status-error"
+                        : a.status === "running"
+                          ? "bg-status-running dot-pulse"
+                          : "bg-status-idle",
+                )}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="text-foreground">
+                  <span className="font-medium">{a.agent}</span>{" "}
+                  <span className="text-muted-foreground">{a.message}</span>
+                </div>
+                <div className="font-mono text-[10px] text-muted-foreground">{fmtTimeUTC(a.ts)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SectionHead({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
+  return (
+    <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+      {icon}
+      {children}
+    </div>
+  );
+}
+
+function Empty({ children }: { children: ReactNode }) {
+  return <div className="glass-panel p-6 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
 function EmptyFleet() {
@@ -160,9 +355,10 @@ function EmptyFleet() {
         </div>
         <h2 className="text-base font-semibold text-foreground">No agents connected</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          This is your live workspace. Connect an agent by setting{" "}
-          <code className="rounded bg-white/5 px-1 font-mono text-foreground">BA_AGENT_URL</code>{" "}
-          (and its API key) on the dashboard server — it will appear here automatically.
+          This is your live workspace. Connect an agent on the{" "}
+          <code className="rounded bg-white/5 px-1 font-mono text-foreground">Connections</code> page
+          (or set <code className="rounded bg-white/5 px-1 font-mono text-foreground">BA_AGENT_URL</code>)
+          — it will appear here automatically.
         </p>
         <p className="mt-3 text-[11px] text-muted-foreground">
           Federated: the dashboard reads each agent's live API; nothing is stored here.
