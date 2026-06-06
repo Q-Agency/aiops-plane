@@ -37,6 +37,29 @@ async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
   }
 }
 
+/** POST variant — several BA reads are RPC-style POSTs (e.g. /session/get). */
+async function baPost(system: RegisteredSystem, path: string, body: unknown): Promise<any> {
+  const headers: Record<string, string> = {
+    accept: "application/json",
+    "content-type": "application/json",
+  };
+  if (system.apiKey) headers[system.authHeader ?? "X-API-Key"] = system.apiKey;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(`${system.baseUrl}${path}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) throw new Error(`BA ${path} -> HTTP ${res.status}`);
+    return res.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 /** BA RunWithSessionResponse → contract Run. */
 function mapRun(r: any, agentId: string): Run {
   const running = !r.ended_at;
@@ -211,4 +234,142 @@ export async function getApprovals(system: RegisteredSystem): Promise<HITLGate[]
   const approvals = sessionsOf(pending).map((s, i) => mapGate(system, s, "approval", i));
   // Most recent first across both kinds.
   return [...approvals, ...clarifications].sort((a, b) => (a.opened_at < b.opened_at ? 1 : -1));
+}
+
+// --- Observability: logs + health checks --------------------------------------
+
+export type AgentLogLine = {
+  ts: string;
+  level: string;
+  logger?: string;
+  message: string;
+  exc?: string;
+};
+
+/** BA /agent/logs/recent → { records: [{ ts: epoch-seconds, level, logger, message, exc? }] }. */
+export async function getLogs(system: RegisteredSystem, limit = 300): Promise<AgentLogLine[]> {
+  let data: any;
+  try {
+    data = await baFetch(system, `/agent/logs/recent?limit=${limit}`);
+  } catch {
+    return [];
+  }
+  const records: any[] = Array.isArray(data) ? data : (data?.records ?? data?.logs ?? []);
+  return records.map((r) => ({
+    ts:
+      typeof r?.ts === "number"
+        ? new Date(r.ts * 1000).toISOString()
+        : (r?.ts ?? r?.timestamp ?? new Date().toISOString()),
+    level: String(r?.level ?? "INFO").toUpperCase(),
+    logger: r?.logger ?? r?.name ?? undefined,
+    message: String(r?.message ?? r?.msg ?? ""),
+    exc: r?.exc ?? undefined,
+  }));
+}
+
+/** BA /agent/health readiness sub-checks. Tolerant: reads the body even on a 503
+ *  (BA returns `{ status, checks }` with a non-200) so we can show which check failed. */
+export async function getHealthChecks(
+  system: RegisteredSystem,
+): Promise<{ healthy: boolean; checks: Record<string, string> }> {
+  const headers: Record<string, string> = { accept: "application/json" };
+  if (system.apiKey) headers[system.authHeader ?? "X-API-Key"] = system.apiKey;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(`${system.baseUrl}/agent/health`, { headers, signal: ctrl.signal });
+    const body = await res.json().catch(() => ({}) as any);
+    const checks: Record<string, string> = {};
+    for (const [k, v] of Object.entries(body?.checks ?? {})) checks[k] = String(v);
+    const healthy = body?.status ? body.status === "healthy" : res.ok;
+    return { healthy, checks };
+  } catch {
+    return { healthy: false, checks: {} };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+// --- Governance: spec quality (per session) -----------------------------------
+
+export type CompletenessMap = {
+  user_roles: number;
+  business_rules: number;
+  acceptance_criteria: number;
+  scope_boundaries: number;
+  error_handling: number;
+  data_model: number;
+};
+
+export const COMPLETENESS_DIMS = [
+  "user_roles",
+  "business_rules",
+  "acceptance_criteria",
+  "scope_boundaries",
+  "error_handling",
+  "data_model",
+] as const;
+
+export type SpecQuality = {
+  session_id: string;
+  title?: string;
+  project?: string;
+  status?: string;
+  completeness?: CompletenessMap;
+  completeness_avg?: number;
+  judge_agreement?: number;
+  persona_approval?: number;
+  ambiguities: number;
+  ears_coverage?: number;
+  gwt_coverage?: number;
+  ac_total?: number;
+};
+
+/** A session known from the runs list — used as the base (and fallback) for
+ *  spec-quality enrichment so a missing /session/get doesn't blank the row. */
+export type SpecBase = {
+  session_id: string;
+  title?: string;
+  project?: string;
+  completeness?: CompletenessMap;
+};
+
+function avgCompleteness(c?: CompletenessMap): number | undefined {
+  if (!c) return undefined;
+  const vals = COMPLETENESS_DIMS.map((d) => Number(c[d] ?? 0));
+  return Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+}
+
+/** Spec-quality signals for one session, enriching a run-derived base:
+ *   • POST /session/get        → status + judge/persona scores (+ completeness)
+ *   • GET /session/{id}/lint   → ambiguity count
+ *   • GET /session/{id}/structured-ac → EARS/GWT coverage
+ *  All cheap reads/parses (no LLM). Falls back to the base if /session/get is
+ *  unavailable, so the row still renders. */
+export async function getSpecQuality(
+  system: RegisteredSystem,
+  base: SpecBase,
+): Promise<SpecQuality> {
+  const sid = encodeURIComponent(base.session_id);
+  const [detail, lint, ac] = await Promise.all([
+    baPost(system, "/session/get", { sessionId: base.session_id }).catch(() => null),
+    baFetch(system, `/session/${sid}/lint`).catch(() => null),
+    baFetch(system, `/session/${sid}/structured-ac`).catch(() => null),
+  ]);
+  const num = (v: unknown) => (typeof v === "number" ? v : undefined);
+  const completeness = (detail?.completeness as CompletenessMap | undefined) ?? base.completeness;
+  return {
+    session_id: base.session_id,
+    title: detail?.teamwork_task_title ?? base.title,
+    project: detail?.project_name ?? base.project,
+    status: detail?.status ?? undefined,
+    completeness,
+    completeness_avg: avgCompleteness(completeness),
+    judge_agreement: num(detail?.judge_agreement),
+    persona_approval: num(detail?.persona_approval_rate),
+    ambiguities: Array.isArray(lint?.warnings) ? lint.warnings.length : 0,
+    ears_coverage: num(ac?.ears_coverage),
+    gwt_coverage: num(ac?.gwt_coverage),
+    ac_total: num(ac?.total),
+  };
 }
