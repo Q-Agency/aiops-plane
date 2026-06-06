@@ -90,3 +90,23 @@ export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
     return { fleet, runs, approvals };
   },
 );
+
+export type AgentDetailData = { agent: AgentHealth | null; runs: Run[]; approvals: HITLGate[] };
+
+/** Everything the agent deep-dive needs for one agent: its health, its
+ *  (project-scoped) runs, and its open gates. `agent` is null when the id isn't
+ *  in the connected fleet. */
+export const getAgentDetailFn = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ systemId: z.string() }))
+  .handler(async ({ data }): Promise<AgentDetailData> => {
+    const [fleet, runs, approvals] = await Promise.all([
+      getFleetHealthFn().catch(() => [] as AgentHealth[]),
+      getRunsFn({ data: { systemId: data.systemId } }).catch(() => []),
+      getApprovalsFn().catch(() => []),
+    ]);
+    const agent = fleet.find((a) => a.agent_id === data.systemId) ?? null;
+    const mine = approvals.filter(
+      (g) => (g.metadata?.agent_id as string | undefined) === data.systemId,
+    );
+    return { agent, runs, approvals: mine };
+  });

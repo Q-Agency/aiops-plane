@@ -238,9 +238,11 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
     (`src/lib/gateway/`, `src/lib/api/fleet.functions.ts`), a real Command Center
     (KPI strip, rich agent cards with success-ring / "working on", human-gates
     queue, activity feed) that **polls near-live** (TanStack Query
-    `refetchInterval`, SSR-seeded, pauses while the tab is hidden), a real project
-    switcher (TopBar), and a throwaway **Connections** page for registering agent
-    URLs (`aiops_systems` cookie).
+    `refetchInterval`, SSR-seeded, pauses while the tab is hidden), a real
+    **agent deep-dive** (`/agents/$agentId` + the agents sidebar: KPIs, charts
+    derived from real runs, gate queue, a clickable runs table → run-detail
+    drawer), a real project switcher (TopBar), and a throwaway **Connections**
+    page for registering agent URLs (`aiops_systems` cookie).
 - **BA Agent — federated and live.** Adapter mappings **verified** against BA's
   real schemas (`RunWithSessionResponse`, `Session`, `/agent/health`):
   - runs + gates surface the human **task title** (`teamwork_task_title` →
@@ -252,8 +254,8 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
     The `agency-agent-sdk` refactor is in progress on the agent side per the brief;
     once adopted, the adapter collapses toward identity.
 - **Next:** live **SSE activity** (push instead of polling — needs a server-side
-  SSE proxy + a verified fleet-wide event stream from BA), and the agent
-  deep-dive (`/agents/ba`) on real data.
+  SSE proxy + a verified fleet-wide event stream from BA), and run-level **step
+  traces** in the deep-dive (light up once BA emits `step.*` events via the SDK).
 
 ---
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { PlugZap, Activity, CheckCircle2, Clock, Cpu, DollarSign, Layers } from "lucide-react";
 
 import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
@@ -153,7 +154,11 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
     : undefined;
 
   return (
-    <div className="glass-panel p-4">
+    <Link
+      to="/agents/$agentId"
+      params={{ agentId: a.agent_id }}
+      className="glass-panel block p-4 transition-colors hover:border-primary/40"
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="truncate text-sm font-semibold">{a.name}</div>
@@ -192,7 +197,7 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
           label="cost"
         />
       </div>
-    </div>
+    </Link>
   );
 }
 

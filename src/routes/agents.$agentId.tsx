@@ -1,33 +1,72 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 import {
-  Check, X, AlertOctagon, ChevronRight, ChevronDown, Moon,
-  GitPullRequest, Wrench, Activity, Server,
+  Check,
+  X,
+  AlertOctagon,
+  ChevronRight,
+  ChevronDown,
+  Moon,
+  GitPullRequest,
+  Wrench,
+  Activity,
+  Server,
 } from "lucide-react";
 import { agents as allAgents } from "@/mock/agents";
 import type { AgentId, Agent } from "@/mock/types";
 import {
-  buildRuns, invocationsSeries, acceptanceSeries, latencyHistogram,
-  tokenCostSeries, overnightHistory, type AgentRun, type RunStep,
+  buildRuns,
+  invocationsSeries,
+  acceptanceSeries,
+  latencyHistogram,
+  tokenCostSeries,
+  overnightHistory,
+  type AgentRun,
+  type RunStep,
 } from "@/mock/runs";
+import { RealAgentDeepDive } from "@/components/agents/RealAgentDeepDive";
+import { getAgentDetailFn, type AgentDetailData } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/agents/$agentId")({
-  loader: ({ params }) => {
+  loader: async ({ params, context }) => {
+    // Real mode: federate this agent's live detail (health + runs + gates).
+    if (context.user?.dataMode === "real") {
+      const detail = await getAgentDetailFn({ data: { systemId: params.agentId } }).catch(
+        (): AgentDetailData => ({ agent: null, runs: [], approvals: [] }),
+      );
+      return { mode: "real" as const, systemId: params.agentId, detail };
+    }
     const agent = allAgents.find((a) => a.id === params.agentId);
     if (!agent) throw notFound();
-    return { agent };
+    return { mode: "mock" as const, agent };
   },
   component: AgentDeepDive,
 });
 
 function AgentDeepDive() {
-  const { agent } = Route.useLoaderData();
-  const a = agent as Agent;
+  const data = Route.useLoaderData();
+  if (data.mode === "real") {
+    return <RealAgentDeepDive systemId={data.systemId} initial={data.detail} />;
+  }
+  return <MockAgentDeepDive agent={data.agent} />;
+}
+
+function MockAgentDeepDive({ agent }: { agent: Agent }) {
+  const a = agent;
   const color = `var(--${a.color})`;
   const [variant, setVariant] = useState<"All" | "Backend" | "Frontend" | "Mobile">("All");
   const [openRun, setOpenRun] = useState<AgentRun | null>(null);
@@ -39,36 +78,70 @@ function AgentDeepDive() {
 
   const invSeries = useMemo(() => invocationsSeries(a.id), [a.id]);
   const accSeries = useMemo(() => acceptanceSeries(a.id), [a.id]);
-  const latData   = useMemo(() => latencyHistogram(a.id), [a.id]);
-  const costData  = useMemo(() => tokenCostSeries(a.id), [a.id]);
+  const latData = useMemo(() => latencyHistogram(a.id), [a.id]);
+  const costData = useMemo(() => tokenCostSeries(a.id), [a.id]);
 
   return (
     <div className="p-4 lg:p-6 space-y-4">
       {/* Header */}
-      <div className="glass-panel p-5 flex items-center gap-4 flex-wrap" style={{ borderColor: `color-mix(in oklab, ${color} 40%, transparent)` }}>
-        <div className="size-12 rounded-xl grid place-items-center text-lg font-semibold"
-             style={{ background: `color-mix(in oklab, ${color} 20%, transparent)`, color, boxShadow: `inset 0 0 0 1px ${color}` }}>
-          {a.name.split(" ").map((w) => w[0]).join("").slice(0,2)}
+      <div
+        className="glass-panel p-5 flex items-center gap-4 flex-wrap"
+        style={{ borderColor: `color-mix(in oklab, ${color} 40%, transparent)` }}
+      >
+        <div
+          className="size-12 rounded-xl grid place-items-center text-lg font-semibold"
+          style={{
+            background: `color-mix(in oklab, ${color} 20%, transparent)`,
+            color,
+            boxShadow: `inset 0 0 0 1px ${color}`,
+          }}
+        >
+          {a.name
+            .split(" ")
+            .map((w) => w[0])
+            .join("")
+            .slice(0, 2)}
         </div>
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">agent</div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+            agent
+          </div>
           <div className="text-xl font-semibold truncate">{a.name}</div>
           <div className="text-xs text-muted-foreground mt-0.5">{a.role}</div>
         </div>
         <div className="ml-auto grid grid-cols-3 gap-2 text-[11px] font-mono">
-          <Meta label="engine"  value={a.engine} />
-          <Meta label="prompt"  value={`${a.id}.prompt v${(a.id.charCodeAt(0) % 6) + 1}`} />
-          <Meta label="state"   value={a.state} tone={a.state === "running" ? "text-status-running" : a.state === "waiting" ? "text-status-waiting" : a.state === "error" ? "text-status-error" : "text-muted-foreground"} />
+          <Meta label="engine" value={a.engine} />
+          <Meta label="prompt" value={`${a.id}.prompt v${(a.id.charCodeAt(0) % 6) + 1}`} />
+          <Meta
+            label="state"
+            value={a.state}
+            tone={
+              a.state === "running"
+                ? "text-status-running"
+                : a.state === "waiting"
+                  ? "text-status-waiting"
+                  : a.state === "error"
+                    ? "text-status-error"
+                    : "text-muted-foreground"
+            }
+          />
         </div>
       </div>
 
       {/* Dev variant tabs */}
       {a.id === "dev" && (
         <div className="flex items-center gap-1 text-xs">
-          {(["All","Backend","Frontend","Mobile"] as const).map((v) => (
-            <button key={v} onClick={() => setVariant(v)}
-              className={cn("px-3 py-1.5 rounded-full border font-mono",
-                variant === v ? "bg-primary/15 text-primary border-primary/40" : "border-border text-muted-foreground hover:text-foreground")}>
+          {(["All", "Backend", "Frontend", "Mobile"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setVariant(v)}
+              className={cn(
+                "px-3 py-1.5 rounded-full border font-mono",
+                variant === v
+                  ? "bg-primary/15 text-primary border-primary/40"
+                  : "border-border text-muted-foreground hover:text-foreground",
+              )}
+            >
               {v}
             </button>
           ))}
@@ -77,7 +150,10 @@ function AgentDeepDive() {
 
       {/* Metric panels */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <ChartPanel title="Invocations · last 24h" sub={`${invSeries.reduce((s, x) => s + x.runs, 0)} runs`}>
+        <ChartPanel
+          title="Invocations · last 24h"
+          sub={`${invSeries.reduce((s, x) => s + x.runs, 0)} runs`}
+        >
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={invSeries} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <defs>
@@ -87,10 +163,29 @@ function AgentDeepDive() {
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-              <XAxis dataKey="h" interval={3} stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} width={28} />
+              <XAxis
+                dataKey="h"
+                interval={3}
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                width={28}
+              />
               <Tooltip content={<DarkTooltip />} />
-              <Area type="monotone" dataKey="runs" stroke={color} strokeWidth={2} fill={`url(#g-${a.id}-inv)`} />
+              <Area
+                type="monotone"
+                dataKey="runs"
+                stroke={color}
+                strokeWidth={2}
+                fill={`url(#g-${a.id}-inv)`}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </ChartPanel>
@@ -99,11 +194,35 @@ function AgentDeepDive() {
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={accSeries} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-              <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} width={28} />
+              <XAxis
+                dataKey="day"
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                width={28}
+              />
               <Tooltip content={<DarkTooltip />} />
-              <Line type="monotone" dataKey="accepted" stroke="var(--status-done)" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="rejected" stroke="var(--status-error)" strokeWidth={2} dot={false} />
+              <Line
+                type="monotone"
+                dataKey="accepted"
+                stroke="var(--status-done)"
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="rejected"
+                stroke="var(--status-error)"
+                strokeWidth={2}
+                dot={false}
+              />
             </LineChart>
           </ResponsiveContainer>
         </ChartPanel>
@@ -112,23 +231,64 @@ function AgentDeepDive() {
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={latData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-              <XAxis dataKey="bucket" stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} width={28} />
+              <XAxis
+                dataKey="bucket"
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                width={28}
+              />
               <Tooltip content={<DarkTooltip />} />
-              <Bar dataKey="count" fill={color} radius={[3,3,0,0]} />
+              <Bar dataKey="count" fill={color} radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartPanel>
 
-        <ChartPanel title="Token cost · cloud vs local" sub={`$${a.tokenCostToday.toFixed(2)} today`}>
+        <ChartPanel
+          title="Token cost · cloud vs local"
+          sub={`$${a.tokenCostToday.toFixed(2)} today`}
+        >
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={costData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-              <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} width={28} />
+              <XAxis
+                dataKey="day"
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="var(--muted-foreground)"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                width={28}
+              />
               <Tooltip content={<DarkTooltip />} />
-              <Area type="monotone" dataKey="cloud" stackId="1" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.35} />
-              <Area type="monotone" dataKey="local" stackId="1" stroke="var(--agent-curator)" fill="var(--agent-curator)" fillOpacity={0.35} />
+              <Area
+                type="monotone"
+                dataKey="cloud"
+                stackId="1"
+                stroke="var(--primary)"
+                fill="var(--primary)"
+                fillOpacity={0.35}
+              />
+              <Area
+                type="monotone"
+                dataKey="local"
+                stackId="1"
+                stroke="var(--agent-curator)"
+                fill="var(--agent-curator)"
+                fillOpacity={0.35}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </ChartPanel>
@@ -141,7 +301,9 @@ function AgentDeepDive() {
       <div className="glass-panel p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">trace · langfuse-style</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+              trace · langfuse-style
+            </div>
             <div className="text-sm font-semibold">Recent runs</div>
           </div>
           <div className="text-[10px] text-muted-foreground font-mono">{runs.length} runs</div>
@@ -163,17 +325,27 @@ function AgentDeepDive() {
             </thead>
             <tbody>
               {runs.map((r) => (
-                <tr key={r.id}
-                    onClick={() => setOpenRun(r)}
-                    className="border-b border-border/60 hover:bg-white/[0.03] cursor-pointer">
+                <tr
+                  key={r.id}
+                  onClick={() => setOpenRun(r)}
+                  className="border-b border-border/60 hover:bg-white/[0.03] cursor-pointer"
+                >
                   <td className="py-2 pl-1 text-muted-foreground">{r.id}</td>
                   <td className="text-foreground">{r.ticketId}</td>
                   <td className="text-muted-foreground">{r.startedOffsetMin}m ago</td>
                   <td className="text-muted-foreground">{fmtDur(r.durationMs)}</td>
                   <td className="text-muted-foreground">{r.tokens.toLocaleString()}</td>
                   <td className="text-muted-foreground">{r.model}</td>
-                  {a.id === "dev" && <td><span className="text-[10px] px-1.5 py-0.5 border border-border rounded text-muted-foreground">{r.variant}</span></td>}
-                  <td><OutcomePill outcome={r.outcome} /></td>
+                  {a.id === "dev" && (
+                    <td>
+                      <span className="text-[10px] px-1.5 py-0.5 border border-border rounded text-muted-foreground">
+                        {r.variant}
+                      </span>
+                    </td>
+                  )}
+                  <td>
+                    <OutcomePill outcome={r.outcome} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -195,7 +367,15 @@ function Meta({ label, value, tone }: { label: string; value: string; tone?: str
   );
 }
 
-function ChartPanel({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+function ChartPanel({
+  title,
+  sub,
+  children,
+}: {
+  title: string;
+  sub?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="glass-panel p-4">
       <div className="flex items-center justify-between mb-2">
@@ -207,11 +387,13 @@ function ChartPanel({ title, sub, children }: { title: string; sub?: string; chi
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function DarkTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="glass-panel p-2 text-[11px] font-mono">
       <div className="text-muted-foreground mb-1">{label}</div>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
         <div key={p.dataKey} className="flex items-center gap-2">
           <span className="size-2 rounded-sm" style={{ background: p.color }} />
@@ -225,14 +407,28 @@ function DarkTooltip({ active, payload, label }: any) {
 
 function OutcomePill({ outcome }: { outcome: AgentRun["outcome"] }) {
   const map = {
-    approved: { i: Check, t: "text-status-done border-status-done/40 bg-status-done/10", l: "approved" },
-    rejected: { i: X, t: "text-status-waiting border-status-waiting/40 bg-status-waiting/10", l: "rejected" },
-    error:    { i: AlertOctagon, t: "text-status-error border-status-error/40 bg-status-error/10", l: "error" },
+    approved: {
+      i: Check,
+      t: "text-status-done border-status-done/40 bg-status-done/10",
+      l: "approved",
+    },
+    rejected: {
+      i: X,
+      t: "text-status-waiting border-status-waiting/40 bg-status-waiting/10",
+      l: "rejected",
+    },
+    error: {
+      i: AlertOctagon,
+      t: "text-status-error border-status-error/40 bg-status-error/10",
+      l: "error",
+    },
   } as const;
   const m = map[outcome];
   const I = m.i;
   return (
-    <span className={cn("inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border", m.t)}>
+    <span
+      className={cn("inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border", m.t)}
+    >
       <I className="size-3" /> {m.l}
     </span>
   );
@@ -247,7 +443,15 @@ function fmtDur(ms: number) {
 
 /* ----- trace drawer ----- */
 
-function TraceDrawer({ run, agentColor, onClose }: { run: AgentRun; agentColor: string; onClose: () => void }) {
+function TraceDrawer({
+  run,
+  agentColor,
+  onClose,
+}: {
+  run: AgentRun;
+  agentColor: string;
+  onClose: () => void;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1 bg-black/60 backdrop-blur-sm" />
@@ -259,26 +463,41 @@ function TraceDrawer({ run, agentColor, onClose }: { run: AgentRun; agentColor: 
         <div className="p-5 border-b border-border sticky top-0 bg-panel/90 backdrop-blur z-10">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">run trace</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                run trace
+              </div>
               <div className="font-mono text-sm truncate">{run.id}</div>
             </div>
-            <button onClick={onClose} className="size-8 rounded grid place-items-center hover:bg-white/5 cursor-pointer">
+            <button
+              onClick={onClose}
+              className="size-8 rounded grid place-items-center hover:bg-white/5 cursor-pointer"
+            >
               <X className="size-4" />
             </button>
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-mono">
-            <span className="border border-border rounded px-1.5 py-0.5">ticket · <span className="text-foreground">{run.ticketId}</span></span>
-            <span className="border border-border rounded px-1.5 py-0.5">duration · {fmtDur(run.durationMs)}</span>
-            <span className="border border-border rounded px-1.5 py-0.5">{run.tokens.toLocaleString()} tokens</span>
+            <span className="border border-border rounded px-1.5 py-0.5">
+              ticket · <span className="text-foreground">{run.ticketId}</span>
+            </span>
+            <span className="border border-border rounded px-1.5 py-0.5">
+              duration · {fmtDur(run.durationMs)}
+            </span>
+            <span className="border border-border rounded px-1.5 py-0.5">
+              {run.tokens.toLocaleString()} tokens
+            </span>
             <span className="border border-border rounded px-1.5 py-0.5">{run.model}</span>
             <OutcomePill outcome={run.outcome} />
           </div>
         </div>
 
         <div className="p-5">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono mb-2">step tree</div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono mb-2">
+            step tree
+          </div>
           <div className="space-y-1.5">
-            {run.trace.map((s) => <Step key={s.id} step={s} color={agentColor} depth={0} />)}
+            {run.trace.map((s) => (
+              <Step key={s.id} step={s} color={agentColor} depth={0} />
+            ))}
           </div>
         </div>
       </div>
@@ -291,16 +510,24 @@ function Step({ step, color, depth }: { step: RunStep; color: string; depth: num
   const hasKids = !!step.children?.length;
   const Toggle = open ? ChevronDown : ChevronRight;
   return (
-    <div className="border-l-2" style={{ borderColor: `color-mix(in oklab, ${color} 35%, transparent)`, paddingLeft: 10 }}>
+    <div
+      className="border-l-2"
+      style={{ borderColor: `color-mix(in oklab, ${color} 35%, transparent)`, paddingLeft: 10 }}
+    >
       <button
         onClick={() => (hasKids || step.input || step.output) && setOpen(!open)}
         className="w-full text-left flex items-center gap-1.5 py-1.5 rounded hover:bg-white/[0.03] cursor-pointer"
       >
         <Toggle className="size-3 text-muted-foreground shrink-0" />
         <span className="text-[13px] text-foreground/90 truncate">{step.name}</span>
-        {step.tool && <span className="text-[10px] font-mono text-muted-foreground border border-border rounded px-1">{step.tool}</span>}
+        {step.tool && (
+          <span className="text-[10px] font-mono text-muted-foreground border border-border rounded px-1">
+            {step.tool}
+          </span>
+        )}
         <span className="ml-auto text-[10px] font-mono text-muted-foreground shrink-0">
-          {fmtDur(step.durationMs)}{step.tokens ? ` · ${step.tokens.toLocaleString()}t` : ""}
+          {fmtDur(step.durationMs)}
+          {step.tokens ? ` · ${step.tokens.toLocaleString()}t` : ""}
         </span>
       </button>
       {open && (
@@ -319,7 +546,9 @@ function Step({ step, color, depth }: { step: RunStep; color: string; depth: num
           )}
           {hasKids && (
             <div className="space-y-1.5 mt-1.5">
-              {step.children!.map((c) => <Step key={c.id} step={c} color={color} depth={depth + 1} />)}
+              {step.children!.map((c) => (
+                <Step key={c.id} step={c} color={color} depth={depth + 1} />
+              ))}
             </div>
           )}
         </div>
@@ -343,7 +572,9 @@ function OvernightPanel() {
         <div className="flex items-center gap-2">
           <Moon className="size-4 text-primary" />
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">overnight</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+              overnight
+            </div>
             <div className="text-sm font-semibold">Ralph Wiggum loop · last 10 nights</div>
           </div>
         </div>
@@ -351,10 +582,25 @@ function OvernightPanel() {
       </div>
 
       <div className="grid grid-cols-4 gap-2 mb-3">
-        <Summary icon={GitPullRequest} label="PRs opened" value={String(totalPRs)} tone="text-status-done" />
-        <Summary icon={Activity}       label="Tickets processed" value={String(totalTickets)} tone="text-foreground" />
-        <Summary icon={Wrench}         label="Healer fixes" value={String(totalHeal)} tone="text-status-waiting" />
-        <Summary icon={Server}         label="GPU hours" value={`${totalGpu}h`} tone="text-primary" />
+        <Summary
+          icon={GitPullRequest}
+          label="PRs opened"
+          value={String(totalPRs)}
+          tone="text-status-done"
+        />
+        <Summary
+          icon={Activity}
+          label="Tickets processed"
+          value={String(totalTickets)}
+          tone="text-foreground"
+        />
+        <Summary
+          icon={Wrench}
+          label="Healer fixes"
+          value={String(totalHeal)}
+          tone="text-status-waiting"
+        />
+        <Summary icon={Server} label="GPU hours" value={`${totalGpu}h`} tone="text-primary" />
       </div>
 
       <div className="overflow-x-auto">
@@ -387,7 +633,18 @@ function OvernightPanel() {
   );
 }
 
-function Summary({ icon: I, label, value, tone }: { icon: any; label: string; value: string; tone?: string }) {
+function Summary({
+  icon: I,
+  label,
+  value,
+  tone,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: any;
+  label: string;
+  value: string;
+  tone?: string;
+}) {
   return (
     <div className="border border-border rounded p-2.5">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
