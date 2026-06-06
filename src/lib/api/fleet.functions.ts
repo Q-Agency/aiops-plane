@@ -20,9 +20,7 @@ function adapterFor(_systemId: string) {
 export const getFleetHealthFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<AgentHealth[]> => {
     const systems = getSystems();
-    const results = await Promise.allSettled(
-      systems.map((s) => adapterFor(s.id).getHealth(s)),
-    );
+    const results = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getHealth(s)));
     return results
       .filter((r): r is PromiseFulfilledResult<AgentHealth> => r.status === "fulfilled")
       .map((r) => r.value);
@@ -72,5 +70,23 @@ export const getApprovalsFn = createServerFn({ method: "GET" }).handler(
     const systems = getSystems();
     const settled = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getApprovals(s)));
     return settled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  },
+);
+
+export type CommandCenterData = { fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
+
+/** One round-trip for the real Command Center: fleet health + the lead agent's
+ *  runs (project-scoped) + open gates. Used by the SSR loader for first paint and
+ *  by the client's poll to keep the surface near-live. Best-effort: one slow or
+ *  unreachable endpoint won't blank the others. */
+export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<CommandCenterData> => {
+    const fleet = await getFleetHealthFn().catch(() => [] as AgentHealth[]);
+    const first = fleet[0]?.agent_id;
+    const [runs, approvals] = await Promise.all([
+      first ? getRunsFn({ data: { systemId: first } }).catch(() => []) : Promise.resolve([]),
+      getApprovalsFn().catch(() => []),
+    ]);
+    return { fleet, runs, approvals };
   },
 );

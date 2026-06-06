@@ -1,8 +1,15 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PlugZap, Activity, CheckCircle2, Clock, Cpu, DollarSign, Layers } from "lucide-react";
 
 import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
+import { getCommandCenterFn } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
+
+// How often the real surface re-reads the fleet through the gateway. Pauses while
+// the tab is hidden (refetchIntervalInBackground defaults to false), so we don't
+// hammer the agents when nobody's looking.
+const POLL_MS = 4000;
 
 const AGENT_STATE_DOT: Record<AgentState, string> = {
   running: "bg-status-running dot-pulse",
@@ -34,10 +41,26 @@ const fmtTimeUTC = (iso?: string) => {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())} UTC`;
 };
+const fmtClockUTC = (ms: number) => {
+  const d = new Date(ms);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`;
+};
 
 type Props = { fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
 
-export function RealCommandCenter({ fleet, runs, approvals }: Props) {
+export function RealCommandCenter(initial: Props) {
+  // SSR seeds the cache (initialData) for a populated first paint; the client then
+  // polls the same combined endpoint to keep the surface near-live. Project scope
+  // (aiops_project cookie) still applies — it's read server-side on every poll.
+  const { data, dataUpdatedAt } = useQuery({
+    queryKey: ["command-center"],
+    queryFn: () => getCommandCenterFn(),
+    initialData: initial,
+    refetchInterval: POLL_MS,
+  });
+  const { fleet, runs, approvals } = data;
+
   if (fleet.length === 0) return <EmptyFleet />;
 
   const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
@@ -52,23 +75,49 @@ export function RealCommandCenter({ fleet, runs, approvals }: Props) {
     <div className="grid gap-4 p-4 lg:gap-5 lg:p-6 xl:grid-cols-[1fr_360px]">
       <div className="min-w-0 space-y-4 lg:space-y-5">
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Kpi label="Connected" value={String(fleet.length)} sub={`${healthy} healthy`} icon={<Cpu className="size-3.5" />} />
-          <Kpi label="Active runs" value={String(activeRuns)} accent={activeRuns > 0} icon={<Activity className="size-3.5" />} />
-          <Kpi label="Success" value={successRate == null ? "—" : `${successRate}%`} sub={`${terminal.length} done`} icon={<CheckCircle2 className="size-3.5" />} />
-          <Kpi label="Cost" value={fmtCost(totalCost)} sub={totalTokens ? `${Math.round(totalTokens / 1000)}k tok` : undefined} icon={<DollarSign className="size-3.5" />} />
+          <Kpi
+            label="Connected"
+            value={String(fleet.length)}
+            sub={`${healthy} healthy`}
+            icon={<Cpu className="size-3.5" />}
+          />
+          <Kpi
+            label="Active runs"
+            value={String(activeRuns)}
+            accent={activeRuns > 0}
+            icon={<Activity className="size-3.5" />}
+          />
+          <Kpi
+            label="Success"
+            value={successRate == null ? "—" : `${successRate}%`}
+            sub={`${terminal.length} done`}
+            icon={<CheckCircle2 className="size-3.5" />}
+          />
+          <Kpi
+            label="Cost"
+            value={fmtCost(totalCost)}
+            sub={totalTokens ? `${Math.round(totalTokens / 1000)}k tok` : undefined}
+            icon={<DollarSign className="size-3.5" />}
+          />
         </section>
 
         <section>
           <SectionHead>Agent status</SectionHead>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {fleet.map((a) => (
-              <AgentCard key={a.agent_id} agent={a} runs={runs.filter((r) => r.agent_id === a.agent_id)} />
+              <AgentCard
+                key={a.agent_id}
+                agent={a}
+                runs={runs.filter((r) => r.agent_id === a.agent_id)}
+              />
             ))}
           </div>
         </section>
 
         <section>
-          <SectionHead icon={<Activity className="size-3.5" />}>Recent runs · {fleet[0]?.name}</SectionHead>
+          <SectionHead icon={<Activity className="size-3.5" />}>
+            Recent runs · {fleet[0]?.name}
+          </SectionHead>
           {runs.length === 0 ? <Empty>No runs yet.</Empty> : <RunsTable runs={runs} />}
         </section>
 
@@ -83,7 +132,7 @@ export function RealCommandCenter({ fleet, runs, approvals }: Props) {
 
       <aside className="min-w-0 space-y-4 self-start lg:space-y-5 xl:sticky xl:top-4">
         <ApprovalsQueue approvals={approvals} />
-        <ActivityFeed runs={runs} approvals={approvals} fleet={fleet} />
+        <ActivityFeed runs={runs} approvals={approvals} fleet={fleet} updatedAt={dataUpdatedAt} />
       </aside>
     </div>
   );
@@ -119,8 +168,12 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
       <div className="mt-3 flex items-center gap-3">
         <Ring pct={pct} />
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Working on</div>
-          <div className="truncate font-mono text-sm text-foreground">{running?.work_item_id ?? "—"}</div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Working on
+          </div>
+          <div className="truncate font-mono text-sm text-foreground">
+            {running?.work_item_id ?? "—"}
+          </div>
           <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
             {a.healthy ? "operational" : "unreachable"}
           </div>
@@ -130,7 +183,11 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
       <div className="mt-3 grid grid-cols-3 gap-1 font-mono text-[10px] text-muted-foreground">
         <Stat icon={<Activity className="size-3" />} value={String(runs.length)} label="runs" />
         <Stat icon={<Clock className="size-3" />} value={fmtDur(avgDur)} label="avg" />
-        <Stat icon={<DollarSign className="size-3" />} value={cost ? cost.toFixed(2) : "—"} label="cost" />
+        <Stat
+          icon={<DollarSign className="size-3" />}
+          value={cost ? cost.toFixed(2) : "—"}
+          label="cost"
+        />
       </div>
     </div>
   );
@@ -183,7 +240,12 @@ function Kpi({
         {icon}
         {label}
       </div>
-      <div className={cn("mt-1 font-mono text-xl tabular-nums", accent ? "text-primary" : "text-foreground")}>
+      <div
+        className={cn(
+          "mt-1 font-mono text-xl tabular-nums",
+          accent ? "text-primary" : "text-foreground",
+        )}
+      >
         {value}
       </div>
       {sub && <div className="mt-0.5 text-[10px] text-muted-foreground">{sub}</div>}
@@ -240,16 +302,25 @@ function RunsTable({ runs }: { runs: Run[] }) {
 function ApprovalsQueue({ approvals }: { approvals: HITLGate[] }) {
   return (
     <div className="glass-panel p-4">
-      <SectionHead icon={<CheckCircle2 className="size-3.5" />}>Human gates ({approvals.length})</SectionHead>
+      <SectionHead icon={<CheckCircle2 className="size-3.5" />}>
+        Human gates ({approvals.length})
+      </SectionHead>
       {approvals.length === 0 ? (
         <div className="py-4 text-center text-xs text-muted-foreground">No pending approvals.</div>
       ) : (
         <div className="space-y-2">
           {approvals.slice(0, 8).map((g) => (
-            <div key={g.id} className="rounded-md border border-status-waiting/30 bg-status-waiting/5 p-2.5">
+            <div
+              key={g.id}
+              className="rounded-md border border-status-waiting/30 bg-status-waiting/5 p-2.5"
+            >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-status-waiting">{g.kind}</span>
-                <span className="font-mono text-[10px] text-muted-foreground">{fmtTimeUTC(g.opened_at)}</span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-status-waiting">
+                  {g.kind}
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {fmtTimeUTC(g.opened_at)}
+                </span>
               </div>
               <div className="mt-1 line-clamp-2 text-xs text-foreground">{g.prompt}</div>
               <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
@@ -265,7 +336,13 @@ function ApprovalsQueue({ approvals }: { approvals: HITLGate[] }) {
   );
 }
 
-type ActivityItem = { ts: string; kind: "run" | "approval"; status?: RunStatus; agent: string; message: string };
+type ActivityItem = {
+  ts: string;
+  kind: "run" | "approval";
+  status?: RunStatus;
+  agent: string;
+  message: string;
+};
 
 function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[]): ActivityItem[] {
   const nameOf = (id: string) => fleet.find((a) => a.agent_id === id)?.name ?? id;
@@ -279,7 +356,13 @@ function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[])
           : r.status === "failed"
             ? `failed ${r.type}${r.error ? ` — ${r.error}` : ""}`
             : `${r.status} ${r.type}`;
-    return { ts: r.ended_at ?? r.started_at, kind: "run", status: r.status, agent: nameOf(r.agent_id), message };
+    return {
+      ts: r.ended_at ?? r.started_at,
+      kind: "run",
+      status: r.status,
+      agent: nameOf(r.agent_id),
+      message,
+    };
   });
   const fromGates: ActivityItem[] = approvals.map((g) => ({
     ts: g.opened_at,
@@ -293,11 +376,26 @@ function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[])
     .slice(0, 15);
 }
 
-function ActivityFeed({ runs, approvals, fleet }: { runs: Run[]; approvals: HITLGate[]; fleet: AgentHealth[] }) {
+function ActivityFeed({
+  runs,
+  approvals,
+  fleet,
+  updatedAt,
+}: {
+  runs: Run[];
+  approvals: HITLGate[];
+  fleet: AgentHealth[];
+  updatedAt: number;
+}) {
   const items = buildActivity(runs, approvals, fleet);
   return (
     <div className="glass-panel p-4">
-      <SectionHead icon={<Activity className="size-3.5" />}>Activity</SectionHead>
+      <SectionHead
+        icon={<Activity className="size-3.5" />}
+        right={<LiveBadge updatedAt={updatedAt} />}
+      >
+        Activity
+      </SectionHead>
       {items.length === 0 ? (
         <div className="py-4 text-center text-xs text-muted-foreground">No activity yet.</div>
       ) : (
@@ -323,7 +421,9 @@ function ActivityFeed({ runs, approvals, fleet }: { runs: Run[]; approvals: HITL
                   <span className="font-medium">{a.agent}</span>{" "}
                   <span className="text-muted-foreground">{a.message}</span>
                 </div>
-                <div className="font-mono text-[10px] text-muted-foreground">{fmtTimeUTC(a.ts)}</div>
+                <div className="font-mono text-[10px] text-muted-foreground">
+                  {fmtTimeUTC(a.ts)}
+                </div>
               </div>
             </div>
           ))}
@@ -333,17 +433,41 @@ function ActivityFeed({ runs, approvals, fleet }: { runs: Run[]; approvals: HITL
   );
 }
 
-function SectionHead({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
+function SectionHead({
+  children,
+  icon,
+  right,
+}: {
+  children: ReactNode;
+  icon?: ReactNode;
+  right?: ReactNode;
+}) {
   return (
     <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
       {icon}
       {children}
+      {right && <span className="ml-auto normal-case">{right}</span>}
     </div>
   );
 }
 
+// Pulsing "Live" chip with the last poll time. The timestamp is client-only
+// (gated on mount) so SSR and the first client render agree — no hydration warning.
+function LiveBadge({ updatedAt }: { updatedAt: number }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return (
+    <span className="inline-flex items-center gap-1 text-status-running">
+      <span className="size-1.5 rounded-full bg-status-running dot-pulse" />
+      Live{mounted && updatedAt ? ` · ${fmtClockUTC(updatedAt)}` : ""}
+    </span>
+  );
+}
+
 function Empty({ children }: { children: ReactNode }) {
-  return <div className="glass-panel p-6 text-center text-sm text-muted-foreground">{children}</div>;
+  return (
+    <div className="glass-panel p-6 text-center text-sm text-muted-foreground">{children}</div>
+  );
 }
 
 function EmptyFleet() {
@@ -356,9 +480,10 @@ function EmptyFleet() {
         <h2 className="text-base font-semibold text-foreground">No agents connected</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           This is your live workspace. Connect an agent on the{" "}
-          <code className="rounded bg-white/5 px-1 font-mono text-foreground">Connections</code> page
-          (or set <code className="rounded bg-white/5 px-1 font-mono text-foreground">BA_AGENT_URL</code>)
-          — it will appear here automatically.
+          <code className="rounded bg-white/5 px-1 font-mono text-foreground">Connections</code>{" "}
+          page (or set{" "}
+          <code className="rounded bg-white/5 px-1 font-mono text-foreground">BA_AGENT_URL</code>) —
+          it will appear here automatically.
         </p>
         <p className="mt-3 text-[11px] text-muted-foreground">
           Federated: the dashboard reads each agent's live API; nothing is stored here.

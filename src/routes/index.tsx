@@ -6,7 +6,7 @@ import { AgentStatusGrid } from "@/components/command-center/AgentStatusGrid";
 import { ApprovalsQueue } from "@/components/command-center/ApprovalsQueue";
 import { ActivityFeed } from "@/components/command-center/ActivityFeed";
 import { RealCommandCenter } from "@/components/command-center/RealCommandCenter";
-import { getApprovalsFn, getFleetHealthFn, getRunsFn } from "@/lib/api/fleet.functions";
+import { getCommandCenterFn } from "@/lib/api/fleet.functions";
 import type { AgentHealth, HITLGate, Run } from "@/contract";
 
 type CommandData =
@@ -25,14 +25,8 @@ export const Route = createFileRoute("/")({
   loader: async ({ context }): Promise<CommandData> => {
     if (context.user?.dataMode !== "real") return { mode: "mock" };
     try {
-      const fleet = await getFleetHealthFn();
-      const first = fleet[0]?.agent_id;
-      // best-effort: one unreachable agent/endpoint shouldn't blank the fleet
-      const [runs, approvals] = await Promise.all([
-        first ? getRunsFn({ data: { systemId: first } }).catch(() => []) : Promise.resolve([]),
-        getApprovalsFn().catch(() => []),
-      ]);
-      return { mode: "real", fleet, runs, approvals };
+      const data = await getCommandCenterFn();
+      return { mode: "real", ...data };
     } catch {
       return { mode: "real", fleet: [], runs: [], approvals: [] };
     }
@@ -57,7 +51,9 @@ function MockCommandCenter() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">Roster</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                Roster
+              </div>
               <div className="text-sm font-semibold">Agent status · last 7d acceptance</div>
             </div>
           </div>
