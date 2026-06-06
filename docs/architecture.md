@@ -209,15 +209,26 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
 
 ---
 
-## 10. Current state (for context)
+## 10. Current state
 
-- Dashboard: TanStack Start (SSR), 100% mock data today. Auth is a **prototype**
-  (unsigned cookie, 2 hardcoded users) with a `dataMode: "standard" | "real"` seam
-  — this generalizes to `systemId`. The TopBar project switcher → system switcher.
-- BA Agent: production LangGraph/FastAPI service, already exposes `/runs/all`,
+- **Dashboard:** TanStack Start (SSR). Two modes via the auth seam
+  (`dataMode: "standard" | "real"`; prototype cookie auth, 2 hardcoded users):
+  - **standard / mock** — the original full mock dashboard (unchanged).
+  - **real** — federates live agents through the gateway. Built so far: contract
+    **v0.2** (`src/contract/`), the gateway + BA adapter (`src/lib/gateway/`,
+    `src/lib/api/fleet.functions.ts`), a real Command Center (KPI strip, rich
+    agent cards with success-ring / "working on", human-gates queue, activity
+    feed), a real project switcher (TopBar), and a throwaway **Connections** page
+    for registering agent URLs (`aiops_systems` cookie).
+- **BA Agent — federated and live.** Exposes `/runs/all`,
   `/agent/health|active|interrupted`, SSE `/agent/watch`, HITL via
-  `waiting_for_input` + Slack — i.e. it's **born governable** and is the ideal
-  first system to federate.
+  `waiting_for_input`. The `agency-agent-sdk` refactor is in progress on the agent
+  side per the build brief; the dashboard's BA adapter currently maps BA's
+  endpoints (field names flagged `VERIFY` until checked against live responses).
+- **Next:** live **SSE activity** (needs a server-side SSE proxy route — the
+  feed is currently synthesized from runs+gates), agent deep-dive (`/agents/ba`)
+  on real data, and confirming the adapter field mappings against live
+  `/runs/all` + `/agent/interrupted`.
 
 ---
 
