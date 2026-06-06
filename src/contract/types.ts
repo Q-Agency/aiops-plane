@@ -38,6 +38,9 @@ export interface Run {
   id: string;
   agent_id: string;
   work_item_id?: string;
+  /** denormalized title of the referenced work item, for display when the
+   *  dashboard doesn't fetch the WorkItem itself (falls back to work_item_id) */
+  work_item_title?: string;
   /** agent-defined, e.g. "spec" */
   type: string;
   status: RunStatus;
@@ -110,6 +113,9 @@ export type HITLState = "open" | "resolved" | "expired";
 export interface HITLGate {
   id: string;
   work_item_id?: string;
+  /** denormalized title of the referenced work item, for display (falls back
+   *  to work_item_id) */
+  work_item_title?: string;
   run_id?: string;
   kind: HITLKind;
   state: HITLState;

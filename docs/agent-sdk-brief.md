@@ -68,6 +68,7 @@ class Run(BaseModel):          # one execution of the agent against a work item
     id: str
     agent_id: str
     work_item_id: str | None = None
+    work_item_title: str | None = None  # denormalized for display (else the id shows)
     type: str                  # agent-defined, e.g. "spec"
     status: str                # "running" | "succeeded" | "failed" | "cancelled"
     started_at: datetime
@@ -123,6 +124,7 @@ class Event(BaseModel):        # the live stream item
 class HITLGate(BaseModel):     # a human approval / clarification request
     id: str
     work_item_id: str | None = None
+    work_item_title: str | None = None  # denormalized for display (else the id shows)
     run_id: str | None = None
     kind: str                  # "approval" | "clarification"
     state: str                 # "open" | "resolved" | "expired"

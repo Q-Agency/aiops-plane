@@ -4,9 +4,11 @@
 // /agent/health, /agent/active, /agent/interrupted, and the well-known card.
 // Once BA adopts `agency-agent-sdk` this adapter collapses toward identity.
 //
-// ⚠️ STATUS: the field mappings below are best-effort from the BA API
-// exploration and are NOT verified end-to-end (no reachable BA here). Point this
-// at a live BA, inspect a real response, and adjust the mapped field names.
+// STATUS: mappings verified against BA's API schemas (2026-06):
+//   • /runs/all          -> RunWithSessionResponse (RunResponse + teamwork_task_title + project_name)
+//   • /agent/interrupted -> { sessions: Session[] } (Session has teamwork_task_title, no question text)
+//   • /agent/health      -> { status, checks } (no name/version — those come from the agent card)
+// The well-known agent card is still pending on BA (served once it adopts the SDK).
 //
 // External API responses are untyped on the wire, so `any` is intentional here.
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -34,7 +36,7 @@ async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
   }
 }
 
-/** BA RunResponse → contract Run. VERIFY field names against a live response. */
+/** BA RunWithSessionResponse → contract Run. */
 function mapRun(r: any, agentId: string): Run {
   const running = !r.ended_at;
   const succeeded = r.success === true;
@@ -42,6 +44,8 @@ function mapRun(r: any, agentId: string): Run {
     id: String(r.id),
     agent_id: agentId,
     work_item_id: r.session_id ?? undefined,
+    // BA joins the Teamwork task title onto /runs/all — use it for display.
+    work_item_title: r.teamwork_task_title ?? undefined,
     type: r.run_type ?? "run",
     status: running ? "running" : succeeded ? "succeeded" : "failed",
     started_at: r.started_at,
@@ -54,11 +58,11 @@ function mapRun(r: any, agentId: string): Run {
     outcome: running ? undefined : succeeded ? "success" : "error",
     error: r.error_message ?? undefined,
     parent_run_id: undefined,
-    // BA enriches /runs/all with project_id/project_name (VERIFY field names):
-    project:
-      r.project_id || r.project_name
-        ? { id: String(r.project_id ?? r.project_name), name: r.project_name ?? String(r.project_id) }
-        : undefined,
+    // /runs/all carries project_name (no project_id today); key the project by
+    // name until BA exposes a stable id.
+    project: r.project_name
+      ? { id: String(r.project_id ?? r.project_name), name: String(r.project_name) }
+      : undefined,
     schema_version: SCHEMA_VERSION,
     // domain payload — kept out of the kernel fields:
     metadata: {
@@ -143,8 +147,10 @@ export async function getCard(system: RegisteredSystem): Promise<AgentCard | nul
   }
 }
 
-/** Open human gates → contract HITLGate[]. Maps BA's /agent/interrupted
- *  (sessions paused waiting for input). VERIFY the shape against live BA. */
+/** Open human gates → contract HITLGate[]. Maps BA's /agent/interrupted, which
+ *  returns { sessions: Session[] } — sessions paused waiting for a human reply
+ *  (in Slack). The pending question text lives in chat messages, not on the
+ *  session, so we surface the task it's blocked on instead. */
 export async function getApprovals(system: RegisteredSystem): Promise<HITLGate[]> {
   let data: any;
   try {
@@ -155,15 +161,26 @@ export async function getApprovals(system: RegisteredSystem): Promise<HITLGate[]
   const items: any[] = Array.isArray(data)
     ? data
     : (data?.sessions ?? data?.interrupted ?? data?.items ?? data?.data ?? []);
-  return items.map((s: any, i: number): HITLGate => ({
-    id: String(s?.id ?? s?.gate_id ?? s?.session_id ?? `${system.id}-gate-${i}`),
-    work_item_id: s?.work_item_id ?? s?.session_id ?? s?.teamwork_task_id ?? undefined,
-    run_id: s?.run_id ?? undefined,
-    kind: s?.kind === "approval" ? "approval" : "clarification",
-    state: "open",
-    prompt: s?.prompt ?? s?.question ?? s?.title ?? "Awaiting human input",
-    channel: s?.channel ?? "slack",
-    opened_at: s?.opened_at ?? s?.created_at ?? s?.updated_at ?? new Date().toISOString(),
-    metadata: { agent_id: system.id, agent_name: system.label },
-  }));
+  return items.map((s: any, i: number): HITLGate => {
+    const title = (s?.teamwork_task_title as string) || undefined;
+    return {
+      id: String(s?.id ?? s?.session_id ?? `${system.id}-gate-${i}`),
+      work_item_id: s?.id ?? s?.session_id ?? undefined,
+      work_item_title: title,
+      run_id: undefined,
+      kind: "clarification",
+      state: "open",
+      prompt: title ? `Waiting for human input on “${title}”` : "Waiting for human input",
+      channel: "slack",
+      opened_at: s?.updated_at ?? s?.created_at ?? new Date().toISOString(),
+      metadata: {
+        agent_id: system.id,
+        agent_name: system.label,
+        teamwork_task_id: s?.teamwork_task_id ?? undefined,
+        project_name: s?.project_name ?? undefined,
+        slack_thread_url: s?.slack_thread_url ?? undefined,
+        status: s?.status ?? undefined,
+      },
+    };
+  });
 }

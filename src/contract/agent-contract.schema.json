@@ -16,7 +16,10 @@
       "required": ["id", "type"],
       "properties": {
         "id": { "type": "string" },
-        "type": { "type": "string", "description": "ticket | session | incident | … (domain-defined)" },
+        "type": {
+          "type": "string",
+          "description": "ticket | session | incident | … (domain-defined)"
+        },
         "title": { "type": "string" },
         "stage": { "type": "string" },
         "status": { "type": "string" },
@@ -31,6 +34,7 @@
         "id": { "type": "string" },
         "agent_id": { "type": "string" },
         "work_item_id": { "type": "string" },
+        "work_item_title": { "type": "string" },
         "type": { "type": "string" },
         "status": { "enum": ["running", "succeeded", "failed", "cancelled"] },
         "started_at": { "type": "string", "format": "date-time" },
@@ -68,11 +72,17 @@
     },
     "EventType": {
       "enum": [
-        "run.started", "run.completed", "run.error",
-        "step.started", "step.completed",
-        "tool.called", "tool.result",
-        "hitl.requested", "hitl.resolved",
-        "metric.update", "log"
+        "run.started",
+        "run.completed",
+        "run.error",
+        "step.started",
+        "step.completed",
+        "tool.called",
+        "tool.result",
+        "hitl.requested",
+        "hitl.resolved",
+        "metric.update",
+        "log"
       ]
     },
     "AgentEvent": {
@@ -94,6 +104,7 @@
       "properties": {
         "id": { "type": "string" },
         "work_item_id": { "type": "string" },
+        "work_item_title": { "type": "string" },
         "run_id": { "type": "string" },
         "kind": { "enum": ["approval", "clarification"] },
         "state": { "enum": ["open", "resolved", "expired"] },
@@ -108,7 +119,15 @@
     },
     "AgentHealth": {
       "type": "object",
-      "required": ["agent_id", "name", "state", "healthy", "active_runs", "schema_version", "last_seen"],
+      "required": [
+        "agent_id",
+        "name",
+        "state",
+        "healthy",
+        "active_runs",
+        "schema_version",
+        "last_seen"
+      ],
       "properties": {
         "agent_id": { "type": "string" },
         "name": { "type": "string" },
@@ -156,7 +175,15 @@
         },
         "x-agency": {
           "type": "object",
-          "required": ["id", "domain", "contractVersion", "produces", "consumes", "sources", "endpoints"],
+          "required": [
+            "id",
+            "domain",
+            "contractVersion",
+            "produces",
+            "consumes",
+            "sources",
+            "endpoints"
+          ],
           "properties": {
             "id": { "type": "string" },
             "domain": { "type": "string" },

@@ -46,6 +46,9 @@ const fmtClockUTC = (ms: number) => {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`;
 };
+// Prefer the human task name; fall back to the work-item id (often a raw UUID).
+const workItemLabel = (x: { work_item_title?: string; work_item_id?: string }) =>
+  x.work_item_title || x.work_item_id || "—";
 
 type Props = { fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
 
@@ -171,8 +174,8 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
             Working on
           </div>
-          <div className="truncate font-mono text-sm text-foreground">
-            {running?.work_item_id ?? "—"}
+          <div className="truncate text-sm text-foreground" title={running?.work_item_id}>
+            {running ? workItemLabel(running) : "—"}
           </div>
           <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
             {a.healthy ? "operational" : "unreachable"}
@@ -259,7 +262,7 @@ function RunsTable({ runs }: { runs: Run[] }) {
       <table className="w-full text-xs">
         <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
           <tr className="border-b border-border">
-            <th className="px-3 py-2 text-left font-medium">Run</th>
+            <th className="px-3 py-2 text-left font-medium">Task</th>
             <th className="px-3 py-2 text-left font-medium">Type</th>
             <th className="px-3 py-2 text-left font-medium">Status</th>
             <th className="px-3 py-2 text-left font-medium">Started</th>
@@ -271,7 +274,12 @@ function RunsTable({ runs }: { runs: Run[] }) {
         <tbody className="font-mono">
           {runs.slice(0, 20).map((r) => (
             <tr key={r.id} className="border-b border-border/60 last:border-0">
-              <td className="max-w-[8rem] truncate px-3 py-2 text-muted-foreground">{r.id}</td>
+              <td
+                className="max-w-[12rem] truncate px-3 py-2 text-foreground"
+                title={`run ${r.id}${r.work_item_id ? ` · ${r.work_item_id}` : ""}`}
+              >
+                {workItemLabel(r)}
+              </td>
               <td className="px-3 py-2">{r.type}</td>
               <td className="px-3 py-2">
                 <span
@@ -324,8 +332,8 @@ function ApprovalsQueue({ approvals }: { approvals: HITLGate[] }) {
               </div>
               <div className="mt-1 line-clamp-2 text-xs text-foreground">{g.prompt}</div>
               <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
-                {[g.metadata?.agent_name as string | undefined, g.work_item_id, g.channel]
-                  .filter(Boolean)
+                {[g.metadata?.agent_name as string | undefined, workItemLabel(g), g.channel]
+                  .filter((v) => v && v !== "—")
                   .join(" · ")}
               </div>
             </div>
@@ -347,7 +355,7 @@ type ActivityItem = {
 function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[]): ActivityItem[] {
   const nameOf = (id: string) => fleet.find((a) => a.agent_id === id)?.name ?? id;
   const fromRuns: ActivityItem[] = runs.map((r) => {
-    const target = r.work_item_id ? ` for ${r.work_item_id}` : "";
+    const target = r.work_item_id || r.work_item_title ? ` for ${workItemLabel(r)}` : "";
     const message =
       r.status === "running"
         ? `started ${r.type}${target}`
@@ -368,7 +376,7 @@ function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[])
     ts: g.opened_at,
     kind: "approval",
     agent: (g.metadata?.agent_name as string) ?? "",
-    message: `awaiting human ${g.kind}${g.work_item_id ? ` on ${g.work_item_id}` : ""}`,
+    message: `awaiting human ${g.kind}${g.work_item_id || g.work_item_title ? ` on ${workItemLabel(g)}` : ""}`,
   }));
   return [...fromRuns, ...fromGates]
     .filter((a) => a.ts)
