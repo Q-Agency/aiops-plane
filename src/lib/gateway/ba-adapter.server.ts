@@ -5,9 +5,10 @@
 // Once BA adopts `agency-agent-sdk` this adapter collapses toward identity.
 //
 // STATUS: mappings verified against BA's API schemas (2026-06):
-//   • /runs/all          -> RunWithSessionResponse (RunResponse + teamwork_task_title + project_name)
-//   • /agent/interrupted -> { sessions: Session[] } (Session has teamwork_task_title, no question text)
-//   • /agent/health      -> { status, checks } (no name/version — those come from the agent card)
+//   • /runs/all              -> RunWithSessionResponse (RunResponse + teamwork_task_title + project_name)
+//   • /agent/interrupted     -> { sessions: Session[] } status=waiting_for_input (clarification gates)
+//   • /session/pending-approval -> { sessions: Session[] } status=spec_ready (approval gates)
+//   • /agent/health          -> { status, checks } (no name/version — those come from the agent card)
 // The well-known agent card is still pending on BA (served once it adopts the SDK).
 //
 // External API responses are untyped on the wire, so `any` is intentional here.
@@ -147,40 +148,67 @@ export async function getCard(system: RegisteredSystem): Promise<AgentCard | nul
   }
 }
 
-/** Open human gates → contract HITLGate[]. Maps BA's /agent/interrupted, which
- *  returns { sessions: Session[] } — sessions paused waiting for a human reply
- *  (in Slack). The pending question text lives in chat messages, not on the
- *  session, so we surface the task it's blocked on instead. */
+/** Pull the `sessions` array out of BA's various wrappers. */
+function sessionsOf(data: any): any[] {
+  if (Array.isArray(data)) return data;
+  return data?.sessions ?? data?.interrupted ?? data?.items ?? data?.data ?? [];
+}
+
+/** One BA Session → a contract HITLGate of the given kind. */
+function mapGate(system: RegisteredSystem, s: any, kind: HITLGate["kind"], i: number): HITLGate {
+  const title = (s?.teamwork_task_title as string) || undefined;
+  const sid = s?.id ?? s?.session_id;
+  // Sessions don't carry the pending-question text (it lives in chat messages),
+  // so describe the gate by the task it concerns.
+  const prompt =
+    kind === "approval"
+      ? title
+        ? `Spec ready for review — “${title}”`
+        : "Spec ready for review"
+      : title
+        ? `Waiting for human input on “${title}”`
+        : "Waiting for human input";
+  return {
+    id: `${system.id}:${kind}:${sid ?? i}`,
+    work_item_id: sid ?? undefined,
+    work_item_title: title,
+    run_id: undefined,
+    kind,
+    state: "open",
+    prompt,
+    channel: kind === "clarification" ? "slack" : undefined,
+    opened_at:
+      (kind === "approval" ? s?.autospec_completed_at : undefined) ??
+      s?.updated_at ??
+      s?.created_at ??
+      new Date().toISOString(),
+    metadata: {
+      agent_id: system.id,
+      agent_name: system.label,
+      teamwork_task_id: s?.teamwork_task_id ?? undefined,
+      project_name: s?.project_name ?? undefined,
+      slack_thread_url: s?.slack_thread_url ?? undefined,
+      status: s?.status ?? undefined,
+    },
+  };
+}
+
+/** Open human gates → contract HITLGate[]. BA splits the two HITL moments across
+ *  two endpoints, both returning { sessions: Session[] }:
+ *    • /agent/interrupted     → status `waiting_for_input` (mid-pipeline
+ *      clarification the agent is blocked on) → kind "clarification"
+ *    • /session/pending-approval → status `spec_ready` (a finished spec awaiting
+ *      human review/sign-off) → kind "approval"
+ *  Best-effort: a missing endpoint (older BA) just drops that bucket. */
 export async function getApprovals(system: RegisteredSystem): Promise<HITLGate[]> {
-  let data: any;
-  try {
-    data = await baFetch(system, "/agent/interrupted");
-  } catch {
-    return [];
-  }
-  const items: any[] = Array.isArray(data)
-    ? data
-    : (data?.sessions ?? data?.interrupted ?? data?.items ?? data?.data ?? []);
-  return items.map((s: any, i: number): HITLGate => {
-    const title = (s?.teamwork_task_title as string) || undefined;
-    return {
-      id: String(s?.id ?? s?.session_id ?? `${system.id}-gate-${i}`),
-      work_item_id: s?.id ?? s?.session_id ?? undefined,
-      work_item_title: title,
-      run_id: undefined,
-      kind: "clarification",
-      state: "open",
-      prompt: title ? `Waiting for human input on “${title}”` : "Waiting for human input",
-      channel: "slack",
-      opened_at: s?.updated_at ?? s?.created_at ?? new Date().toISOString(),
-      metadata: {
-        agent_id: system.id,
-        agent_name: system.label,
-        teamwork_task_id: s?.teamwork_task_id ?? undefined,
-        project_name: s?.project_name ?? undefined,
-        slack_thread_url: s?.slack_thread_url ?? undefined,
-        status: s?.status ?? undefined,
-      },
-    };
-  });
+  const [interrupted, pending] = await Promise.all([
+    baFetch(system, "/agent/interrupted").catch(() => null),
+    baFetch(system, "/session/pending-approval").catch(() => null),
+  ]);
+  const clarifications = sessionsOf(interrupted).map((s, i) =>
+    mapGate(system, s, "clarification", i),
+  );
+  const approvals = sessionsOf(pending).map((s, i) => mapGate(system, s, "approval", i));
+  // Most recent first across both kinds.
+  return [...approvals, ...clarifications].sort((a, b) => (a.opened_at < b.opened_at ? 1 : -1));
 }
