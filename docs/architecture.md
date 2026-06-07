@@ -195,9 +195,9 @@ changes per agent:
 
 Both render in one Human-gates queue; the actual artifact review (edit the real
 `SPEC.md`, EARS, …) stays in the agent's tool per the boundary above. The
-dashboard standardizes the **gate**, not the artifact's content. (BA predates the
-SDK and exposes these on two endpoints — `/agent/interrupted` + `/session/pending-approval`
-— which the adapter merges; SDK agents serve one unified gate list. See agent-sdk-brief §A.3–A.4.)
+dashboard standardizes the **gate**, not the artifact's content. (BA merges both
+kinds agent-side and serves one unified canonical list at `/agency/gates`; the
+dashboard just stamps gate ownership. See agent-sdk-brief §A.3–A.4.)
 
 ---
 
@@ -273,20 +273,24 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
     completeness, ambiguities, EARS/GWT coverage, judge/persona, lifecycle stage),
     a real project switcher (TopBar), and a throwaway **Connections** page
     (`aiops_systems` cookie).
-- **BA Agent — federated and live.** Adapter mappings **verified** against BA's
-  real schemas (`RunWithSessionResponse`, `Session`, `/agent/health`):
-  - runs + gates surface the human **task title** (`teamwork_task_title` →
-    `work_item_title`) instead of raw session UUIDs.
-  - **Both HITL kinds** are surfaced (§5): `/agent/interrupted`
-    (`waiting_for_input` → clarification) **and** `/session/pending-approval`
-    (`spec_ready` → approval, i.e. a finished spec awaiting review). The agent's
-    `waiting` badge tracks only `waiting_for_input`; the gate queue includes both.
-  - **Artifact lifecycle (§3a)** is mapped: BA status → `LifecycleStage`, runs
-    tagged `artifact_type: "spec"`. Adapter also reads `/agent/logs/recent`,
-    `POST /session/get`, `/session/{id}/lint` + `/structured-ac` for the
-    Observability and Governance surfaces.
-    The `agency-agent-sdk` refactor is in progress on the agent side per the brief;
-    once adopted, the adapter collapses toward identity.
+- **BA Agent — federated and live, over the canonical surface.** BA adopted
+  `agency-agent-sdk` and serves the contract directly, so the adapter now reads
+  BA's **`/agency/*`** surface instead of mapping BA-native shapes — the
+  BA→contract translation lives entirely agent-side, and the adapter has
+  collapsed toward identity:
+  - runs (`/agency/runs`), health (`/agency/health`, incl. its 503/unhealthy
+    body), gates (`/agency/gates`), and lifecycle events
+    (`/agency/events/recent`) come back already contract-shaped. The adapter only
+    re-keys `agent_id` to the dashboard's registry id and stamps gate ownership
+    (`metadata.agent_id`/`agent_name`) the agent can't know.
+  - **Both HITL kinds** (§5) arrive **pre-merged** on `/agency/gates`:
+    `clarification` (`waiting_for_input`) **and** `approval` (`spec_ready`). The
+    agent's `waiting` badge tracks only clarifications; the gate queue includes both.
+  - Human **task titles** (`work_item_title`) and the **artifact lifecycle** (§3a:
+    `artifact_type: "spec"`, `LifecycleStage`) ride on the canonical payloads.
+  - **Not in the contract → still BA-native:** Governance spec-quality
+    (`POST /session/get`, `/session/{id}/lint` + `/structured-ac`) and
+    Observability (`/agent/logs/recent`, the rich `/agent/health` sub-checks).
 - **Next:** live **SSE activity** (push instead of polling — needs a server-side
   SSE proxy + a verified fleet-wide event stream from BA), and run-level **step
   traces** in the deep-dive (light up once BA emits `step.*` events via the SDK).
