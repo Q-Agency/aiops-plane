@@ -53,6 +53,24 @@ const tokenSum = (a?: number, b?: number) => (a ?? 0) + (b ?? 0);
 const workItemLabel = (x: { work_item_title?: string; work_item_id?: string }) =>
   x.work_item_title || x.work_item_id || "—";
 
+/** Median — robust to outliers, so one rare 30-min run can't drag the "typical" value up
+ *  the way an average would. */
+function median(nums: number[]): number | undefined {
+  if (!nums.length) return undefined;
+  const s = [...nums].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+/** A stable, distinct color per agent id (hashed hue) so each agent's work items are
+ *  visually grouped and differentiated in the table. Works for any agent — nothing to
+ *  pre-register as the fleet grows. */
+function agentColor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return `hsl(${h % 360} 65% 60%)`;
+}
+
 // --- KPI trends (all from the runs ledger; deterministic — anchored to the latest run,
 //     never Date.now(), so SSR and client agree) ------------------------------------
 const DAY_MS = 86_400_000;
@@ -182,16 +200,14 @@ export function RealCommandCenter(initial: Props) {
   const tput7d = anchor != null ? windowSum(terminal, anchor, 7, () => 1) : terminal.length;
   const tputDelta = anchor != null ? windowDelta(terminal, anchor, 7, () => 1) : null;
   const durRuns = terminal.filter((r) => r.duration_ms != null);
-  const avgDurMs = durRuns.length
-    ? durRuns.reduce((s, r) => s + (r.duration_ms ?? 0), 0) / durRuns.length
-    : undefined;
+  const medDurMs = median(durRuns.map((r) => r.duration_ms ?? 0));
 
   return (
     <div className="grid gap-4 p-4 lg:gap-5 lg:p-6 xl:grid-cols-[1fr_360px]">
       <div className="min-w-0 space-y-4 lg:space-y-5">
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Kpi
-            label="Active specs"
+            label="Active artifacts"
             value={String(activeRuns)}
             sub="in progress"
             accent={activeRuns > 0}
@@ -215,11 +231,11 @@ export function RealCommandCenter(initial: Props) {
             help="Runs completed in the last 7 days. The sparkline is the daily trend; the chip is the change versus the previous 7 days (up is good)."
           />
           <Kpi
-            label="Avg run"
-            value={fmtDur(avgDurMs)}
+            label="Median run"
+            value={fmtDur(medDurMs)}
             sub="per turn"
             icon={<Clock className="size-3.5" />}
-            help="Average wall-clock duration of one finished run — i.e. a single autospec turn. A spec usually takes several turns, so this is per-turn, not the whole spec's cycle time."
+            help="The typical time one finished run (a single turn) takes — the median, so a rare slow outlier doesn't skew it the way an average would. An artifact usually spans several turns, so this is per-turn, not its full cycle time."
           />
           <Kpi
             label="Cost"
@@ -293,7 +309,7 @@ function AgentCard({
   const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
   const succeeded = runs.filter((r) => r.status === "succeeded").length;
   const pct = terminal.length ? Math.round((succeeded / terminal.length) * 100) : null;
-  // BA runs many specs at once — show the concurrency, not just the first.
+  // An agent may run many artifacts at once — show the concurrency, not just the first.
   const runningRuns = runs.filter((r) => r.status === "running");
   const lastDone = runs.find(isTerminal); // runs are newest-first → most recent artifact
   const workingLabel =
@@ -303,12 +319,10 @@ function AgentCard({
         : "—"
       : runningRuns.length === 1
         ? workItemLabel(runningRuns[0])
-        : `${runningRuns.length} specs in progress`;
+        : `${runningRuns.length} artifacts in progress`;
   const cost = runs.reduce((s, r) => s + (r.cost_usd ?? 0), 0);
-  const durations = runs.filter((r) => r.duration_ms != null);
-  const avgDur = durations.length
-    ? durations.reduce((s, r) => s + (r.duration_ms ?? 0), 0) / durations.length
-    : undefined;
+  // Median (not mean) — consistent with the "Median run" KPI; an outlier run won't skew it.
+  const medDur = median(runs.filter((r) => r.duration_ms != null).map((r) => r.duration_ms ?? 0));
 
   return (
     <Link
@@ -347,7 +361,7 @@ function AgentCard({
               <div className="absolute left-0 top-full z-50 hidden w-72 max-w-[80vw] pt-1.5 group-hover/wo:block">
                 <div className="glass-panel border border-primary/25 p-2 shadow-xl shadow-black/50">
                   <div className="mb-1 px-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {runningRuns.length} specs in progress
+                    {runningRuns.length} artifacts in progress
                   </div>
                   <div className="space-y-0.5">
                     {runningRuns.map((r) => {
@@ -396,7 +410,7 @@ function AgentCard({
 
       <div className="mt-3 grid grid-cols-3 gap-1 font-mono text-[10px] text-muted-foreground">
         <Stat icon={<Activity className="size-3" />} value={String(runs.length)} label="runs" />
-        <Stat icon={<Clock className="size-3" />} value={fmtDur(avgDur)} label="avg" />
+        <Stat icon={<Clock className="size-3" />} value={fmtDur(medDur)} label="med" />
         <Stat
           icon={<DollarSign className="size-3" />}
           value={cost ? cost.toFixed(2) : "—"}
@@ -518,7 +532,7 @@ function Kpi({
   );
 }
 
-/** "Where every spec is right now" — the artifact lifecycle as a live flow, all from BA's
+/** "Where every artifact is right now" — the artifact lifecycle as a live flow, all from BA's
  *  data: running runs → in-progress, gates → waiting/ready, lifecycle events → recent
  *  approved/reset. The same lifecycle generalizes to every agent. */
 function LifecycleFlow({
@@ -717,6 +731,9 @@ function WorkItemsTable({
 }) {
   const items = buildWorkItems(runs, approvals);
   const agentName = new Map(fleet.map((a) => [a.agent_id, a.name]));
+  // Overview altitude: only the most recent few — the per-agent views carry the full list.
+  const LIMIT = 10;
+  const shown = items.slice(0, LIMIT);
   return (
     <div className="glass-panel overflow-x-auto">
       <table className="w-full text-xs">
@@ -732,10 +749,11 @@ function WorkItemsTable({
           </tr>
         </thead>
         <tbody className="font-mono">
-          {items.slice(0, 20).map((w) => (
+          {shown.map((w) => (
             <tr
               key={`${w.agentId}:${w.id}`}
-              className="border-b border-border/60 last:border-0 hover:bg-white/[0.02]"
+              className="border-b border-l-[3px] border-border/60 last:border-b-0 hover:bg-white/[0.02]"
+              style={{ borderLeftColor: agentColor(w.agentId) }}
             >
               <td className="max-w-[16rem] px-3 py-2">
                 <Link
@@ -750,8 +768,16 @@ function WorkItemsTable({
                   </span>
                 </Link>
               </td>
-              <td className="max-w-[10rem] truncate px-3 py-2 text-muted-foreground">
-                {agentName.get(w.agentId) ?? w.agentId}
+              <td className="px-3 py-2">
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="size-2 shrink-0 rounded-full"
+                    style={{ background: agentColor(w.agentId) }}
+                  />
+                  <span className="max-w-[8rem] truncate text-muted-foreground">
+                    {agentName.get(w.agentId) ?? w.agentId}
+                  </span>
+                </span>
               </td>
               <td className="px-3 py-2">
                 <StageBadge stage={w.stage} />
@@ -770,6 +796,11 @@ function WorkItemsTable({
           ))}
         </tbody>
       </table>
+      {items.length > LIMIT && (
+        <div className="border-t border-border/60 px-3 py-2 text-[10px] text-muted-foreground">
+          Showing the {LIMIT} most recent of {items.length} — open an agent for its full history.
+        </div>
+      )}
     </div>
   );
 }

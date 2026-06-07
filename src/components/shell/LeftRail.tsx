@@ -21,7 +21,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { to: "/", label: "Command Center", icon: LayoutDashboard },
+  { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/pipeline", label: "Pipeline Board", icon: KanbanSquare },
   { to: "/traceability", label: "Traceability", icon: GitBranch },
   { to: "/agents", label: "Agents", icon: Bot },

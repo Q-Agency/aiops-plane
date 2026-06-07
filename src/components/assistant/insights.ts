@@ -52,15 +52,14 @@ export interface SectionConfig {
   answer: (prompt: string) => string;
 }
 
-const fmt$ = (n: number) =>
-  n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n.toFixed(2)}`;
+const fmt$ = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n.toFixed(2)}`);
 const fmtH = (m: number) => (m >= 60 ? `${(m / 60).toFixed(1)}h` : `${m}m`);
 
 /* ---------------- per-section computers ---------------- */
 
 const commandCenter = (): SectionConfig => ({
   id: "command-center",
-  name: "Command Center",
+  name: "Overview",
   prompts: [
     "What's the biggest bottleneck right now?",
     "Summarize today's progress",
@@ -80,7 +79,12 @@ const commandCenter = (): SectionConfig => ({
       const ranked = [...gateStats].sort((a, b) => b.avgWaitMin - a.avgWaitMin);
       return [
         "**Slowest gates (avg wait):**",
-        ...ranked.slice(0, 3).map((g, i) => `${i + 1}. ${g.gate} Review — ${fmtH(g.avgWaitMin)} (p95 ${fmtH(g.p95WaitMin)}) · ${g.breaches} SLA breach${g.breaches === 1 ? "" : "es"}`),
+        ...ranked
+          .slice(0, 3)
+          .map(
+            (g, i) =>
+              `${i + 1}. ${g.gate} Review — ${fmtH(g.avgWaitMin)} (p95 ${fmtH(g.p95WaitMin)}) · ${g.breaches} SLA breach${g.breaches === 1 ? "" : "es"}`,
+          ),
         "",
         `Top fix: speed up **${ranked[0].gate} Review** — owned by ${agents.find((a) => a.id === GATE_AGENT[ranked[0].gate])?.name}.`,
       ].join("\n");
@@ -92,7 +96,10 @@ const commandCenter = (): SectionConfig => ({
         .slice(0, 4);
       return [
         "**Needs attention now:**",
-        ...stale.map((t) => `• ${t.id} · ${t.title} — ${t.stage} · approver ${t.approver}${t.rerunCount ? ` · ${t.rerunCount} rerun(s)` : ""}`),
+        ...stale.map(
+          (t) =>
+            `• ${t.id} · ${t.title} — ${t.stage} · approver ${t.approver}${t.rerunCount ? ` · ${t.rerunCount} rerun(s)` : ""}`,
+        ),
       ].join("\n");
     }
     if (lq.includes("progress") || lq.includes("today") || lq.includes("summarize")) {
@@ -125,12 +132,17 @@ const pipeline = (): SectionConfig => ({
       const r = [...tickets]
         .filter((t) => (t.rerunCount ?? 0) > 0)
         .sort((a, b) => (b.rerunCount ?? 0) - (a.rerunCount ?? 0));
-      return ["**Most rejected:**", ...r.map((t) => `• ${t.id} · ${t.rerunCount} rerun(s) · ${t.stage}`)].join("\n");
+      return [
+        "**Most rejected:**",
+        ...r.map((t) => `• ${t.id} · ${t.rerunCount} rerun(s) · ${t.stage}`),
+      ].join("\n");
     }
     if (lq.includes("slow") || lq.includes("flow")) {
       return [
         "**Flow drag, slowest first:**",
-        ...[...gateStats].sort((a, b) => b.avgWaitMin - a.avgWaitMin).map((g) => `• ${g.gate} — avg ${fmtH(g.avgWaitMin)} · ${g.open} open`),
+        ...[...gateStats]
+          .sort((a, b) => b.avgWaitMin - a.avgWaitMin)
+          .map((g) => `• ${g.gate} — avg ${fmtH(g.avgWaitMin)} · ${g.open} open`),
       ].join("\n");
     }
     const stuck = tickets
@@ -139,7 +151,10 @@ const pipeline = (): SectionConfig => ({
       .slice(0, 5);
     return [
       "**Stuck tickets (oldest first):**",
-      ...stuck.map((t) => `• ${t.id} · ${t.stage} · approver ${t.approver} · idle ${fmtH(Math.round((Date.now() - t.updatedAt) / 60000))}`),
+      ...stuck.map(
+        (t) =>
+          `• ${t.id} · ${t.stage} · approver ${t.approver} · idle ${fmtH(Math.round((Date.now() - t.updatedAt) / 60000))}`,
+      ),
     ].join("\n");
   },
 });
@@ -159,8 +174,10 @@ const traceability = (): SectionConfig => ({
   answer: (q) => {
     const t = tickets[0];
     const lq = q.toLowerCase();
-    if (lq.includes("delay")) return `Biggest delay for ${t.id}: stuck ${fmtH(Math.round((Date.now() - t.updatedAt) / 60000))} in ${t.stage}, approver ${t.approver}.`;
-    if (lq.includes("changed") || lq.includes("version")) return `Spec v1 → v2 for ${t.id}: clarified acceptance criteria, added 2 edge cases (empty-state, paginated results). v2 cited 3 SOW lines and 1 Slack decision.`;
+    if (lq.includes("delay"))
+      return `Biggest delay for ${t.id}: stuck ${fmtH(Math.round((Date.now() - t.updatedAt) / 60000))} in ${t.stage}, approver ${t.approver}.`;
+    if (lq.includes("changed") || lq.includes("version"))
+      return `Spec v1 → v2 for ${t.id}: clarified acceptance criteria, added 2 edge cases (empty-state, paginated results). v2 cited 3 SOW lines and 1 Slack decision.`;
     return `${t.id} journey: BA spec → SA design → Tasks → Dev → Code Review → QA. Currently at **${t.stage}**, last touched ${fmtH(Math.round((Date.now() - t.updatedAt) / 60000))} ago.`;
   },
 });
@@ -182,10 +199,18 @@ const agentsSection = (): SectionConfig => ({
     const lq = q.toLowerCase();
     if (lq.includes("cost") || lq.includes("driving")) {
       const ranked = [...agents].sort((a, b) => b.tokenCostToday - a.tokenCostToday);
-      return ["**Spend today:**", ...ranked.slice(0, 5).map((a) => `• ${a.name} — $${a.tokenCostToday.toFixed(2)} · ${a.latencyMs}ms p50`)].join("\n");
+      return [
+        "**Spend today:**",
+        ...ranked
+          .slice(0, 5)
+          .map((a) => `• ${a.name} — $${a.tokenCostToday.toFixed(2)} · ${a.latencyMs}ms p50`),
+      ].join("\n");
     }
     if (lq.includes("acceptance") || lq.includes("performing")) {
-      return ["**Acceptance vs latency:**", ...agents.map((a) => `• ${a.name} — ${a.successRate}% accepted · ${a.latencyMs}ms`)].join("\n");
+      return [
+        "**Acceptance vs latency:**",
+        ...agents.map((a) => `• ${a.name} — ${a.successRate}% accepted · ${a.latencyMs}ms`),
+      ].join("\n");
     }
     return agentsSection().summary();
   },
@@ -213,7 +238,10 @@ const observability = (): SectionConfig => ({
       return `Highest p50 latency: **${slow.name}** at ${slow.latencyMs}ms — within band, no anomaly flagged.`;
     }
     const ranked = [...agents].sort((a, b) => b.tokenCostToday - a.tokenCostToday).slice(0, 3);
-    return ["**Top spend today:**", ...ranked.map((a) => `• ${a.name} — $${a.tokenCostToday.toFixed(2)}`)].join("\n");
+    return [
+      "**Top spend today:**",
+      ...ranked.map((a) => `• ${a.name} — $${a.tokenCostToday.toFixed(2)}`),
+    ].join("\n");
   },
 });
 
@@ -225,12 +253,19 @@ const approvalsSection = (): SectionConfig => ({
     "Summarize what's waiting on me",
     "Anything breaching response time?",
   ],
-  summary: () => `${approvals.length} approvals open across all gates. Oldest: ${approvals[0]?.ticketId} (${approvals[0]?.gate}).`,
+  summary: () =>
+    `${approvals.length} approvals open across all gates. Oldest: ${approvals[0]?.ticketId} (${approvals[0]?.gate}).`,
   answer: (q) => {
     const lq = q.toLowerCase();
     if (lq.includes("first") || lq.includes("priority")) {
       const sorted = [...approvals].sort((a, b) => a.openedAt - b.openedAt).slice(0, 4);
-      return ["**Review first (oldest):**", ...sorted.map((a) => `• ${a.ticketId} · ${a.gate} · opened ${fmtH(Math.round((Date.now() - a.openedAt) / 60000))} ago`)].join("\n");
+      return [
+        "**Review first (oldest):**",
+        ...sorted.map(
+          (a) =>
+            `• ${a.ticketId} · ${a.gate} · opened ${fmtH(Math.round((Date.now() - a.openedAt) / 60000))} ago`,
+        ),
+      ].join("\n");
     }
     if (lq.includes("breach")) {
       const breaching = approvals.filter((a) => Date.now() - a.openedAt > 90 * 60_000);
@@ -252,17 +287,26 @@ const accountability = (): SectionConfig => ({
     const lq = q.toLowerCase();
     if (lq.includes("uncovered")) {
       const missing = agents.filter((a) => !OWNERSHIP[a.id]);
-      return missing.length ? `Uncovered: ${missing.map((a) => a.name).join(", ")}.` : "Every agent has a named accountable human.";
+      return missing.length
+        ? `Uncovered: ${missing.map((a) => a.name).join(", ")}.`
+        : "Every agent has a named accountable human.";
     }
     if (lq.includes("ana")) {
       const ana = humans.find((h) => h.name.toLowerCase().includes("ana"));
       if (!ana) return "No Ana found.";
-      const owns = Object.entries(OWNERSHIP).filter(([, hid]) => hid === ana.id).map(([a]) => a);
+      const owns = Object.entries(OWNERSHIP)
+        .filter(([, hid]) => hid === ana.id)
+        .map(([a]) => a);
       const queue = tickets.filter((t) => t.approver === ana.name).length;
       return `${ana.name} owns: ${owns.join(", ") || "—"}. Current approval queue: ${queue}.`;
     }
-    const loads = humans.map((h) => ({ h, q: tickets.filter((t) => t.approver === h.name).length })).sort((a, b) => b.q - a.q);
-    return ["**Load (open approvals):**", ...loads.slice(0, 5).map((x) => `• ${x.h.name} — ${x.q}`)].join("\n");
+    const loads = humans
+      .map((h) => ({ h, q: tickets.filter((t) => t.approver === h.name).length }))
+      .sort((a, b) => b.q - a.q);
+    return [
+      "**Load (open approvals):**",
+      ...loads.slice(0, 5).map((x) => `• ${x.h.name} — ${x.q}`),
+    ].join("\n");
   },
 });
 
@@ -282,14 +326,24 @@ const governanceSection = (): SectionConfig => ({
     const lq = q.toLowerCase();
     if (lq.includes("codebase")) {
       const byCb: Record<string, number> = {};
-      violations.filter((v) => v.status === "open").forEach((v) => (byCb[v.cb] = (byCb[v.cb] || 0) + 1));
-      return ["**Open by codebase:**", ...Object.entries(byCb).sort((a, b) => b[1] - a[1]).map(([cb, n]) => `• ${cb} — ${n}`)].join("\n");
+      violations
+        .filter((v) => v.status === "open")
+        .forEach((v) => (byCb[v.cb] = (byCb[v.cb] || 0) + 1));
+      return [
+        "**Open by codebase:**",
+        ...Object.entries(byCb)
+          .sort((a, b) => b[1] - a[1])
+          .map(([cb, n]) => `• ${cb} — ${n}`),
+      ].join("\n");
     }
     if (lq.includes("failing") || lq.includes("gate")) {
       return "Failing gates: see PR Gates table — most common failure: missing tests for new branches and lint violations on backend.";
     }
     const open = violations.filter((v) => v.status === "open").slice(0, 5);
-    return ["**Open violations:**", ...open.map((v) => `• [${v.severity}] ${v.cb} · ${v.rule}`)].join("\n");
+    return [
+      "**Open violations:**",
+      ...open.map((v) => `• [${v.severity}] ${v.cb} · ${v.rule}`),
+    ].join("\n");
   },
 });
 
@@ -309,10 +363,21 @@ const knowledge = (): SectionConfig => ({
     const lq = q.toLowerCase();
     if (lq.includes("stale")) {
       const stale = sources.filter((s) => s.freshness !== "fresh");
-      return ["**Stale/failed sources:**", ...stale.map((s) => `• ${s.id} — ${s.freshness}`)].join("\n");
+      return ["**Stale/failed sources:**", ...stale.map((s) => `• ${s.id} — ${s.freshness}`)].join(
+        "\n",
+      );
     }
-    if (lq.includes("conflict")) return ["**Conflicts:**", ...conflicts.slice(0, 4).map((c) => `• ${c.topic} — ${c.a.source} vs ${c.b.source} (winner: ${c.resolution.winner})`)].join("\n");
-    if (lq.includes("am-150") || lq.includes("fresh enough")) return "AM-150 (VIN decoder): Jira fresh · SOW fresh · 1 Slack decision 4d old. Safe to spec — no blocking staleness.";
+    if (lq.includes("conflict"))
+      return [
+        "**Conflicts:**",
+        ...conflicts
+          .slice(0, 4)
+          .map(
+            (c) => `• ${c.topic} — ${c.a.source} vs ${c.b.source} (winner: ${c.resolution.winner})`,
+          ),
+      ].join("\n");
+    if (lq.includes("am-150") || lq.includes("fresh enough"))
+      return "AM-150 (VIN decoder): Jira fresh · SOW fresh · 1 Slack decision 4d old. Safe to spec — no blocking staleness.";
     return knowledge().summary();
   },
 });
@@ -331,17 +396,28 @@ const economics = (): SectionConfig => ({
   },
   answer: (q) => {
     const lq = q.toLowerCase();
-    if (lq.includes("merged") || lq.includes("per pr")) return `Cost/merged PR: **${fmt$(aggregates.costPerMerged)}** across ${aggregates.mergedCount} merged tickets.`;
+    if (lq.includes("merged") || lq.includes("per pr"))
+      return `Cost/merged PR: **${fmt$(aggregates.costPerMerged)}** across ${aggregates.mergedCount} merged tickets.`;
     if (lq.includes("expensive") || lq.includes("most")) {
-      const ranked = [...ticketEconomics].sort((a, b) => ticketTotalUsd(b) - ticketTotalUsd(a)).slice(0, 4);
-      return ["**Most expensive:**", ...ranked.map((t) => {
-        const top = [...t.stages].sort((a, b) => (b.cloudUsd + b.localUsd) - (a.cloudUsd + a.localUsd))[0];
-        return `• ${t.ticketId} — ${fmt$(ticketTotalUsd(t))} (driver: ${stageLabel[top.stage]} · ${ticketRerunCount(t)} rerun${ticketRerunCount(t) === 1 ? "" : "s"})`;
-      })].join("\n");
+      const ranked = [...ticketEconomics]
+        .sort((a, b) => ticketTotalUsd(b) - ticketTotalUsd(a))
+        .slice(0, 4);
+      return [
+        "**Most expensive:**",
+        ...ranked.map((t) => {
+          const top = [...t.stages].sort(
+            (a, b) => b.cloudUsd + b.localUsd - (a.cloudUsd + a.localUsd),
+          )[0];
+          return `• ${t.ticketId} — ${fmt$(ticketTotalUsd(t))} (driver: ${stageLabel[top.stage]} · ${ticketRerunCount(t)} rerun${ticketRerunCount(t) === 1 ? "" : "s"})`;
+        }),
+      ].join("\n");
     }
     if (lq.includes("rerun")) {
       const reruns = ticketEconomics.reduce((a, t) => a + ticketRerunCount(t), 0);
-      const cost = ticketEconomics.reduce((a, t) => a + ticketTokenUsd(t) * (ticketRerunCount(t) / 6), 0);
+      const cost = ticketEconomics.reduce(
+        (a, t) => a + ticketTokenUsd(t) * (ticketRerunCount(t) / 6),
+        0,
+      );
       return `${reruns} reruns this period · estimated rerun cost ~${fmt$(cost)} (≈${Math.round((cost / aggregates.totalCost) * 100)}% of total).`;
     }
     return economics().summary();
@@ -356,11 +432,14 @@ const incidents = (): SectionConfig => ({
     "Which gate lets the most through?",
     "Root-cause the latest incident",
   ],
-  summary: () => `Escape rate trending at ~2.1% over last 7d · 1 critical incident open (AM-149 SQL injection).`,
+  summary: () =>
+    `Escape rate trending at ~2.1% over last 7d · 1 critical incident open (AM-149 SQL injection).`,
   answer: (q) => {
     const lq = q.toLowerCase();
-    if (lq.includes("root")) return "Latest: AM-149 escaped Dev Review — Code Review missed parameterized-query rule in OfferRepository. Rule re-added to constitution, retroactive scan queued.";
-    if (lq.includes("gate")) return "QA Review accounts for **62%** of escapes — selector drift is the largest single cause this period.";
+    if (lq.includes("root"))
+      return "Latest: AM-149 escaped Dev Review — Code Review missed parameterized-query rule in OfferRepository. Rule re-added to constitution, retroactive scan queued.";
+    if (lq.includes("gate"))
+      return "QA Review accounts for **62%** of escapes — selector drift is the largest single cause this period.";
     return "Escape rate: 3.1% → 2.4% → 2.1% over the last 3 weeks. Trending down as Healer coverage rises.";
   },
 });
@@ -386,7 +465,13 @@ const flow = (): SectionConfig => ({
       return `Per ticket: ~${fmtH(totalWait)} waiting on humans vs ~${compute}m agent compute. **Humans are ${humanPct}%** of cycle time.`;
     }
     const ranked = [...gateStats].sort((a, b) => b.avgWaitMin - a.avgWaitMin);
-    return ["**Gates by wait time:**", ...ranked.map((g) => `• ${g.gate} — avg ${fmtH(g.avgWaitMin)} · p95 ${fmtH(g.p95WaitMin)} · ${g.breaches} breach`)].join("\n");
+    return [
+      "**Gates by wait time:**",
+      ...ranked.map(
+        (g) =>
+          `• ${g.gate} — avg ${fmtH(g.avgWaitMin)} · p95 ${fmtH(g.p95WaitMin)} · ${g.breaches} breach`,
+      ),
+    ].join("\n");
   },
 });
 
@@ -398,11 +483,14 @@ const orchestration = (): SectionConfig => ({
     "Which agent API is degraded?",
     "What's the dispatch-latency trend?",
   ],
-  summary: () => `All agent APIs healthy · dispatch p50 ~140ms · 0 stuck handoffs · orchestrator (planned) not yet in path.`,
+  summary: () =>
+    `All agent APIs healthy · dispatch p50 ~140ms · 0 stuck handoffs · orchestrator (planned) not yet in path.`,
   answer: (q) => {
     const lq = q.toLowerCase();
-    if (lq.includes("degrade")) return "No agent API currently degraded. Highest error rate: Dev agent at 1.2% (within budget).";
-    if (lq.includes("stuck")) return "No stuck handoffs in the last 30m. Stale-handoff alert threshold: 5m without ack.";
+    if (lq.includes("degrade"))
+      return "No agent API currently degraded. Highest error rate: Dev agent at 1.2% (within budget).";
+    if (lq.includes("stuck"))
+      return "No stuck handoffs in the last 30m. Stale-handoff alert threshold: 5m without ack.";
     return "Dispatch latency over 24h: p50 138ms → 142ms (flat) · p95 410ms · no anomalies.";
   },
 });
@@ -423,11 +511,17 @@ const comms = (): SectionConfig => ({
     const lq = q.toLowerCase();
     if (lq.includes("escalation") || lq.includes("open")) {
       const open = ESCALATIONS.filter((e) => e.status === "open");
-      return ["**Open escalations:**", ...open.map((e) => `• [${e.severity}] ${e.ticketId} → ${e.routedTo} · ${e.trigger}`)].join("\n");
+      return [
+        "**Open escalations:**",
+        ...open.map((e) => `• [${e.severity}] ${e.ticketId} → ${e.routedTo} · ${e.trigger}`),
+      ].join("\n");
     }
     if (lq.includes("digest")) {
       const d = SCHEDULED[0];
-      return [`**${d.preview.title}**`, ...d.preview.sections.flatMap((s) => [`*${s.heading}*`, ...s.lines.map((l) => `• ${l}`)])].join("\n");
+      return [
+        `**${d.preview.title}**`,
+        ...d.preview.sections.flatMap((s) => [`*${s.heading}*`, ...s.lines.map((l) => `• ${l}`)]),
+      ].join("\n");
     }
     return `This week: ${COMMS.length} outbound messages (mix of scheduled and threshold). 2 cadences active: daily digest + weekly report.`;
   },
@@ -447,12 +541,14 @@ const compliance = (): SectionConfig => ({
   },
   answer: (q) => {
     const lq = q.toLowerCase();
-    if (lq.includes("gdpr") || lq.includes("gap")) return "GDPR: all 7 mapped controls have evidence. 1 advisory: erasure-request SLA logging is captured but not yet exported in the monthly bundle.";
+    if (lq.includes("gdpr") || lq.includes("gap"))
+      return "GDPR: all 7 mapped controls have evidence. 1 advisory: erasure-request SLA logging is captured but not yet exported in the monthly bundle.";
     if (lq.includes("on-prem") || lq.includes("left")) {
       const cloudPct = Math.round((aggregates.totalCloud / aggregates.totalTokens) * 100);
       return `${cloudPct}% of tokens were processed in cloud (vendor-managed) this period. All cloud calls are logged with model, prompt-version, and content classification.`;
     }
-    if (lq.includes("am-142")) return "AM-142 audit trail: 6 entries — BA draft, Spec approval (Zlatko), SA design, Tasks approval, Dev start, current state. Chain valid.";
+    if (lq.includes("am-142"))
+      return "AM-142 audit trail: 6 entries — BA draft, Spec approval (Zlatko), SA design, Tasks approval, Dev start, current state. Chain valid.";
     return compliance().summary();
   },
 });
