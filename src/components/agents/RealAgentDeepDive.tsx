@@ -398,6 +398,7 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
       {openRun && (
         <RunDrawer
           run={openRun}
+          siblingRuns={runs}
           observabilityTemplate={observability}
           onClose={() => setOpenRun(null)}
         />
@@ -427,29 +428,35 @@ function GateRow({ gate: g }: { gate: HITLGate }) {
 
 function RunDrawer({
   run,
+  siblingRuns,
   observabilityTemplate,
   onClose,
 }: {
   run: Run;
+  siblingRuns?: Run[];
   observabilityTemplate?: string;
   onClose: () => void;
 }) {
   const meta = run.metadata ?? {};
   const liveUrl = runObservabilityUrl(observabilityTemplate, run);
-  // The artifact's completeness before/after this run — a run is a step in the
-  // artifact's life, so show how much it advanced.
-  const avgComp = (c: unknown) => {
-    if (!c || typeof c !== "object") return undefined;
-    const vals = Object.values(c as Record<string, unknown>).filter(
-      (v): v is number => typeof v === "number",
-    );
-    return vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : undefined;
-  };
-  const cBefore = avgComp(meta.completeness_before);
-  const cAfter = avgComp(meta.completeness_after);
-  const metaEntries = Object.entries(meta).filter(
-    ([k, v]) => v != null && v !== "" && k !== "completeness_before" && k !== "completeness_after",
-  );
+  // The live deep view only exists *while the run is in flight* — BA streams it from an
+  // in-memory bus that's wiped ~5 min after the run finishes (and on restart). Past that,
+  // the durable record below is the source of truth. So only offer the live link when running.
+  const showLive = run.status === "running" && !!liveUrl;
+
+  const before = completenessMap(meta.completeness_before);
+  const after = completenessMap(meta.completeness_after);
+  const cBefore = avgOf(before);
+  const cAfter = avgOf(after);
+
+  // The session's turns (same work item) — a durable timeline of how the spec advanced.
+  const turns = (siblingRuns ?? [])
+    .filter((r) => r.work_item_id && r.work_item_id === run.work_item_id)
+    .sort((a, b) => turnNo(a) - turnNo(b));
+
+  const valErrors = Array.isArray(meta.validation_errors)
+    ? (meta.validation_errors as unknown[])
+    : [];
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1 bg-black/60 backdrop-blur-sm" />
@@ -494,33 +501,14 @@ function RunDrawer({
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-5 p-5">
           {run.error && (
             <div className="rounded-md border border-status-error/30 bg-status-error/5 p-3 text-xs text-status-error">
               {run.error}
             </div>
           )}
 
-          <div>
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              Details
-            </div>
-            <dl className="space-y-1 text-xs">
-              <Row k="Started" v={run.started_at} />
-              <Row k="Ended" v={run.ended_at ?? "—"} />
-              {run.artifact_type && <Row k="Artifact" v={run.artifact_type} />}
-              {(cBefore != null || cAfter != null) && (
-                <Row k="Completeness" v={`${cBefore ?? "—"}% → ${cAfter ?? "—"}%`} />
-              )}
-              {run.work_item_id && <Row k="Work item" v={run.work_item_id} />}
-              {run.project && <Row k="Project" v={run.project.name} />}
-              {metaEntries.map(([k, v]) => (
-                <Row key={k} k={k} v={typeof v === "object" ? JSON.stringify(v) : String(v)} />
-              ))}
-            </dl>
-          </div>
-
-          {liveUrl ? (
+          {showLive ? (
             <a
               href={liveUrl}
               target="_blank"
@@ -530,19 +518,87 @@ function RunDrawer({
               <span>
                 <span className="font-medium">Open this run live in Flow Observer</span>
                 <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                  Step-by-step trace, supervisor graph, and token stream — the agent’s own
-                  deep-observability view.
+                  Step-by-step trace, supervisor graph, and token stream — live while it runs.
                 </span>
               </span>
               <ExternalLink className="size-4 shrink-0 text-primary" />
             </a>
-          ) : (
+          ) : liveUrl ? (
             <div className="rounded-md border border-border bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
-              Step-level deep trace lives in the agent’s own observability tool. This agent doesn’t
-              advertise one (<code className="font-mono">x-agency.ui.runUrlTemplate</code>), so this
-              shows the run record + its domain metadata.
+              The live Flow Observer view exists only while a run is in progress (the agent streams
+              it in real time, then it expires). This run has finished — its durable record is
+              below.
             </div>
+          ) : null}
+
+          {/* Spec completeness — durable, from persisted run metrics */}
+          {(Object.keys(after).length > 0 || Object.keys(before).length > 0) && (
+            <section>
+              <SectionLabel>
+                Spec completeness
+                {cBefore != null && cAfter != null ? ` · avg ${cBefore}% → ${cAfter}%` : ""}
+              </SectionLabel>
+              <div className="space-y-2">
+                {Object.entries(COMPLETENESS_LABELS).map(([dim, label]) =>
+                  after[dim] == null && before[dim] == null ? null : (
+                    <CompletenessRow
+                      key={dim}
+                      label={label}
+                      before={before[dim]}
+                      after={after[dim]}
+                    />
+                  ),
+                )}
+              </div>
+            </section>
           )}
+
+          {/* Validation errors — durable */}
+          {valErrors.length > 0 && (
+            <section>
+              <SectionLabel>Validation ({valErrors.length})</SectionLabel>
+              <ul className="space-y-1">
+                {valErrors.map((e, i) => (
+                  <li
+                    key={i}
+                    className="rounded border border-status-error/25 bg-status-error/5 px-2 py-1 font-mono text-[11px] text-status-error/90"
+                  >
+                    {String(e)}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Session turns — durable timeline of the spec's autospec iterations */}
+          {turns.length > 1 && (
+            <section>
+              <SectionLabel>Session turns ({turns.length})</SectionLabel>
+              <div className="space-y-1">
+                {turns.map((t) => (
+                  <TurnRow key={t.id} turn={t} current={t.id === run.id} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Details */}
+          <section>
+            <SectionLabel>Details</SectionLabel>
+            <dl className="space-y-1 text-xs">
+              <Row k="Started" v={run.started_at} />
+              <Row k="Ended" v={run.ended_at ?? "—"} />
+              {run.work_item_id && <Row k="Work item" v={run.work_item_id} />}
+              {run.project && <Row k="Project" v={run.project.name} />}
+              {typeof meta.finalize_method === "string" && (
+                <Row k="Finalize" v={meta.finalize_method} />
+              )}
+              {meta.decision_count != null && <Row k="Decisions" v={String(meta.decision_count)} />}
+              {meta.worker_count != null && Number(meta.worker_count) > 0 && (
+                <Row k="Workers" v={String(meta.worker_count)} />
+              )}
+            </dl>
+          </section>
         </div>
       </div>
     </div>
@@ -560,6 +616,120 @@ function Row({ k, v }: { k: string; v: string }) {
 
 function Tag({ children }: { children: ReactNode }) {
   return <span className="rounded border border-border px-1.5 py-0.5">{children}</span>;
+}
+
+const COMPLETENESS_LABELS: Record<string, string> = {
+  user_roles: "User roles",
+  business_rules: "Business rules",
+  acceptance_criteria: "Acceptance criteria",
+  scope_boundaries: "Scope boundaries",
+  error_handling: "Error handling",
+  data_model: "Data model",
+};
+
+/** Pull the numeric dimensions out of a completeness map (ignores non-numbers). */
+function completenessMap(v: unknown): Record<string, number> {
+  if (!v || typeof v !== "object") return {};
+  const out: Record<string, number> = {};
+  for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+    if (typeof val === "number") out[k] = val;
+  }
+  return out;
+}
+
+function avgOf(m: Record<string, number>): number | undefined {
+  const vals = Object.values(m);
+  return vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : undefined;
+}
+
+function turnNo(r: Run): number {
+  const n = r.metadata?.run_number;
+  return typeof n === "number" ? n : 0;
+}
+
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+      {children}
+    </div>
+  );
+}
+
+/** One completeness dimension: before→after with a delta + an overlaid bar (faint =
+ *  before, solid = after). All from persisted run metrics, so it survives restarts. */
+function CompletenessRow({
+  label,
+  before,
+  after,
+}: {
+  label: string;
+  before?: number;
+  after?: number;
+}) {
+  const filled = after ?? before ?? 0;
+  const delta = before != null && after != null ? after - before : undefined;
+  const clamp = (n: number) => Math.min(100, Math.max(0, n));
+  return (
+    <div>
+      <div className="mb-0.5 flex items-center justify-between font-mono text-[11px]">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="text-foreground">
+          {before ?? "—"} → {after ?? "—"}
+          {delta != null && delta !== 0 && (
+            <span className={cn("ml-1", delta > 0 ? "text-status-done" : "text-status-error")}>
+              {delta > 0 ? `+${delta}` : delta}
+            </span>
+          )}
+        </span>
+      </div>
+      <div className="relative h-1.5 overflow-hidden rounded-full bg-white/5">
+        {before != null && (
+          <div
+            className="absolute h-full rounded-full bg-white/15"
+            style={{ width: `${clamp(before)}%` }}
+          />
+        )}
+        <div
+          className="absolute h-full rounded-full bg-primary/70"
+          style={{ width: `${clamp(filled)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** One autospec turn in the session's durable timeline. */
+function TurnRow({ turn, current }: { turn: Run; current: boolean }) {
+  const b = avgOf(completenessMap(turn.metadata?.completeness_before));
+  const a = avgOf(completenessMap(turn.metadata?.completeness_after));
+  const n = turnNo(turn);
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded px-2 py-1.5 text-[11px]",
+        current ? "border border-primary/40 bg-primary/5" : "border border-border",
+      )}
+    >
+      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/5 font-mono text-[10px] text-muted-foreground">
+        {n || "•"}
+      </span>
+      <span
+        className={cn(
+          "size-1.5 shrink-0 rounded-full",
+          turn.status === "running"
+            ? "bg-status-running dot-pulse"
+            : turn.status === "failed"
+              ? "bg-status-error"
+              : "bg-status-done",
+        )}
+      />
+      <span className="font-mono text-foreground/80">{turn.status}</span>
+      <span className="ml-auto truncate font-mono text-muted-foreground">
+        {b != null || a != null ? `${b ?? "—"}→${a ?? "—"}%` : ""}
+        {turn.duration_ms != null ? ` · ${fmtDur(turn.duration_ms)}` : ""}
+      </span>
+    </div>
+  );
 }
 
 function OutcomeBar({
