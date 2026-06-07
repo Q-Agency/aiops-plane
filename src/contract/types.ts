@@ -136,6 +136,9 @@ export const EVENT_TYPES = [
   "tool.result",
   "hitl.requested",
   "hitl.resolved",
+  // artifact moved to a LifecycleStage (reset / approved / blocked / …); the new
+  // stage rides in `data.stage` (+ work_item_id/title, artifact_type).
+  "lifecycle.changed",
   "metric.update",
   "log",
 ] as const;

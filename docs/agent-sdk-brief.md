@@ -214,6 +214,10 @@ serves the Agent Card (A.6) from the constructor args.
   (`waiting_for_input` → clarification) and `GET /session/pending-approval`
   (`spec_ready` → approval); the BA adapter merges them. New SDK agents serve the
   single unified endpoint._
+- `GET /agent/events/recent` — recent **lifecycle events** as `AgentEvent[]`
+  (`type: "lifecycle.changed"`, the new stage in `data.stage`): resets, approvals,
+  blocks. Powers the activity feed without the SSE stream — and a replay buffer for
+  it. _BA pre-SDK: add it now per `ba-events-endpoint.md`._
 
 ### A.4 Run / event / HITL API (what agent code calls)
 

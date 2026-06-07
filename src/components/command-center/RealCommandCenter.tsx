@@ -12,7 +12,15 @@ import {
   Layers,
 } from "lucide-react";
 
-import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
+import type {
+  AgentEvent,
+  AgentHealth,
+  AgentState,
+  HITLGate,
+  LifecycleStage,
+  Run,
+  RunStatus,
+} from "@/contract";
 import { getCommandCenterFn } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +68,12 @@ const fmtClockUTC = (ms: number) => {
 const workItemLabel = (x: { work_item_title?: string; work_item_id?: string }) =>
   x.work_item_title || x.work_item_id || "—";
 
-type Props = { fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
+type Props = {
+  fleet: AgentHealth[];
+  runs: Run[];
+  approvals: HITLGate[];
+  events: AgentEvent[];
+};
 
 export function RealCommandCenter(initial: Props) {
   // SSR seeds the cache (initialData) for a populated first paint; the client then
@@ -72,7 +85,7 @@ export function RealCommandCenter(initial: Props) {
     initialData: initial,
     refetchInterval: POLL_MS,
   });
-  const { fleet, runs, approvals } = data;
+  const { fleet, runs, approvals, events } = data;
 
   if (fleet.length === 0) return <EmptyFleet />;
 
@@ -145,7 +158,13 @@ export function RealCommandCenter(initial: Props) {
 
       <aside className="min-w-0 space-y-4 self-start lg:space-y-5 xl:sticky xl:top-4">
         <ApprovalsQueue approvals={approvals} />
-        <ActivityFeed runs={runs} approvals={approvals} fleet={fleet} updatedAt={dataUpdatedAt} />
+        <ActivityFeed
+          runs={runs}
+          approvals={approvals}
+          events={events}
+          fleet={fleet}
+          updatedAt={dataUpdatedAt}
+        />
       </aside>
     </div>
   );
@@ -402,13 +421,49 @@ function ApprovalsQueue({ approvals }: { approvals: HITLGate[] }) {
 
 type ActivityItem = {
   ts: string;
-  kind: "run" | "approval";
+  kind: "run" | "approval" | "lifecycle";
   status?: RunStatus;
+  stage?: LifecycleStage;
   agent: string;
   message: string;
 };
 
-function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[]): ActivityItem[] {
+const STAGE_VERB: Partial<Record<LifecycleStage, string>> = {
+  reset: "reset the",
+  approved: "approved the",
+  blocked: "blocked the",
+  error: "errored on the",
+  ready: "finished the",
+  delivered: "delivered the",
+};
+
+const STAGE_DOT: Partial<Record<LifecycleStage, string>> = {
+  reset: "bg-status-error",
+  error: "bg-status-error",
+  blocked: "bg-status-waiting",
+  approved: "bg-status-done",
+  delivered: "bg-status-done",
+  ready: "bg-status-running",
+};
+
+function activityDot(a: ActivityItem): string {
+  if (a.kind === "lifecycle") return (a.stage && STAGE_DOT[a.stage]) || "bg-status-idle";
+  if (a.kind === "approval") return "bg-status-waiting";
+  return a.status === "succeeded"
+    ? "bg-status-done"
+    : a.status === "failed"
+      ? "bg-status-error"
+      : a.status === "running"
+        ? "bg-status-running dot-pulse"
+        : "bg-status-idle";
+}
+
+function buildActivity(
+  runs: Run[],
+  approvals: HITLGate[],
+  events: AgentEvent[],
+  fleet: AgentHealth[],
+): ActivityItem[] {
   const nameOf = (id: string) => fleet.find((a) => a.agent_id === id)?.name ?? id;
   const fromRuns: ActivityItem[] = runs.map((r) => {
     const target = r.work_item_id || r.work_item_title ? ` for ${workItemLabel(r)}` : "";
@@ -434,24 +489,43 @@ function buildActivity(runs: Run[], approvals: HITLGate[], fleet: AgentHealth[])
     agent: (g.metadata?.agent_name as string) ?? "",
     message: `awaiting human ${g.kind}${g.work_item_id || g.work_item_title ? ` on ${workItemLabel(g)}` : ""}`,
   }));
-  return [...fromRuns, ...fromGates]
+  // Lifecycle transitions (resets, approvals, …) that aren't runs or gates.
+  const fromEvents: ActivityItem[] = events
+    .filter((e) => e.type === "lifecycle.changed")
+    .map((e) => {
+      const d = e.data ?? {};
+      const stage = d.stage as LifecycleStage | undefined;
+      const title = (d.work_item_title as string) || (d.work_item_id as string) || "";
+      const artifact = (d.artifact_type as string) || "artifact";
+      const verb = (stage && STAGE_VERB[stage]) || "updated the";
+      return {
+        ts: e.ts,
+        kind: "lifecycle",
+        stage,
+        agent: nameOf(e.agent_id),
+        message: `${verb} ${artifact}${title ? ` · ${title}` : ""}`,
+      };
+    });
+  return [...fromRuns, ...fromGates, ...fromEvents]
     .filter((a) => a.ts)
     .sort((a, b) => (a.ts < b.ts ? 1 : -1))
-    .slice(0, 15);
+    .slice(0, 18);
 }
 
 function ActivityFeed({
   runs,
   approvals,
+  events,
   fleet,
   updatedAt,
 }: {
   runs: Run[];
   approvals: HITLGate[];
+  events: AgentEvent[];
   fleet: AgentHealth[];
   updatedAt: number;
 }) {
-  const items = buildActivity(runs, approvals, fleet);
+  const items = buildActivity(runs, approvals, events, fleet);
   return (
     <div className="glass-panel p-4">
       <SectionHead
@@ -466,20 +540,7 @@ function ActivityFeed({
         <div className="space-y-2.5">
           {items.map((a, i) => (
             <div key={i} className="flex gap-2.5 text-xs">
-              <span
-                className={cn(
-                  "mt-1 size-2 shrink-0 rounded-full",
-                  a.kind === "approval"
-                    ? "bg-status-waiting"
-                    : a.status === "succeeded"
-                      ? "bg-status-done"
-                      : a.status === "failed"
-                        ? "bg-status-error"
-                        : a.status === "running"
-                          ? "bg-status-running dot-pulse"
-                          : "bg-status-idle",
-                )}
-              />
+              <span className={cn("mt-1 size-2 shrink-0 rounded-full", activityDot(a))} />
               <div className="min-w-0 flex-1">
                 <div className="text-foreground">
                   <span className="font-medium">{a.agent}</span>{" "}

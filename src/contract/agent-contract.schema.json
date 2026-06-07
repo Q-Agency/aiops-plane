@@ -126,6 +126,7 @@
         "tool.result",
         "hitl.requested",
         "hitl.resolved",
+        "lifecycle.changed",
         "metric.update",
         "log"
       ]

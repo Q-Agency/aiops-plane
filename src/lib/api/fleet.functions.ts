@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-import type { AgentHealth, HITLGate, Run } from "@/contract";
+import type { AgentEvent, AgentHealth, HITLGate, Run } from "@/contract";
 import { getSystem, getSystems } from "../gateway/systems.server";
 import * as ba from "../gateway/ba-adapter.server";
 import type {
@@ -80,21 +80,30 @@ export const getApprovalsFn = createServerFn({ method: "GET" }).handler(
   },
 );
 
-export type CommandCenterData = { fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
+export type CommandCenterData = {
+  fleet: AgentHealth[];
+  runs: Run[];
+  approvals: HITLGate[];
+  events: AgentEvent[];
+};
 
 /** One round-trip for the real Command Center: fleet health + the lead agent's
- *  runs (project-scoped) + open gates. Used by the SSR loader for first paint and
- *  by the client's poll to keep the surface near-live. Best-effort: one slow or
- *  unreachable endpoint won't blank the others. */
+ *  runs (project-scoped) + open gates + recent lifecycle events (resets, approvals)
+ *  across the fleet. Used by the SSR loader for first paint and by the client's
+ *  poll to keep the surface near-live. Best-effort: one slow or unreachable
+ *  endpoint won't blank the others. */
 export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<CommandCenterData> => {
+    const systems = getSystems();
     const fleet = await getFleetHealthFn().catch(() => [] as AgentHealth[]);
     const first = fleet[0]?.agent_id;
-    const [runs, approvals] = await Promise.all([
+    const [runs, approvals, eventsSettled] = await Promise.all([
       first ? getRunsFn({ data: { systemId: first } }).catch(() => []) : Promise.resolve([]),
       getApprovalsFn().catch(() => []),
+      Promise.allSettled(systems.map((s) => adapterFor(s.id).getEvents(s))),
     ]);
-    return { fleet, runs, approvals };
+    const events = eventsSettled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+    return { fleet, runs, approvals, events };
   },
 );
 

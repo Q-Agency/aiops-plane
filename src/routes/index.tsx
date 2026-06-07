@@ -7,11 +7,17 @@ import { ApprovalsQueue } from "@/components/command-center/ApprovalsQueue";
 import { ActivityFeed } from "@/components/command-center/ActivityFeed";
 import { RealCommandCenter } from "@/components/command-center/RealCommandCenter";
 import { getCommandCenterFn } from "@/lib/api/fleet.functions";
-import type { AgentHealth, HITLGate, Run } from "@/contract";
+import type { AgentEvent, AgentHealth, HITLGate, Run } from "@/contract";
 
 type CommandData =
   | { mode: "mock" }
-  | { mode: "real"; fleet: AgentHealth[]; runs: Run[]; approvals: HITLGate[] };
+  | {
+      mode: "real";
+      fleet: AgentHealth[];
+      runs: Run[];
+      approvals: HITLGate[];
+      events: AgentEvent[];
+    };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,7 +34,7 @@ export const Route = createFileRoute("/")({
       const data = await getCommandCenterFn();
       return { mode: "real", ...data };
     } catch {
-      return { mode: "real", fleet: [], runs: [], approvals: [] };
+      return { mode: "real", fleet: [], runs: [], approvals: [], events: [] };
     }
   },
   component: CommandCenter,
@@ -37,7 +43,14 @@ export const Route = createFileRoute("/")({
 function CommandCenter() {
   const data = Route.useLoaderData();
   if (data.mode === "real") {
-    return <RealCommandCenter fleet={data.fleet} runs={data.runs} approvals={data.approvals} />;
+    return (
+      <RealCommandCenter
+        fleet={data.fleet}
+        runs={data.runs}
+        approvals={data.approvals}
+        events={data.events}
+      />
+    );
   }
   return <MockCommandCenter />;
 }

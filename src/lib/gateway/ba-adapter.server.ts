@@ -17,6 +17,7 @@
 import {
   SCHEMA_VERSION,
   type AgentCard,
+  type AgentEvent,
   type AgentHealth,
   type HITLGate,
   type LifecycleStage,
@@ -410,4 +411,47 @@ export async function getSpecQuality(
     gwt_coverage: num(ac?.gwt_coverage),
     ac_total: num(ac?.total),
   };
+}
+
+// --- Lifecycle events (resets, approvals, …) ----------------------------------
+
+/** BA records reset/approval as `chore_run`s; the (new) GET /agent/events/recent
+ *  exposes them globally, newest-first. Map each to a contract AgentEvent
+ *  (`lifecycle.changed`, with the new stage in `data.stage`). */
+function mapEvent(system: RegisteredSystem, e: any): AgentEvent | null {
+  const et = String(e?.event_type ?? e?.type ?? "");
+  let stage: LifecycleStage | undefined;
+  if (et === "reset") stage = "reset";
+  else if (et === "approval" || et === "approved") stage = "approved";
+  else stage = lifecycleStage(e?.status ?? e?.stage);
+  if (!stage) return null;
+  return {
+    ts: e?.created_at ?? e?.ts ?? new Date().toISOString(),
+    agent_id: system.id,
+    type: "lifecycle.changed",
+    level: stage === "reset" || stage === "error" ? "warning" : "info",
+    data: {
+      stage,
+      work_item_id: e?.teamwork_task_id ?? e?.work_item_id ?? e?.session_id ?? undefined,
+      work_item_title: e?.teamwork_task_title ?? e?.title ?? undefined,
+      project_name: e?.project_name ?? undefined,
+      artifact_type: "spec",
+    },
+    schema_version: SCHEMA_VERSION,
+  };
+}
+
+/** Recent lifecycle events for the activity feed. Tolerant: an older BA without
+ *  the endpoint just yields nothing (the feed falls back to runs+gates). */
+export async function getEvents(system: RegisteredSystem, limit = 50): Promise<AgentEvent[]> {
+  let data: any;
+  try {
+    data = await baFetch(system, `/agent/events/recent?limit=${limit}`);
+  } catch {
+    return [];
+  }
+  const items: any[] = Array.isArray(data)
+    ? data
+    : (data?.events ?? data?.items ?? data?.data ?? []);
+  return items.map((e) => mapEvent(system, e)).filter((e): e is AgentEvent => e !== null);
 }
