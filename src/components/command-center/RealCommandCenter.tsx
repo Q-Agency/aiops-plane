@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -435,16 +436,37 @@ function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: s
 }
 
 /** A "?" that reveals a short explanation on hover (styled + immediate; not a native
- *  title). Anchored to its right edge so it doesn't clip on right-hand tiles. */
+ *  title). The popover is portalled to <body> and fixed-positioned by the icon's coords,
+ *  so it escapes the tile's `backdrop-filter` stacking context + any `overflow` clipping
+ *  — it always renders on top, never cut off by the menu or adjacent panels. */
 function HelpTip({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+
+  const show = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (r) setPos({ top: r.bottom + 6, right: Math.max(8, window.innerWidth - r.right) });
+  };
+
   return (
-    <span className="group/help relative ml-auto inline-flex shrink-0">
+    <span
+      ref={ref}
+      className="ml-auto inline-flex shrink-0"
+      onMouseEnter={show}
+      onMouseLeave={() => setPos(null)}
+    >
       <CircleHelp className="size-3 cursor-help text-muted-foreground/40 transition-colors hover:text-muted-foreground" />
-      <span className="absolute right-0 top-full z-50 hidden w-56 max-w-[70vw] pt-1.5 group-hover/help:block">
-        <span className="block rounded-md border border-border bg-panel/95 p-2.5 font-sans text-[11px] font-normal normal-case leading-relaxed tracking-normal text-muted-foreground shadow-xl shadow-black/50 backdrop-blur">
-          {text}
-        </span>
-      </span>
+      {pos &&
+        createPortal(
+          <span
+            role="tooltip"
+            style={{ top: pos.top, right: pos.right }}
+            className="pointer-events-none fixed z-[200] w-56 max-w-[80vw] rounded-md border border-border bg-panel/95 p-2.5 font-sans text-[11px] font-normal normal-case leading-relaxed tracking-normal text-muted-foreground shadow-xl shadow-black/50 backdrop-blur"
+          >
+            {text}
+          </span>,
+          document.body,
+        )}
     </span>
   );
 }
