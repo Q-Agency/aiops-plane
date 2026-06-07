@@ -63,9 +63,10 @@ into a standalone, versioned package once a second agent (SA/Dev) consumes it.
   PM-aware** (links to Teamwork/GitHub/Jira/… via `source.system`). `Run` gained typed
   `work_item`, `artifact` (`RunArtifact`), `stage`, `lineage` (traceability); `HITLGate`
   gained `work_item`; `WorkItem` gained `source`. The flat `work_item_id` /
-  `work_item_title` / `artifact_type` are **deprecated** (kept during migration). The
-  dashboard adapter maps a v0.4 agent's payload onto these typed fields, so BA keeps
-  working while it catches up. Reframed as the _SDLC_ agent contract.
+  `work_item_title` / `artifact_type` are **deprecated** (kept during migration). BA
+  emits v0.5 natively (its SDK + run projection build `work_item`/`artifact.facet`); the
+  dashboard adapter still tolerantly lifts a v0.4 agent's flat payload onto the typed
+  fields. Reframed as the _SDLC_ agent contract.
 - **0.4** — optional `x-agency.ui.runUrlTemplate` on the Agent Card — a per-run
   deep-observability URL the agent owns (e.g. a Flow Observer) that the control plane
   deep-links to (`{work_item_id}`/`{run_id}` placeholders). The dashboard stays

@@ -1,7 +1,7 @@
 # Agency OS — Architecture Decisions
 
 > **Status:** internal tool for Q Agency (not productized). Living document.
-> **Last updated:** 2026-06-04
+> **Last updated:** 2026-06-07
 
 This captures the decisions from the design discussions so they don't live only
 in chat history. It records _what_ we decided and _why_, plus open questions —
@@ -20,30 +20,43 @@ Two framing decisions:
 
 - **Internal for now.** Multi-org tenancy, RBAC, billing, and data-residency are
   explicitly **out of scope** while this is an internal tool. (See Open Questions.)
-- **The fleet is heterogeneous — not every agent is SDLC.** Therefore the core is
-  **domain-agnostic**; SDLC is the _first domain pack_, not the foundation.
+- **SDLC-native (revised in v0.5 — see §2).** The fleet _is_ the software-delivery
+  pipeline (BA → SA → Dev → QA → …). We dropped the original "domain-agnostic core"
+  stance: the contract is specialized for SDLC, with a reusable **envelope** every
+  agent shares and a per-agent **facet** for what each one produces.
 
 ---
 
-## 2. Core principle: agnostic kernel + domain packs
+## 2. Core principle: shared envelope + per-agent facet (SDLC-native)
 
-The product splits into two layers:
+> **Decision change (v0.5).** We originally split into an agnostic _kernel_ +
+> pluggable _domain packs_, hedging for hypothetical non-SDLC agents. We revised this:
+> the fleet is all-SDLC, and the agnosticism cost more than it bought — untyped
+> `metadata`, a contract mirrored across many drifting copies, and "is this generic
+> enough?" friction on every feature, all for a flexibility we never used. So the
+> contract is now **SDLC-specialized**. We kept the part that was genuinely valuable —
+> a uniform, runtime-decoupled seam — and dropped the fiction that it must serve
+> arbitrary domains.
 
-- **Universal kernel (fixed):** agents & status, runs/traces/tool-calls,
-  tokens/cost/latency, the event stream, human-in-the-loop (HITL) gates,
-  economics, audit, accountability, health. True of _any_ agentic system.
-- **Domain pack (declarative, pluggable):** unit-of-work, stages, artifact types
-  - renderers, gate types, roles, KPIs, vocabulary. The SDLC-specific layer is
-    thinner than it looks.
+The contract splits into two layers:
 
-**Stance:** design the kernel/domain _seam_ now (we know non-SDLC agents are
-coming), but only **build the SDLC pack first**. Keep the pack minimal but real;
-add a second pack when a non-SDLC agent actually lands — that's the real test of
-the seam.
+- **Envelope (shared, reusable):** run lifecycle, runs/traces/tool-calls,
+  tokens/cost/latency, the event stream, HITL gates, health, and the work-item ref.
+  Identical for every agent — the dashboard renders it generically (the fleet rollup,
+  lifecycle, gates queue). This is the seam.
+- **Facet (per-agent — the differentiator):** `Run.artifact.facet` — each agent's
+  craft + focus metrics, typed per artifact (`SpecFacet`, `DesignFacet`, `CodeFacet`,
+  `TestFacet`, …) with a `GenericFacet` fallback so any agent still renders.
+
+Rule of thumb: anything the dashboard compares **across** agents → envelope; anything
+that's one agent's craft → its facet. Add a role = add a facet + one UI renderer; the
+envelope never moves. The contract stays a **stable internal boundary** (decoupled from
+each agent's runtime, so a runtime can change without breaking the dashboard) — just not
+a universal public standard.
 
 ---
 
-## 3. The three agnostic layers
+## 3. The three layers (all runtime-decoupled)
 
 | Layer                 | Answers                                                       | Home                                                                 |
 | --------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------- |
@@ -57,9 +70,10 @@ auto-appears, wired, in its slot.
 
 ### 3a. Agent contract
 
-- Two tiers: a **kernel** (Run, Event, Step/Trace, HITLGate, AgentHealth,
-  WorkItem) we commit to hard, and **domain payloads** (e.g. spec completeness,
-  EARS) that ride in `data`/`metadata` and are typed-but-evolvable.
+- Two tiers: the **envelope** (Run, Event, Step/Trace, HITLGate, AgentHealth,
+  WorkItem + work-item ref) shared by every SDLC agent, and the per-agent **facet**
+  (`Run.artifact.facet` — `SpecFacet`/`CodeFacet`/…) for each agent's typed metrics.
+  Only genuinely freeform extras still ride in `data`/`metadata`.
 - **Dependency direction points inward:** agents and dashboard both depend on the
   contract, never on each other. The contract is **not** owned by BA or by the
   dashboard.
@@ -67,7 +81,7 @@ auto-appears, wired, in its slot.
   **schema-first** (Pydantic → exported JSON Schema → generated TS types). Seed it
   from BA's existing `schemas/*.py`.
 
-**The artifact lifecycle — the agent-agnostic backbone (v0.4).** Every agent
+**The artifact lifecycle — the backbone every agent shares (v0.5).** Every agent
 **produces and advances an artifact** (BA: `SPEC.md`; SA: a design; QA: tests).
 The artifact moves through one shared `LifecycleStage` (happy path
 `backlog → in_progress → waiting → ready → approved → delivered`, plus the
@@ -133,9 +147,9 @@ Pydantic types, a FastAPI app factory serving the standard endpoints (`/runs`,
 `/agent/watch` SSE, `/agent/health`, and the Agent Card), the event bus/SSE, and
 a run/event/HITL API (`agent.run(...)`, `run.emit(...)`, `run.request_approval(...)`,
 `run.finish(...)`). It is **runtime-agnostic** (wraps the seam, not the brain) and
-**domain-agnostic** (domain payloads like spec completeness ride in `metadata`).
-**BA is the first implementation** (extracted from its existing plumbing); KA and
-SA adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-brief.md).
+**SDLC-typed** (each agent's metrics ride on its facet — `run.finish(artifact=…)` — not
+buried in `metadata`). **BA is the first implementation** (extracted from its existing
+plumbing); SA and Dev adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-brief.md).
 
 **Packaging & ownership (sequenced):**
 
@@ -270,8 +284,8 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
   (`dataMode: "standard" | "real"`; prototype cookie auth, 2 hardcoded users):
   - **standard / mock** — the original full mock dashboard (unchanged).
   - **real** — federates live agents through the gateway. Built so far: contract
-    **v0.4** (`src/contract/`, incl. the artifact `LifecycleStage` + `ArtifactRef`,
-    `work_item_title`), the gateway + BA adapter (`src/lib/gateway/`,
+    **v0.5** (`src/contract/`, incl. the shared envelope + per-agent artifact
+    `facet`s and source-neutral `WorkItemRef`), the gateway + BA adapter (`src/lib/gateway/`,
     `src/lib/api/fleet.functions.ts`), a real Command Center (KPI strip, rich agent
     cards that show **concurrent specs** and split **liveness vs activity**,
     human-gates queue, activity feed) that **polls near-live** (TanStack Query
@@ -315,7 +329,7 @@ serves many projects, and each run/work-item carries the project it belongs to
 **scoping dimension orthogonal to "agent"** — a run belongs to _(agent, project)_.
 
 - **Contract:** `Run` and `WorkItem` carry an optional `project { id, name }`
-  (`ProjectRef`, schema v0.4). Each adapter populates it (BA from its
+  (`ProjectRef`, schema v0.5). Each adapter populates it (BA from its
   `project_id`/`project_name`).
 - **Derived, not declared:** the dashboard derives the project list from the
   federated runs (distinct projects + counts) — no project registry.
@@ -336,8 +350,9 @@ serves many projects, and each run/work-item carries the project it belongs to
   while internal; revisit if this becomes a product.
 - **Topology source** — start with a central manifest; evolve to self-declared +
   auto-composed as the fleet grows.
-- **The first non-SDLC agent** — when it lands it forces the _second_ domain pack;
-  that's the real test of the agnostic seam.
+- **A genuinely non-SDLC agent** — none is planned (we deliberately specialized to
+  SDLC in v0.5). If one ever lands, revisit: keep it on the `GenericFacet` fallback, or
+  re-introduce a thin domain-neutral layer under the envelope.
 - **Infra/GPU telemetry** — needs a real source (Prometheus/host metrics), not an
   agent; the Observability view's infra dials are mock until then.
 - **Auth hardening** — replace the prototype cookie before any external exposure
