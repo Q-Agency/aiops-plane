@@ -281,7 +281,7 @@ Served at `/.well-known/agent-card.json`, built from the `Agent(...)` args:
     // our extension (A2A doesn't model pipeline topology)
     "id": "ba",
     "domain": "sdlc",
-    "contractVersion": "0.1",
+    "contractVersion": "0.3",
     "produces": ["spec"],
     "consumes": ["task"],
     "sources": [
@@ -289,7 +289,7 @@ Served at `/.well-known/agent-card.json`, built from the `Agent(...)` args:
       { "system": "slack", "mode": "write" },
       { "system": "knowledge-agent", "mode": "read" },
     ],
-    "endpoints": { "runs": "/runs", "events": "/agent/watch/{id}", "health": "/agent/health" },
+    "endpoints": { "runs": "/runs", "events": "/agent/watch/{id}", "recentEvents": "/agent/events/recent", "gates": "/agent/gates", "health": "/agent/health" },
   },
 }
 ```
@@ -381,7 +381,7 @@ app = agent.fastapi_app()
       agent-specific imports**.
 - [ ] `GET /.well-known/agent-card.json` returns a valid A2A card + `x-agency`.
 - [ ] `GET /runs`, `/runs/{id}`, SSE `/agent/watch/{id}`, `/agent/health`,
-      `/agent/active`, `/agent/interrupted` all work and return contract-shaped
+      `/agent/active`, `/agent/gates` all work and return contract-shaped
       payloads carrying `schema_version`.
 - [ ] Canonical events are emitted (`run.started` … `run.completed`,
       `tool.called`, `hitl.requested`/`hitl.resolved`).
