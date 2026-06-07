@@ -48,6 +48,10 @@ agent (KA/SA) consumes it, so neither the dashboard nor any agent "owns" it.
   agent produces). `WorkItem.stage` now uses `LifecycleStage`; `Run`/`WorkItem`
   gained `artifact_type` (ties a run to the artifact it advances). Also added
   `work_item_title` to `Run`/`HITLGate` for display.
+  - _0.3 (additive):_ optional `x-agency.ui.runUrlTemplate` on the Agent Card — a
+    per-run deep-observability URL the agent owns (e.g. a Flow Observer) that the
+    control plane deep-links to (`{work_item_id}`/`{run_id}` placeholders). The
+    dashboard stays read-only; deep per-run UI lives with the agent.
 - **0.2** — added optional `project` (`ProjectRef`) to `Run`/`WorkItem` for
   project scoping (SDLC agents are shared but tag each run with its project).
 - **0.1** — initial kernel.

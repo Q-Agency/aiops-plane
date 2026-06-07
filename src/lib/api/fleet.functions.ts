@@ -85,6 +85,9 @@ export type CommandCenterData = {
   runs: Run[];
   approvals: HITLGate[];
   events: AgentEvent[];
+  /** agent_id → per-run deep-observability URL template (e.g. a Flow Observer),
+   *  advertised on each agent's card. Absent agents ship no deep tool → no link. */
+  observability: Record<string, string>;
 };
 
 /** One round-trip for the real Command Center: fleet health + the lead agent's
@@ -97,17 +100,32 @@ export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
     const systems = getSystems();
     const fleet = await getFleetHealthFn().catch(() => [] as AgentHealth[]);
     const first = fleet[0]?.agent_id;
-    const [runs, approvals, eventsSettled] = await Promise.all([
+    const [runs, approvals, eventsSettled, obsSettled] = await Promise.all([
       first ? getRunsFn({ data: { systemId: first } }).catch(() => []) : Promise.resolve([]),
       getApprovalsFn().catch(() => []),
       Promise.allSettled(systems.map((s) => adapterFor(s.id).getEvents(s))),
+      Promise.allSettled(
+        systems.map(
+          async (s) => [s.id, await adapterFor(s.id).getObservabilityTemplate(s)] as const,
+        ),
+      ),
     ]);
     const events = eventsSettled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
-    return { fleet, runs, approvals, events };
+    const observability: Record<string, string> = {};
+    for (const r of obsSettled) {
+      if (r.status === "fulfilled" && r.value[1]) observability[r.value[0]] = r.value[1];
+    }
+    return { fleet, runs, approvals, events, observability };
   },
 );
 
-export type AgentDetailData = { agent: AgentHealth | null; runs: Run[]; approvals: HITLGate[] };
+export type AgentDetailData = {
+  agent: AgentHealth | null;
+  runs: Run[];
+  approvals: HITLGate[];
+  /** this agent's per-run deep-observability URL template, if it advertises one */
+  observability?: string;
+};
 
 /** Everything the agent deep-dive needs for one agent: its health, its
  *  (project-scoped) runs, and its open gates. `agent` is null when the id isn't
@@ -115,16 +133,22 @@ export type AgentDetailData = { agent: AgentHealth | null; runs: Run[]; approval
 export const getAgentDetailFn = createServerFn({ method: "GET" })
   .inputValidator(z.object({ systemId: z.string() }))
   .handler(async ({ data }): Promise<AgentDetailData> => {
-    const [fleet, runs, approvals] = await Promise.all([
+    const system = getSystem(data.systemId);
+    const [fleet, runs, approvals, observability] = await Promise.all([
       getFleetHealthFn().catch(() => [] as AgentHealth[]),
       getRunsFn({ data: { systemId: data.systemId } }).catch(() => []),
       getApprovalsFn().catch(() => []),
+      system
+        ? adapterFor(data.systemId)
+            .getObservabilityTemplate(system)
+            .catch(() => undefined)
+        : Promise.resolve(undefined),
     ]);
     const agent = fleet.find((a) => a.agent_id === data.systemId) ?? null;
     const mine = approvals.filter(
       (g) => (g.metadata?.agent_id as string | undefined) === data.systemId,
     );
-    return { agent, runs, approvals: mine };
+    return { agent, runs, approvals: mine, observability };
   });
 
 // --- Unit economics -----------------------------------------------------------

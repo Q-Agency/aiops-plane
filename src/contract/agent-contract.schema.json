@@ -247,7 +247,17 @@
                 }
               }
             },
-            "endpoints": { "type": "object", "additionalProperties": { "type": "string" } }
+            "endpoints": { "type": "object", "additionalProperties": { "type": "string" } },
+            "ui": {
+              "type": "object",
+              "description": "Optional UI affordances the control plane can deep-link to.",
+              "properties": {
+                "runUrlTemplate": {
+                  "type": "string",
+                  "description": "Per-run deep-observability URL template; consumer substitutes {work_item_id} and/or {run_id}."
+                }
+              }
+            }
           }
         }
       }

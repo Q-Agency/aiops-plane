@@ -12,7 +12,17 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Activity, CheckCircle2, Clock, Cpu, DollarSign, PlugZap, X } from "lucide-react";
+import {
+  Activity,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  DollarSign,
+  ExternalLink,
+  PlugZap,
+  X,
+} from "lucide-react";
+import { runObservabilityUrl } from "@/lib/flow-link";
 
 import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
 import { getAgentDetailFn, type AgentDetailData } from "@/lib/api/fleet.functions";
@@ -108,7 +118,9 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
   });
   const [openRun, setOpenRun] = useState<Run | null>(null);
 
-  const { agent, runs, approvals } = data;
+  // `data` is typed `unknown` here due to the server-fn return-serialization
+  // inference; at runtime it is AgentDetailData (initialData + queryFn both supply it).
+  const { agent, runs, approvals, observability } = data as AgentDetailData;
   if (!agent) return <NotConnected systemId={systemId} />;
 
   const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
@@ -383,7 +395,13 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
         )}
       </section>
 
-      {openRun && <RunDrawer run={openRun} onClose={() => setOpenRun(null)} />}
+      {openRun && (
+        <RunDrawer
+          run={openRun}
+          observabilityTemplate={observability}
+          onClose={() => setOpenRun(null)}
+        />
+      )}
     </div>
   );
 }
@@ -407,8 +425,17 @@ function GateRow({ gate: g }: { gate: HITLGate }) {
   );
 }
 
-function RunDrawer({ run, onClose }: { run: Run; onClose: () => void }) {
+function RunDrawer({
+  run,
+  observabilityTemplate,
+  onClose,
+}: {
+  run: Run;
+  observabilityTemplate?: string;
+  onClose: () => void;
+}) {
   const meta = run.metadata ?? {};
+  const liveUrl = runObservabilityUrl(observabilityTemplate, run);
   // The artifact's completeness before/after this run — a run is a step in the
   // artifact's life, so show how much it advanced.
   const avgComp = (c: unknown) => {
@@ -493,11 +520,29 @@ function RunDrawer({ run, onClose }: { run: Run; onClose: () => void }) {
             </dl>
           </div>
 
-          <div className="rounded-md border border-border bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
-            Step-level trace isn’t available yet — it lights up once BA streams steps through the
-            SDK (<code className="font-mono">step.*</code> events). For now this shows the run
-            record + its domain metadata.
-          </div>
+          {liveUrl ? (
+            <a
+              href={liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-2 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-foreground transition-colors hover:bg-primary/10"
+            >
+              <span>
+                <span className="font-medium">Open this run live in Flow Observer</span>
+                <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                  Step-by-step trace, supervisor graph, and token stream — the agent’s own
+                  deep-observability view.
+                </span>
+              </span>
+              <ExternalLink className="size-4 shrink-0 text-primary" />
+            </a>
+          ) : (
+            <div className="rounded-md border border-border bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
+              Step-level deep trace lives in the agent’s own observability tool. This agent doesn’t
+              advertise one (<code className="font-mono">x-agency.ui.runUrlTemplate</code>), so this
+              shows the run record + its domain metadata.
+            </div>
+          )}
         </div>
       </div>
     </div>

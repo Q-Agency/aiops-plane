@@ -205,6 +205,16 @@ export interface AgencyCardExtension {
   consumes: string[];
   sources: { system: string; mode: string }[];
   endpoints: Record<string, string>;
+  /** Optional UI affordances the control plane can deep-link to (it stays a
+   *  read-only viewer; the deep observability tool lives with the agent). */
+  ui?: AgencyCardUi;
+}
+
+export interface AgencyCardUi {
+  /** URL template for a per-run deep-observability view the agent owns (e.g. a
+   *  Flow Observer). The consumer substitutes `{work_item_id}` and/or `{run_id}`.
+   *  Omitted when the agent ships no such tool — then no link is shown. */
+  runUrlTemplate?: string;
 }
 
 export interface AgentCard {

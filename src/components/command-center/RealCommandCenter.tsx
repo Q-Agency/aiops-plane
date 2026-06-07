@@ -9,8 +9,10 @@ import {
   Clock,
   Cpu,
   DollarSign,
+  ExternalLink,
   Layers,
 } from "lucide-react";
+import { runObservabilityUrl } from "@/lib/flow-link";
 
 import type {
   AgentEvent,
@@ -73,6 +75,7 @@ type Props = {
   runs: Run[];
   approvals: HITLGate[];
   events: AgentEvent[];
+  observability: Record<string, string>;
 };
 
 export function RealCommandCenter(initial: Props) {
@@ -85,7 +88,7 @@ export function RealCommandCenter(initial: Props) {
     initialData: initial,
     refetchInterval: POLL_MS,
   });
-  const { fleet, runs, approvals, events } = data;
+  const { fleet, runs, approvals, events, observability } = data;
 
   if (fleet.length === 0) return <EmptyFleet />;
 
@@ -135,6 +138,7 @@ export function RealCommandCenter(initial: Props) {
                 key={a.agent_id}
                 agent={a}
                 runs={runs.filter((r) => r.agent_id === a.agent_id)}
+                observabilityTemplate={observability[a.agent_id]}
               />
             ))}
           </div>
@@ -170,7 +174,15 @@ export function RealCommandCenter(initial: Props) {
   );
 }
 
-function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
+function AgentCard({
+  agent: a,
+  runs,
+  observabilityTemplate,
+}: {
+  agent: AgentHealth;
+  runs: Run[];
+  observabilityTemplate?: string;
+}) {
   const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
   const succeeded = runs.filter((r) => r.status === "succeeded").length;
   const pct = terminal.length ? Math.round((succeeded / terminal.length) * 100) : null;
@@ -228,22 +240,36 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
                     {runningRuns.length} specs in progress
                   </div>
                   <div className="space-y-0.5">
-                    {runningRuns.map((r) => (
-                      <div
-                        key={r.id}
-                        className="flex items-center gap-2 rounded px-1 py-1 text-xs hover:bg-white/5"
-                      >
-                        <span className="size-1.5 shrink-0 rounded-full bg-status-running dot-pulse" />
-                        <span className="min-w-0 flex-1 truncate text-foreground">
-                          {workItemLabel(r)}
-                        </span>
-                        {r.project?.name && (
-                          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-                            {r.project.name}
+                    {runningRuns.map((r) => {
+                      const live = runObservabilityUrl(observabilityTemplate, r);
+                      return (
+                        <div
+                          key={r.id}
+                          className="flex items-center gap-2 rounded px-1 py-1 text-xs hover:bg-white/5"
+                        >
+                          <span className="size-1.5 shrink-0 rounded-full bg-status-running dot-pulse" />
+                          <span className="min-w-0 flex-1 truncate text-foreground">
+                            {workItemLabel(r)}
                           </span>
-                        )}
-                      </div>
-                    ))}
+                          {r.project?.name && (
+                            <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                              {r.project.name}
+                            </span>
+                          )}
+                          {live && (
+                            <a
+                              href={live}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Open this run live in Flow Observer"
+                              className="shrink-0 text-muted-foreground transition-colors hover:text-primary"
+                            >
+                              <ExternalLink className="size-3" />
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

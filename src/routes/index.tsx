@@ -17,6 +17,7 @@ type CommandData =
       runs: Run[];
       approvals: HITLGate[];
       events: AgentEvent[];
+      observability: Record<string, string>;
     };
 
 export const Route = createFileRoute("/")({
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/")({
       const data = await getCommandCenterFn();
       return { mode: "real", ...data };
     } catch {
-      return { mode: "real", fleet: [], runs: [], approvals: [], events: [] };
+      return { mode: "real", fleet: [], runs: [], approvals: [], events: [], observability: {} };
     }
   },
   component: CommandCenter,
@@ -49,6 +50,7 @@ function CommandCenter() {
         runs={data.runs}
         approvals={data.approvals}
         events={data.events}
+        observability={data.observability}
       />
     );
   }

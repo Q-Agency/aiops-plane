@@ -156,6 +156,31 @@ export async function getCard(system: RegisteredSystem): Promise<AgentCard | nul
   }
 }
 
+const _tplCache = new Map<string, { tpl?: string; exp: number }>();
+const TPL_TTL_MS = 5 * 60_000;
+
+/** The agent's advertised per-run deep-observability URL template
+ *  (`x-agency.ui.runUrlTemplate`, e.g. a Flow Observer), or undefined if it ships
+ *  none. Cached briefly — the card is near-static and this rides the poll path. The
+ *  control plane only *links* to it; the deep tool lives with the agent. */
+export async function getObservabilityTemplate(
+  system: RegisteredSystem,
+): Promise<string | undefined> {
+  const now = Date.now();
+  const hit = _tplCache.get(system.baseUrl);
+  if (hit && hit.exp > now) return hit.tpl;
+  let tpl: string | undefined;
+  try {
+    const card = await getCard(system);
+    const t = card?.["x-agency"]?.ui?.runUrlTemplate;
+    tpl = typeof t === "string" && t ? t : undefined;
+  } catch {
+    tpl = undefined;
+  }
+  _tplCache.set(system.baseUrl, { tpl, exp: now + TPL_TTL_MS });
+  return tpl;
+}
+
 /** Open human gates → contract HITLGate[]. `/agency/gates` already merges BOTH HITL
  *  moments (clarification + approval) and shapes them; we only stamp ownership (the
  *  agent can't know which dashboard registry id it's filed under) and sort newest-first.
