@@ -39,13 +39,6 @@ const AGENT_STATE_DOT: Record<AgentState, string> = {
   idle: "bg-status-idle",
 };
 
-const RUN_STATUS_STYLE: Record<RunStatus, string> = {
-  running: "border-status-running/40 bg-status-running/10 text-status-running",
-  succeeded: "border-status-done/40 bg-status-done/10 text-status-done",
-  failed: "border-status-error/40 bg-status-error/10 text-status-error",
-  cancelled: "border-border bg-white/5 text-muted-foreground",
-};
-
 const fmtCost = (v?: number) => (v == null ? "—" : `$${v.toFixed(2)}`);
 const fmtDur = (ms?: number) => {
   if (ms == null) return "—";
@@ -53,7 +46,6 @@ const fmtDur = (ms?: number) => {
   return s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
 };
 const tokenSum = (a?: number, b?: number) => (a ?? 0) + (b ?? 0);
-const fmtTokens = (n: number) => (n ? n.toLocaleString("en-US") : "—");
 // UTC-based so server and client render identically (no hydration mismatch).
 const fmtTimeUTC = (iso?: string) => {
   if (!iso) return "—";
@@ -269,9 +261,13 @@ export function RealCommandCenter(initial: Props) {
 
         <section>
           <SectionHead icon={<Activity className="size-3.5" />}>
-            Recent runs{fleet.length > 1 ? " · fleet" : ""}
+            Work items{fleet.length > 1 ? " · fleet" : ""}
           </SectionHead>
-          {runs.length === 0 ? <Empty>No runs yet.</Empty> : <RunsTable runs={runs} />}
+          {runs.length === 0 ? (
+            <Empty>No work items yet.</Empty>
+          ) : (
+            <WorkItemsTable runs={runs} approvals={approvals} />
+          )}
         </section>
       </div>
 
@@ -581,49 +577,147 @@ function LifecycleFlow({
   );
 }
 
-function RunsTable({ runs }: { runs: Run[] }) {
+const STAGE_BADGE: Record<string, { cls: string; label: string }> = {
+  in_progress: {
+    cls: "text-status-running border-status-running/40 bg-status-running/10",
+    label: "in progress",
+  },
+  waiting: {
+    cls: "text-status-waiting border-status-waiting/40 bg-status-waiting/10",
+    label: "waiting · human",
+  },
+  ready: {
+    cls: "text-status-done border-status-done/40 bg-status-done/10",
+    label: "ready · review",
+  },
+  done: { cls: "text-muted-foreground border-border bg-white/5", label: "done" },
+  error: { cls: "text-status-error border-status-error/40 bg-status-error/10", label: "error" },
+};
+
+function StageBadge({ stage }: { stage: string }) {
+  const s = STAGE_BADGE[stage] ?? STAGE_BADGE.done;
+  return (
+    <span className={cn("inline-block rounded border px-1.5 py-0.5 text-[10px]", s.cls)}>
+      {s.label}
+    </span>
+  );
+}
+
+function avgComp(c: unknown): number | undefined {
+  if (!c || typeof c !== "object") return undefined;
+  const vals = Object.values(c as Record<string, unknown>).filter(
+    (v): v is number => typeof v === "number",
+  );
+  return vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : undefined;
+}
+
+type WorkItem = {
+  id: string;
+  title: string;
+  agentId: string;
+  project?: string;
+  stage: string;
+  turns: number;
+  completeness?: number;
+  cost: number;
+  lastIso: string;
+  lastMs: number;
+};
+
+/** Collapse runs (turns) into one row per work item (artifact) — the command-center unit.
+ *  Stage: a running turn → in_progress; an open gate on it → waiting/ready; else the latest
+ *  turn's outcome (done/error). All from the data already on the page (no new endpoint). */
+function buildWorkItems(runs: Run[], approvals: HITLGate[]): WorkItem[] {
+  const gateStage = new Map<string, "waiting" | "ready">();
+  for (const g of approvals) {
+    const wid = g.work_item_id;
+    if (!wid) continue;
+    if (g.kind === "clarification") gateStage.set(wid, "waiting");
+    else if (g.kind === "approval" && !gateStage.has(wid)) gateStage.set(wid, "ready");
+  }
+  const byItem = new Map<string, Run[]>();
+  for (const r of runs) {
+    const wid = r.work_item_id ?? r.id;
+    const list = byItem.get(wid);
+    if (list) list.push(r);
+    else byItem.set(wid, [r]);
+  }
+  const items: WorkItem[] = [];
+  for (const [wid, rs] of byItem) {
+    const latest = rs.reduce((a, b) =>
+      Date.parse(a.started_at) >= Date.parse(b.started_at) ? a : b,
+    );
+    const running = rs.some((r) => r.status === "running");
+    const gate = gateStage.get(wid);
+    const stage = running
+      ? "in_progress"
+      : (gate ?? (latest.status === "failed" ? "error" : "done"));
+    const times = rs
+      .map((r) => Date.parse(r.ended_at ?? r.started_at))
+      .filter((n) => !Number.isNaN(n));
+    items.push({
+      id: wid,
+      title: workItemLabel(latest),
+      agentId: latest.agent_id,
+      project: latest.project?.name,
+      stage,
+      turns: rs.length,
+      completeness: avgComp(latest.metadata?.completeness_after),
+      cost: rs.reduce((s, r) => s + (r.cost_usd ?? 0), 0),
+      lastIso: latest.ended_at ?? latest.started_at,
+      lastMs: times.length ? Math.max(...times) : 0,
+    });
+  }
+  return items.sort((a, b) => b.lastMs - a.lastMs);
+}
+
+function WorkItemsTable({ runs, approvals }: { runs: Run[]; approvals: HITLGate[] }) {
+  const items = buildWorkItems(runs, approvals);
   return (
     <div className="glass-panel overflow-x-auto">
       <table className="w-full text-xs">
         <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
           <tr className="border-b border-border">
-            <th className="px-3 py-2 text-left font-medium">Task</th>
-            <th className="px-3 py-2 text-left font-medium">Type</th>
-            <th className="px-3 py-2 text-left font-medium">Status</th>
-            <th className="px-3 py-2 text-left font-medium">Started</th>
-            <th className="px-3 py-2 text-right font-medium">Duration</th>
-            <th className="px-3 py-2 text-right font-medium">Tokens</th>
+            <th className="px-3 py-2 text-left font-medium">Artifact</th>
+            <th className="px-3 py-2 text-left font-medium">Stage</th>
+            <th className="px-3 py-2 text-right font-medium">Turns</th>
+            <th className="px-3 py-2 text-right font-medium">Complete</th>
             <th className="px-3 py-2 text-right font-medium">Cost</th>
+            <th className="px-3 py-2 text-right font-medium">Last</th>
           </tr>
         </thead>
         <tbody className="font-mono">
-          {runs.slice(0, 20).map((r) => (
-            <tr key={r.id} className="border-b border-border/60 last:border-0">
-              <td
-                className="max-w-[12rem] truncate px-3 py-2 text-foreground"
-                title={`run ${r.id}${r.work_item_id ? ` · ${r.work_item_id}` : ""}`}
-              >
-                {workItemLabel(r)}
-              </td>
-              <td className="px-3 py-2">{r.type}</td>
-              <td className="px-3 py-2">
-                <span
-                  className={cn(
-                    "inline-block rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
-                    RUN_STATUS_STYLE[r.status],
-                  )}
+          {items.slice(0, 20).map((w) => (
+            <tr
+              key={`${w.agentId}:${w.id}`}
+              className="border-b border-border/60 last:border-0 hover:bg-white/[0.02]"
+            >
+              <td className="max-w-[16rem] px-3 py-2">
+                <Link
+                  to="/agents/$agentId"
+                  params={{ agentId: w.agentId }}
+                  className="block min-w-0"
+                  title={w.id}
                 >
-                  {r.status}
-                </span>
+                  <span className="block truncate text-foreground">{w.title}</span>
+                  <span className="block truncate text-[10px] text-muted-foreground">
+                    {w.project ?? "—"}
+                  </span>
+                </Link>
               </td>
-              <td className="px-3 py-2 text-muted-foreground" title={r.started_at}>
-                {fmtTimeUTC(r.started_at)}
+              <td className="px-3 py-2">
+                <StageBadge stage={w.stage} />
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtDur(r.duration_ms)}</td>
-              <td className="px-3 py-2 text-right tabular-nums">
-                {fmtTokens(tokenSum(r.tokens_in, r.tokens_out))}
+              <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{w.turns}</td>
+              <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                {w.completeness != null ? `${w.completeness}%` : "—"}
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtCost(r.cost_usd)}</td>
+              <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                {fmtCost(w.cost)}
+              </td>
+              <td className="px-3 py-2 text-right text-muted-foreground" title={w.lastIso}>
+                {fmtTimeUTC(w.lastIso)}
+              </td>
             </tr>
           ))}
         </tbody>
