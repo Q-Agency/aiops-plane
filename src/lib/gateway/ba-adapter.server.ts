@@ -115,9 +115,11 @@ async function baPost(system: RegisteredSystem, path: string, body: unknown): Pr
 // typed envelope (`work_item`) + facet (`artifact.facet`) so the dashboard reads one
 // shape. Legacy flat fields are preserved for views not yet migrated.
 
-/** Build the SDLC facet from a run's metadata. BA produces specs: completeness rides
- *  in metadata.completeness_after (per-dimension) + validation_errors. Other artifact
- *  types get their facet once those agents emit it; until then, none. */
+/** Build the SDLC facet from a run's metadata. This is the fallback for an agent still
+ *  on the v0.4 flat shape; a v0.5-native agent (BA today) emits `artifact.facet` directly
+ *  and skips this. BA's spec quality is structural — the 6-dim `completeness` rides in
+ *  metadata.completeness_after as a structurally-derived readout. The richer structural
+ *  report (V1–V9 / EARS / missing sections) is only on the typed facet a v0.5 agent emits. */
 function buildFacet(type: string, meta?: Record<string, unknown>): ArtifactFacet | undefined {
   if (!meta) return undefined;
   if (type === "spec") {
@@ -130,10 +132,11 @@ function buildFacet(type: string, meta?: Record<string, unknown>): ArtifactFacet
     if (Array.isArray(meta.validation_errors)) {
       facet.validation_errors = (meta.validation_errors as unknown[]).map(String);
     }
-    if (typeof meta.ambiguities === "number") facet.open_questions = meta.ambiguities;
-    if (typeof meta.ac_met === "number" && typeof meta.ac_total === "number") {
-      facet.acceptance = { met: meta.ac_met, total: meta.ac_total };
+    if (typeof meta.finalize_method === "string") facet.finalize_method = meta.finalize_method;
+    if (typeof meta.completion_reason === "string") {
+      facet.completion_reason = meta.completion_reason;
     }
+    if (typeof meta.decision_count === "number") facet.decisions = meta.decision_count;
     return facet;
   }
   // Unknown artifact type → surface scalar metrics generically so the agent still renders.

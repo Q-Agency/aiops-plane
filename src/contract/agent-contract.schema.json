@@ -104,24 +104,49 @@
       "type": "string",
       "examples": ["spec", "design", "tasks", "code", "review", "test", "doc"]
     },
+    "StructuralSummary": {
+      "type": "object",
+      "description": "Deterministic structural-validator gate (V1–V9, zero LLM) — the real spec-quality signal.",
+      "properties": {
+        "passed": { "type": "integer", "description": "validators that produced no failures" },
+        "total": { "type": "integer", "description": "validators run" }
+      }
+    },
     "SpecFacet": {
       "type": "object",
-      "description": "BA — the specification.",
+      "description": "BA — the specification. Quality is assessed by deterministic structural validators (V1–V9, zero LLM); the 6-dimension `completeness` is DERIVED from those checks (per-check score caps), not LLM-judged.",
       "required": ["kind"],
       "properties": {
         "kind": { "const": "spec" },
-        "completeness": { "type": "number", "description": "overall 0–100" },
+        "structural": { "$ref": "#/$defs/StructuralSummary" },
+        "ears_coverage": {
+          "type": "number",
+          "description": "% of acceptance criteria in EARS format (0–100)"
+        },
+        "missing_sections": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "canonical sections absent from the spec"
+        },
+        "completeness": {
+          "type": "number",
+          "description": "overall, structurally-derived (0–100)"
+        },
         "dimensions": {
           "type": "object",
           "additionalProperties": { "type": "number" },
-          "description": "per-dimension completeness"
+          "description": "the 6 structurally-derived dimension scores (user_roles, business_rules, acceptance_criteria, scope_boundaries, error_handling, data_model)"
         },
-        "acceptance": {
-          "type": "object",
-          "properties": { "met": { "type": "integer" }, "total": { "type": "integer" } }
+        "validation_errors": { "type": "array", "items": { "type": "string" } },
+        "completion_reason": {
+          "type": "string",
+          "description": "why the run ended: all_validators_pass | max_turns | max_fix_attempts | timeout | budget_exceeded | already_passing_no_op | …"
         },
-        "open_questions": { "type": "integer" },
-        "validation_errors": { "type": "array", "items": { "type": "string" } }
+        "finalize_method": {
+          "type": "string",
+          "description": "first_try | fallback | langgraph"
+        },
+        "decisions": { "type": "integer", "description": "decisions logged this turn" }
       }
     },
     "DesignFacet": {

@@ -155,29 +155,61 @@ export interface WorkItem {
   metadata?: { [k: string]: unknown };
 }
 /**
- * BA — the specification.
+ * Deterministic structural-validator gate (V1–V9, zero LLM) — the real spec-quality signal.
+ *
+ * This interface was referenced by `AgencyOSSDLCAgentContract`'s JSON-Schema
+ * via the `definition` "StructuralSummary".
+ */
+export interface StructuralSummary {
+  /**
+   * validators that produced no failures
+   */
+  passed?: number;
+  /**
+   * validators run
+   */
+  total?: number;
+}
+/**
+ * BA — the specification. Quality is assessed by deterministic structural validators (V1–V9, zero LLM); the 6-dimension `completeness` is DERIVED from those checks (per-check score caps), not LLM-judged.
  *
  * This interface was referenced by `AgencyOSSDLCAgentContract`'s JSON-Schema
  * via the `definition` "SpecFacet".
  */
 export interface SpecFacet {
   kind: "spec";
+  structural?: StructuralSummary;
   /**
-   * overall 0–100
+   * % of acceptance criteria in EARS format (0–100)
+   */
+  ears_coverage?: number;
+  /**
+   * canonical sections absent from the spec
+   */
+  missing_sections?: string[];
+  /**
+   * overall, structurally-derived (0–100)
    */
   completeness?: number;
   /**
-   * per-dimension completeness
+   * the 6 structurally-derived dimension scores (user_roles, business_rules, acceptance_criteria, scope_boundaries, error_handling, data_model)
    */
   dimensions?: {
     [k: string]: number;
   };
-  acceptance?: {
-    met?: number;
-    total?: number;
-  };
-  open_questions?: number;
   validation_errors?: string[];
+  /**
+   * why the run ended: all_validators_pass | max_turns | max_fix_attempts | timeout | budget_exceeded | already_passing_no_op | …
+   */
+  completion_reason?: string;
+  /**
+   * first_try | fallback | langgraph
+   */
+  finalize_method?: string;
+  /**
+   * decisions logged this turn
+   */
+  decisions?: number;
 }
 /**
  * SA — the technical design.
