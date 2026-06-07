@@ -58,11 +58,13 @@ class ProjectRef(BaseModel):   # scope a run / work item belongs to (SDLC: a pro
     name: str
 
 # Shared, agent-agnostic lifecycle every work item/artifact moves through.
-# Map your native status onto these (BA: active→in_progress, waiting_for_input→
-# waiting, spec_ready→ready, approved→approved). Only the *artifact* differs per
-# agent (BA spec, SA design, QA tests) — this lifecycle is the same for all.
+# Happy path backlog→…→delivered; `reset` is the loop-back (artifact discarded,
+# a fresh run is needed — can happen from any stage). Map your native status onto
+# these (BA: active→in_progress, waiting_for_input→waiting, spec_ready→ready,
+# approved→approved, reset→reset). Only the *artifact* differs per agent (BA spec,
+# SA design, QA tests) — this lifecycle is the same for all.
 LifecycleStage = Literal[
-    "backlog", "in_progress", "waiting", "ready", "approved", "delivered"
+    "backlog", "in_progress", "waiting", "ready", "approved", "delivered", "reset"
 ]
 
 class ArtifactRef(BaseModel):  # the thing the agent produces & advances (BA: SPEC.md)

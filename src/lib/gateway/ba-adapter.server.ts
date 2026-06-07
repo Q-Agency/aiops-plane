@@ -42,6 +42,8 @@ export function lifecycleStage(status?: string): LifecycleStage | undefined {
       return "approved";
     case "delivered":
       return "delivered";
+    case "reset":
+      return "reset"; // spec cleared — a fresh run is needed
     case "pending":
       return "backlog";
     default:
