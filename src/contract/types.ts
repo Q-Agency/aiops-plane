@@ -8,7 +8,7 @@
 // in sync by hand for now; codegen later). The Python SDK's Pydantic models must
 // conform to the same schema — verified by the conformance suite. See README.md.
 
-export const SCHEMA_VERSION = "0.3" as const;
+export const SCHEMA_VERSION = "0.4" as const;
 
 /** ISO-8601 timestamp, e.g. "2026-06-04T12:00:00Z". */
 export type ISODateTime = string;

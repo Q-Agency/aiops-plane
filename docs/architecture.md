@@ -67,7 +67,7 @@ auto-appears, wired, in its slot.
   **schema-first** (Pydantic → exported JSON Schema → generated TS types). Seed it
   from BA's existing `schemas/*.py`.
 
-**The artifact lifecycle — the agent-agnostic backbone (v0.3).** Every agent
+**The artifact lifecycle — the agent-agnostic backbone (v0.4).** Every agent
 **produces and advances an artifact** (BA: `SPEC.md`; SA: a design; QA: tests).
 The artifact moves through one shared `LifecycleStage` (happy path
 `backlog → in_progress → waiting → ready → approved → delivered`, plus the
@@ -260,7 +260,7 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
   (`dataMode: "standard" | "real"`; prototype cookie auth, 2 hardcoded users):
   - **standard / mock** — the original full mock dashboard (unchanged).
   - **real** — federates live agents through the gateway. Built so far: contract
-    **v0.3** (`src/contract/`, incl. the artifact `LifecycleStage` + `ArtifactRef`,
+    **v0.4** (`src/contract/`, incl. the artifact `LifecycleStage` + `ArtifactRef`,
     `work_item_title`), the gateway + BA adapter (`src/lib/gateway/`,
     `src/lib/api/fleet.functions.ts`), a real Command Center (KPI strip, rich agent
     cards that show **concurrent specs** and split **liveness vs activity**,
@@ -305,7 +305,7 @@ serves many projects, and each run/work-item carries the project it belongs to
 **scoping dimension orthogonal to "agent"** — a run belongs to _(agent, project)_.
 
 - **Contract:** `Run` and `WorkItem` carry an optional `project { id, name }`
-  (`ProjectRef`, schema v0.3). Each adapter populates it (BA from its
+  (`ProjectRef`, schema v0.4). Each adapter populates it (BA from its
   `project_id`/`project_name`).
 - **Derived, not declared:** the dashboard derives the project list from the
   federated runs (distinct projects + counts) — no project registry.

@@ -3,7 +3,7 @@
   "$id": "https://agency-os/contract/v0/agent-contract.schema.json",
   "title": "Agency OS Agent Contract",
   "description": "Canonical, language-neutral wire contract a compliant agent emits. The dashboard's TS types and the Python SDK's Pydantic models both derive from this. Domain-specific data rides in `metadata`/`data`.",
-  "x-contract-version": "0.3",
+  "x-contract-version": "0.4",
   "$defs": {
     "ProjectRef": {
       "type": "object",

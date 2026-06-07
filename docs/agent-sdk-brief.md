@@ -42,7 +42,7 @@ SSE, `/agent/health`, HITL via `waiting_for_input`) — so for BA this is mostly
 
 ### A.1 Contract types (Pydantic v2, domain-agnostic)
 
-Define a `SCHEMA_VERSION = "0.3"` constant, stamped on every emitted payload.
+Define a `SCHEMA_VERSION = "0.4"` constant, stamped on every emitted payload.
 **Domain-specific data must ride in `metadata` / event `data` — never as core
 fields.** (BA's `completeness`, EARS, `spec_version` etc. go in `metadata`.)
 
@@ -281,7 +281,7 @@ Served at `/.well-known/agent-card.json`, built from the `Agent(...)` args:
     // our extension (A2A doesn't model pipeline topology)
     "id": "ba",
     "domain": "sdlc",
-    "contractVersion": "0.3",
+    "contractVersion": "0.4",
     "produces": ["spec"],
     "consumes": ["task"],
     "sources": [
