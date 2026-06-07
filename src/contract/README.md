@@ -18,7 +18,10 @@ extras still ride in `metadata` / event `data`.
 
 - **`agent-contract.schema.json`** — **canonical source of truth** (JSON Schema,
   language-neutral). Both sides derive from this.
-- **`types.ts`** — TypeScript types the dashboard imports (mirror the schema).
+- **`types.gen.ts`** — TypeScript types **generated** from the schema
+  (`bun run gen:contract`, via `scripts/gen-contract.mjs`). Do not edit by hand.
+- **`types.ts`** — the stable import surface: re-exports `types.gen.ts` + a few enum
+  aliases derived from the generated interfaces. Hand-written helpers go here.
 - **`index.ts`** — barrel (`import { Run, AgentEvent } from "@/contract"`).
 
 ## The one rule that makes this a real contract
@@ -26,8 +29,9 @@ extras still ride in `metadata` / event `data`.
 Both ends must **derive from / validate against `agent-contract.schema.json`** —
 not maintain look-alike copies:
 
-- **Dashboard (this repo, TS):** `types.ts` mirrors the schema (hand-synced for
-  now; wire `json-schema-to-typescript` codegen later).
+- **Dashboard (this repo, TS):** `types.gen.ts` is **generated** from the schema
+  (`bun run gen:contract`); `gen:contract:check` fails the build if it drifts. So the
+  TS types can't fall out of sync by hand.
 - **Agent SDK (Python, `agency-agent-sdk`):** its Pydantic models must conform to
   this schema, enforced by the SDK's **conformance suite** in each agent's CI.
 
