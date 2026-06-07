@@ -6,6 +6,11 @@
 > _records_ these as `ba_chore_runs` (`event_type` ∈ {`reset`, `approval`}); it
 > just doesn't expose them as a global list. Add a small read endpoint.
 
+> **Status (2026-06): implemented + superseded.** The native `/agent/events/recent`
+> shipped (commit `2a364ea`). BA then adopted the SDK and now exposes this
+> **canonically at `/agency/events/recent`** (`BaEventsProvider`); the dashboard reads
+> the canonical endpoint. Kept as the native-endpoint reference.
+
 ## Why
 
 A reset **deletes** the task's sessions/runs, so the artifact vanishes from
@@ -54,16 +59,16 @@ GET /agent/events/recent?limit=50   →  { "events": Event[] }   # newest first
 
 ## How the dashboard uses it
 
-The BA adapter maps each event → the canonical `AgentEvent`:
-`event_type "reset" → lifecycle.changed (stage "reset")`,
-`"approval" → lifecycle.changed (stage "approved")`, then folds them into the
-activity feed ("BA reset the spec · Checkout…"). Missing endpoint ⇒ the dashboard
-degrades silently (feed stays runs+gates). See `agent-contract.schema.json`
-(`AgentEvent`, `EventType: lifecycle.changed`, `LifecycleStage`).
+BA's `BaEventsProvider` maps each `ba_chore_runs` row → a canonical `AgentEvent`
+(`event_type "reset" → lifecycle.changed` stage `"reset"`; `"approval" → "approved"`)
+and serves them at `/agency/events/recent`. The dashboard reads that, re-stamps
+`agent_id`, and folds them into the activity feed ("BA reset the spec · Checkout…").
+Missing endpoint ⇒ the dashboard degrades silently (feed stays runs+gates). See
+`agent-contract.schema.json` (`AgentEvent`, `EventType: lifecycle.changed`, `LifecycleStage`).
 
-## Later (SDK)
+## Streaming (SDK)
 
-When BA adopts `agency-agent-sdk`, this becomes part of the standard event stream
-(`/agent/watch` SSE emitting `AgentEvent`s, `type: "lifecycle.changed"`). The
-polled `/agent/events/recent` is the pre-SDK bridge — keep it; it's also a fine
-replay endpoint.
+BA adopted `agency-agent-sdk`, so these also ride the standard event stream
+(`/agency/watch/{id}` SSE emitting `AgentEvent`s, `type: "lifecycle.changed"`). The
+polled `/agency/events/recent` is the canonical recent-feed (and a fine replay
+endpoint), sourced from the native `/agent/events/recent`.

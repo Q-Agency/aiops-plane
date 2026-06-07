@@ -210,10 +210,10 @@ serves the Agent Card (A.6) from the constructor args.
 - `GET /agent/gates` — **all open HITL gates** (`HITLGate[]`), regardless of kind.
   Two kinds, one per HITL _moment_ (see A.4): `clarification` (blocked mid-run,
   needs an answer) and `approval` (an artifact it produced is ready for review).
-  _BA predates the SDK and splits these across `GET /agent/interrupted`
+  _BA's native API still splits these across `GET /agent/interrupted`
   (`waiting_for_input` → clarification) and `GET /session/pending-approval`
-  (`spec_ready` → approval); the BA adapter merges them. New SDK agents serve the
-  single unified endpoint._
+  (`spec_ready` → approval); its SDK surface merges them into this single unified
+  `/agency/gates`, which the dashboard consumes directly._
 - `GET /agent/events/recent` — recent **lifecycle events** as `AgentEvent[]`
   (`type: "lifecycle.changed"`, the new stage in `data.stage`): resets, approvals,
   blocks. Powers the activity feed without the SSE stream — and a replay buffer for
