@@ -184,6 +184,16 @@ SA adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-brief.md).
 UI; the fleet view federates a normalized read + lightweight actions + deep-links.
 This keeps Agency OS **mostly read-only** (small blast radius, simple v1).
 
+**Deep-link, don't embed.** The drill-down to an agent's deep view is **advertised on
+the card** (`x-agency.ui.runUrlTemplate`, e.g. BA → its Flow Observer), opened with the
+run's `work_item_id` — so it generalizes to any agent and Agency OS hardcodes nothing.
+The agent sets it via its own admin (BA: a global setting the card resolves live, so no
+redeploy). Note the **ephemeral/durable split**: the live deep view is transient (BA
+streams it from an in-memory bus, gone ~5 min after a run finishes), so the link shows
+**only while the run is live**; the **durable** per-run record (completeness deltas,
+validation errors, the session's turns) is rendered in Agency OS itself from persisted
+`Run` metrics. Live detail lives with the agent; the durable summary is federated.
+
 **HITL is two moments, one contract type.** Every human gate is a `HITLGate`
 distinguished by `kind`, and this is **agent-agnostic** — only the artifact noun
 changes per agent:

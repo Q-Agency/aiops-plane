@@ -290,6 +290,8 @@ Served at `/.well-known/agent-card.json`, built from the `Agent(...)` args:
       { "system": "knowledge-agent", "mode": "read" },
     ],
     "endpoints": { "runs": "/runs", "events": "/agent/watch/{id}", "recentEvents": "/agent/events/recent", "gates": "/agent/gates", "health": "/agent/health" },
+    // optional: deep-link template to the agent's own per-run observability tool
+    "ui": { "runUrlTemplate": "https://flow-observer.example/?session={work_item_id}" },
   },
 }
 ```
