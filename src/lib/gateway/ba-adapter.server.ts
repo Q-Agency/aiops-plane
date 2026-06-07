@@ -1,15 +1,23 @@
-// Server-only: BA agent adapter — maps BA's live API → the canonical contract.
+// Server-only: BA agent adapter — consumes BA's CANONICAL Agency OS surface (/agency/*).
 //
-// Targets BA's CURRENT endpoints (which exist today, pre-SDK): GET /runs/all,
-// /agent/health, /agent/active, /agent/interrupted, and the well-known card.
-// Once BA adopts `agency-agent-sdk` this adapter collapses toward identity.
+// BA adopted `agency-agent-sdk` and serves the contract directly, so the canonical
+// reads are now near-identity: the wire payloads already ARE contract shapes
+// (snake_case, `schema_version` stamped). This adapter just re-keys `agent_id` to the
+// dashboard's registry id and stamps gate ownership the agent can't know about.
 //
-// STATUS: mappings verified against BA's API schemas (2026-06):
-//   • /runs/all              -> RunWithSessionResponse (RunResponse + teamwork_task_title + project_name)
-//   • /agent/interrupted     -> { sessions: Session[] } status=waiting_for_input (clarification gates)
-//   • /session/pending-approval -> { sessions: Session[] } status=spec_ready (approval gates)
-//   • /agent/health          -> { status, checks } (no name/version — those come from the agent card)
-// The well-known agent card is still pending on BA (served once it adopts the SDK).
+//   • GET /agency/runs            -> Run[]        (the run ledger, newest-first; includes
+//                                                  in-flight runs as status "running")
+//   • GET /agency/health          -> AgentHealth  (state + active_runs computed agent-side;
+//                                                  503 body is still a valid AgentHealth)
+//   • GET /agency/gates           -> HITLGate[]   (BOTH kinds: clarification + approval)
+//   • GET /agency/events/recent   -> AgentEvent[] (lifecycle.changed: resets/approvals)
+//   • GET /.well-known/agent-card.json -> AgentCard
+//
+// Governance + Observability extras are NOT part of the contract, so they stay BA-native
+// (read-time projections the dashboard composes itself):
+//   • getSpecQuality  -> POST /session/get + /session/{id}/lint + /structured-ac
+//   • getLogs         -> /agent/logs/recent
+//   • getHealthChecks -> /agent/health (rich readiness sub-checks)
 //
 // External API responses are untyped on the wire, so `any` is intentional here.
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -25,10 +33,9 @@ import {
 } from "@/contract";
 import type { RegisteredSystem } from "./systems.server";
 
-/** BA's artifact is the spec — every run is in service of one SPEC.md. */
-const BA_ARTIFACT = "spec";
-
-/** Map BA's native session status onto the shared, agent-agnostic lifecycle. */
+/** Map BA's native session status onto the shared, agent-agnostic lifecycle.
+ *  Used by the BA-native spec-quality enrichment (the canonical surface already
+ *  carries lifecycle stages where relevant). */
 export function lifecycleStage(status?: string): LifecycleStage | undefined {
   switch (status) {
     case "active":
@@ -71,7 +78,7 @@ async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
   }
 }
 
-/** POST variant — several BA reads are RPC-style POSTs (e.g. /session/get). */
+/** POST variant — several BA-native reads are RPC-style POSTs (e.g. /session/get). */
 async function baPost(system: RegisteredSystem, path: string, body: unknown): Promise<any> {
   const headers: Record<string, string> = {
     accept: "application/json",
@@ -94,111 +101,53 @@ async function baPost(system: RegisteredSystem, path: string, body: unknown): Pr
   }
 }
 
-/** BA RunWithSessionResponse → contract Run. */
-function mapRun(r: any, agentId: string): Run {
-  const running = !r.ended_at;
-  const succeeded = r.success === true;
-  return {
-    id: String(r.id),
-    agent_id: agentId,
-    work_item_id: r.session_id ?? undefined,
-    // BA joins the Teamwork task title onto /runs/all — use it for display.
-    work_item_title: r.teamwork_task_title ?? undefined,
-    type: r.run_type ?? "run",
-    // Every BA run advances the same artifact: the spec.
-    artifact_type: BA_ARTIFACT,
-    status: running ? "running" : succeeded ? "succeeded" : "failed",
-    started_at: r.started_at,
-    ended_at: r.ended_at ?? undefined,
-    duration_ms: r.duration_ms ?? undefined,
-    model: r.model_id ?? undefined,
-    tokens_in: r.input_tokens ?? r.tokens_in ?? undefined,
-    tokens_out: r.output_tokens ?? r.tokens_out ?? undefined,
-    cost_usd: r.estimated_cost_usd ?? r.cost_usd ?? undefined,
-    outcome: running ? undefined : succeeded ? "success" : "error",
-    error: r.error_message ?? undefined,
-    parent_run_id: undefined,
-    // /runs/all carries project_name (no project_id today); key the project by
-    // name until BA exposes a stable id.
-    project: r.project_name
-      ? { id: String(r.project_id ?? r.project_name), name: String(r.project_name) }
-      : undefined,
-    schema_version: SCHEMA_VERSION,
-    // domain payload — kept out of the kernel fields:
-    metadata: {
-      run_number: r.run_number,
-      completeness_before: r.completeness_before,
-      completeness_after: r.completeness_after,
-      validation_errors: r.validation_errors,
-    },
-  };
-}
+// --- Canonical contract surface (/agency/*) -----------------------------------
 
+/** The run ledger. `/agency/runs` is already contract-shaped and newest-first; it
+ *  includes in-flight runs (status "running"). We request the canonical max so the
+ *  economics/governance windows see a fuller history. */
 export async function getRuns(system: RegisteredSystem): Promise<Run[]> {
-  const data = await baFetch(system, "/runs/all");
-  const rows: any[] = Array.isArray(data) ? data : (data?.runs ?? []);
-  return rows.map((r) => mapRun(r, system.id));
-}
-
-/** Count an array-ish payload regardless of how the agent wraps it. */
-function countItems(x: any): number {
-  if (Array.isArray(x)) return x.length;
-  if (typeof x?.count === "number") return x.count;
-  for (const k of ["sessions", "active", "interrupted", "items", "runs", "data"]) {
-    if (Array.isArray(x?.[k])) return x[k].length;
-  }
-  return 0;
+  const data = await baFetch(system, "/agency/runs?limit=500");
+  const rows: Run[] = Array.isArray(data) ? (data as Run[]) : [];
+  // The agent self-reports its own id; key by the dashboard's registry id so the
+  // fleet/runs/deep-dive surfaces line up (env BA is "ba"; a cookie system may differ).
+  return rows.map((r) => ({ ...r, agent_id: system.id }));
 }
 
 export async function getHealth(system: RegisteredSystem): Promise<AgentHealth> {
-  let healthy = true;
-  let body: any = {};
+  const headers: Record<string, string> = { accept: "application/json" };
+  if (system.apiKey) headers[system.authHeader ?? "X-API-Key"] = system.apiKey;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
   try {
-    body = await baFetch(system, "/agent/health");
+    // The agent computes `state` + `active_runs` itself; `/agency/health` returns a
+    // valid AgentHealth even on a 503 (unhealthy) — read the body regardless of status.
+    const res = await fetch(`${system.baseUrl}/agency/health`, { headers, signal: ctrl.signal });
+    const body = (await res.json()) as AgentHealth;
+    return {
+      ...body,
+      agent_id: system.id,
+      name: body.name ?? system.label,
+      last_seen: body.last_seen ?? new Date().toISOString(),
+    };
   } catch {
-    healthy = false;
+    // Unreachable/timeout/parse error → synthesize an unhealthy snapshot so the rest
+    // of the fleet still renders.
+    return {
+      agent_id: system.id,
+      name: system.label,
+      state: "error",
+      healthy: false,
+      active_runs: 0,
+      schema_version: SCHEMA_VERSION,
+      last_seen: new Date().toISOString(),
+    };
+  } finally {
+    clearTimeout(t);
   }
-
-  // Derive "running" from the runs themselves, so the card always agrees with
-  // the runs list (rather than guessing the shape of /agent/active).
-  let runningCount = 0;
-  try {
-    const runs = await getRuns(system);
-    runningCount = runs.filter((r) => r.status === "running").length;
-  } catch {
-    /* non-fatal */
-  }
-
-  // Human-blocked (waiting for input) takes priority on the badge. Best-effort.
-  let waitingCount = 0;
-  try {
-    waitingCount = countItems(await baFetch(system, "/agent/interrupted"));
-  } catch {
-    /* non-fatal */
-  }
-
-  const state: AgentHealth["state"] = !healthy
-    ? "error"
-    : waitingCount > 0
-      ? "waiting"
-      : runningCount > 0
-        ? "running"
-        : "idle";
-
-  return {
-    agent_id: system.id,
-    name: body?.name ?? system.label,
-    role: body?.role,
-    state,
-    healthy,
-    active_runs: runningCount,
-    version: body?.version,
-    schema_version: SCHEMA_VERSION,
-    last_seen: new Date().toISOString(),
-  };
 }
 
-/** The agent's self-description. Null until BA serves the card (post-SDK). */
+/** The agent's self-description (A2A card + `x-agency`). Null if unreachable. */
 export async function getCard(system: RegisteredSystem): Promise<AgentCard | null> {
   try {
     return (await baFetch(system, "/.well-known/agent-card.json")) as AgentCard;
@@ -207,72 +156,38 @@ export async function getCard(system: RegisteredSystem): Promise<AgentCard | nul
   }
 }
 
-/** Pull the `sessions` array out of BA's various wrappers. */
-function sessionsOf(data: any): any[] {
-  if (Array.isArray(data)) return data;
-  return data?.sessions ?? data?.interrupted ?? data?.items ?? data?.data ?? [];
-}
-
-/** One BA Session → a contract HITLGate of the given kind. */
-function mapGate(system: RegisteredSystem, s: any, kind: HITLGate["kind"], i: number): HITLGate {
-  const title = (s?.teamwork_task_title as string) || undefined;
-  const sid = s?.id ?? s?.session_id;
-  // Sessions don't carry the pending-question text (it lives in chat messages),
-  // so describe the gate by the task it concerns.
-  const prompt =
-    kind === "approval"
-      ? title
-        ? `Spec ready for review — “${title}”`
-        : "Spec ready for review"
-      : title
-        ? `Waiting for human input on “${title}”`
-        : "Waiting for human input";
-  return {
-    id: `${system.id}:${kind}:${sid ?? i}`,
-    work_item_id: sid ?? undefined,
-    work_item_title: title,
-    run_id: undefined,
-    kind,
-    state: "open",
-    prompt,
-    channel: kind === "clarification" ? "slack" : undefined,
-    opened_at:
-      (kind === "approval" ? s?.autospec_completed_at : undefined) ??
-      s?.updated_at ??
-      s?.created_at ??
-      new Date().toISOString(),
-    metadata: {
-      agent_id: system.id,
-      agent_name: system.label,
-      teamwork_task_id: s?.teamwork_task_id ?? undefined,
-      project_name: s?.project_name ?? undefined,
-      slack_thread_url: s?.slack_thread_url ?? undefined,
-      status: s?.status ?? undefined,
-    },
-  };
-}
-
-/** Open human gates → contract HITLGate[]. BA splits the two HITL moments across
- *  two endpoints, both returning { sessions: Session[] }:
- *    • /agent/interrupted     → status `waiting_for_input` (mid-pipeline
- *      clarification the agent is blocked on) → kind "clarification"
- *    • /session/pending-approval → status `spec_ready` (a finished spec awaiting
- *      human review/sign-off) → kind "approval"
- *  Best-effort: a missing endpoint (older BA) just drops that bucket. */
+/** Open human gates → contract HITLGate[]. `/agency/gates` already merges BOTH HITL
+ *  moments (clarification + approval) and shapes them; we only stamp ownership (the
+ *  agent can't know which dashboard registry id it's filed under) and sort newest-first.
+ *  Tolerant: an unreachable endpoint yields no gates rather than blanking the queue. */
 export async function getApprovals(system: RegisteredSystem): Promise<HITLGate[]> {
-  const [interrupted, pending] = await Promise.all([
-    baFetch(system, "/agent/interrupted").catch(() => null),
-    baFetch(system, "/session/pending-approval").catch(() => null),
-  ]);
-  const clarifications = sessionsOf(interrupted).map((s, i) =>
-    mapGate(system, s, "clarification", i),
-  );
-  const approvals = sessionsOf(pending).map((s, i) => mapGate(system, s, "approval", i));
-  // Most recent first across both kinds.
-  return [...approvals, ...clarifications].sort((a, b) => (a.opened_at < b.opened_at ? 1 : -1));
+  const data = await baFetch(system, "/agency/gates").catch(() => null);
+  const gates: HITLGate[] = Array.isArray(data) ? (data as HITLGate[]) : [];
+  return gates
+    .map((g) => ({
+      ...g,
+      // The deep-dive filter (metadata.agent_id) + activity attribution (metadata.agent_name)
+      // depend on these; the canonical gate doesn't carry them.
+      metadata: { ...g.metadata, agent_id: system.id, agent_name: system.label },
+    }))
+    .sort((a, b) => ((a.opened_at ?? "") < (b.opened_at ?? "") ? 1 : -1));
 }
 
-// --- Observability: logs + health checks --------------------------------------
+/** Recent lifecycle events (resets, approvals) for the activity feed. Already
+ *  contract-shaped (`lifecycle.changed`, stage in `data.stage`). Tolerant: a missing
+ *  endpoint just yields nothing (the feed falls back to runs+gates). */
+export async function getEvents(system: RegisteredSystem, limit = 50): Promise<AgentEvent[]> {
+  let data: unknown;
+  try {
+    data = await baFetch(system, `/agency/events/recent?limit=${limit}`);
+  } catch {
+    return [];
+  }
+  const items: AgentEvent[] = Array.isArray(data) ? (data as AgentEvent[]) : [];
+  return items.map((e) => ({ ...e, agent_id: system.id }));
+}
+
+// --- Observability: logs + health checks (BA-native, not in the contract) -----
 
 export type AgentLogLine = {
   ts: string;
@@ -326,7 +241,7 @@ export async function getHealthChecks(
   }
 }
 
-// --- Governance: spec quality (per session) -----------------------------------
+// --- Governance: spec quality (per session, BA-native) ------------------------
 
 export type CompletenessMap = {
   user_roles: number;
@@ -411,47 +326,4 @@ export async function getSpecQuality(
     gwt_coverage: num(ac?.gwt_coverage),
     ac_total: num(ac?.total),
   };
-}
-
-// --- Lifecycle events (resets, approvals, …) ----------------------------------
-
-/** BA records reset/approval as `chore_run`s; the (new) GET /agent/events/recent
- *  exposes them globally, newest-first. Map each to a contract AgentEvent
- *  (`lifecycle.changed`, with the new stage in `data.stage`). */
-function mapEvent(system: RegisteredSystem, e: any): AgentEvent | null {
-  const et = String(e?.event_type ?? e?.type ?? "");
-  let stage: LifecycleStage | undefined;
-  if (et === "reset") stage = "reset";
-  else if (et === "approval" || et === "approved") stage = "approved";
-  else stage = lifecycleStage(e?.status ?? e?.stage);
-  if (!stage) return null;
-  return {
-    ts: e?.created_at ?? e?.ts ?? new Date().toISOString(),
-    agent_id: system.id,
-    type: "lifecycle.changed",
-    level: stage === "reset" || stage === "error" ? "warning" : "info",
-    data: {
-      stage,
-      work_item_id: e?.teamwork_task_id ?? e?.work_item_id ?? e?.session_id ?? undefined,
-      work_item_title: e?.teamwork_task_title ?? e?.title ?? undefined,
-      project_name: e?.project_name ?? undefined,
-      artifact_type: "spec",
-    },
-    schema_version: SCHEMA_VERSION,
-  };
-}
-
-/** Recent lifecycle events for the activity feed. Tolerant: an older BA without
- *  the endpoint just yields nothing (the feed falls back to runs+gates). */
-export async function getEvents(system: RegisteredSystem, limit = 50): Promise<AgentEvent[]> {
-  let data: any;
-  try {
-    data = await baFetch(system, `/agent/events/recent?limit=${limit}`);
-  } catch {
-    return [];
-  }
-  const items: any[] = Array.isArray(data)
-    ? data
-    : (data?.events ?? data?.items ?? data?.data ?? []);
-  return items.map((e) => mapEvent(system, e)).filter((e): e is AgentEvent => e !== null);
 }
