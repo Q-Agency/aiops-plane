@@ -1,7 +1,16 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { PlugZap, Activity, CheckCircle2, Clock, Cpu, DollarSign, Layers } from "lucide-react";
+import {
+  PlugZap,
+  Activity,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  Cpu,
+  DollarSign,
+  Layers,
+} from "lucide-react";
 
 import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
 import { getCommandCenterFn } from "@/lib/api/fleet.functions";
@@ -154,7 +163,6 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
       : runningRuns.length === 1
         ? workItemLabel(runningRuns[0])
         : `${runningRuns.length} specs in progress`;
-  const workingTitle = runningRuns.map((r) => workItemLabel(r)).join(", ");
   const cost = runs.reduce((s, r) => s + (r.cost_usd ?? 0), 0);
   const durations = runs.filter((r) => r.duration_ms != null);
   const avgDur = durations.length
@@ -187,9 +195,43 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
             Working on
           </div>
-          <div className="truncate text-sm text-foreground" title={workingTitle}>
-            {workingLabel}
-          </div>
+          {runningRuns.length > 1 ? (
+            <div className="group/wo relative inline-block max-w-full">
+              {/* clear "hoverable" affordance: dotted underline + chevron */}
+              <span className="inline-flex max-w-full cursor-help items-center gap-1 text-sm text-foreground underline decoration-dotted decoration-muted-foreground/50 underline-offset-4">
+                <span className="truncate">{workingLabel}</span>
+                <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
+              </span>
+              {/* instant, styled popover — `pt-1.5` bridges the gap so it doesn't flicker */}
+              <div className="absolute left-0 top-full z-50 hidden w-72 max-w-[80vw] pt-1.5 group-hover/wo:block">
+                <div className="glass-panel border border-primary/25 p-2 shadow-xl shadow-black/50">
+                  <div className="mb-1 px-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {runningRuns.length} specs in progress
+                  </div>
+                  <div className="space-y-0.5">
+                    {runningRuns.map((r) => (
+                      <div
+                        key={r.id}
+                        className="flex items-center gap-2 rounded px-1 py-1 text-xs hover:bg-white/5"
+                      >
+                        <span className="size-1.5 shrink-0 rounded-full bg-status-running dot-pulse" />
+                        <span className="min-w-0 flex-1 truncate text-foreground">
+                          {workItemLabel(r)}
+                        </span>
+                        {r.project?.name && (
+                          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                            {r.project.name}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="truncate text-sm text-foreground">{workingLabel}</div>
+          )}
           {/* Liveness (always-on while healthy) — distinct from the activity badge above. */}
           <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
             {a.healthy ? "available" : "unreachable"}
