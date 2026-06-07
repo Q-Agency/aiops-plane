@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock,
+  CircleHelp,
   Cpu,
   DollarSign,
   ExternalLink,
@@ -194,12 +195,14 @@ export function RealCommandCenter(initial: Props) {
             sub="in progress"
             accent={activeRuns > 0}
             icon={<Activity className="size-3.5" />}
+            help="Artifacts the fleet is working on right now — runs in progress across all agents, scoped to the selected project. This is live state (what's happening now), not a running total."
           />
           <Kpi
             label="Success"
             value={successRate == null ? "—" : `${successRate}%`}
             sub={`${terminal.length} done`}
             icon={<CheckCircle2 className="size-3.5" />}
+            help="Of the runs that have finished, the share that succeeded (succeeded ÷ all finished runs). A failed run is one the agent couldn't complete — not one a human rejected."
           />
           <Kpi
             label="Throughput"
@@ -208,12 +211,14 @@ export function RealCommandCenter(initial: Props) {
             delta={{ pct: tputDelta }}
             series={tputSeries}
             icon={<TrendingUp className="size-3.5" />}
+            help="Runs completed in the last 7 days. The sparkline is the daily trend; the chip is the change versus the previous 7 days (up is good)."
           />
           <Kpi
             label="Avg run"
             value={fmtDur(avgDurMs)}
             sub="per turn"
             icon={<Clock className="size-3.5" />}
+            help="Average wall-clock duration of one finished run — i.e. a single autospec turn. A spec usually takes several turns, so this is per-turn, not the whole spec's cycle time."
           />
           <Kpi
             label="Cost"
@@ -222,12 +227,14 @@ export function RealCommandCenter(initial: Props) {
             delta={{ pct: costDelta, goodDown: true }}
             series={costSeries}
             icon={<DollarSign className="size-3.5" />}
+            help="Total LLM spend across the runs shown (project-scoped). The sub-line is total tokens. Sparkline = daily spend; the chip compares the last 7 days to the prior 7 (a drop is green)."
           />
           <Kpi
             label="Connected"
             value={String(fleet.length)}
             sub={`${healthy} healthy`}
             icon={<Cpu className="size-3.5" />}
+            help="Agents registered in the control plane and reachable through the gateway, and how many currently report healthy. Today that's the BA agent; more join the fleet here."
           />
         </section>
 
@@ -427,6 +434,21 @@ function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: s
   );
 }
 
+/** A "?" that reveals a short explanation on hover (styled + immediate; not a native
+ *  title). Anchored to its right edge so it doesn't clip on right-hand tiles. */
+function HelpTip({ text }: { text: string }) {
+  return (
+    <span className="group/help relative ml-auto inline-flex shrink-0">
+      <CircleHelp className="size-3 cursor-help text-muted-foreground/40 transition-colors hover:text-muted-foreground" />
+      <span className="absolute right-0 top-full z-50 hidden w-56 max-w-[70vw] pt-1.5 group-hover/help:block">
+        <span className="block rounded-md border border-border bg-panel/95 p-2.5 font-sans text-[11px] font-normal normal-case leading-relaxed tracking-normal text-muted-foreground shadow-xl shadow-black/50 backdrop-blur">
+          {text}
+        </span>
+      </span>
+    </span>
+  );
+}
+
 function Kpi({
   label,
   value,
@@ -435,6 +457,7 @@ function Kpi({
   accent,
   delta,
   series,
+  help,
 }: {
   label: string;
   value: string;
@@ -443,12 +466,14 @@ function Kpi({
   accent?: boolean;
   delta?: { pct: number | null; goodDown?: boolean };
   series?: number[];
+  help?: string;
 }) {
   return (
     <div className="glass-panel flex flex-col p-3">
       <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
         {icon}
-        {label}
+        <span className="truncate">{label}</span>
+        {help && <HelpTip text={help} />}
       </div>
       <div className="mt-1 flex items-baseline gap-1.5">
         <span
