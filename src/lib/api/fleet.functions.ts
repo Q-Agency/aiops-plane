@@ -23,6 +23,17 @@ function adapterFor(_systemId: string) {
   return ba; // TODO: registry of adapters keyed by system kind
 }
 
+/** The selected project scope (`aiops_project` cookie). Keyed by project NAME — the one
+ *  field present on runs, gates AND events (gates/events carry only a name, not an id), so
+ *  the whole Command Center scopes consistently. undefined = all projects. */
+function selectedProject(): string | undefined {
+  try {
+    return getCookie("aiops_project") || undefined;
+  } catch {
+    return undefined; // no request context (e.g. tests)
+  }
+}
+
 /** Health of every registered agent → the fleet/agent-status surface. */
 export const getFleetHealthFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<AgentHealth[]> => {
@@ -41,14 +52,11 @@ export const getRunsFn = createServerFn({ method: "GET" })
     const system = getSystem(data.systemId);
     if (!system) return [];
     const runs = await adapterFor(system.id).getRuns(system);
-    // Scope by the selected project (aiops_project cookie), if any.
-    let project: string | undefined;
-    try {
-      project = getCookie("aiops_project") || undefined;
-    } catch {
-      /* no request context */
-    }
-    return project ? runs.filter((r) => r.project?.id === project) : runs;
+    const project = selectedProject();
+    // Match by name (the cross-surface key); also accept a legacy id-keyed cookie.
+    return project
+      ? runs.filter((r) => r.project?.name === project || r.project?.id === project)
+      : runs;
   });
 
 /** Distinct projects across the fleet's runs → powers the project switcher. */
@@ -56,18 +64,20 @@ export const getProjectsFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ id: string; name: string; count: number }[]> => {
     const systems = getSystems();
     const settled = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getRuns(s)));
-    const byId = new Map<string, { id: string; name: string; count: number }>();
+    const byName = new Map<string, { id: string; name: string; count: number }>();
     for (const res of settled) {
       if (res.status !== "fulfilled") continue;
       for (const r of res.value) {
-        const p = r.project;
-        if (!p?.id) continue;
-        const e = byId.get(p.id) ?? { id: p.id, name: p.name || p.id, count: 0 };
+        const name = r.project?.name?.trim();
+        if (!name) continue;
+        // Key by NAME so the switcher value matches runs/gates/events and same-named
+        // projects merge (fixes the duplicate "Project Test" rows). `id` mirrors the key.
+        const e = byName.get(name) ?? { id: name, name, count: 0 };
         e.count += 1;
-        byId.set(p.id, e);
+        byName.set(name, e);
       }
     }
-    return [...byId.values()].sort((a, b) => b.count - a.count);
+    return [...byName.values()].sort((a, b) => b.count - a.count);
   },
 );
 
@@ -90,18 +100,21 @@ export type CommandCenterData = {
   observability: Record<string, string>;
 };
 
-/** One round-trip for the real Command Center: fleet health + the lead agent's
- *  runs (project-scoped) + open gates + recent lifecycle events (resets, approvals)
- *  across the fleet. Used by the SSR loader for first paint and by the client's
- *  poll to keep the surface near-live. Best-effort: one slow or unreachable
- *  endpoint won't blank the others. */
+/** One round-trip for the real Command Center: a **per-project, whole-fleet rollup** —
+ *  fleet health + every agent's runs + open gates + recent lifecycle events, all scoped
+ *  to the selected project (`aiops_project`). Used by the SSR loader for first paint and
+ *  the client poll. Best-effort: one slow/unreachable endpoint won't blank the others. */
 export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<CommandCenterData> => {
     const systems = getSystems();
+    const project = selectedProject();
+    const inProject = (name?: string) => !project || name === project;
+
     const fleet = await getFleetHealthFn().catch(() => [] as AgentHealth[]);
-    const first = fleet[0]?.agent_id;
-    const [runs, approvals, eventsSettled, obsSettled] = await Promise.all([
-      first ? getRunsFn({ data: { systemId: first } }).catch(() => []) : Promise.resolve([]),
+    const [runsSettled, approvalsAll, eventsSettled, obsSettled] = await Promise.all([
+      // ALL agents' runs (each already project-scoped inside getRunsFn) — the Command
+      // Center sums the whole fleet for the selected project, not just the lead agent.
+      Promise.allSettled(systems.map((s) => getRunsFn({ data: { systemId: s.id } }))),
       getApprovalsFn().catch(() => []),
       Promise.allSettled(systems.map((s) => adapterFor(s.id).getEvents(s))),
       Promise.allSettled(
@@ -110,7 +123,19 @@ export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
         ),
       ),
     ]);
-    const events = eventsSettled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+    // (`r.value` is typed `unknown` by the server-fn return-serialization inference; it's
+    //  Run[] at runtime.)
+    const runs: Run[] = runsSettled
+      .flatMap((r) => (r.status === "fulfilled" ? (r.value as Run[]) : []))
+      .sort((a, b) => (a.started_at < b.started_at ? 1 : -1)); // newest-first across agents
+    // Gates + events carry only a project NAME → scope them to the selected project too,
+    // so the whole surface (KPIs, lifecycle flow, approvals) reflects one project.
+    const approvals = approvalsAll.filter((g) =>
+      inProject(g.metadata?.project_name as string | undefined),
+    );
+    const events = eventsSettled
+      .flatMap((r) => (r.status === "fulfilled" ? r.value : []))
+      .filter((e) => inProject(e.data?.project_name as string | undefined));
     const observability: Record<string, string> = {};
     for (const r of obsSettled) {
       if (r.status === "fulfilled" && r.value[1]) observability[r.value[0]] = r.value[1];

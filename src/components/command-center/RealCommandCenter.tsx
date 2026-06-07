@@ -269,7 +269,7 @@ export function RealCommandCenter(initial: Props) {
 
         <section>
           <SectionHead icon={<Activity className="size-3.5" />}>
-            Recent runs · {fleet[0]?.name}
+            Recent runs{fleet.length > 1 ? " · fleet" : ""}
           </SectionHead>
           {runs.length === 0 ? <Empty>No runs yet.</Empty> : <RunsTable runs={runs} />}
         </section>
@@ -538,9 +538,9 @@ function LifecycleFlow({
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Spec lifecycle
+            Artifact lifecycle
           </div>
-          <div className="mt-0.5 text-sm font-semibold">Where every spec is right now</div>
+          <div className="mt-0.5 text-sm font-semibold">Where every artifact is right now</div>
         </div>
         {(recentApproved > 0 || recentReset > 0) && (
           <div className="flex items-center gap-2 font-mono text-[10px]">
