@@ -24,19 +24,23 @@ export interface ProjectRef {
  *  This is the backbone the dashboard renders generically; only the *artifact
  *  type* differs per agent (BA → spec, SA → design, QA → tests). Each agent maps
  *  its native status onto a stage (BA: active→in_progress, waiting_for_input→
- *  waiting, spec_ready→ready, approved→approved, reset→reset).
+ *  waiting, spec_ready→ready, approved→approved, reset→reset, blocked→blocked,
+ *  error→error).
  *
  *  `backlog → in_progress → waiting → ready → approved → delivered` is the happy
- *  path; `reset` is the loop-back: the artifact is discarded and a fresh run is
- *  needed (it can happen from any stage). */
+ *  path. The rest are exceptional: `reset` (artifact discarded, fresh run needed),
+ *  `blocked` (stuck, needs intervention), `error` (a run failed) — any can occur
+ *  off the happy path. */
 export type LifecycleStage =
   | "backlog" // known, not started
   | "in_progress" // an agent run is actively advancing the artifact
-  | "waiting" // blocked on a human (clarification)
+  | "waiting" // awaiting a human reply (clarification)
   | "ready" // artifact produced, awaiting human approval
   | "approved" // signed off
   | "delivered" // handed off downstream / done
-  | "reset"; // artifact discarded/cleared — a fresh run is needed (loop-back from any stage)
+  | "reset" // artifact discarded/cleared — a fresh run is needed (loop-back from any stage)
+  | "blocked" // stuck — cannot proceed without intervention
+  | "error"; // a run failed
 
 /** The thing an agent produces and advances (BA: `SPEC.md`). A work item carries
  *  one artifact per producing agent; that agent's runs advance it through the

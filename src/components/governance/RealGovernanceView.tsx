@@ -36,6 +36,8 @@ const STAGE_STYLE: Record<string, string> = {
   approved: "border-status-done/40 bg-status-done/10 text-status-done",
   delivered: "border-status-done/40 bg-status-done/10 text-status-done",
   reset: "border-status-error/40 bg-status-error/10 text-status-error",
+  blocked: "border-status-waiting/40 bg-status-waiting/10 text-status-waiting",
+  error: "border-status-error/40 bg-status-error/10 text-status-error",
   backlog: "border-border bg-white/5 text-muted-foreground",
 };
 

@@ -70,11 +70,13 @@ auto-appears, wired, in its slot.
 **The artifact lifecycle — the agent-agnostic backbone (v0.3).** Every agent
 **produces and advances an artifact** (BA: `SPEC.md`; SA: a design; QA: tests).
 The artifact moves through one shared `LifecycleStage` (happy path
-`backlog → in_progress → waiting → ready → approved → delivered`, plus **`reset`**
-— the artifact is **discarded and a fresh run is needed**, a loop-back that can
-happen from any stage); each agent maps its native status onto it (BA:
-`active→in_progress`, `waiting_for_input→waiting`, `spec_ready→ready`,
-`approved→approved`, `reset→reset`). Three properties the dashboard relies on:
+`backlog → in_progress → waiting → ready → approved → delivered`, plus the
+exceptional **`reset`** (discarded, fresh run needed), **`blocked`** (stuck, needs
+intervention) and **`error`** (a run failed) — any can occur off the happy path);
+each agent maps its native status onto it (BA: `active→in_progress`,
+`waiting_for_input→waiting`, `spec_ready→ready`, `approved→approved`,
+`reset→reset`, `blocked→blocked`, `error→error`). Three properties the dashboard
+relies on:
 
 - **A run advances the artifact.** A run of type `autospec` is a _step in one
   spec's life_, not a standalone event — which is exactly why each run carries

@@ -44,10 +44,10 @@ agent (KA/SA) consumes it, so neither the dashboard nor any agent "owns" it.
 
 - **0.3** — made the **artifact lifecycle** first-class: a shared `LifecycleStage`
   vocabulary (`backlog → in_progress → waiting → ready → approved → delivered`, plus
-  `reset` — the artifact is discarded and a fresh run is needed) and an `ArtifactRef`
-  (the thing an agent produces). `WorkItem.stage` now uses `LifecycleStage`;
-  `Run`/`WorkItem` gained `artifact_type` (ties a run to the artifact it advances).
-  Also added `work_item_title` to `Run`/`HITLGate` for display.
+  the exceptional `reset` / `blocked` / `error`) and an `ArtifactRef` (the thing an
+  agent produces). `WorkItem.stage` now uses `LifecycleStage`; `Run`/`WorkItem`
+  gained `artifact_type` (ties a run to the artifact it advances). Also added
+  `work_item_title` to `Run`/`HITLGate` for display.
 - **0.2** — added optional `project` (`ProjectRef`) to `Run`/`WorkItem` for
   project scoping (SDLC agents are shared but tag each run with its project).
 - **0.1** — initial kernel.

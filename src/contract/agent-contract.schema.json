@@ -12,8 +12,18 @@
       "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
     },
     "LifecycleStage": {
-      "description": "Shared, agent-agnostic lifecycle every work item/artifact moves through. Happy path backlog→in_progress→waiting→ready→approved→delivered; `reset` is the loop-back (artifact discarded, a fresh run is needed). Agents map native statuses onto these (BA: active→in_progress, waiting_for_input→waiting, spec_ready→ready, approved→approved, reset→reset).",
-      "enum": ["backlog", "in_progress", "waiting", "ready", "approved", "delivered", "reset"]
+      "description": "Shared, agent-agnostic lifecycle every work item/artifact moves through. Happy path backlog→in_progress→waiting→ready→approved→delivered; the rest are exceptional: `reset` (artifact discarded, fresh run needed), `blocked` (stuck, needs intervention), `error` (a run failed). Agents map native statuses onto these (BA: active→in_progress, waiting_for_input→waiting, spec_ready→ready, approved→approved, reset→reset, blocked→blocked, error→error).",
+      "enum": [
+        "backlog",
+        "in_progress",
+        "waiting",
+        "ready",
+        "approved",
+        "delivered",
+        "reset",
+        "blocked",
+        "error"
+      ]
     },
     "ArtifactRef": {
       "type": "object",
