@@ -1,9 +1,18 @@
-# Agent contract (v0)
+# SDLC agent contract (v0.5)
 
-The wire contract between **agents** (producers) and **Agency OS** (consumer).
-This is the kernel — universal agent-ops shapes. Domain-specific data (spec
-completeness, EARS, story points, …) rides in `metadata` / event `data`, never as
-core fields.
+The wire contract between the **SDLC agent fleet** (producers — BA, SA, Dev, QA, …)
+and **Agency OS** (consumer). It's specialized for software delivery, in two layers:
+
+- the **envelope** — run lifecycle, health, HITL gates, events, work-item ref — is
+  identical for every agent; the dashboard renders it generically (the fleet rollup,
+  lifecycle, gates). This is the reusable seam.
+- the **facet** (`Run.artifact.facet`) — each agent's craft + focus metrics, typed per
+  artifact (`SpecFacet`, `DesignFacet`, `CodeFacet`, `TestFacet`, …), with a
+  `GenericFacet` fallback so any agent still renders.
+
+The rule of thumb: anything the dashboard compares **across** agents lives in the
+envelope; anything that's a single agent's craft lives in its facet. Truly freeform
+extras still ride in `metadata` / event `data`.
 
 ## Files
 
@@ -36,12 +45,27 @@ the schema just makes the handshake safe.)
 
 ## Status / intent
 
-v0, internal. Lives in `src/` for convenient imports, but is meant to be a
-**neutral artifact** — extract into a standalone, versioned package once a second
-agent (KA/SA) consumes it, so neither the dashboard nor any agent "owns" it.
+v0.5, internal. Specialized for the SDLC fleet — **not** a universal agent standard —
+but still a **stable internal boundary**: the dashboard reads this projection, never an
+agent's raw DB, so an agent's runtime can change without breaking the dashboard. Lives
+in `src/` for convenient imports; shared by every SDLC agent, owned by none. Extract
+into a standalone, versioned package once a second agent (SA/Dev) consumes it.
 
 **Changelog**
 
+- **0.5** — **SDLC specialization (envelope + facet).** The contract is now explicitly
+  for an SDLC fleet. Two layers: a shared **envelope** (run lifecycle, health, gates,
+  events, work-item ref) the dashboard renders generically, and a per-agent **facet**
+  (`Run.artifact.facet`) carrying each agent's craft + focus metrics — a union keyed by
+  `kind`: `SpecFacet` (BA), `DesignFacet` (SA), `TasksFacet`, `CodeFacet` (Dev),
+  `ReviewFacet`, `TestFacet` (QA), and a `GenericFacet` fallback so unknown agents still
+  render. Added `WorkItemRef` + `ExternalRef` — the work item is **source-neutral but
+  PM-aware** (links to Teamwork/GitHub/Jira/… via `source.system`). `Run` gained typed
+  `work_item`, `artifact` (`RunArtifact`), `stage`, `lineage` (traceability); `HITLGate`
+  gained `work_item`; `WorkItem` gained `source`. The flat `work_item_id` /
+  `work_item_title` / `artifact_type` are **deprecated** (kept during migration). The
+  dashboard adapter maps a v0.4 agent's payload onto these typed fields, so BA keeps
+  working while it catches up. Reframed as the _SDLC_ agent contract.
 - **0.4** — optional `x-agency.ui.runUrlTemplate` on the Agent Card — a per-run
   deep-observability URL the agent owns (e.g. a Flow Observer) that the control plane
   deep-links to (`{work_item_id}`/`{run_id}` placeholders). The dashboard stays

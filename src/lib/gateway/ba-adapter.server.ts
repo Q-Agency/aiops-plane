@@ -27,9 +27,14 @@ import {
   type AgentCard,
   type AgentEvent,
   type AgentHealth,
+  type ArtifactFacet,
+  type ExternalRef,
   type HITLGate,
   type LifecycleStage,
   type Run,
+  type RunArtifact,
+  type SpecFacet,
+  type WorkItemRef,
 } from "@/contract";
 import type { RegisteredSystem } from "./systems.server";
 
@@ -103,15 +108,87 @@ async function baPost(system: RegisteredSystem, path: string, body: unknown): Pr
 
 // --- Canonical contract surface (/agency/*) -----------------------------------
 
+// --- v0.5 projection: map the agent's payload onto the dashboard's typed model -----
+// The adapter is the seam. A v0.5-native agent already sends `work_item` + `artifact`,
+// which pass through untouched. BA today still sends the v0.4 flat fields
+// (work_item_id, artifact_type, metadata.completeness_after); we lift those onto the
+// typed envelope (`work_item`) + facet (`artifact.facet`) so the dashboard reads one
+// shape. Legacy flat fields are preserved for views not yet migrated.
+
+/** Build the SDLC facet from a run's metadata. BA produces specs: completeness rides
+ *  in metadata.completeness_after (per-dimension) + validation_errors. Other artifact
+ *  types get their facet once those agents emit it; until then, none. */
+function buildFacet(type: string, meta?: Record<string, unknown>): ArtifactFacet | undefined {
+  if (!meta) return undefined;
+  if (type === "spec") {
+    const facet: SpecFacet = { kind: "spec" };
+    const dims = meta.completeness_after as CompletenessMap | undefined;
+    if (dims) {
+      facet.dimensions = dims as Record<string, number>;
+      facet.completeness = avgCompleteness(dims);
+    }
+    if (Array.isArray(meta.validation_errors)) {
+      facet.validation_errors = (meta.validation_errors as unknown[]).map(String);
+    }
+    if (typeof meta.ambiguities === "number") facet.open_questions = meta.ambiguities;
+    if (typeof meta.ac_met === "number" && typeof meta.ac_total === "number") {
+      facet.acceptance = { met: meta.ac_met, total: meta.ac_total };
+    }
+    return facet;
+  }
+  // Unknown artifact type → surface scalar metrics generically so the agent still renders.
+  const values: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(meta)) {
+    if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") values[k] = v;
+  }
+  return Object.keys(values).length ? { kind: "generic", values } : undefined;
+}
+
+/** External tracker linkage, if the agent attached one (forward-looking: BA will put
+ *  the Teamwork/GitHub task ref in metadata.work_item_source). */
+function readSource(meta?: Record<string, unknown>): ExternalRef | undefined {
+  const s = meta?.work_item_source as Partial<ExternalRef> | undefined;
+  if (s && typeof s.system === "string" && typeof s.external_id === "string") {
+    return {
+      system: s.system,
+      external_id: s.external_id,
+      url: s.url,
+      project: s.project,
+      status: s.status,
+      assignee: s.assignee,
+    };
+  }
+  return undefined;
+}
+
+/** Project one run onto v0.5: typed envelope (`work_item`) + facet (`artifact`),
+ *  keeping the legacy flat fields. v0.5-native runs pass through. */
+function toV05Run(r: Run, systemId: string): Run {
+  const type = r.artifact?.type ?? r.artifact_type ?? "spec";
+  const work_item: WorkItemRef | undefined =
+    r.work_item ??
+    (r.work_item_id
+      ? {
+          id: r.work_item_id,
+          title: r.work_item_title,
+          type: "ticket",
+          source: readSource(r.metadata),
+        }
+      : undefined);
+  const facet = r.artifact?.facet ?? buildFacet(type, r.metadata);
+  const artifact: RunArtifact = { ...(r.artifact ?? {}), type, ...(facet ? { facet } : {}) };
+  return { ...r, agent_id: systemId, work_item, artifact };
+}
+
 /** The run ledger. `/agency/runs` is already contract-shaped and newest-first; it
  *  includes in-flight runs (status "running"). We request the canonical max so the
  *  economics/governance windows see a fuller history. */
 export async function getRuns(system: RegisteredSystem): Promise<Run[]> {
   const data = await baFetch(system, "/agency/runs?limit=500");
   const rows: Run[] = Array.isArray(data) ? (data as Run[]) : [];
-  // The agent self-reports its own id; key by the dashboard's registry id so the
-  // fleet/runs/deep-dive surfaces line up (env BA is "ba"; a cookie system may differ).
-  return rows.map((r) => ({ ...r, agent_id: system.id }));
+  // Re-key agent_id to the dashboard's registry id (env BA is "ba"; a cookie system may
+  // differ) and project each run onto the typed v0.5 model.
+  return rows.map((r) => toV05Run(r, system.id));
 }
 
 export async function getHealth(system: RegisteredSystem): Promise<AgentHealth> {

@@ -1,15 +1,45 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://agency-os/contract/v0/agent-contract.schema.json",
-  "title": "Agency OS Agent Contract",
-  "description": "Canonical, language-neutral wire contract a compliant agent emits. The dashboard's TS types and the Python SDK's Pydantic models both derive from this. Domain-specific data rides in `metadata`/`data`.",
-  "x-contract-version": "0.4",
+  "title": "Agency OS SDLC Agent Contract",
+  "description": "Canonical, language-neutral wire contract a conformant SDLC agent emits. The dashboard's TS types and the Python SDK's Pydantic models both derive from this. Two layers: a shared ENVELOPE (run lifecycle, health, gates, events, work-item ref) the dashboard renders generically, and a per-agent FACET (`Run.artifact.facet`) carrying each agent's craft + focus metrics (spec/design/code/review/test). Truly freeform extras still ride in `metadata`/`data`.",
+  "x-contract-version": "0.5",
   "$defs": {
     "ProjectRef": {
       "type": "object",
       "description": "Scope a work item/run belongs to (SDLC: a project/codebase).",
       "required": ["id", "name"],
       "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+    },
+    "ExternalRef": {
+      "type": "object",
+      "description": "Link to the system of record for a work item — source-neutral (Teamwork, GitHub, Jira, Linear, …). `system` is an open string; well-known values can get richer UI.",
+      "required": ["system", "external_id"],
+      "properties": {
+        "system": {
+          "type": "string",
+          "description": "teamwork | github | jira | linear | … (open)"
+        },
+        "external_id": { "type": "string" },
+        "url": { "type": "string", "description": "deep link out to the tracker" },
+        "project": { "type": "string" },
+        "status": {
+          "type": "string",
+          "description": "mirrored external status (advisory, may lag)"
+        },
+        "assignee": { "type": "string" }
+      }
+    },
+    "WorkItemRef": {
+      "type": "object",
+      "description": "Lightweight, denormalized reference to the work item a run/gate advances — enough to display + deep-link without fetching the full WorkItem.",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "description": "ticket | session | incident | …" },
+        "source": { "$ref": "#/$defs/ExternalRef" }
+      }
     },
     "LifecycleStage": {
       "description": "Shared, agent-agnostic lifecycle every work item/artifact moves through. Happy path backlog→in_progress→waiting→ready→approved→delivered; the rest are exceptional: `reset` (artifact discarded, fresh run needed), `blocked` (stuck, needs intervention), `error` (a run failed). Agents map native statuses onto these (BA: active→in_progress, waiting_for_input→waiting, spec_ready→ready, approved→approved, reset→reset, blocked→blocked, error→error).",
@@ -65,7 +95,155 @@
           "description": "the artifact this work item produces, e.g. spec"
         },
         "project": { "$ref": "#/$defs/ProjectRef" },
+        "source": { "$ref": "#/$defs/ExternalRef" },
         "metadata": { "type": "object" }
+      }
+    },
+    "ArtifactType": {
+      "description": "What an agent produces. Open enum — well-known SDLC types get a bespoke facet + UI card; anything else falls back to a generic renderer.",
+      "type": "string",
+      "examples": ["spec", "design", "tasks", "code", "review", "test", "doc"]
+    },
+    "SpecFacet": {
+      "type": "object",
+      "description": "BA — the specification.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "spec" },
+        "completeness": { "type": "number", "description": "overall 0–100" },
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "per-dimension completeness"
+        },
+        "acceptance": {
+          "type": "object",
+          "properties": { "met": { "type": "integer" }, "total": { "type": "integer" } }
+        },
+        "open_questions": { "type": "integer" },
+        "validation_errors": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "DesignFacet": {
+      "type": "object",
+      "description": "SA — the technical design.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "design" },
+        "components": { "type": "integer" },
+        "decisions": { "type": "integer", "description": "ADRs recorded" },
+        "risks": { "type": "integer" },
+        "diagrams": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "TasksFacet": {
+      "type": "object",
+      "description": "Tasklist — the work breakdown.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "tasks" },
+        "count": { "type": "integer" },
+        "by_codebase": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "estimate": { "type": "number", "description": "points" }
+      }
+    },
+    "CodeFacet": {
+      "type": "object",
+      "description": "Dev — the code change.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "code" },
+        "pr": {
+          "type": "object",
+          "properties": {
+            "number": { "type": "integer" },
+            "url": { "type": "string" },
+            "branch": { "type": "string" }
+          }
+        },
+        "codebase": { "type": "string", "description": "backend | web | mobile | … (open)" },
+        "additions": { "type": "integer" },
+        "deletions": { "type": "integer" },
+        "files": { "type": "integer" },
+        "build": { "enum": ["passing", "failing", "unknown"] }
+      }
+    },
+    "ReviewFacet": {
+      "type": "object",
+      "description": "Code Review — the review report.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "review" },
+        "findings": {
+          "type": "object",
+          "properties": {
+            "blocker": { "type": "integer" },
+            "major": { "type": "integer" },
+            "minor": { "type": "integer" }
+          }
+        },
+        "verdict": { "enum": ["approve", "changes_requested", "comment"] }
+      }
+    },
+    "TestFacet": {
+      "type": "object",
+      "description": "QA — the test report.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "test" },
+        "suites": { "type": "integer" },
+        "passed": { "type": "integer" },
+        "failed": { "type": "integer" },
+        "flaky": { "type": "integer" },
+        "coverage": { "type": "number", "description": "0–100" },
+        "defects": { "type": "integer" },
+        "healer_runs": { "type": "integer" }
+      }
+    },
+    "GenericFacet": {
+      "type": "object",
+      "description": "Fallback for agents without a bespoke facet — flat scalar metrics the generic renderer lists.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "generic" },
+        "values": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean"] }
+        }
+      }
+    },
+    "ArtifactFacet": {
+      "description": "Per-agent craft + focus metrics, discriminated on `kind`.",
+      "oneOf": [
+        { "$ref": "#/$defs/SpecFacet" },
+        { "$ref": "#/$defs/DesignFacet" },
+        { "$ref": "#/$defs/TasksFacet" },
+        { "$ref": "#/$defs/CodeFacet" },
+        { "$ref": "#/$defs/ReviewFacet" },
+        { "$ref": "#/$defs/TestFacet" },
+        { "$ref": "#/$defs/GenericFacet" }
+      ]
+    },
+    "RunArtifact": {
+      "type": "object",
+      "description": "What a run produced/advanced + its typed facet (the per-agent differentiator).",
+      "required": ["type"],
+      "properties": {
+        "type": { "$ref": "#/$defs/ArtifactType" },
+        "version": { "type": "integer" },
+        "url": {
+          "type": "string",
+          "description": "deep-link into the producing agent's own tool/output"
+        },
+        "facet": { "$ref": "#/$defs/ArtifactFacet" }
+      }
+    },
+    "Lineage": {
+      "type": "object",
+      "description": "Upstream/downstream artifact or work-item ids — powers the traceability graph.",
+      "properties": {
+        "upstream": { "type": "array", "items": { "type": "string" } },
+        "downstream": { "type": "array", "items": { "type": "string" } }
       }
     },
     "Run": {
@@ -74,13 +252,20 @@
       "properties": {
         "id": { "type": "string" },
         "agent_id": { "type": "string" },
-        "work_item_id": { "type": "string" },
-        "work_item_title": { "type": "string" },
+        "work_item_id": { "type": "string", "description": "DEPRECATED v0.5 — use work_item.id" },
+        "work_item_title": {
+          "type": "string",
+          "description": "DEPRECATED v0.5 — use work_item.title"
+        },
+        "work_item": { "$ref": "#/$defs/WorkItemRef" },
         "type": { "type": "string", "description": "agent-defined run type, e.g. autospec" },
         "artifact_type": {
           "type": "string",
-          "description": "the artifact this run produces/advances, e.g. spec"
+          "description": "DEPRECATED v0.5 — use artifact.type"
         },
+        "artifact": { "$ref": "#/$defs/RunArtifact" },
+        "stage": { "$ref": "#/$defs/LifecycleStage" },
+        "lineage": { "$ref": "#/$defs/Lineage" },
         "status": { "enum": ["running", "succeeded", "failed", "cancelled"] },
         "started_at": { "type": "string", "format": "date-time" },
         "ended_at": { "type": "string", "format": "date-time" },
@@ -149,8 +334,12 @@
       "required": ["id", "kind", "state", "prompt", "opened_at"],
       "properties": {
         "id": { "type": "string" },
-        "work_item_id": { "type": "string" },
-        "work_item_title": { "type": "string" },
+        "work_item_id": { "type": "string", "description": "DEPRECATED v0.5 — use work_item.id" },
+        "work_item_title": {
+          "type": "string",
+          "description": "DEPRECATED v0.5 — use work_item.title"
+        },
+        "work_item": { "$ref": "#/$defs/WorkItemRef" },
         "run_id": { "type": "string" },
         "kind": { "enum": ["approval", "clarification"] },
         "state": { "enum": ["open", "resolved", "expired"] },

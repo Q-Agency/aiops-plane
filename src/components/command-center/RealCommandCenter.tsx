@@ -22,6 +22,7 @@ import type {
   AgentEvent,
   AgentHealth,
   AgentState,
+  ExternalRef,
   HITLGate,
   LifecycleStage,
   Run,
@@ -660,11 +661,21 @@ function avgComp(c: unknown): number | undefined {
   return vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : undefined;
 }
 
+/** Completeness from the typed spec facet (v0.5), falling back to the legacy
+ *  metadata.completeness_after during the migration. */
+function facetCompleteness(r: Run): number | undefined {
+  const f = r.artifact?.facet;
+  if (f?.kind === "spec") return f.completeness ?? avgComp(f.dimensions);
+  return avgComp(r.metadata?.completeness_after);
+}
+
 type WorkItem = {
   id: string;
   title: string;
   agentId: string;
+  artifactType?: string;
   project?: string;
+  source?: ExternalRef;
   stage: string;
   turns: number;
   completeness?: number;
@@ -708,16 +719,47 @@ function buildWorkItems(runs: Run[], approvals: HITLGate[]): WorkItem[] {
       id: wid,
       title: workItemLabel(latest),
       agentId: latest.agent_id,
+      artifactType: latest.artifact?.type ?? latest.artifact_type,
       project: latest.project?.name,
+      source: latest.work_item?.source,
       stage,
       turns: rs.length,
-      completeness: avgComp(latest.metadata?.completeness_after),
+      completeness: facetCompleteness(latest),
       cost: rs.reduce((s, r) => s + (r.cost_usd ?? 0), 0),
       lastIso: latest.ended_at ?? latest.started_at,
       lastMs: times.length ? Math.max(...times) : 0,
     });
   }
   return items.sort((a, b) => b.lastMs - a.lastMs);
+}
+
+/** The work item's link to its system of record — source-neutral (Teamwork, GitHub,
+ *  Jira…). A deep link when the tracker gave us a URL, otherwise a plain badge. Sits
+ *  outside the row's Link so we don't nest anchors. */
+function SourceChip({ source }: { source: ExternalRef }) {
+  const label = `${source.system}${source.external_id ? ` ${source.external_id}` : ""}`;
+  const base =
+    "mt-1 inline-flex max-w-full items-center gap-1 rounded border border-border bg-white/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground";
+  if (source.url) {
+    return (
+      <a
+        href={source.url}
+        target="_blank"
+        rel="noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        title={`Open in ${source.system}${source.status ? ` · ${source.status}` : ""}`}
+        className={cn(base, "hover:border-primary/40 hover:text-foreground")}
+      >
+        <span className="truncate">{label}</span>
+        <ExternalLink className="size-2.5 shrink-0" />
+      </a>
+    );
+  }
+  return (
+    <span className={base} title={source.status ? `status: ${source.status}` : undefined}>
+      <span className="truncate">{label}</span>
+    </span>
+  );
 }
 
 function WorkItemsTable({
@@ -767,6 +809,7 @@ function WorkItemsTable({
                     {w.project ?? "—"}
                   </span>
                 </Link>
+                {w.source && <SourceChip source={w.source} />}
               </td>
               <td className="px-3 py-2">
                 <span className="flex items-center gap-1.5">
