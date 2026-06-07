@@ -5,6 +5,7 @@ import { Activity, CheckCircle2, AlertTriangle, ScrollText } from "lucide-react"
 import type { AgentState } from "@/contract";
 import { getObservabilityFn, type AgentDiagnostics } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
+import { fmtClock } from "@/lib/time";
 
 const POLL_MS = 8000;
 
@@ -13,13 +14,6 @@ const AGENT_STATE_DOT: Record<AgentState, string> = {
   waiting: "bg-status-waiting",
   error: "bg-status-error",
   idle: "bg-status-idle",
-};
-
-const fmtClockUTC = (iso: string) => {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`;
 };
 
 const checkOk = (v: string) => /^ok\b/i.test(v) || v === "ok" || /^\d+$/.test(v);
@@ -167,7 +161,7 @@ export function RealObservabilityView({ initial }: Props) {
                     key={i}
                     className="flex items-start gap-2 px-2.5 py-1.5 hover:bg-white/[0.02]"
                   >
-                    <span className="shrink-0 text-muted-foreground/70">{fmtClockUTC(l.ts)}</span>
+                    <span className="shrink-0 text-muted-foreground/70">{fmtClock(l.ts)}</span>
                     <span className={cn("w-12 shrink-0 uppercase", LEVEL_STYLE[rank])}>{rank}</span>
                     {multi && <span className="shrink-0 text-primary/80">{l.agent}</span>}
                     {l.logger && (

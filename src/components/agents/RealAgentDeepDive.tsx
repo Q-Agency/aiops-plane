@@ -27,6 +27,7 @@ import { runObservabilityUrl } from "@/lib/flow-link";
 import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
 import { getAgentDetailFn, type AgentDetailData } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
+import { fmtDateTime, fmtTime } from "@/lib/time";
 
 const POLL_MS = 5000;
 
@@ -51,13 +52,6 @@ const fmtDur = (ms?: number) => {
   return s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
 };
 const fmtTokens = (n: number) => (n ? n.toLocaleString("en-US") : "—");
-const fmtTimeUTC = (iso?: string) => {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())} UTC`;
-};
 const workItemLabel = (x: { work_item_title?: string; work_item_id?: string }) =>
   x.work_item_title || x.work_item_id || "—";
 
@@ -379,7 +373,7 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
                       </span>
                     </td>
                     <td className="px-2 py-2 text-muted-foreground" title={r.started_at}>
-                      {fmtTimeUTC(r.started_at)}
+                      {fmtDateTime(r.started_at)}
                     </td>
                     <td className="px-2 py-2 text-right tabular-nums">{fmtDur(r.duration_ms)}</td>
                     <td className="px-2 py-2 text-right tabular-nums">
@@ -414,9 +408,7 @@ function GateRow({ gate: g }: { gate: HITLGate }) {
         <span className="font-mono text-[10px] uppercase tracking-wider text-status-waiting">
           {g.kind}
         </span>
-        <span className="font-mono text-[10px] text-muted-foreground">
-          {fmtTimeUTC(g.opened_at)}
-        </span>
+        <span className="font-mono text-[10px] text-muted-foreground">{fmtTime(g.opened_at)}</span>
       </div>
       <div className="mt-1 line-clamp-2 text-xs text-foreground">{g.prompt}</div>
       <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">

@@ -14,6 +14,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { runObservabilityUrl } from "@/lib/flow-link";
+import { fmtClock, fmtDateTime, fmtTime } from "@/lib/time";
 
 import type {
   AgentEvent,
@@ -46,19 +47,6 @@ const fmtDur = (ms?: number) => {
   return s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
 };
 const tokenSum = (a?: number, b?: number) => (a ?? 0) + (b ?? 0);
-// UTC-based so server and client render identically (no hydration mismatch).
-const fmtTimeUTC = (iso?: string) => {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())} UTC`;
-};
-const fmtClockUTC = (ms: number) => {
-  const d = new Date(ms);
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`;
-};
 // Prefer the human task name; fall back to the work-item id (often a raw UUID).
 const workItemLabel = (x: { work_item_title?: string; work_item_id?: string }) =>
   x.work_item_title || x.work_item_id || "—";
@@ -266,7 +254,7 @@ export function RealCommandCenter(initial: Props) {
           {runs.length === 0 ? (
             <Empty>No work items yet.</Empty>
           ) : (
-            <WorkItemsTable runs={runs} approvals={approvals} />
+            <WorkItemsTable runs={runs} approvals={approvals} fleet={fleet} />
           )}
         </section>
       </div>
@@ -671,14 +659,24 @@ function buildWorkItems(runs: Run[], approvals: HITLGate[]): WorkItem[] {
   return items.sort((a, b) => b.lastMs - a.lastMs);
 }
 
-function WorkItemsTable({ runs, approvals }: { runs: Run[]; approvals: HITLGate[] }) {
+function WorkItemsTable({
+  runs,
+  approvals,
+  fleet,
+}: {
+  runs: Run[];
+  approvals: HITLGate[];
+  fleet: AgentHealth[];
+}) {
   const items = buildWorkItems(runs, approvals);
+  const agentName = new Map(fleet.map((a) => [a.agent_id, a.name]));
   return (
     <div className="glass-panel overflow-x-auto">
       <table className="w-full text-xs">
         <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
           <tr className="border-b border-border">
             <th className="px-3 py-2 text-left font-medium">Artifact</th>
+            <th className="px-3 py-2 text-left font-medium">Agent</th>
             <th className="px-3 py-2 text-left font-medium">Stage</th>
             <th className="px-3 py-2 text-right font-medium">Turns</th>
             <th className="px-3 py-2 text-right font-medium">Complete</th>
@@ -705,6 +703,9 @@ function WorkItemsTable({ runs, approvals }: { runs: Run[]; approvals: HITLGate[
                   </span>
                 </Link>
               </td>
+              <td className="max-w-[10rem] truncate px-3 py-2 text-muted-foreground">
+                {agentName.get(w.agentId) ?? w.agentId}
+              </td>
               <td className="px-3 py-2">
                 <StageBadge stage={w.stage} />
               </td>
@@ -716,7 +717,7 @@ function WorkItemsTable({ runs, approvals }: { runs: Run[]; approvals: HITLGate[
                 {fmtCost(w.cost)}
               </td>
               <td className="px-3 py-2 text-right text-muted-foreground" title={w.lastIso}>
-                {fmtTimeUTC(w.lastIso)}
+                {fmtDateTime(w.lastIso)}
               </td>
             </tr>
           ))}
@@ -746,7 +747,7 @@ function ApprovalsQueue({ approvals }: { approvals: HITLGate[] }) {
                   {g.kind}
                 </span>
                 <span className="font-mono text-[10px] text-muted-foreground">
-                  {fmtTimeUTC(g.opened_at)}
+                  {fmtTime(g.opened_at)}
                 </span>
               </div>
               <div className="mt-1 line-clamp-2 text-xs text-foreground">{g.prompt}</div>
@@ -890,9 +891,7 @@ function ActivityFeed({
                   <span className="font-medium">{a.agent}</span>{" "}
                   <span className="text-muted-foreground">{a.message}</span>
                 </div>
-                <div className="font-mono text-[10px] text-muted-foreground">
-                  {fmtTimeUTC(a.ts)}
-                </div>
+                <div className="font-mono text-[10px] text-muted-foreground">{fmtTime(a.ts)}</div>
               </div>
             </div>
           ))}
@@ -928,7 +927,7 @@ function LiveBadge({ updatedAt }: { updatedAt: number }) {
   return (
     <span className="inline-flex items-center gap-1 text-status-running">
       <span className="size-1.5 rounded-full bg-status-running dot-pulse" />
-      Live{mounted && updatedAt ? ` · ${fmtClockUTC(updatedAt)}` : ""}
+      Live{mounted && updatedAt ? ` · ${fmtClock(updatedAt)}` : ""}
     </span>
   );
 }
