@@ -42,7 +42,7 @@ SSE, `/agent/health`, HITL via `waiting_for_input`) — so for BA this is mostly
 
 ### A.1 Contract types (Pydantic v2, domain-agnostic)
 
-Define a `SCHEMA_VERSION = "0.2"` constant, stamped on every emitted payload.
+Define a `SCHEMA_VERSION = "0.3"` constant, stamped on every emitted payload.
 **Domain-specific data must ride in `metadata` / event `data` — never as core
 fields.** (BA's `completeness`, EARS, `spec_version` etc. go in `metadata`.)
 
@@ -57,12 +57,33 @@ class ProjectRef(BaseModel):   # scope a run / work item belongs to (SDLC: a pro
     id: str
     name: str
 
+# Shared, agent-agnostic lifecycle every work item/artifact moves through.
+# Map your native status onto these (BA: active→in_progress, waiting_for_input→
+# waiting, spec_ready→ready, approved→approved). Only the *artifact* differs per
+# agent (BA spec, SA design, QA tests) — this lifecycle is the same for all.
+LifecycleStage = Literal[
+    "backlog", "in_progress", "waiting", "ready", "approved", "delivered"
+]
+
+class ArtifactRef(BaseModel):  # the thing the agent produces & advances (BA: SPEC.md)
+    id: str
+    type: str                  # "spec" | "design" | "tests" | ... (matches `produces`)
+    title: str | None = None
+    work_item_id: str | None = None
+    producer_agent_id: str | None = None
+    stage: LifecycleStage
+    version: int | None = None
+    completeness: float | None = None   # overall 0–100, if scored
+    url: str | None = None              # deep-link into the agent's own tool
+    updated_at: datetime | None = None
+
 class WorkItem(BaseModel):     # the unit of work flowing through the pipeline
     id: str                    # e.g. the Teamwork task id / BA session id
     type: str                  # "ticket" | "session" | "incident" | ...
     title: str | None = None
-    stage: str | None = None
-    status: str | None = None
+    stage: LifecycleStage | None = None  # where it is in the shared lifecycle
+    status: str | None = None            # your native status, kept for reference
+    artifact_type: str | None = None     # the artifact it produces, e.g. "spec"
     project: ProjectRef | None = None   # one shared agent serves many projects
     metadata: dict = {}
 
@@ -71,7 +92,8 @@ class Run(BaseModel):          # one execution of the agent against a work item
     agent_id: str
     work_item_id: str | None = None
     work_item_title: str | None = None  # denormalized for display (else the id shows)
-    type: str                  # agent-defined, e.g. "spec"
+    type: str                  # agent-defined run type, e.g. "autospec"
+    artifact_type: str | None = None    # what this run produces/advances, e.g. "spec"
     status: str                # "running" | "succeeded" | "failed" | "cancelled"
     started_at: datetime
     ended_at: datetime | None = None

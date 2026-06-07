@@ -146,7 +146,15 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
   const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
   const succeeded = runs.filter((r) => r.status === "succeeded").length;
   const pct = terminal.length ? Math.round((succeeded / terminal.length) * 100) : null;
-  const running = runs.find((r) => r.status === "running");
+  // BA runs many specs at once — show the concurrency, not just the first.
+  const runningRuns = runs.filter((r) => r.status === "running");
+  const workingLabel =
+    runningRuns.length === 0
+      ? "—"
+      : runningRuns.length === 1
+        ? workItemLabel(runningRuns[0])
+        : `${runningRuns.length} specs in progress`;
+  const workingTitle = runningRuns.map((r) => workItemLabel(r)).join(", ");
   const cost = runs.reduce((s, r) => s + (r.cost_usd ?? 0), 0);
   const durations = runs.filter((r) => r.duration_ms != null);
   const avgDur = durations.length
@@ -179,11 +187,12 @@ function AgentCard({ agent: a, runs }: { agent: AgentHealth; runs: Run[] }) {
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
             Working on
           </div>
-          <div className="truncate text-sm text-foreground" title={running?.work_item_id}>
-            {running ? workItemLabel(running) : "—"}
+          <div className="truncate text-sm text-foreground" title={workingTitle}>
+            {workingLabel}
           </div>
+          {/* Liveness (always-on while healthy) — distinct from the activity badge above. */}
           <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-            {a.healthy ? "operational" : "unreachable"}
+            {a.healthy ? "available" : "unreachable"}
           </div>
         </div>
       </div>

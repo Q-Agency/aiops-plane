@@ -67,6 +67,29 @@ auto-appears, wired, in its slot.
   **schema-first** (Pydantic → exported JSON Schema → generated TS types). Seed it
   from BA's existing `schemas/*.py`.
 
+**The artifact lifecycle — the agent-agnostic backbone (v0.3).** Every agent
+**produces and advances an artifact** (BA: `SPEC.md`; SA: a design; QA: tests).
+The artifact moves through one shared `LifecycleStage`
+(`backlog → in_progress → waiting → ready → approved → delivered`); each agent
+maps its native status onto it (BA: `active→in_progress`, `waiting_for_input→
+waiting`, `spec_ready→ready`, `approved→approved`). Three properties the dashboard
+relies on:
+
+- **A run advances the artifact.** A run of type `autospec` is a _step in one
+  spec's life_, not a standalone event — which is exactly why each run carries
+  `completeness_before → completeness_after`. `Run.artifact_type` ties a run to
+  the artifact it produces (`ArtifactRef` models the artifact itself).
+- **Liveness ≠ activity.** The agent is a **long-running service**: while healthy
+  it is _available_, independent of whether it is `idle`/`running`/`waiting`
+  (`AgentState` — a separate axis). "idle" means standing by, **not** down.
+- **One agent, many artifacts at once.** BA runs multiple `autospec` pipelines
+  **concurrently** (one per task, capped by a slot budget), so `active_runs` can
+  be >1 across different `(task, project)`.
+
+Only the **artifact type** and the `produces`/`consumes` wiring change per agent —
+the lifecycle, runs, gates and health are identical. That is why a new agent
+lights up the same surfaces with no dashboard changes.
+
 ### 3b. Topology manifest
 
 - Three element types: **nodes** (agents/stages), **edges** (artifact hand-offs,
@@ -234,15 +257,19 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
   (`dataMode: "standard" | "real"`; prototype cookie auth, 2 hardcoded users):
   - **standard / mock** — the original full mock dashboard (unchanged).
   - **real** — federates live agents through the gateway. Built so far: contract
-    **v0.2** (`src/contract/`, incl. `work_item_title`), the gateway + BA adapter
-    (`src/lib/gateway/`, `src/lib/api/fleet.functions.ts`), a real Command Center
-    (KPI strip, rich agent cards with success-ring / "working on", human-gates
-    queue, activity feed) that **polls near-live** (TanStack Query
+    **v0.3** (`src/contract/`, incl. the artifact `LifecycleStage` + `ArtifactRef`,
+    `work_item_title`), the gateway + BA adapter (`src/lib/gateway/`,
+    `src/lib/api/fleet.functions.ts`), a real Command Center (KPI strip, rich agent
+    cards that show **concurrent specs** and split **liveness vs activity**,
+    human-gates queue, activity feed) that **polls near-live** (TanStack Query
     `refetchInterval`, SSR-seeded, pauses while the tab is hidden), a real
-    **agent deep-dive** (`/agents/$agentId` + the agents sidebar: KPIs, charts
-    derived from real runs, gate queue, a clickable runs table → run-detail
-    drawer), a real project switcher (TopBar), and a throwaway **Connections**
-    page for registering agent URLs (`aiops_systems` cookie).
+    **agent deep-dive** (`/agents/$agentId` + sidebar: KPIs, charts, gate queue,
+    runs table → run drawer showing the artifact + completeness progression),
+    real **Unit Economics** (spend/tokens by model/project/day), **Observability**
+    (health checks + live log tail), and **Governance** (spec quality:
+    completeness, ambiguities, EARS/GWT coverage, judge/persona, lifecycle stage),
+    a real project switcher (TopBar), and a throwaway **Connections** page
+    (`aiops_systems` cookie).
 - **BA Agent — federated and live.** Adapter mappings **verified** against BA's
   real schemas (`RunWithSessionResponse`, `Session`, `/agent/health`):
   - runs + gates surface the human **task title** (`teamwork_task_title` →
@@ -251,6 +278,10 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
     (`waiting_for_input` → clarification) **and** `/session/pending-approval`
     (`spec_ready` → approval, i.e. a finished spec awaiting review). The agent's
     `waiting` badge tracks only `waiting_for_input`; the gate queue includes both.
+  - **Artifact lifecycle (§3a)** is mapped: BA status → `LifecycleStage`, runs
+    tagged `artifact_type: "spec"`. Adapter also reads `/agent/logs/recent`,
+    `POST /session/get`, `/session/{id}/lint` + `/structured-ac` for the
+    Observability and Governance surfaces.
     The `agency-agent-sdk` refactor is in progress on the agent side per the brief;
     once adopted, the adapter collapses toward identity.
 - **Next:** live **SSE activity** (push instead of polling — needs a server-side
@@ -267,7 +298,7 @@ serves many projects, and each run/work-item carries the project it belongs to
 **scoping dimension orthogonal to "agent"** — a run belongs to _(agent, project)_.
 
 - **Contract:** `Run` and `WorkItem` carry an optional `project { id, name }`
-  (`ProjectRef`, schema v0.2). Each adapter populates it (BA from its
+  (`ProjectRef`, schema v0.3). Each adapter populates it (BA from its
   `project_id`/`project_name`).
 - **Derived, not declared:** the dashboard derives the project list from the
   federated runs (distinct projects + counts) — no project registry.

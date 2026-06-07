@@ -19,9 +19,35 @@ import {
   type AgentCard,
   type AgentHealth,
   type HITLGate,
+  type LifecycleStage,
   type Run,
 } from "@/contract";
 import type { RegisteredSystem } from "./systems.server";
+
+/** BA's artifact is the spec — every run is in service of one SPEC.md. */
+const BA_ARTIFACT = "spec";
+
+/** Map BA's native session status onto the shared, agent-agnostic lifecycle. */
+export function lifecycleStage(status?: string): LifecycleStage | undefined {
+  switch (status) {
+    case "active":
+    case "in_progress":
+    case "running":
+      return "in_progress";
+    case "waiting_for_input":
+      return "waiting";
+    case "spec_ready":
+      return "ready";
+    case "approved":
+      return "approved";
+    case "delivered":
+      return "delivered";
+    case "pending":
+      return "backlog";
+    default:
+      return undefined;
+  }
+}
 
 async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
   const headers: Record<string, string> = { accept: "application/json" };
@@ -71,6 +97,8 @@ function mapRun(r: any, agentId: string): Run {
     // BA joins the Teamwork task title onto /runs/all — use it for display.
     work_item_title: r.teamwork_task_title ?? undefined,
     type: r.run_type ?? "run",
+    // Every BA run advances the same artifact: the spec.
+    artifact_type: BA_ARTIFACT,
     status: running ? "running" : succeeded ? "succeeded" : "failed",
     started_at: r.started_at,
     ended_at: r.ended_at ?? undefined,
@@ -315,6 +343,8 @@ export type SpecQuality = {
   title?: string;
   project?: string;
   status?: string;
+  /** the BA status mapped onto the shared lifecycle */
+  stage?: LifecycleStage;
   completeness?: CompletenessMap;
   completeness_avg?: number;
   judge_agreement?: number;
@@ -363,6 +393,7 @@ export async function getSpecQuality(
     title: detail?.teamwork_task_title ?? base.title,
     project: detail?.project_name ?? base.project,
     status: detail?.status ?? undefined,
+    stage: lifecycleStage(detail?.status),
     completeness,
     completeness_avg: avgCompleteness(completeness),
     judge_agreement: num(detail?.judge_agreement),

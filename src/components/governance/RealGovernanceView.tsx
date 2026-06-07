@@ -28,10 +28,14 @@ const scoreTone = (n: number | null) =>
         ? "text-status-waiting"
         : "text-status-error";
 
-const STATUS_STYLE: Record<string, string> = {
+// Keyed by the shared LifecycleStage (not BA's native status).
+const STAGE_STYLE: Record<string, string> = {
+  in_progress: "border-status-running/40 bg-status-running/10 text-status-running",
+  waiting: "border-status-waiting/40 bg-status-waiting/10 text-status-waiting",
+  ready: "border-status-running/40 bg-status-running/10 text-status-running",
   approved: "border-status-done/40 bg-status-done/10 text-status-done",
-  spec_ready: "border-status-running/40 bg-status-running/10 text-status-running",
-  waiting_for_input: "border-status-waiting/40 bg-status-waiting/10 text-status-waiting",
+  delivered: "border-status-done/40 bg-status-done/10 text-status-done",
+  backlog: "border-border bg-white/5 text-muted-foreground",
 };
 
 type Props = { data: GovernanceData };
@@ -138,7 +142,7 @@ export function RealGovernanceView({ data }: Props) {
             <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
                 <th className="px-2 py-2 text-left font-medium">Spec</th>
-                <th className="px-2 py-2 text-left font-medium">Status</th>
+                <th className="px-2 py-2 text-left font-medium">Stage</th>
                 <th className="px-2 py-2 text-right font-medium">Complete</th>
                 <th className="px-2 py-2 text-right font-medium">Ambig.</th>
                 <th className="px-2 py-2 text-right font-medium">EARS</th>
@@ -157,15 +161,15 @@ export function RealGovernanceView({ data }: Props) {
                     )}
                   </td>
                   <td className="px-2 py-2">
-                    {s.status ? (
+                    {s.stage ? (
                       <span
+                        title={s.status}
                         className={cn(
                           "inline-block rounded border px-1.5 py-0.5 text-[10px]",
-                          STATUS_STYLE[s.status] ??
-                            "border-border bg-white/5 text-muted-foreground",
+                          STAGE_STYLE[s.stage] ?? "border-border bg-white/5 text-muted-foreground",
                         )}
                       >
-                        {s.status}
+                        {s.stage.replace("_", " ")}
                       </span>
                     ) : (
                       "—"

@@ -3,13 +3,37 @@
   "$id": "https://agency-os/contract/v0/agent-contract.schema.json",
   "title": "Agency OS Agent Contract",
   "description": "Canonical, language-neutral wire contract a compliant agent emits. The dashboard's TS types and the Python SDK's Pydantic models both derive from this. Domain-specific data rides in `metadata`/`data`.",
-  "x-contract-version": "0.2",
+  "x-contract-version": "0.3",
   "$defs": {
     "ProjectRef": {
       "type": "object",
       "description": "Scope a work item/run belongs to (SDLC: a project/codebase).",
       "required": ["id", "name"],
       "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+    },
+    "LifecycleStage": {
+      "description": "Shared, agent-agnostic lifecycle every work item/artifact moves through. Agents map native statuses onto these (BA: active→in_progress, waiting_for_input→waiting, spec_ready→ready, approved→approved).",
+      "enum": ["backlog", "in_progress", "waiting", "ready", "approved", "delivered"]
+    },
+    "ArtifactRef": {
+      "type": "object",
+      "description": "The thing an agent produces and advances (BA: SPEC.md). `type` matches the producer's agent-card `produces`.",
+      "required": ["id", "type", "stage"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "description": "spec | design | tests | … (matches producer's `produces`)"
+        },
+        "title": { "type": "string" },
+        "work_item_id": { "type": "string" },
+        "producer_agent_id": { "type": "string" },
+        "stage": { "$ref": "#/$defs/LifecycleStage" },
+        "version": { "type": "integer" },
+        "completeness": { "type": "number", "description": "overall 0–100, if scored" },
+        "url": { "type": "string", "description": "deep-link into the producing agent's own tool" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
     },
     "WorkItem": {
       "type": "object",
@@ -21,8 +45,15 @@
           "description": "ticket | session | incident | … (domain-defined)"
         },
         "title": { "type": "string" },
-        "stage": { "type": "string" },
-        "status": { "type": "string" },
+        "stage": { "$ref": "#/$defs/LifecycleStage" },
+        "status": {
+          "type": "string",
+          "description": "agent-native status (e.g. BA spec_ready), kept for reference"
+        },
+        "artifact_type": {
+          "type": "string",
+          "description": "the artifact this work item produces, e.g. spec"
+        },
         "project": { "$ref": "#/$defs/ProjectRef" },
         "metadata": { "type": "object" }
       }
@@ -35,7 +66,11 @@
         "agent_id": { "type": "string" },
         "work_item_id": { "type": "string" },
         "work_item_title": { "type": "string" },
-        "type": { "type": "string" },
+        "type": { "type": "string", "description": "agent-defined run type, e.g. autospec" },
+        "artifact_type": {
+          "type": "string",
+          "description": "the artifact this run produces/advances, e.g. spec"
+        },
         "status": { "enum": ["running", "succeeded", "failed", "cancelled"] },
         "started_at": { "type": "string", "format": "date-time" },
         "ended_at": { "type": "string", "format": "date-time" },

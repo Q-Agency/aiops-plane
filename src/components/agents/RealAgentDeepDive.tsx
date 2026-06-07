@@ -409,7 +409,20 @@ function GateRow({ gate: g }: { gate: HITLGate }) {
 
 function RunDrawer({ run, onClose }: { run: Run; onClose: () => void }) {
   const meta = run.metadata ?? {};
-  const metaEntries = Object.entries(meta).filter(([, v]) => v != null && v !== "");
+  // The artifact's completeness before/after this run — a run is a step in the
+  // artifact's life, so show how much it advanced.
+  const avgComp = (c: unknown) => {
+    if (!c || typeof c !== "object") return undefined;
+    const vals = Object.values(c as Record<string, unknown>).filter(
+      (v): v is number => typeof v === "number",
+    );
+    return vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : undefined;
+  };
+  const cBefore = avgComp(meta.completeness_before);
+  const cAfter = avgComp(meta.completeness_after);
+  const metaEntries = Object.entries(meta).filter(
+    ([k, v]) => v != null && v !== "" && k !== "completeness_before" && k !== "completeness_after",
+  );
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1 bg-black/60 backdrop-blur-sm" />
@@ -437,6 +450,7 @@ function RunDrawer({ run, onClose }: { run: Run; onClose: () => void }) {
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[11px]">
             <Tag>{run.type}</Tag>
+            {run.artifact_type && <Tag>→ {run.artifact_type}</Tag>}
             <Tag>
               <span
                 className={RUN_STATUS_STYLE[run.status]
@@ -467,6 +481,10 @@ function RunDrawer({ run, onClose }: { run: Run; onClose: () => void }) {
             <dl className="space-y-1 text-xs">
               <Row k="Started" v={run.started_at} />
               <Row k="Ended" v={run.ended_at ?? "—"} />
+              {run.artifact_type && <Row k="Artifact" v={run.artifact_type} />}
+              {(cBefore != null || cAfter != null) && (
+                <Row k="Completeness" v={`${cBefore ?? "—"}% → ${cAfter ?? "—"}%`} />
+              )}
               {run.work_item_id && <Row k="Work item" v={run.work_item_id} />}
               {run.project && <Row k="Project" v={run.project.name} />}
               {metaEntries.map(([k, v]) => (

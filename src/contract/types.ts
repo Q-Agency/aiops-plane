@@ -8,7 +8,7 @@
 // in sync by hand for now; codegen later). The Python SDK's Pydantic models must
 // conform to the same schema — verified by the conformance suite. See README.md.
 
-export const SCHEMA_VERSION = "0.2" as const;
+export const SCHEMA_VERSION = "0.3" as const;
 
 /** ISO-8601 timestamp, e.g. "2026-06-04T12:00:00Z". */
 export type ISODateTime = string;
@@ -20,13 +20,49 @@ export interface ProjectRef {
   name: string;
 }
 
+/** The shared, agent-agnostic lifecycle every work item / artifact moves through.
+ *  This is the backbone the dashboard renders generically; only the *artifact
+ *  type* differs per agent (BA → spec, SA → design, QA → tests). Each agent maps
+ *  its native status onto a stage (BA: active→in_progress, waiting_for_input→
+ *  waiting, spec_ready→ready, approved→approved). */
+export type LifecycleStage =
+  | "backlog" // known, not started
+  | "in_progress" // an agent run is actively advancing the artifact
+  | "waiting" // blocked on a human (clarification)
+  | "ready" // artifact produced, awaiting human approval
+  | "approved" // signed off
+  | "delivered"; // handed off downstream / done
+
+/** The thing an agent produces and advances (BA: `SPEC.md`). A work item carries
+ *  one artifact per producing agent; that agent's runs advance it through the
+ *  lifecycle. `type` matches the producer's agent-card `produces`. */
+export interface ArtifactRef {
+  id: string;
+  /** "spec" | "design" | "tests" | … (matches the producer's `produces`) */
+  type: string;
+  title?: string;
+  work_item_id?: string;
+  producer_agent_id?: string;
+  stage: LifecycleStage;
+  version?: number;
+  /** overall 0–100, if the agent scores it */
+  completeness?: number;
+  /** deep-link into the producing agent's own tool */
+  url?: string;
+  updated_at?: ISODateTime;
+}
+
 export interface WorkItem {
   id: string;
   /** "ticket" | "session" | "incident" | … (domain-defined) */
   type: string;
   title?: string;
-  stage?: string;
+  /** where it is in the shared lifecycle */
+  stage?: LifecycleStage;
+  /** the agent's native status (e.g. BA "spec_ready"), kept for reference */
   status?: string;
+  /** the artifact this work item is producing, e.g. "spec" */
+  artifact_type?: string;
   project?: ProjectRef;
   metadata?: Record<string, unknown>;
 }
@@ -41,8 +77,11 @@ export interface Run {
   /** denormalized title of the referenced work item, for display when the
    *  dashboard doesn't fetch the WorkItem itself (falls back to work_item_id) */
   work_item_title?: string;
-  /** agent-defined, e.g. "spec" */
+  /** agent-defined run type, e.g. "autospec" */
   type: string;
+  /** the artifact this run produces / advances, e.g. "spec" — ties a run to the
+   *  artifact lifecycle (an autospec run is a step in one spec's life) */
+  artifact_type?: string;
   status: RunStatus;
   started_at: ISODateTime;
   ended_at?: ISODateTime;
