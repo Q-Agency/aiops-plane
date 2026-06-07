@@ -4,13 +4,14 @@ import { Link } from "@tanstack/react-router";
 import {
   PlugZap,
   Activity,
+  ArrowRight,
   CheckCircle2,
   ChevronDown,
   Clock,
   Cpu,
   DollarSign,
   ExternalLink,
-  Layers,
+  TrendingUp,
 } from "lucide-react";
 import { runObservabilityUrl } from "@/lib/flow-link";
 
@@ -70,6 +71,97 @@ const fmtClockUTC = (ms: number) => {
 const workItemLabel = (x: { work_item_title?: string; work_item_id?: string }) =>
   x.work_item_title || x.work_item_id || "—";
 
+// --- KPI trends (all from the runs ledger; deterministic — anchored to the latest run,
+//     never Date.now(), so SSR and client agree) ------------------------------------
+const DAY_MS = 86_400_000;
+const isTerminal = (r: Run) => r.status === "succeeded" || r.status === "failed";
+
+/** Latest run time as a stable "now" anchor; null if no parseable runs. */
+function anchorMs(runs: Run[]): number | null {
+  let max = -Infinity;
+  for (const r of runs) {
+    const t = Date.parse(r.started_at);
+    if (!Number.isNaN(t) && t > max) max = t;
+  }
+  return max === -Infinity ? null : max;
+}
+
+/** Per-day sum of `pick` over the last `days`, oldest→newest. */
+function dailySeries(
+  runs: Run[],
+  anchor: number,
+  days: number,
+  pick: (r: Run) => number,
+): number[] {
+  const endDay = Math.floor(anchor / DAY_MS);
+  const out = new Array<number>(days).fill(0);
+  for (const r of runs) {
+    const t = Date.parse(r.started_at);
+    if (Number.isNaN(t)) continue;
+    const idx = days - 1 - (endDay - Math.floor(t / DAY_MS));
+    if (idx >= 0 && idx < days) out[idx] += pick(r);
+  }
+  return out;
+}
+
+/** Count/sum of `pick` within the last `win` days of the anchor. */
+function windowSum(runs: Run[], anchor: number, win: number, pick: (r: Run) => number): number {
+  const start = anchor - win * DAY_MS;
+  let s = 0;
+  for (const r of runs) {
+    const t = Date.parse(r.started_at);
+    if (!Number.isNaN(t) && t > start) s += pick(r);
+  }
+  return s;
+}
+
+/** % change of `pick`-sum: last `win` days vs the prior `win` days. null if no baseline. */
+function windowDelta(
+  runs: Run[],
+  anchor: number,
+  win: number,
+  pick: (r: Run) => number,
+): number | null {
+  const cur = windowSum(runs, anchor, win, pick);
+  const prev = windowSum(runs, anchor, 2 * win, pick) - cur; // prior window = [2w, w) ago
+  if (prev <= 0) return null;
+  return ((cur - prev) / prev) * 100;
+}
+
+function Sparkline({ data, className }: { data: number[]; className?: string }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const pts = data
+    .map((v, i) => `${(i / (data.length - 1)) * 100},${95 - ((v - min) / range) * 90}`)
+    .join(" ");
+  return (
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className={cn("h-5 w-full", className)}>
+      <polyline
+        points={pts}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+/** WoW delta chip. `goodDown` flips the color (for cost/latency, a drop is good). */
+function Delta({ pct, goodDown }: { pct: number | null; goodDown?: boolean }) {
+  if (pct == null || !Number.isFinite(pct) || Math.round(pct) === 0) return null;
+  const up = pct > 0;
+  const good = goodDown ? !up : up;
+  return (
+    <span className={cn("font-mono text-[10px]", good ? "text-status-done" : "text-status-error")}>
+      {up ? "▲" : "▼"}
+      {Math.abs(Math.round(pct))}%
+    </span>
+  );
+}
+
 type Props = {
   fleet: AgentHealth[];
   runs: Run[];
@@ -100,19 +192,26 @@ export function RealCommandCenter(initial: Props) {
   const activeRuns = fleet.reduce((n, a) => n + (a.active_runs ?? 0), 0);
   const healthy = fleet.filter((a) => a.healthy).length;
 
+  // KPI trends, all derived from the runs ledger (anchored to the latest run → deterministic).
+  const anchor = anchorMs(runs);
+  const costSeries = anchor != null ? dailySeries(runs, anchor, 14, (r) => r.cost_usd ?? 0) : [];
+  const costDelta = anchor != null ? windowDelta(runs, anchor, 7, (r) => r.cost_usd ?? 0) : null;
+  const tputSeries = anchor != null ? dailySeries(terminal, anchor, 14, () => 1) : [];
+  const tput7d = anchor != null ? windowSum(terminal, anchor, 7, () => 1) : terminal.length;
+  const tputDelta = anchor != null ? windowDelta(terminal, anchor, 7, () => 1) : null;
+  const durRuns = terminal.filter((r) => r.duration_ms != null);
+  const avgDurMs = durRuns.length
+    ? durRuns.reduce((s, r) => s + (r.duration_ms ?? 0), 0) / durRuns.length
+    : undefined;
+
   return (
     <div className="grid gap-4 p-4 lg:gap-5 lg:p-6 xl:grid-cols-[1fr_360px]">
       <div className="min-w-0 space-y-4 lg:space-y-5">
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Kpi
-            label="Connected"
-            value={String(fleet.length)}
-            sub={`${healthy} healthy`}
-            icon={<Cpu className="size-3.5" />}
-          />
-          <Kpi
-            label="Active runs"
+            label="Active specs"
             value={String(activeRuns)}
+            sub="in progress"
             accent={activeRuns > 0}
             icon={<Activity className="size-3.5" />}
           />
@@ -123,12 +222,36 @@ export function RealCommandCenter(initial: Props) {
             icon={<CheckCircle2 className="size-3.5" />}
           />
           <Kpi
+            label="Throughput"
+            value={String(tput7d)}
+            sub="last 7d"
+            delta={{ pct: tputDelta }}
+            series={tputSeries}
+            icon={<TrendingUp className="size-3.5" />}
+          />
+          <Kpi
+            label="Avg run"
+            value={fmtDur(avgDurMs)}
+            sub="per turn"
+            icon={<Clock className="size-3.5" />}
+          />
+          <Kpi
             label="Cost"
             value={fmtCost(totalCost)}
             sub={totalTokens ? `${Math.round(totalTokens / 1000)}k tok` : undefined}
+            delta={{ pct: costDelta, goodDown: true }}
+            series={costSeries}
             icon={<DollarSign className="size-3.5" />}
           />
+          <Kpi
+            label="Connected"
+            value={String(fleet.length)}
+            sub={`${healthy} healthy`}
+            icon={<Cpu className="size-3.5" />}
+          />
         </section>
+
+        <LifecycleFlow runs={runs} approvals={approvals} events={events} />
 
         <section>
           <SectionHead>Agent status</SectionHead>
@@ -149,14 +272,6 @@ export function RealCommandCenter(initial: Props) {
             Recent runs · {fleet[0]?.name}
           </SectionHead>
           {runs.length === 0 ? <Empty>No runs yet.</Empty> : <RunsTable runs={runs} />}
-        </section>
-
-        <section className="glass-panel flex items-start gap-3 p-4 text-sm text-muted-foreground">
-          <Layers className="mt-0.5 size-4 shrink-0" />
-          <span>
-            Pipeline flow, traceability, and unit economics light up as you connect downstream
-            agents (Software Architect, Dev, QA). Today the BA / spec slice is live.
-          </span>
         </section>
       </div>
 
@@ -188,9 +303,12 @@ function AgentCard({
   const pct = terminal.length ? Math.round((succeeded / terminal.length) * 100) : null;
   // BA runs many specs at once — show the concurrency, not just the first.
   const runningRuns = runs.filter((r) => r.status === "running");
+  const lastDone = runs.find(isTerminal); // runs are newest-first → most recent artifact
   const workingLabel =
     runningRuns.length === 0
-      ? "—"
+      ? lastDone
+        ? `last · ${workItemLabel(lastDone)}`
+        : "—"
       : runningRuns.length === 1
         ? workItemLabel(runningRuns[0])
         : `${runningRuns.length} specs in progress`;
@@ -331,29 +449,135 @@ function Kpi({
   sub,
   icon,
   accent,
+  delta,
+  series,
 }: {
   label: string;
   value: string;
   sub?: string;
   icon?: ReactNode;
   accent?: boolean;
+  delta?: { pct: number | null; goodDown?: boolean };
+  series?: number[];
 }) {
   return (
-    <div className="glass-panel p-3">
+    <div className="glass-panel flex flex-col p-3">
       <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
         {icon}
         {label}
       </div>
-      <div
-        className={cn(
-          "mt-1 font-mono text-xl tabular-nums",
-          accent ? "text-primary" : "text-foreground",
-        )}
-      >
-        {value}
+      <div className="mt-1 flex items-baseline gap-1.5">
+        <span
+          className={cn(
+            "font-mono text-xl tabular-nums",
+            accent ? "text-primary" : "text-foreground",
+          )}
+        >
+          {value}
+        </span>
+        {delta && <Delta pct={delta.pct} goodDown={delta.goodDown} />}
       </div>
       {sub && <div className="mt-0.5 text-[10px] text-muted-foreground">{sub}</div>}
+      {series && series.length > 1 && (
+        <div className={cn("mt-2", accent ? "text-primary/50" : "text-muted-foreground/40")}>
+          <Sparkline data={series} />
+        </div>
+      )}
     </div>
+  );
+}
+
+/** "Where every spec is right now" — the artifact lifecycle as a live flow, all from BA's
+ *  data: running runs → in-progress, gates → waiting/ready, lifecycle events → recent
+ *  approved/reset. The same lifecycle generalizes to every agent. */
+function LifecycleFlow({
+  runs,
+  approvals,
+  events,
+}: {
+  runs: Run[];
+  approvals: HITLGate[];
+  events: AgentEvent[];
+}) {
+  const inProgress = new Set(
+    runs.filter((r) => r.status === "running").map((r) => r.work_item_id ?? r.id),
+  ).size;
+  const waiting = approvals.filter((g) => g.kind === "clarification").length;
+  const ready = approvals.filter((g) => g.kind === "approval").length;
+  const stageOf = (e: AgentEvent) =>
+    e.type === "lifecycle.changed" ? (e.data?.stage as string | undefined) : undefined;
+  const recentApproved = events.filter((e) => stageOf(e) === "approved").length;
+  const recentReset = events.filter((e) => stageOf(e) === "reset").length;
+
+  const stages = [
+    {
+      key: "in_progress",
+      label: "In progress",
+      count: inProgress,
+      dot: "bg-status-running dot-pulse",
+      note: "agent working",
+    },
+    {
+      key: "waiting",
+      label: "Waiting · human",
+      count: waiting,
+      dot: "bg-status-waiting",
+      note: "blocked on clarification",
+    },
+    {
+      key: "ready",
+      label: "Ready · review",
+      count: ready,
+      dot: "bg-status-done",
+      note: "awaiting approval",
+    },
+  ];
+
+  return (
+    <section className="glass-panel p-5">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            Spec lifecycle
+          </div>
+          <div className="mt-0.5 text-sm font-semibold">Where every spec is right now</div>
+        </div>
+        {(recentApproved > 0 || recentReset > 0) && (
+          <div className="flex items-center gap-2 font-mono text-[10px]">
+            <span className="text-muted-foreground">recent</span>
+            {recentApproved > 0 && (
+              <span className="text-status-done">▲ {recentApproved} approved</span>
+            )}
+            {recentReset > 0 && <span className="text-status-error">↺ {recentReset} reset</span>}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-stretch gap-2">
+        {stages.map((s, i) => (
+          <div key={s.key} className="flex flex-1 items-center gap-2">
+            <div className="flex-1 rounded-lg border border-border bg-panel/40 p-3">
+              <div className="flex items-center gap-1.5">
+                <span className={cn("size-1.5 shrink-0 rounded-full", s.dot)} />
+                <span className="truncate font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {s.label}
+                </span>
+              </div>
+              <div className="mt-1.5 font-mono text-2xl tabular-nums">{s.count}</div>
+              <div className="mt-0.5 truncate text-[10px] text-muted-foreground">{s.note}</div>
+            </div>
+            {i < stages.length - 1 && (
+              <ArrowRight className="size-4 shrink-0 text-muted-foreground/40" />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 text-[10px] text-muted-foreground">
+        Downstream agents (Software Architect, Dev, QA) extend this same lifecycle as you connect
+        them.
+      </div>
+    </section>
   );
 }
 
