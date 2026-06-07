@@ -40,11 +40,16 @@ SSE, `/agent/health`, HITL via `waiting_for_input`) — so for BA this is mostly
   **pin a version**.
 - Python ≥ 3.12, **Pydantic v2**, **FastAPI** (match the agents' stack).
 
-### A.1 Contract types (Pydantic v2, domain-agnostic)
+### A.1 Contract types (Pydantic v2 — envelope + facet)
 
-Define a `SCHEMA_VERSION = "0.4"` constant, stamped on every emitted payload.
-**Domain-specific data must ride in `metadata` / event `data` — never as core
-fields.** (BA's `completeness`, EARS, `spec_version` etc. go in `metadata`.)
+Define a `SCHEMA_VERSION = "0.5"` constant, stamped on every emitted payload. The
+contract has two layers: a shared **envelope** (run lifecycle, health, gates, events,
+work-item ref) every agent emits identically and the dashboard renders generically, and
+a per-agent **facet** (`Run.artifact.facet`) carrying your craft's focus metrics —
+`SpecFacet` (BA), `DesignFacet` (SA), `CodeFacet` (Dev), `TestFacet` (QA), … with a
+`GenericFacet` fallback so any agent still renders. **Put your structured metrics in the
+right facet** (BA's `completeness` → `SpecFacet.completeness`/`dimensions`); only
+genuinely freeform extras ride in `metadata` / event `data`.
 
 > **Canonical schema:** the authoritative contract is **`agent-contract.schema.json`**
 > (it lives in the Agency OS repo at `src/contract/`; copy it into this repo
@@ -223,17 +228,20 @@ serves the Agent Card (A.6) from the constructor args.
 
 ```python
 async def handle_task(task):
-    async with agent.run(work_item=task.id, type="spec",
-                         metadata={"teamwork_task": task.id}) as run:   # emits run.started, records a Run
+    work_item = WorkItemRef(id=task.id, title=task.title,              # source-neutral ref to the tracker
+        source=ExternalRef(system="teamwork", external_id=task.id, url=task.url))
+    async with agent.run(work_item=work_item, type="spec") as run:     # emits run.started, records a Run
         run.emit("tool.called", {"tool": "search_teamwork"})           # canonical event → SSE + history
         # ... do work ...
         decision = await run.request_approval(                          # opens a HITLGate{kind}, emits hitl.requested,
             kind="approval",                                           # "approval" (artifact ready) | "clarification" (blocked, need an answer)
-            prompt="Spec ready for review", work_item_title=task.title, # title = human label (else the id shows)
-            channel="slack", metadata={"completeness": 86, "artifact": "spec"},
+            prompt="Spec ready for review",
+            channel="slack",
         )
         run.finish(outcome="success", tokens_in=…, tokens_out=…,        # emits run.completed, closes the Run
-                   cost_usd=…, metadata={"completeness": 92, "spec_version": 4})
+                   cost_usd=…,                                          # your typed facet → the dashboard's Spec card
+                   artifact=RunArtifact(type="spec", version=4,
+                       facet=SpecFacet(completeness=92, dimensions={"user_roles": 95})))
 ```
 
 - **Two HITL moments, one type.** Every gate is a `HITLGate`, distinguished by `kind`:
@@ -281,7 +289,7 @@ Served at `/.well-known/agent-card.json`, built from the `Agent(...)` args:
     // our extension (A2A doesn't model pipeline topology)
     "id": "ba",
     "domain": "sdlc",
-    "contractVersion": "0.4",
+    "contractVersion": "0.5",
     "produces": ["spec"],
     "consumes": ["task"],
     "sources": [
@@ -339,9 +347,10 @@ codebase — these are from an earlier read and may have moved):
 | `error`                                              | `run.error`                                                             |
 | pipeline `turn_start` / `turn_done` / `score_update` | `step.started` / `step.completed` / `metric.update` (payload in `data`) |
 
-**Move BA-domain fields into `metadata`:** `completeness` (6-dim), EARS criteria,
-`spec_version`, validation errors → `Run.metadata` / event `data`. They must
-**not** become core SDK fields.
+**Map BA-domain metrics onto the spec facet:** `completeness` (6-dim) →
+`SpecFacet.completeness` + `dimensions`; validation errors →
+`SpecFacet.validation_errors`; `spec_version` → `RunArtifact.version`. Only genuinely
+freeform extras stay in `Run.metadata` / event `data`.
 
 **Project is a first-class field, not metadata:** map BA's `project_id` /
 `project_name` (it enriches `/runs/all`) → `Run.project` (`ProjectRef`). It's the
@@ -387,15 +396,16 @@ app = agent.fastapi_app()
       payloads carrying `schema_version`.
 - [ ] Canonical events are emitted (`run.started` … `run.completed`,
       `tool.called`, `hitl.requested`/`hitl.resolved`).
-- [ ] No core contract type contains BA-specific fields; domain data is in
-      `metadata` / event `data`.
+- [ ] BA's metrics ride on the typed `SpecFacet` (completeness/dimensions/validation
+      errors); only genuinely freeform extras stay in `metadata` / event `data`.
 - [ ] BA's flow-observer still works.
 - [ ] `python -m agency_sdk.conformance <ba_url>` passes.
 
 ## Constraints / don'ts
 
 - **Card only**, not the full A2A protocol.
-- **No domain logic in the SDK** (no Teamwork/Slack/spec specifics).
+- **No agent-specific behavior in the SDK** — it ships the SDLC facet *types* but no
+  Teamwork/Slack/spec *logic*; that stays in the agent.
 - API key / auth header name is **configurable**; secret values come from **env**,
   never hard-coded.
 - Backward-compatible, additive evolution; bump `SCHEMA_VERSION` only for breaks.
