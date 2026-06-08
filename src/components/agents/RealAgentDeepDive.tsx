@@ -776,47 +776,22 @@ function LiveSpecReport({ report }: { report?: SpecReport | null }) {
   if (!report) return null;
   const weak = report.weak_criteria ?? [];
   const warnings = report.lint_warnings ?? [];
-  // Coverage % is only meaningful once the spec has acceptance criteria; 0/0 = "not yet".
   const acTotal = report.ac_total ?? 0;
-  // BA standardizes on EARS, so its GWT is ~always 0% — only show GWT when it's actually
-  // used (a future agent might), so BA doesn't display a misleading 0% bar.
-  const showGwt = (report.gwt_coverage ?? 0) > 0;
-  const hasCoverage = acTotal > 0 && (report.ears_coverage != null || showGwt);
-  if (!hasCoverage && !weak.length && !warnings.length) return null;
+  // The coverage % is a summary — it lives on the SpecCard above. This section is the
+  // DETAIL: the acceptance-criteria count, which ACs aren't EARS, and lint. Nothing to
+  // drill into yet (e.g. an in-progress spec) → hide.
+  if (!acTotal && !weak.length && !warnings.length) return null;
   return (
     <section>
       <SectionLabel>Live spec report · current</SectionLabel>
       <div className="space-y-3 rounded-md border border-border bg-white/[0.02] p-3">
-        {hasCoverage && (
-          <div className="space-y-2">
-            {report.ears_coverage != null && (
-              <CoverageBar
-                label="EARS"
-                pct={report.ears_coverage}
-                sub={
-                  report.ears_count != null && report.ac_total != null
-                    ? `${report.ears_count}/${report.ac_total}`
-                    : undefined
-                }
-              />
-            )}
-            {showGwt && (
-              <CoverageBar
-                label="GWT"
-                pct={report.gwt_coverage ?? 0}
-                sub={
-                  report.gwt_count != null && report.ac_total != null
-                    ? `${report.gwt_count}/${report.ac_total}`
-                    : undefined
-                }
-              />
-            )}
-          </div>
+        {acTotal > 0 && (
+          <div className="text-[11px] text-muted-foreground">{acTotal} acceptance criteria</div>
         )}
         {weak.length > 0 && (
           <div>
             <div className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-              Non-EARS criteria ({weak.length})
+              Not in EARS form ({weak.length})
             </div>
             <ul className="space-y-1">
               {weak.map((c, i) => (
@@ -855,25 +830,6 @@ function LiveSpecReport({ report }: { report?: SpecReport | null }) {
         )}
       </div>
     </section>
-  );
-}
-
-function CoverageBar({ label, pct, sub }: { label: string; pct: number; sub?: string }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between text-[11px] text-muted-foreground">
-        <span>{label}</span>
-        <span className="font-mono">
-          {Math.round(pct)}%{sub ? ` · ${sub}` : ""}
-        </span>
-      </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
-        <div
-          className="h-full rounded-full bg-primary/60"
-          style={{ width: `${Math.max(0, Math.min(100, pct))}%` }}
-        />
-      </div>
-    </div>
   );
 }
 
