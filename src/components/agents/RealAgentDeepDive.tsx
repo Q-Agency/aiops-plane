@@ -414,6 +414,7 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
           systemId={systemId}
           siblingRuns={runs}
           observabilityTemplate={observability}
+          approvals={approvals}
           onClose={() => setOpenRun(null)}
         />
       )}
@@ -421,7 +422,24 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
   );
 }
 
+/** The review/approve deep-link an approval gate carries — the agent stamps its own
+ *  dashboard URL into `gate.metadata.review_url` (BA: `{DASHBOARD_BASE_URL}/?session=<id>`). */
+function gateReviewUrl(g: HITLGate): string | undefined {
+  const u = (g.metadata as Record<string, unknown> | undefined)?.review_url;
+  return typeof u === "string" && u.length > 0 ? u : undefined;
+}
+
+/** The open approval gate (a produced artifact awaiting human sign-off) for a run's work
+ *  item, if any — i.e. "this spec is waiting for review right now." */
+function reviewGateFor(approvals: HITLGate[] | undefined, run: Run): HITLGate | undefined {
+  if (!run.work_item_id) return undefined;
+  return (approvals ?? []).find(
+    (g) => g.kind === "approval" && g.state === "open" && g.work_item_id === run.work_item_id,
+  );
+}
+
 function GateRow({ gate: g }: { gate: HITLGate }) {
+  const reviewUrl = g.kind === "approval" ? gateReviewUrl(g) : undefined;
   return (
     <div className="rounded-md border border-status-waiting/30 bg-status-waiting/5 p-2.5">
       <div className="flex items-center justify-between gap-2">
@@ -434,6 +452,18 @@ function GateRow({ gate: g }: { gate: HITLGate }) {
       <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
         {[workItemLabel(g), g.channel].filter((v) => v && v !== "—").join(" · ")}
       </div>
+      {reviewUrl && (
+        <a
+          href={reviewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="mt-2 inline-flex items-center gap-1.5 rounded border border-status-waiting/40 bg-status-waiting/10 px-2 py-1 text-[11px] font-medium text-status-waiting transition-colors hover:bg-status-waiting/20"
+        >
+          Review &amp; approve in BA
+          <ExternalLink className="size-3 shrink-0" />
+        </a>
+      )}
     </div>
   );
 }
@@ -443,15 +473,21 @@ function RunDrawer({
   systemId,
   siblingRuns,
   observabilityTemplate,
+  approvals,
   onClose,
 }: {
   run: Run;
   systemId: string;
   siblingRuns?: Run[];
   observabilityTemplate?: string;
+  approvals?: HITLGate[];
   onClose: () => void;
 }) {
   const liveUrl = runObservabilityUrl(observabilityTemplate, run);
+  // Is this run's artifact sitting in a human-review gate? If so, deep-link to the agent's
+  // own approval screen (BA's "Spec review workspace") so the operator can sign off there.
+  const reviewGate = reviewGateFor(approvals, run);
+  const reviewUrl = reviewGate ? gateReviewUrl(reviewGate) : undefined;
   // The live deep view only exists *while the run is in flight* — BA streams it from an
   // in-memory bus that's wiped ~5 min after the run finishes (and on restart). Past that,
   // the durable record below is the source of truth. So only offer the live link when running.
@@ -548,6 +584,25 @@ function RunDrawer({
               below.
             </div>
           ) : null}
+
+          {/* Waiting on a human: the produced artifact is in a review gate → deep-link to the
+              agent's own approval screen so the operator can approve / request changes. */}
+          {reviewUrl && (
+            <a
+              href={reviewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-2 rounded-md border border-status-waiting/40 bg-status-waiting/10 p-3 text-xs text-foreground transition-colors hover:bg-status-waiting/20"
+            >
+              <span>
+                <span className="font-medium text-status-waiting">Waiting for review</span>
+                <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                  Open the agent's dashboard to approve the spec or request changes.
+                </span>
+              </span>
+              <ExternalLink className="size-4 shrink-0 text-status-waiting" />
+            </a>
+          )}
 
           {/* Artifact facet — the per-agent craft + focus metrics, from the typed
               run.artifact.facet (spec → SpecCard; anything else → generic fallback). */}
