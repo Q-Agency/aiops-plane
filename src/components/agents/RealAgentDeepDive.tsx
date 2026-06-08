@@ -628,6 +628,23 @@ function SpecCard({ facet, run }: { facet: SpecFacet; run: Run }) {
   const gatePass = !!s && s.total != null && s.passed === s.total;
   const missing = facet.missing_sections ?? [];
   const valErrors = facet.validation_errors ?? [];
+  // Structural quality is persisted when the turn COMPLETES — a running run has none yet.
+  const hasAny =
+    (!!s && (s.passed != null || s.total != null)) ||
+    Object.keys(after).length > 0 ||
+    facet.completeness != null ||
+    facet.ears_coverage != null ||
+    missing.length > 0 ||
+    valErrors.length > 0;
+  if (!hasAny) {
+    return (
+      <div className="text-[11px] text-muted-foreground">
+        {run.status === "running"
+          ? "In progress — structural quality is recorded when the turn completes."
+          : "No structural data recorded for this run."}
+      </div>
+    );
+  }
   return (
     <div className="space-y-4">
       {s && (s.passed != null || s.total != null) && (
@@ -699,7 +716,7 @@ function SpecCard({ facet, run }: { facet: SpecFacet; run: Run }) {
         </div>
       )}
 
-      {(facet.completion_reason || facet.finalize_method || facet.decisions != null) && (
+      {(facet.completion_reason || facet.finalize_method || !!facet.decisions) && (
         <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
           {facet.completion_reason && <Tag>{facet.completion_reason.replace(/_/g, " ")}</Tag>}
           {facet.finalize_method && <Tag>finalize: {facet.finalize_method}</Tag>}
@@ -754,8 +771,10 @@ function LiveSpecReport({ report }: { report?: SpecReport | null }) {
   if (!report) return null;
   const weak = report.weak_criteria ?? [];
   const warnings = report.lint_warnings ?? [];
-  const hasCoverage = report.ears_coverage != null || report.gwt_coverage != null;
-  if (!hasCoverage && !weak.length && !warnings.length && report.ac_total == null) return null;
+  // Coverage % is only meaningful once the spec has acceptance criteria; 0/0 = "not yet".
+  const acTotal = report.ac_total ?? 0;
+  const hasCoverage = acTotal > 0 && (report.ears_coverage != null || report.gwt_coverage != null);
+  if (!hasCoverage && !weak.length && !warnings.length) return null;
   return (
     <section>
       <SectionLabel>Live spec report · current</SectionLabel>
