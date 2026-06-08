@@ -131,6 +131,11 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
   const { agent, runs, approvals, observability } = data as AgentDetailData;
   if (!agent) return <NotConnected systemId={systemId} />;
 
+  // Keep the open drawer synced with the polled data — `openRun` is otherwise a frozen
+  // click-time snapshot, so a running run wouldn't fill in (facet, end time) when it
+  // completes. Re-resolve it from the latest runs each poll.
+  const openRunLive = openRun ? (runs.find((r) => r.id === openRun.id) ?? openRun) : null;
+
   const terminal = runs.filter((r) => r.status === "succeeded" || r.status === "failed");
   const succeeded = runs.filter((r) => r.status === "succeeded").length;
   const failed = runs.filter((r) => r.status === "failed").length;
@@ -403,9 +408,9 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
         )}
       </section>
 
-      {openRun && (
+      {openRunLive && (
         <RunDrawer
-          run={openRun}
+          run={openRunLive}
           systemId={systemId}
           siblingRuns={runs}
           observabilityTemplate={observability}
