@@ -778,14 +778,17 @@ function LiveSpecReport({ report }: { report?: SpecReport | null }) {
   const warnings = report.lint_warnings ?? [];
   // Coverage % is only meaningful once the spec has acceptance criteria; 0/0 = "not yet".
   const acTotal = report.ac_total ?? 0;
-  const hasCoverage = acTotal > 0 && (report.ears_coverage != null || report.gwt_coverage != null);
+  // BA standardizes on EARS, so its GWT is ~always 0% — only show GWT when it's actually
+  // used (a future agent might), so BA doesn't display a misleading 0% bar.
+  const showGwt = (report.gwt_coverage ?? 0) > 0;
+  const hasCoverage = acTotal > 0 && (report.ears_coverage != null || showGwt);
   if (!hasCoverage && !weak.length && !warnings.length) return null;
   return (
     <section>
       <SectionLabel>Live spec report · current</SectionLabel>
       <div className="space-y-3 rounded-md border border-border bg-white/[0.02] p-3">
         {hasCoverage && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
             {report.ears_coverage != null && (
               <CoverageBar
                 label="EARS"
@@ -797,10 +800,10 @@ function LiveSpecReport({ report }: { report?: SpecReport | null }) {
                 }
               />
             )}
-            {report.gwt_coverage != null && (
+            {showGwt && (
               <CoverageBar
                 label="GWT"
-                pct={report.gwt_coverage}
+                pct={report.gwt_coverage ?? 0}
                 sub={
                   report.gwt_count != null && report.ac_total != null
                     ? `${report.gwt_count}/${report.ac_total}`
