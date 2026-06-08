@@ -725,7 +725,7 @@ function SpecCard({ facet, run }: { facet: SpecFacet; run: Run }) {
         <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
           {facet.completion_reason && <Tag>{facet.completion_reason.replace(/_/g, " ")}</Tag>}
           {facet.finalize_method && <Tag>finalize: {facet.finalize_method}</Tag>}
-          {facet.decisions != null && <Tag>{facet.decisions} decisions</Tag>}
+          {!!facet.decisions && <Tag>{facet.decisions} decisions</Tag>}
         </div>
       )}
 
