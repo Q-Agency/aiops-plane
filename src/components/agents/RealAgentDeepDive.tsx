@@ -25,15 +25,7 @@ import {
 } from "lucide-react";
 import { runObservabilityUrl } from "@/lib/flow-link";
 
-import type {
-  AgentHealth,
-  AgentState,
-  ArtifactFacet,
-  HITLGate,
-  Run,
-  RunStatus,
-  SpecFacet,
-} from "@/contract";
+import type { AgentHealth, AgentState, ArtifactFacet, HITLGate, Run, SpecFacet } from "@/contract";
 import {
   getAgentDetailFn,
   getSpecReportFn,
@@ -42,6 +34,7 @@ import {
 } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
 import { fmtDateTime, fmtTime } from "@/lib/time";
+import { STAGE_META, runStage } from "@/lib/lifecycle";
 
 const POLL_MS = 5000;
 
@@ -52,12 +45,21 @@ const AGENT_STATE_DOT: Record<AgentState, string> = {
   idle: "bg-status-idle",
 };
 
-const RUN_STATUS_STYLE: Record<RunStatus, string> = {
-  running: "border-status-running/40 bg-status-running/10 text-status-running",
-  succeeded: "border-status-done/40 bg-status-done/10 text-status-done",
-  failed: "border-status-error/40 bg-status-error/10 text-status-error",
-  cancelled: "border-border bg-white/5 text-muted-foreground",
-};
+/** The run's SDLC lifecycle stage (ready for review / approved / in progress / …) rather
+ *  than the bare exec status — derived from the agent's real session status when present. */
+function RunStageBadge({ run }: { run: Run }) {
+  const meta = STAGE_META[runStage(run)] ?? STAGE_META.done;
+  return (
+    <span
+      className={cn(
+        "inline-block rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
+        meta.cls,
+      )}
+    >
+      {meta.label}
+    </span>
+  );
+}
 
 const fmtCost = (v?: number) => (v == null ? "—" : `$${v.toFixed(2)}`);
 const fmtDur = (ms?: number) => {
@@ -359,7 +361,7 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
                 <tr className="border-b border-border">
                   <th className="px-2 py-2 text-left font-medium">Task</th>
                   <th className="px-2 py-2 text-left font-medium">Type</th>
-                  <th className="px-2 py-2 text-left font-medium">Status</th>
+                  <th className="px-2 py-2 text-left font-medium">Stage</th>
                   <th className="px-2 py-2 text-left font-medium">Started</th>
                   <th className="px-2 py-2 text-right font-medium">Duration</th>
                   <th className="px-2 py-2 text-right font-medium">Tokens</th>
@@ -382,14 +384,7 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
                     </td>
                     <td className="px-2 py-2">{r.type}</td>
                     <td className="px-2 py-2">
-                      <span
-                        className={cn(
-                          "inline-block rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
-                          RUN_STATUS_STYLE[r.status],
-                        )}
-                      >
-                        {r.status}
-                      </span>
+                      <RunStageBadge run={r} />
                     </td>
                     <td className="px-2 py-2 text-muted-foreground" title={r.started_at}>
                       {fmtDateTime(r.started_at)}
@@ -541,11 +536,11 @@ function RunDrawer({
             )}
             <Tag>
               <span
-                className={RUN_STATUS_STYLE[run.status]
+                className={(STAGE_META[runStage(run)] ?? STAGE_META.done).cls
                   .split(" ")
                   .find((c) => c.startsWith("text-"))}
               >
-                {run.status}
+                {(STAGE_META[runStage(run)] ?? STAGE_META.done).label}
               </span>
             </Tag>
             <Tag>{fmtDur(run.duration_ms)}</Tag>

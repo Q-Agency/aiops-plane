@@ -37,37 +37,9 @@ import {
   type WorkItemRef,
 } from "@/contract";
 import type { RegisteredSystem } from "./systems.server";
-
-/** Map BA's native session status onto the shared, agent-agnostic lifecycle.
- *  Used by the BA-native spec-quality enrichment (the canonical surface already
- *  carries lifecycle stages where relevant). */
-export function lifecycleStage(status?: string): LifecycleStage | undefined {
-  switch (status) {
-    case "active":
-    case "in_progress":
-    case "running":
-      return "in_progress";
-    case "waiting_for_input":
-      return "waiting";
-    case "spec_ready":
-      return "ready";
-    case "approved":
-      return "approved";
-    case "delivered":
-      return "delivered";
-    case "reset":
-      return "reset"; // spec cleared — a fresh run is needed
-    case "blocked":
-      return "blocked";
-    case "error":
-    case "failed":
-      return "error";
-    case "pending":
-      return "backlog";
-    default:
-      return undefined;
-  }
-}
+// The BA→shared-lifecycle mapping lives in a client-safe module so the React tables can
+// reuse it (this .server.ts file can't be imported from the browser bundle).
+import { lifecycleStage } from "@/lib/lifecycle";
 
 async function baFetch(system: RegisteredSystem, path: string): Promise<any> {
   const headers: Record<string, string> = { accept: "application/json" };

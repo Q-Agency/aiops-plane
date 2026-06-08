@@ -29,6 +29,7 @@ import type {
   RunStatus,
 } from "@/contract";
 import { getCommandCenterFn } from "@/lib/api/fleet.functions";
+import { STAGE_META, lifecycleStage } from "@/lib/lifecycle";
 import { cn } from "@/lib/utils";
 
 // How often the real surface re-reads the fleet through the gateway. Pauses while
@@ -627,25 +628,8 @@ function LifecycleFlow({
   );
 }
 
-const STAGE_BADGE: Record<string, { cls: string; label: string }> = {
-  in_progress: {
-    cls: "text-status-running border-status-running/40 bg-status-running/10",
-    label: "in progress",
-  },
-  waiting: {
-    cls: "text-status-waiting border-status-waiting/40 bg-status-waiting/10",
-    label: "waiting · human",
-  },
-  ready: {
-    cls: "text-status-done border-status-done/40 bg-status-done/10",
-    label: "ready · review",
-  },
-  done: { cls: "text-muted-foreground border-border bg-white/5", label: "done" },
-  error: { cls: "text-status-error border-status-error/40 bg-status-error/10", label: "error" },
-};
-
 function StageBadge({ stage }: { stage: string }) {
-  const s = STAGE_BADGE[stage] ?? STAGE_BADGE.done;
+  const s = STAGE_META[stage] ?? STAGE_META.done;
   return (
     <span className={cn("inline-block rounded border px-1.5 py-0.5 text-[10px]", s.cls)}>
       {s.label}
@@ -709,9 +693,16 @@ function buildWorkItems(runs: Run[], approvals: HITLGate[]): WorkItem[] {
     );
     const running = rs.some((r) => r.status === "running");
     const gate = gateStage.get(wid);
+    // Prefer the agent's real session stage (approved / ready / waiting / …). A live running
+    // turn overrides to in_progress; else fall back to an open gate, then the run outcome.
+    const sessionStage = lifecycleStage(
+      typeof latest.metadata?.session_status === "string"
+        ? latest.metadata.session_status
+        : undefined,
+    );
     const stage = running
       ? "in_progress"
-      : (gate ?? (latest.status === "failed" ? "error" : "done"));
+      : (sessionStage ?? gate ?? (latest.status === "failed" ? "error" : "done"));
     const times = rs
       .map((r) => Date.parse(r.ended_at ?? r.started_at))
       .filter((n) => !Number.isNaN(n));
