@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import {
   Activity,
+  AlertTriangle,
   CheckCircle2,
   Clock,
   Cpu,
@@ -24,7 +25,15 @@ import {
 } from "lucide-react";
 import { runObservabilityUrl } from "@/lib/flow-link";
 
-import type { AgentHealth, AgentState, HITLGate, Run, RunStatus } from "@/contract";
+import type {
+  AgentHealth,
+  AgentState,
+  ArtifactFacet,
+  HITLGate,
+  Run,
+  RunStatus,
+  SpecFacet,
+} from "@/contract";
 import { getAgentDetailFn, type AgentDetailData } from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
 import { fmtDateTime, fmtTime } from "@/lib/time";
@@ -429,26 +438,17 @@ function RunDrawer({
   observabilityTemplate?: string;
   onClose: () => void;
 }) {
-  const meta = run.metadata ?? {};
   const liveUrl = runObservabilityUrl(observabilityTemplate, run);
   // The live deep view only exists *while the run is in flight* — BA streams it from an
   // in-memory bus that's wiped ~5 min after the run finishes (and on restart). Past that,
   // the durable record below is the source of truth. So only offer the live link when running.
   const showLive = run.status === "running" && !!liveUrl;
 
-  const before = completenessMap(meta.completeness_before);
-  const after = completenessMap(meta.completeness_after);
-  const cBefore = avgOf(before);
-  const cAfter = avgOf(after);
-
   // The session's turns (same work item) — a durable timeline of how the spec advanced.
   const turns = (siblingRuns ?? [])
     .filter((r) => r.work_item_id && r.work_item_id === run.work_item_id)
     .sort((a, b) => turnNo(a) - turnNo(b));
 
-  const valErrors = Array.isArray(meta.validation_errors)
-    ? (meta.validation_errors as unknown[])
-    : [];
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1 bg-black/60 backdrop-blur-sm" />
@@ -476,7 +476,9 @@ function RunDrawer({
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[11px]">
             <Tag>{run.type}</Tag>
-            {run.artifact_type && <Tag>→ {run.artifact_type}</Tag>}
+            {(run.artifact?.type ?? run.artifact_type) && (
+              <Tag>→ {run.artifact?.type ?? run.artifact_type}</Tag>
+            )}
             <Tag>
               <span
                 className={RUN_STATUS_STYLE[run.status]
@@ -523,44 +525,9 @@ function RunDrawer({
             </div>
           ) : null}
 
-          {/* Spec completeness — durable, from persisted run metrics */}
-          {(Object.keys(after).length > 0 || Object.keys(before).length > 0) && (
-            <section>
-              <SectionLabel>
-                Spec completeness
-                {cBefore != null && cAfter != null ? ` · avg ${cBefore}% → ${cAfter}%` : ""}
-              </SectionLabel>
-              <div className="space-y-2">
-                {Object.entries(COMPLETENESS_LABELS).map(([dim, label]) =>
-                  after[dim] == null && before[dim] == null ? null : (
-                    <CompletenessRow
-                      key={dim}
-                      label={label}
-                      before={before[dim]}
-                      after={after[dim]}
-                    />
-                  ),
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Validation errors — durable */}
-          {valErrors.length > 0 && (
-            <section>
-              <SectionLabel>Validation ({valErrors.length})</SectionLabel>
-              <ul className="space-y-1">
-                {valErrors.map((e, i) => (
-                  <li
-                    key={i}
-                    className="rounded border border-status-error/25 bg-status-error/5 px-2 py-1 font-mono text-[11px] text-status-error/90"
-                  >
-                    {String(e)}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+          {/* Artifact facet — the per-agent craft + focus metrics, from the typed
+              run.artifact.facet (spec → SpecCard; anything else → generic fallback). */}
+          <FacetPanel run={run} />
 
           {/* Session turns — durable timeline of the spec's autospec iterations */}
           {turns.length > 1 && (
@@ -580,15 +547,10 @@ function RunDrawer({
             <dl className="space-y-1 text-xs">
               <Row k="Started" v={run.started_at} />
               <Row k="Ended" v={run.ended_at ?? "—"} />
-              {run.work_item_id && <Row k="Work item" v={run.work_item_id} />}
+              {(run.work_item?.id ?? run.work_item_id) && (
+                <Row k="Work item" v={(run.work_item?.id ?? run.work_item_id) as string} />
+              )}
               {run.project && <Row k="Project" v={run.project.name} />}
-              {typeof meta.finalize_method === "string" && (
-                <Row k="Finalize" v={meta.finalize_method} />
-              )}
-              {meta.decision_count != null && <Row k="Decisions" v={String(meta.decision_count)} />}
-              {meta.worker_count != null && Number(meta.worker_count) > 0 && (
-                <Row k="Workers" v={String(meta.worker_count)} />
-              )}
             </dl>
           </section>
         </div>
@@ -608,6 +570,160 @@ function Row({ k, v }: { k: string; v: string }) {
 
 function Tag({ children }: { children: ReactNode }) {
   return <span className="rounded border border-border px-1.5 py-0.5">{children}</span>;
+}
+
+// --- Artifact facet renderers ------------------------------------------------
+// Registry: each artifact kind gets a bespoke card; unknown kinds fall back to a
+// generic key/value list so any agent still renders. Add a role = add a case here.
+
+/** Per-agent craft + focus metrics from the typed `run.artifact.facet`. */
+function FacetPanel({ run }: { run: Run }) {
+  const facet = run.artifact?.facet;
+  if (!facet) return null;
+  if (facet.kind === "spec") {
+    return (
+      <section>
+        <SectionLabel>Spec quality</SectionLabel>
+        <SpecCard facet={facet} run={run} />
+      </section>
+    );
+  }
+  return (
+    <section>
+      <SectionLabel>{facet.kind} metrics</SectionLabel>
+      <AnyFacetCard facet={facet} />
+    </section>
+  );
+}
+
+/** BA's spec quality — structural-first: the V1–V9 gate is the headline; the
+ *  6-dimension readout is a structurally-derived signal, not LLM-judged. */
+function SpecCard({ facet, run }: { facet: SpecFacet; run: Run }) {
+  const before = completenessMap(run.metadata?.completeness_before);
+  const after = facet.dimensions ?? completenessMap(run.metadata?.completeness_after);
+  const cAfter = facet.completeness ?? avgOf(after);
+  const s = facet.structural;
+  const gatePass = !!s && s.total != null && s.passed === s.total;
+  const missing = facet.missing_sections ?? [];
+  const valErrors = facet.validation_errors ?? [];
+  return (
+    <div className="space-y-4">
+      {s && (s.passed != null || s.total != null) && (
+        <div
+          className={cn(
+            "flex items-center justify-between rounded-md border p-3",
+            gatePass
+              ? "border-status-done/30 bg-status-done/5"
+              : "border-status-waiting/30 bg-status-waiting/5",
+          )}
+        >
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Structural gate (V1–V9)
+            </div>
+            <div className="mt-0.5 text-sm font-semibold">
+              {s.passed ?? 0} / {s.total ?? 0} checks passed
+            </div>
+          </div>
+          {gatePass ? (
+            <CheckCircle2 className="size-5 shrink-0 text-status-done" />
+          ) : (
+            <AlertTriangle className="size-5 shrink-0 text-status-waiting" />
+          )}
+        </div>
+      )}
+
+      {facet.ears_coverage != null && (
+        <div>
+          <div className="flex justify-between text-[11px] text-muted-foreground">
+            <span>EARS coverage</span>
+            <span className="font-mono">{Math.round(facet.ears_coverage)}%</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
+            <div
+              className="h-full rounded-full bg-primary/60"
+              style={{ width: `${Math.max(0, Math.min(100, facet.ears_coverage))}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {missing.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="text-[11px] text-muted-foreground">Missing sections:</span>
+          {missing.map((m) => (
+            <span
+              key={m}
+              className="rounded border border-status-waiting/30 bg-status-waiting/10 px-1.5 py-0.5 text-[10px] text-status-waiting"
+            >
+              {m}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {(Object.keys(after).length > 0 || Object.keys(before).length > 0) && (
+        <div>
+          <SectionLabel>
+            Dimensions (structural){cAfter != null ? ` · ${Math.round(cAfter)}%` : ""}
+          </SectionLabel>
+          <div className="space-y-2">
+            {Object.entries(COMPLETENESS_LABELS).map(([dim, label]) =>
+              after[dim] == null && before[dim] == null ? null : (
+                <CompletenessRow key={dim} label={label} before={before[dim]} after={after[dim]} />
+              ),
+            )}
+          </div>
+        </div>
+      )}
+
+      {(facet.completion_reason || facet.finalize_method || facet.decisions != null) && (
+        <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
+          {facet.completion_reason && <Tag>{facet.completion_reason.replace(/_/g, " ")}</Tag>}
+          {facet.finalize_method && <Tag>finalize: {facet.finalize_method}</Tag>}
+          {facet.decisions != null && <Tag>{facet.decisions} decisions</Tag>}
+        </div>
+      )}
+
+      {valErrors.length > 0 && (
+        <div>
+          <SectionLabel>Validation ({valErrors.length})</SectionLabel>
+          <ul className="space-y-1">
+            {valErrors.map((e, i) => (
+              <li
+                key={i}
+                className="rounded border border-status-error/25 bg-status-error/5 px-2 py-1 font-mono text-[11px] text-status-error/90"
+              >
+                {e}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Generic fallback — lists an artifact facet's scalar fields, so an agent without a
+ *  bespoke card still renders something useful. */
+function AnyFacetCard({ facet }: { facet: ArtifactFacet }) {
+  const src: Record<string, unknown> =
+    facet.kind === "generic" ? (facet.values ?? {}) : (facet as unknown as Record<string, unknown>);
+  const entries = Object.entries(src).filter(
+    ([k, v]) =>
+      k !== "kind" && (typeof v === "string" || typeof v === "number" || typeof v === "boolean"),
+  );
+  if (!entries.length) return null;
+  return (
+    <dl className="space-y-1 text-xs">
+      {entries.map(([k, v]) => (
+        <div key={k} className="flex gap-3">
+          <dt className="w-32 shrink-0 font-mono text-muted-foreground">{k.replace(/_/g, " ")}</dt>
+          <dd className="min-w-0 flex-1 break-words font-mono text-foreground/90">{String(v)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
 }
 
 const COMPLETENESS_LABELS: Record<string, string> = {
