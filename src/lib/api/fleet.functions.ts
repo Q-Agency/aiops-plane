@@ -10,8 +10,13 @@ import type {
   CompletenessMap,
   SpecBase,
   SpecQuality,
+  SpecReport,
 } from "../gateway/ba-adapter.server";
 import { COMPLETENESS_DIMS } from "../gateway/ba-adapter.server";
+
+// Re-export so client components can type the getSpecReportFn result without importing
+// the `.server` module directly.
+export type { SpecReport } from "../gateway/ba-adapter.server";
 
 // The gateway seam: server functions the dashboard's "real" mode calls to get
 // normalized, contract-shaped fleet data. Secrets + fetches stay server-side
@@ -174,6 +179,19 @@ export const getAgentDetailFn = createServerFn({ method: "GET" })
       (g) => (g.metadata?.agent_id as string | undefined) === data.systemId,
     );
     return { agent, runs, approvals: mine, observability };
+  });
+
+/** Live, READ-ONLY structural report for a spec's CURRENT state (AC/EARS detail + lint
+ *  warnings, from the agent's own read endpoints). Null if the agent has no such session
+ *  / endpoints — the run drawer just hides the section then. */
+export const getSpecReportFn = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ systemId: z.string(), sessionId: z.string() }))
+  .handler(async ({ data }): Promise<SpecReport | null> => {
+    const system = getSystem(data.systemId);
+    if (!system) return null;
+    return adapterFor(data.systemId)
+      .getSpecReport(system, data.sessionId)
+      .catch(() => null);
   });
 
 // --- Unit economics -----------------------------------------------------------

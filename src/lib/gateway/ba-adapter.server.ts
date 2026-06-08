@@ -432,3 +432,55 @@ export async function getSpecQuality(
     ac_total: num(ac?.total),
   };
 }
+
+// --- Live spec report (read-only) ---------------------------------------------
+
+export type SpecReportCriterion = { raw: string; is_ears: boolean; is_gwt: boolean };
+export type SpecReportWarning = { line?: number; issue: string; suggestion?: string };
+export type SpecReport = {
+  ears_coverage?: number; // % of ACs in EARS form
+  gwt_coverage?: number; // % in Given-When-Then form
+  ac_total?: number;
+  ears_count?: number;
+  gwt_count?: number;
+  weak_criteria: SpecReportCriterion[]; // a few ACs that aren't EARS-compliant
+  lint_warnings: SpecReportWarning[];
+  lines_scanned?: number;
+};
+
+/** Live, READ-ONLY structural report for the CURRENT spec — GET /structured-ac + /lint.
+ *  Deliberately NOT /session/evaluate: that endpoint requires the full spec_md in the
+ *  request and PERSISTS a new spec version (a write), so it's unsafe for a read-only
+ *  viewer. The per-validator V1–V9 breakdown only exists there; the persisted run facet
+ *  carries the compact gate (passed/total) instead. */
+export async function getSpecReport(
+  system: RegisteredSystem,
+  sessionId: string,
+): Promise<SpecReport | null> {
+  const sid = encodeURIComponent(sessionId);
+  const [ac, lint] = await Promise.all([
+    baFetch(system, `/session/${sid}/structured-ac`).catch(() => null),
+    baFetch(system, `/session/${sid}/lint`).catch(() => null),
+  ]);
+  if (!ac && !lint) return null;
+  const num = (v: unknown) => (typeof v === "number" ? v : undefined);
+  const criteria: any[] = Array.isArray(ac?.criteria) ? ac.criteria : [];
+  const warnings: any[] = Array.isArray(lint?.warnings) ? lint.warnings : [];
+  return {
+    ears_coverage: num(ac?.ears_coverage),
+    gwt_coverage: num(ac?.gwt_coverage),
+    ac_total: num(ac?.total),
+    ears_count: num(ac?.ears_count),
+    gwt_count: num(ac?.gwt_count),
+    weak_criteria: criteria
+      .filter((c) => !c?.is_ears)
+      .slice(0, 5)
+      .map((c) => ({ raw: String(c?.raw ?? ""), is_ears: !!c?.is_ears, is_gwt: !!c?.is_gwt })),
+    lint_warnings: warnings.slice(0, 8).map((w) => ({
+      line: num(w?.line_number),
+      issue: String(w?.issue ?? ""),
+      suggestion: typeof w?.suggestion === "string" ? w.suggestion : undefined,
+    })),
+    lines_scanned: num(lint?.lines_scanned),
+  };
+}

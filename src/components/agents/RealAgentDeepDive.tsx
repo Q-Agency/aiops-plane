@@ -34,7 +34,12 @@ import type {
   RunStatus,
   SpecFacet,
 } from "@/contract";
-import { getAgentDetailFn, type AgentDetailData } from "@/lib/api/fleet.functions";
+import {
+  getAgentDetailFn,
+  getSpecReportFn,
+  type AgentDetailData,
+  type SpecReport,
+} from "@/lib/api/fleet.functions";
 import { cn } from "@/lib/utils";
 import { fmtDateTime, fmtTime } from "@/lib/time";
 
@@ -401,6 +406,7 @@ export function RealAgentDeepDive({ systemId, initial }: Props) {
       {openRun && (
         <RunDrawer
           run={openRun}
+          systemId={systemId}
           siblingRuns={runs}
           observabilityTemplate={observability}
           onClose={() => setOpenRun(null)}
@@ -429,11 +435,13 @@ function GateRow({ gate: g }: { gate: HITLGate }) {
 
 function RunDrawer({
   run,
+  systemId,
   siblingRuns,
   observabilityTemplate,
   onClose,
 }: {
   run: Run;
+  systemId: string;
   siblingRuns?: Run[];
   observabilityTemplate?: string;
   onClose: () => void;
@@ -448,6 +456,17 @@ function RunDrawer({
   const turns = (siblingRuns ?? [])
     .filter((r) => r.work_item_id && r.work_item_id === run.work_item_id)
     .sort((a, b) => turnNo(a) - turnNo(b));
+
+  // Live, read-only structural report for the spec's CURRENT state (AC/EARS + lint) —
+  // on-demand, spec runs only. Complements the per-run facet, which is historical.
+  const sessionId = run.work_item?.id ?? run.work_item_id;
+  const isSpec = (run.artifact?.type ?? run.artifact_type) === "spec";
+  const { data: specReport } = useQuery({
+    queryKey: ["spec-report", systemId, sessionId],
+    queryFn: () => getSpecReportFn({ data: { systemId, sessionId: sessionId as string } }),
+    enabled: !!sessionId && isSpec,
+    staleTime: 60_000,
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
@@ -528,6 +547,9 @@ function RunDrawer({
           {/* Artifact facet — the per-agent craft + focus metrics, from the typed
               run.artifact.facet (spec → SpecCard; anything else → generic fallback). */}
           <FacetPanel run={run} />
+
+          {/* Live, read-only report for the CURRENT spec (on-demand from the agent). */}
+          <LiveSpecReport report={specReport as SpecReport | null | undefined} />
 
           {/* Session turns — durable timeline of the spec's autospec iterations */}
           {turns.length > 1 && (
@@ -723,6 +745,108 @@ function AnyFacetCard({ facet }: { facet: ArtifactFacet }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Live, read-only structural report for the CURRENT spec (agent's /structured-ac + /lint).
+ *  Distinct from the per-run facet above — that's the historical record; this is now. */
+function LiveSpecReport({ report }: { report?: SpecReport | null }) {
+  if (!report) return null;
+  const weak = report.weak_criteria ?? [];
+  const warnings = report.lint_warnings ?? [];
+  const hasCoverage = report.ears_coverage != null || report.gwt_coverage != null;
+  if (!hasCoverage && !weak.length && !warnings.length && report.ac_total == null) return null;
+  return (
+    <section>
+      <SectionLabel>Live spec report · current</SectionLabel>
+      <div className="space-y-3 rounded-md border border-border bg-white/[0.02] p-3">
+        {hasCoverage && (
+          <div className="grid grid-cols-2 gap-3">
+            {report.ears_coverage != null && (
+              <CoverageBar
+                label="EARS"
+                pct={report.ears_coverage}
+                sub={
+                  report.ears_count != null && report.ac_total != null
+                    ? `${report.ears_count}/${report.ac_total}`
+                    : undefined
+                }
+              />
+            )}
+            {report.gwt_coverage != null && (
+              <CoverageBar
+                label="GWT"
+                pct={report.gwt_coverage}
+                sub={
+                  report.gwt_count != null && report.ac_total != null
+                    ? `${report.gwt_count}/${report.ac_total}`
+                    : undefined
+                }
+              />
+            )}
+          </div>
+        )}
+        {weak.length > 0 && (
+          <div>
+            <div className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Non-EARS criteria ({weak.length})
+            </div>
+            <ul className="space-y-1">
+              {weak.map((c, i) => (
+                <li
+                  key={i}
+                  className="line-clamp-2 rounded border border-border bg-white/[0.02] px-2 py-1 text-[11px] text-muted-foreground"
+                >
+                  {c.raw}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {warnings.length > 0 && (
+          <div>
+            <div className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Lint ({warnings.length}
+              {report.lines_scanned ? ` · ${report.lines_scanned} lines` : ""})
+            </div>
+            <ul className="space-y-1">
+              {warnings.map((w, i) => (
+                <li
+                  key={i}
+                  className="rounded border border-status-waiting/20 bg-status-waiting/5 px-2 py-1 text-[11px]"
+                >
+                  <span className="text-status-waiting/90">{w.issue}</span>
+                  {w.suggestion && (
+                    <span className="block text-[10px] text-muted-foreground">
+                      → {w.suggestion}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CoverageBar({ label, pct, sub }: { label: string; pct: number; sub?: string }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between text-[11px] text-muted-foreground">
+        <span>{label}</span>
+        <span className="font-mono">
+          {Math.round(pct)}%{sub ? ` · ${sub}` : ""}
+        </span>
+      </div>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
+        <div
+          className="h-full rounded-full bg-primary/60"
+          style={{ width: `${Math.max(0, Math.min(100, pct))}%` }}
+        />
+      </div>
+    </div>
   );
 }
 
