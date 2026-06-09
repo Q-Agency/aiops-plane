@@ -225,6 +225,20 @@ serves the Agent Card (A.6) from the constructor args.
   blocks. Powers the activity feed without the SSE stream — and a replay buffer for
   it. _BA pre-SDK: add it now per `ba-events-endpoint.md`._
 
+**Planned (product SKU — contract v0.6, NOT in v0.5).** The product SKU's in-app
+control surface (see `docs/product-vision-deep-dive.md`, Contract evolution
+register) adds write ops the factory will serve once contract v0.6 lands. Listed
+here so the seam is visible; do **not** build them against v0.5:
+
+- `POST /agency/gates/{id}/resolve` — `{decision, reason (required), answer?,
+  actor, idempotency_key}`; returns `409` if already resolved (CAS semantics —
+  the dual-channel race with Slack resolve is agent-arbitrated)
+- `POST /agency/control/pause` / `POST /agency/control/resume`
+- `POST /agency/runs/{id}/retry` / `POST /agency/runs/{id}/cancel`
+- `PUT /agency/config` — typed subset (Slack routing, approver ids, source
+  bindings, pause), advertised via card `capabilities.config`
+- `GET /agency/artifacts/{id}` — artifact content + structured facet payload
+
 ### A.4 Run / event / HITL API (what agent code calls)
 
 ```python
@@ -349,7 +363,7 @@ codebase — these are from an earlier read and may have moved):
 | `error`                                              | `run.error`                                                             |
 | pipeline `turn_start` / `turn_done` / `score_update` | `step.started` / `step.completed` / `metric.update` (payload in `data`) |
 
-**Map BA-domain metrics onto the spec facet (structural-first):** the V1–V9 validator gate →
+**Map BA-domain metrics onto the spec facet (structural-first):** the structural validator gate (8 zero-LLM validators; V3 retired) →
 `SpecFacet.structural` (`passed`/`total`); EARS coverage → `ears_coverage`; missing sections →
 `missing_sections`; validation errors → `validation_errors`; plus `finalize_method` /
 `completion_reason` / `decisions` as recorded. The 6-dim `completeness` / `dimensions` ride

@@ -139,6 +139,13 @@ startup fetches each agent's card to auto-fill name / role / produces / consumes
 control-plane DB exists. Principle either way: **the agent declares; the platform
 confirms and places.**
 
+> **Superseded for the product SKU (2026-06).** The product adds a dashboard
+> **Add-agent / catalog UI** and **pod-level agent configuration**
+> (`PodAgentConfig`, pushed to agents via a config API — contract v0.6). The
+> config-file registry stance above stays accurate for the **internal build**.
+> See [`product-vision.md`](./product-vision.md) §8 and
+> [`control-plane-data-model.md`](./control-plane-data-model.md).
+
 ### 3d. The platform SDK
 
 A shared Python package (working name `agency-agent-sdk`) that implements the
@@ -229,6 +236,17 @@ Both render in one Human-gates queue; the actual artifact review (edit the real
 dashboard standardizes the **gate**, not the artifact's content. (BA merges both
 kinds agent-side and serves one unified canonical list at `/agency/gates`; the
 dashboard just stamps gate ownership. See agent-sdk-brief §A.3–A.4.)
+
+> **Superseded for the product SKU (2026-06).** The read-only/deep-link stance
+> above stays accurate for the **internal build**, but the product SKU (see
+> [`product-vision.md`](./product-vision.md)) adds a **client-grade in-app gate
+> review** — approve/reject with a required reason — for the top gates,
+> reversing the deep-link-only boundary. This requires the **contract v0.6
+> control surface** (gate resolve with CAS semantics, pause/resume, config push,
+> artifact content read) per the Contract evolution register in
+> [`product-vision-deep-dive.md`](./product-vision-deep-dive.md). Deep-link to
+> the agent's own tool remains the fallback — and stays the path for
+> artifact-heavy editing.
 
 ---
 
