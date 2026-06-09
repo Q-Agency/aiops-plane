@@ -296,6 +296,260 @@ export const getEconomicsFn = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// --- Flow analytics: SDLC flow efficiency (compute vs rework, churn) -----------
+
+export type FlowBucket = { key: string; count: number; ms: number };
+export type FlowSession = {
+  title: string;
+  turns: number;
+  firstTryMs: number;
+  reworkMs: number;
+  totalMs: number;
+  reworkBound: boolean;
+};
+export type FlowTrailRow = { ts: string; stage: string; title: string; project: string };
+export type FlowTrendPoint = { bucket: string; completeness: number; runs: number };
+export type FlowTotals = {
+  runs: number;
+  succeeded: number;
+  sessions: number;
+  /** compute split: first-attempt compute vs compute burned on retries+failures */
+  firstTryPct: number;
+  reworkPct: number;
+  avgTurns: number;
+  maxTurns: number;
+  avgSessionMs: number;
+  /** finalize_method-based: how often the agent nails it on attempt #1 */
+  firstTryRate: number | null;
+  firstTryCount: number;
+  finalizeDenom: number;
+  successRate: number;
+  p50Ms: number | null;
+  p95Ms: number | null;
+  /** human churn at the one real (Spec) gate, from the recent lifecycle-event window */
+  resets: number;
+  approvals: number;
+  openGate: number;
+  eventsWindowed: boolean;
+  /** the one quality field with real history (metadata.completeness_after) */
+  avgCompleteness: number | null;
+  completenessN: number;
+};
+export type FlowAnalyticsData = {
+  totals: FlowTotals;
+  durationHist: { bucket: string; count: number }[];
+  byFinalize: FlowBucket[];
+  sessions: FlowSession[];
+  trail: FlowTrailRow[];
+  completenessTrend: FlowTrendPoint[];
+};
+
+const WEEK_MS = 7 * DAY_MS;
+const flowNum = (v: unknown): number | undefined =>
+  typeof v === "number" && !Number.isNaN(v) ? v : undefined;
+const flowStr = (v: unknown): string | undefined => (typeof v === "string" && v ? v : undefined);
+function percentile(sortedAsc: number[], p: number): number | null {
+  if (!sortedAsc.length) return null;
+  return sortedAsc[Math.floor(p * (sortedAsc.length - 1))];
+}
+
+/** Pure, server-side flow aggregation. Honest by construction: every output rides on a
+ *  populated field (duration_ms, run_number, finalize_method, completeness_after) or the
+ *  recent reset/approve event window — no per-stage clocks or approver identity (absent). */
+function aggregateFlow(runs: Run[], events: AgentEvent[], openGate: number): FlowAnalyticsData {
+  const total = runs.length;
+  let succeeded = 0;
+  let firstTryComputeMs = 0;
+  let totalComputeMs = 0;
+  let firstTryCount = 0;
+  let finalizeDenom = 0;
+  const durations: number[] = [];
+  const finalize = new Map<string, FlowBucket>();
+  const sessions = new Map<
+    string,
+    { title: string; totalMs: number; firstTryMs: number; maxRunNo: number; count: number }
+  >();
+
+  for (const r of runs) {
+    if (r.status === "succeeded") succeeded += 1;
+    // Compute / rework / session metrics use SUCCEEDED runs only — a failed run's duration
+    // is wall-time-to-failure (can be a multi-hour hang), not representative agent compute,
+    // and a handful would dominate the totals. Failures are surfaced via the success rate.
+    if (r.status !== "succeeded") continue;
+    const dur = flowNum(r.duration_ms) ?? 0;
+    const meta = (r.metadata ?? {}) as Record<string, unknown>;
+    const runNo = flowNum(meta.run_number) ?? 1;
+    totalComputeMs += dur;
+    // First-attempt compute = every run_number==1 (a reset restarts the chain at #1, so a
+    // title has many run #1s); rework = everything spent on turns 2+. Same definition feeds
+    // the headline split and the per-session bars.
+    if (runNo === 1) firstTryComputeMs += dur;
+    if (dur > 0) durations.push(dur);
+
+    // finalize_method rides in metadata; the v0.5 spec facet also carries it.
+    const facet = r.artifact?.facet;
+    const fm =
+      flowStr(meta.finalize_method) ??
+      (facet && facet.kind === "spec" ? flowStr(facet.finalize_method) : undefined);
+    if (fm) {
+      finalizeDenom += 1;
+      if (fm === "first_try") firstTryCount += 1;
+      const b = finalize.get(fm) ?? { key: fm, count: 0, ms: 0 };
+      b.count += 1;
+      b.ms += dur;
+      finalize.set(fm, b);
+    }
+
+    // Session identity is work_item_title (the bulk-history key; work_item.id is rare).
+    const title = r.work_item_title || r.work_item?.title || "(untitled)";
+    const s = sessions.get(title) ?? { title, totalMs: 0, firstTryMs: 0, maxRunNo: 0, count: 0 };
+    s.totalMs += dur;
+    s.count += 1;
+    s.maxRunNo = Math.max(s.maxRunNo, runNo);
+    if (runNo === 1) s.firstTryMs += dur; // sum first-attempt compute (consistent w/ headline)
+    sessions.set(title, s);
+  }
+
+  const sortedDur = [...durations].sort((a, b) => a - b);
+  const reworkComputeMs = Math.max(0, totalComputeMs - firstTryComputeMs);
+  const reworkPct = totalComputeMs ? Math.round((reworkComputeMs / totalComputeMs) * 100) : 0;
+
+  const sessionList = [...sessions.values()].map((s) => {
+    const reworkMs = Math.max(0, s.totalMs - s.firstTryMs);
+    return {
+      title: s.title,
+      turns: s.maxRunNo > 0 ? s.maxRunNo : s.count,
+      firstTryMs: Math.round(s.firstTryMs),
+      reworkMs: Math.round(reworkMs),
+      totalMs: Math.round(s.totalMs),
+      reworkBound: reworkMs > s.firstTryMs,
+    };
+  });
+  const sCount = sessionList.length;
+  const avgSessionMs = sCount
+    ? Math.round(sessionList.reduce((a, s) => a + s.totalMs, 0) / sCount)
+    : 0;
+  const avgTurns = sCount ? +(sessionList.reduce((a, s) => a + s.turns, 0) / sCount).toFixed(1) : 0;
+  const maxTurns = sessionList.reduce((a, s) => Math.max(a, s.turns), 0);
+
+  // Reset / approve churn at the one real gate (recent lifecycle-event window).
+  const lc = events.filter((e) => e.type === "lifecycle.changed");
+  const resets = lc.filter((e) => e.data?.stage === "reset").length;
+  const approvals = lc.filter((e) => e.data?.stage === "approved").length;
+  const trail: FlowTrailRow[] = lc
+    .slice()
+    .sort((a, b) => (String(a.ts) < String(b.ts) ? 1 : -1))
+    .slice(0, 12)
+    .map((e) => ({
+      ts: e.ts,
+      stage: flowStr(e.data?.stage) ?? "",
+      title: flowStr(e.data?.work_item_title) ?? "",
+      project: flowStr(e.data?.project_name) ?? "",
+    }));
+
+  // Per-run compute distribution (median/p95, not mean — failed-run outliers).
+  const histDefs = [
+    { label: "<30s", lo: 0, hi: 30 },
+    { label: "30–60s", lo: 30, hi: 60 },
+    { label: "1–2m", lo: 60, hi: 120 },
+    { label: "2–5m", lo: 120, hi: 300 },
+    { label: "5m+", lo: 300, hi: Infinity },
+  ];
+  const durationHist = histDefs.map((d) => ({ bucket: d.label, count: 0 }));
+  for (const ms of durations) {
+    const s = ms / 1000;
+    const idx = histDefs.findIndex((d) => s >= d.lo && s < d.hi);
+    if (idx >= 0) durationHist[idx].count += 1;
+  }
+
+  // The one quality series with real history: metadata.completeness_after (6-dim avg).
+  const compRuns = runs
+    .map((r) => {
+      const c = (r.metadata as Record<string, unknown> | undefined)?.completeness_after;
+      if (!c || typeof c !== "object") return null;
+      const map = c as Record<string, unknown>;
+      const vals = COMPLETENESS_DIMS.map((d) => flowNum(map[d]) ?? 0);
+      const t = Date.parse(r.started_at);
+      return Number.isNaN(t) ? null : { t, avg: vals.reduce((a, v) => a + v, 0) / vals.length };
+    })
+    .filter((x): x is { t: number; avg: number } => x !== null);
+
+  let completenessTrend: FlowTrendPoint[] = [];
+  if (compRuns.length) {
+    const weeks = new Map<number, { sum: number; n: number }>();
+    for (const r of compRuns) {
+      const w = Math.floor(r.t / WEEK_MS); // bucket key from run times only (SSR-deterministic)
+      const b = weeks.get(w) ?? { sum: 0, n: 0 };
+      b.sum += r.avg;
+      b.n += 1;
+      weeks.set(w, b);
+    }
+    const pts = [...weeks.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([w, v]) => ({
+        bucket: new Date(w * WEEK_MS).toISOString().slice(0, 10),
+        completeness: Math.round(v.sum / v.n),
+        runs: v.n,
+      }));
+    // Only a TREND if there's real signal; otherwise the view shows a single KPI instead.
+    if (compRuns.length >= 8 && pts.length >= 3) completenessTrend = pts;
+  }
+  const avgCompleteness = compRuns.length
+    ? Math.round(compRuns.reduce((a, r) => a + r.avg, 0) / compRuns.length)
+    : null;
+
+  return {
+    totals: {
+      runs: total,
+      succeeded,
+      sessions: sCount,
+      firstTryPct: 100 - reworkPct,
+      reworkPct,
+      avgTurns,
+      maxTurns,
+      avgSessionMs,
+      firstTryRate: finalizeDenom ? Math.round((firstTryCount / finalizeDenom) * 100) : null,
+      firstTryCount,
+      finalizeDenom,
+      successRate: total ? Math.round((succeeded / total) * 100) : 0,
+      p50Ms: percentile(sortedDur, 0.5),
+      p95Ms: percentile(sortedDur, 0.95),
+      resets,
+      approvals,
+      openGate,
+      eventsWindowed: true,
+      avgCompleteness,
+      completenessN: compRuns.length,
+    },
+    durationHist,
+    byFinalize: [...finalize.values()]
+      .map((b) => ({ ...b, ms: Math.round(b.ms) }))
+      .sort((a, b) => b.count - a.count),
+    sessions: sessionList.sort((a, b) => b.totalMs - a.totalMs).slice(0, 12),
+    trail,
+    completenessTrend,
+  };
+}
+
+/** SDLC flow-efficiency analytics across the whole fleet (NOT project-scoped — mirrors
+ *  unit economics). Aggregated server-side from runs + recent lifecycle events + open
+ *  gates: compute-vs-rework, first-try rate, reset/approve churn, completeness trend. */
+export const getFlowAnalyticsFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<FlowAnalyticsData> => {
+    const systems = getSystems();
+    const [runsSettled, eventsSettled, gatesSettled] = await Promise.all([
+      Promise.allSettled(systems.map((s) => adapterFor(s.id).getRuns(s))),
+      Promise.allSettled(systems.map((s) => adapterFor(s.id).getEvents(s, 200))),
+      Promise.allSettled(systems.map((s) => adapterFor(s.id).getApprovals(s))),
+    ]);
+    const runs = runsSettled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+    const events = eventsSettled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+    const gates = gatesSettled.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+    const openGate = gates.filter((g) => g.kind === "approval" && g.state === "open").length;
+    return aggregateFlow(runs, events, openGate);
+  },
+);
+
 // --- Observability: health checks + recent logs -------------------------------
 
 export type AgentDiagnostics = {
