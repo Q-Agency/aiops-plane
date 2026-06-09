@@ -5,6 +5,7 @@ import { KpiStrip } from "@/components/command-center/KpiStrip";
 import { AgentStatusGrid } from "@/components/command-center/AgentStatusGrid";
 import { ApprovalsQueue } from "@/components/command-center/ApprovalsQueue";
 import { ActivityFeed } from "@/components/command-center/ActivityFeed";
+import { FirstRunRibbon } from "@/components/fireup/FirstRunRibbon";
 import { RealCommandCenter } from "@/components/command-center/RealCommandCenter";
 import { getCommandCenterFn } from "@/lib/api/fleet.functions";
 import type { AgentEvent, AgentHealth, HITLGate, Run } from "@/contract";
@@ -61,6 +62,7 @@ function MockCommandCenter() {
   return (
     <div className="p-4 lg:p-6 grid gap-4 lg:gap-5 xl:grid-cols-[1fr_360px]">
       <div className="space-y-4 lg:space-y-5 min-w-0">
+        <FirstRunRibbon />
         <FlowRiver />
         <KpiStrip />
         <section>

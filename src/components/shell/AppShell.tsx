@@ -3,19 +3,22 @@ import { LeftRail } from "./LeftRail";
 import { TopBar } from "./TopBar";
 import { LiveProvider } from "@/hooks/useLiveTicker";
 import { SectionAssistantProvider } from "@/components/assistant/SectionAssistant";
+import { PodProvider } from "@/lib/pods/pod-store";
 import type { AppUser } from "@/lib/auth/types";
 
 export function AppShell({ children, user }: { children: ReactNode; user: AppUser }) {
   return (
     <LiveProvider>
       <SectionAssistantProvider>
-        <div className="flex h-screen w-full overflow-hidden">
-          <LeftRail />
-          <div className="flex-1 flex flex-col min-w-0">
-            <TopBar user={user} />
-            <main className="flex-1 overflow-auto scrollbar-thin">{children}</main>
+        <PodProvider>
+          <div className="flex h-screen w-full overflow-hidden">
+            <LeftRail />
+            <div className="flex-1 flex flex-col min-w-0">
+              <TopBar user={user} />
+              <main className="flex-1 overflow-auto scrollbar-thin">{children}</main>
+            </div>
           </div>
-        </div>
+        </PodProvider>
       </SectionAssistantProvider>
     </LiveProvider>
   );

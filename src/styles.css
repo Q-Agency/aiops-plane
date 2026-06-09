@@ -39,6 +39,8 @@
   --color-agent-review: var(--agent-review);
   --color-agent-qa: var(--agent-qa);
   --color-agent-pm: var(--agent-pm);
+  --color-agent-uiux: var(--agent-uiux);
+  --color-agent-devops: var(--agent-devops);
 
   --color-status-running: var(--status-running);
   --color-status-waiting: var(--status-waiting);
@@ -86,6 +88,8 @@
   --agent-review: #f59e0b;
   --agent-qa: #d946ef;
   --agent-pm: #6c63ff;
+  --agent-uiux: #ec4899;
+  --agent-devops: #14b8a6;
 
   --status-running: #3b82f6;
   --status-waiting: #f59e0b;
@@ -128,6 +132,8 @@
   --agent-review: #d97706;
   --agent-qa: #c026d3;
   --agent-pm: #5b54e6;
+  --agent-uiux: #db2777;
+  --agent-devops: #0d9488;
 
   --status-running: #2563eb;
   --status-waiting: #d97706;

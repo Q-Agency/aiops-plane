@@ -1,100 +1,184 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  KanbanSquare,
-  GitBranch,
-  Bot,
-  Activity,
-  CheckCircle2,
-  Users,
-  Scale,
-  Database,
-  DollarSign,
-  Hourglass,
-  Network,
-  Megaphone,
-  ShieldCheck,
-  PlugZap,
-  Settings,
-  ChevronLeft,
-} from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { NAV, SETTINGS_ITEM, navBadgeCount, type NavItem } from "./nav";
 
-const items = [
-  { to: "/", label: "Overview", icon: LayoutDashboard },
-  { to: "/pipeline", label: "Pipeline Board", icon: KanbanSquare },
-  { to: "/traceability", label: "Traceability", icon: GitBranch },
-  { to: "/agents", label: "Agents", icon: Bot },
-  { to: "/pod", label: "Accountability", icon: Users },
-  { to: "/governance", label: "Governance", icon: Scale },
-  { to: "/knowledge", label: "Knowledge", icon: Database },
-  { to: "/economics", label: "Unit Economics", icon: DollarSign },
-  { to: "/flow", label: "Flow Analytics", icon: Hourglass },
-  { to: "/orchestration", label: "Orchestration", icon: Network },
-  { to: "/comms", label: "Comms & Escal.", icon: Megaphone },
-  { to: "/compliance", label: "Compliance & Audit", icon: ShieldCheck },
-  { to: "/observability", label: "Observability", icon: Activity },
-  { to: "/approvals", label: "Approvals", icon: CheckCircle2 },
-  { to: "/connections", label: "Connections", icon: PlugZap },
-  { to: "/settings", label: "Settings", icon: Settings },
-] as const;
+function RailLink({
+  item,
+  collapsed,
+  pathname,
+}: {
+  item: NavItem;
+  collapsed: boolean;
+  pathname: string;
+}) {
+  const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
+  const count = item.badgeKey ? navBadgeCount(item.badgeKey) : 0;
+  const Icon = item.icon;
+
+  const link = (
+    <Link
+      to={item.to}
+      className={cn(
+        "group flex items-center gap-3 px-2.5 py-2 rounded-md text-sm transition-colors relative",
+        active
+          ? "bg-primary/15 text-foreground"
+          : "text-muted-foreground hover:text-foreground hover:bg-white/5",
+      )}
+    >
+      {active && (
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r bg-primary shadow-[0_0_8px_var(--primary)]" />
+      )}
+      <Icon className="size-4 shrink-0" />
+      {!collapsed && <span className="truncate">{item.label}</span>}
+      {!collapsed && count > 0 && (
+        <Badge
+          variant="outline"
+          className="ml-auto h-4 min-w-4 px-1 py-0 justify-center rounded border-primary/40 bg-primary/10 text-primary text-[10px] font-mono leading-none shadow-[0_0_8px_var(--primary)]"
+        >
+          {count}
+        </Badge>
+      )}
+      {collapsed && count > 0 && (
+        <span className="absolute top-1 right-1 size-1.5 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]" />
+      )}
+    </Link>
+  );
+
+  if (!collapsed) return link;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right">
+        {item.label}
+        {count > 0 ? ` · ${count}` : ""}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function LeftRail() {
   const [collapsed, setCollapsed] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  // ⌘B / Ctrl+B toggles the rail (client-only listener — SSR-safe).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        setCollapsed((c) => !c);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
-    <aside
-      className={cn(
-        "shrink-0 border-r border-border bg-panel/40 backdrop-blur-md flex flex-col transition-[width] duration-200",
-        collapsed ? "w-14" : "w-56",
-      )}
-    >
-      <div className="h-14 flex items-center px-3 border-b border-border">
-        <div className="size-7 rounded-md bg-primary/20 border border-primary/40 grid place-items-center text-primary font-bold text-xs font-mono">
-          AI
-        </div>
-        {!collapsed && (
-          <div className="ml-2 leading-tight">
-            <div className="text-sm font-semibold">Agency OS</div>
-            <div className="text-[10px] text-muted-foreground font-mono">v0.4.2</div>
-          </div>
+    <TooltipProvider delayDuration={150}>
+      <aside
+        className={cn(
+          "shrink-0 border-r border-border bg-panel/40 backdrop-blur-md flex flex-col transition-[width] duration-200",
+          collapsed ? "w-14" : "w-56",
         )}
-      </div>
-
-      <nav className="p-2 flex-1 space-y-0.5">
-        {items.map((it) => {
-          const active = pathname === it.to;
-          const Icon = it.icon;
-          return (
-            <Link
-              key={it.to}
-              to={it.to}
-              className={cn(
-                "group flex items-center gap-3 px-2.5 py-2 rounded-md text-sm transition-colors relative",
-                active
-                  ? "bg-primary/15 text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
-            >
-              {active && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r bg-primary shadow-[0_0_8px_var(--primary)]" />
-              )}
-              <Icon className="size-4 shrink-0" />
-              {!collapsed && <span className="truncate">{it.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <button
-        onClick={() => setCollapsed((c) => !c)}
-        className="m-2 h-8 rounded-md border border-border bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10 flex items-center justify-center cursor-pointer"
-        aria-label="Toggle nav"
       >
-        <ChevronLeft className={cn("size-4 transition-transform", collapsed && "rotate-180")} />
-      </button>
-    </aside>
+        <div className="h-14 flex items-center px-3 border-b border-border shrink-0">
+          <div className="size-7 rounded-md bg-primary/20 border border-primary/40 grid place-items-center text-primary font-bold text-xs font-mono">
+            AI
+          </div>
+          {!collapsed && (
+            <div className="ml-2 leading-tight">
+              <div className="text-sm font-semibold">Agency OS</div>
+              <div className="text-[10px] text-muted-foreground font-mono">v0.4.2</div>
+            </div>
+          )}
+        </div>
+
+        <nav className="p-2 flex-1 overflow-y-auto scrollbar-thin">
+          {NAV.map((group, i) =>
+            group.pillar === "ADVANCED" ? (
+              <Collapsible key={group.pillar} open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                {collapsed ? (
+                  <>
+                    <Separator className="my-2" />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CollapsibleTrigger
+                          className="w-full flex items-center justify-center py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 cursor-pointer"
+                          aria-label="Toggle advanced section"
+                        >
+                          <ChevronDown
+                            className={cn(
+                              "size-3.5 transition-transform",
+                              advancedOpen && "rotate-180",
+                            )}
+                          />
+                        </CollapsibleTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">ADVANCED · technical</TooltipContent>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <CollapsibleTrigger className="w-full flex items-center justify-between text-[10px] tracking-wider uppercase text-muted-foreground hover:text-foreground px-2.5 pt-3 pb-1 cursor-pointer transition-colors">
+                    <span>{group.label}</span>
+                    <ChevronDown
+                      className={cn("size-3 transition-transform", advancedOpen && "rotate-180")}
+                    />
+                  </CollapsibleTrigger>
+                )}
+                <CollapsibleContent className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <RailLink
+                      key={`${group.pillar}-${item.to}`}
+                      item={item}
+                      collapsed={collapsed}
+                      pathname={pathname}
+                    />
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <div key={group.pillar}>
+                {collapsed ? (
+                  i > 0 && <Separator className="my-2" />
+                ) : (
+                  <div className="text-[10px] tracking-wider uppercase text-muted-foreground px-2.5 pt-3 pb-1">
+                    {group.label}
+                  </div>
+                )}
+                <div className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <RailLink
+                      key={`${group.pillar}-${item.to}`}
+                      item={item}
+                      collapsed={collapsed}
+                      pathname={pathname}
+                    />
+                  ))}
+                </div>
+              </div>
+            ),
+          )}
+        </nav>
+
+        <div className="p-2 pt-0 shrink-0">
+          <Separator className="mb-2" />
+          <RailLink item={SETTINGS_ITEM} collapsed={collapsed} pathname={pathname} />
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="mt-2 w-full h-8 rounded-md border border-border bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10 flex items-center justify-center cursor-pointer"
+            aria-label="Toggle nav"
+            title="Toggle nav (⌘B)"
+          >
+            <ChevronLeft className={cn("size-4 transition-transform", collapsed && "rotate-180")} />
+          </button>
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 }

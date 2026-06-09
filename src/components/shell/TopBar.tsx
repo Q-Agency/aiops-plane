@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { ChevronDown, MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut } from "lucide-react";
+import { MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import { useTheme } from "@/hooks/useTheme";
-import { projects, project } from "@/mock/project";
 import { unackedOpen, nextDailyDigest } from "@/mock/comms";
 import { cn } from "@/lib/utils";
 import { AssistantTriggerButton } from "@/components/assistant/SectionAssistant";
 import { logoutFn } from "@/lib/auth/auth";
 import type { AppUser } from "@/lib/auth/types";
 import { ProjectSwitcher } from "./ProjectSwitcher";
+import { PodSwitcher } from "./PodSwitcher";
+import { TenancyBadge } from "./TenancyBadge";
 
 function useUtcClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -40,7 +41,11 @@ export function TopBar({ user }: { user: AppUser }) {
 
   const isReal = user.dataMode === "real";
   const healthColor =
-    health === "green" ? "bg-status-done" : health === "amber" ? "bg-status-waiting" : "bg-status-error";
+    health === "green"
+      ? "bg-status-done"
+      : health === "amber"
+        ? "bg-status-waiting"
+        : "bg-status-error";
 
   const openEsc = unackedOpen().length;
   const digest = nextDailyDigest();
@@ -53,20 +58,12 @@ export function TopBar({ user }: { user: AppUser }) {
 
   return (
     <header className="h-14 border-b border-border bg-panel/40 backdrop-blur-md flex items-center px-4 gap-4">
-
       {isReal ? (
         <ProjectSwitcher />
       ) : (
         <>
-          <button className="flex items-center gap-2 px-3 h-9 rounded-md bg-white/5 border border-border hover:border-primary/40 transition-colors cursor-pointer text-sm">
-            <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" />
-            <span className="font-medium">{project.name}</span>
-            <ChevronDown className="size-3.5 text-muted-foreground" />
-          </button>
-
-          <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground font-mono">
-            {projects.length} projects · 3 codebases
-          </div>
+          <PodSwitcher />
+          <TenancyBadge />
         </>
       )}
 
@@ -75,7 +72,9 @@ export function TopBar({ user }: { user: AppUser }) {
       <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
         <span className={cn("size-2 rounded-full dot-pulse", healthColor)} />
         <span className="text-xs text-muted-foreground">SYSTEM</span>
-        <span className="text-xs font-medium uppercase">{health === "green" ? "Healthy" : health}</span>
+        <span className="text-xs font-medium uppercase">
+          {health === "green" ? "Healthy" : health}
+        </span>
       </div>
 
       <div
@@ -114,14 +113,17 @@ export function TopBar({ user }: { user: AppUser }) {
       >
         <Clock className="size-3.5" />
         <span className="text-[10px] uppercase tracking-wider">Next digest</span>
-        <span className="font-mono text-foreground tabular-nums" suppressHydrationWarning>{digestLabel}</span>
+        <span className="font-mono text-foreground tabular-nums" suppressHydrationWarning>
+          {digestLabel}
+        </span>
       </Link>
 
       <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Spend·24h</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Spend·24h
+        </span>
         <span className="font-mono text-sm text-foreground">${tokenSpend.toFixed(2)}</span>
       </div>
-
 
       <AssistantTriggerButton />
 
@@ -131,7 +133,11 @@ export function TopBar({ user }: { user: AppUser }) {
         className="size-8 rounded-md border border-border bg-white/5 hover:border-primary/40 hover:text-primary transition-colors flex items-center justify-center text-muted-foreground"
         aria-label="Toggle theme"
       >
-        {mounted && theme === "light" ? <Sun className="size-3.5" /> : <MoonStar className="size-3.5" />}
+        {mounted && theme === "light" ? (
+          <Sun className="size-3.5" />
+        ) : (
+          <MoonStar className="size-3.5" />
+        )}
       </button>
 
       <div className="px-3 h-8 rounded-md border border-border bg-white/5 flex items-center font-mono text-xs text-muted-foreground">
