@@ -172,10 +172,17 @@ plumbing); SA and Dev adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-
   agent's **live API** (REST + SSE); each agent owns its data.
 - **Database:**
   - **Agent/runtime data → no dashboard DB.** Federate; BA's **Supabase stays the
-    system of record.**
+    system of record.** (Runs, gates, specs, health — all read live from each agent.)
+  - **Control-plane audit ledger → a dashboard-owned Supabase (landed in v1).** An
+    append-only `audit_log` of state-changing fleet actions (reset, approve, …) in a
+    **separate** Supabase project ("Q AI Ops Plane"). This is the one thing that **can't**
+    be federated: an agent's audit trail must **outlive the agent's own data** (BA's reset
+    _deletes_ the spec, so the record can't live in the thing being deleted). Server-only
+    (service-role, RLS-locked, never in the browser); **ingested** from each agent's durable
+    lifecycle events — not a second source of truth, a durable sink. See §10.
   - **Dashboard control-plane data** (real users/auth, the system registry,
-    memberships/roles) → a **small Postgres**: reuse **Supabase** (a _separate_
-    project) + **Supabase Auth**. Only at the real-auth milestone.
+    memberships/roles) → the **same small Postgres** at the real-auth milestone, plus
+    **Supabase Auth**.
 - **API-first, never direct-DB** into an agent's tables (couples to internals,
   bypasses its auth, doesn't generalize to agents we don't own). If a query is
   missing, add an endpoint to the agent.
@@ -269,9 +276,15 @@ SDK**, _not_ a frozen file:
 
 | Phase              | Scope                                                                                                                                                                                 | Dashboard DB                       |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| **v1 (now)**       | Wire **BA as system #1**, federated. Light up BA-covered views (agent deep-dive, approvals, activity, health); show others as **not connected**.                                      | none                               |
+| **v1 (now)**       | Wire **BA as system #1**, federated. Light up BA-covered views (agent deep-dive, approvals, activity, health); show others as **not connected**.                                      | **audit ledger** (Supabase)        |
 | **v2**             | Real auth (**Supabase Auth**) + control-plane DB (system registry, memberships). Add **SA as system #2** (validates the contract) and the **Knowledge Agent** for the Knowledge view. | small Postgres (separate Supabase) |
 | **v3 (if needed)** | Durable cross-system event/analytics store (ingest) — only if federation limits actually bite.                                                                                        | + event store                      |
+
+> **Update (v1).** The **audit ledger** Supabase shipped early — it's append-only and
+> control-plane-owned, so it didn't need the v2 auth/registry work to land. The v2
+> "control-plane DB" is therefore about **users/auth + the system registry**, not the first
+> database. "Who" stays unattributed (`actor` null, "when-only") until the real-auth
+> milestone gives the control plane an identity to stamp.
 
 **Build order within v1:** decisions doc (this) → v0 `agent-contract` + topology
 schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` mode).
@@ -295,8 +308,15 @@ schemas → thin BA vertical slice (`gateway/` + `adapters/ba.ts`, flip `real` m
     real **Unit Economics** (spend/tokens by model/project/day), **Observability**
     (health checks + live log tail), and **Governance** (spec quality:
     completeness, ambiguities, EARS/GWT coverage, judge/persona, lifecycle stage),
-    a real project switcher (TopBar), and a throwaway **Connections** page
-    (`aiops_systems` cookie).
+    a real project switcher (TopBar), a throwaway **Connections** page
+    (`aiops_systems` cookie), a **Compliance & Audit** trail (the dashboard-owned,
+    append-only `audit_log` in a separate Supabase — ingests each agent's durable
+    reset/approve events and survives agent-side deletes), a **Settings** page (audit-DB
+    status/health; the service-role key stays a server env secret), the **artifact
+    lifecycle stage** on the runs + work-item tables (from the agent's real session status
+    via `metadata.session_status`, not just run-success), and **deep-links to act** —
+    "Open in Flow Observer" on a live run (`x-agency.ui.runUrlTemplate`) and "Review &
+    approve in BA" on an approval gate (`gate.metadata.review_url`).
 - **BA Agent — federated and live, over the canonical surface.** BA adopted
   `agency-agent-sdk` and serves the contract directly, so the adapter now reads
   BA's **`/agency/*`** surface instead of mapping BA-native shapes — the
