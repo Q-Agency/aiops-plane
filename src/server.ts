@@ -2,6 +2,11 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { startAuditSyncLoop } from "./lib/db/audit-sync.server";
+
+// Kick off the durable audit-ledger background sync once, on server boot (no-op unless the
+// audit DB is configured). Captures fleet actions 24/7, independent of any open page.
+startAuditSyncLoop();
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;

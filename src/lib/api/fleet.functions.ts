@@ -13,15 +13,8 @@ import type {
   SpecReport,
 } from "../gateway/ba-adapter.server";
 import { COMPLETENESS_DIMS } from "../gateway/ba-adapter.server";
-import {
-  auditEnabled,
-  auditStatus,
-  eventToAuditRow,
-  listAuditLog,
-  recordAuditRows,
-  type AuditEntry,
-  type AuditRow,
-} from "../db/audit.server";
+import { auditEnabled, auditStatus, listAuditLog, type AuditEntry } from "../db/audit.server";
+import { ingestAuditOnce } from "../db/audit-sync.server";
 
 // Re-export so client components can type the getSpecReportFn result without importing
 // the `.server` module directly.
@@ -173,19 +166,9 @@ export type AuditData = { enabled: boolean; entries: AuditEntry[] };
 export const getAuditFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<AuditData> => {
     if (!auditEnabled()) return { enabled: false, entries: [] };
-    const systems = getSystems();
-    // Best-effort ingest: pull recent events from every agent, append the auditable ones.
-    // Ingest failures must not blank the view, so they're swallowed.
-    try {
-      const settled = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getEvents(s)));
-      const rows: AuditRow[] = settled
-        .flatMap((r) => (r.status === "fulfilled" ? r.value : []))
-        .map(eventToAuditRow)
-        .filter((r): r is AuditRow => r !== null);
-      if (rows.length) await recordAuditRows(rows);
-    } catch {
-      // network / DB hiccup — fall through and show whatever's already stored
-    }
+    // Refresh on view (the server-side background loop also ingests independently). Failures
+    // must not blank the view, so they're swallowed.
+    await ingestAuditOnce().catch(() => 0);
     const entries = await listAuditLog(200).catch(() => [] as AuditEntry[]);
     return { enabled: true, entries };
   },
