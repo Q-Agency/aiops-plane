@@ -48,8 +48,9 @@ work-item ref) every agent emits identically and the dashboard renders generical
 a per-agent **facet** (`Run.artifact.facet`) carrying your craft's focus metrics —
 `SpecFacet` (BA), `DesignFacet` (SA), `CodeFacet` (Dev), `TestFacet` (QA), … with a
 `GenericFacet` fallback so any agent still renders. **Put your structured metrics in the
-right facet** (BA's `completeness` → `SpecFacet.completeness`/`dimensions`); only
-genuinely freeform extras ride in `metadata` / event `data`.
+right facet** (BA's structural gate → `SpecFacet.structural`/`ears_coverage`/`missing_sections`,
+with `completeness`/`dimensions` as a derived readout); only genuinely freeform extras ride in
+`metadata` / event `data`.
 
 > **Canonical schema:** the authoritative contract is **`agent-contract.schema.json`**
 > (it lives in the Agency OS repo at `src/contract/`; copy it into this repo
@@ -241,7 +242,8 @@ async def handle_task(task):
         run.finish(outcome="success", tokens_in=…, tokens_out=…,        # emits run.completed, closes the Run
                    cost_usd=…,                                          # your typed facet → the dashboard's Spec card
                    artifact=RunArtifact(type="spec", version=4,
-                       facet=SpecFacet(completeness=92, dimensions={"user_roles": 95})))
+                       facet=SpecFacet(structural=StructuralSummary(passed=8, total=8),
+                                       ears_coverage=100.0, missing_sections=[])))
 ```
 
 - **Two HITL moments, one type.** Every gate is a `HITLGate`, distinguished by `kind`:
@@ -347,10 +349,12 @@ codebase — these are from an earlier read and may have moved):
 | `error`                                              | `run.error`                                                             |
 | pipeline `turn_start` / `turn_done` / `score_update` | `step.started` / `step.completed` / `metric.update` (payload in `data`) |
 
-**Map BA-domain metrics onto the spec facet:** `completeness` (6-dim) →
-`SpecFacet.completeness` + `dimensions`; validation errors →
-`SpecFacet.validation_errors`; `spec_version` → `RunArtifact.version`. Only genuinely
-freeform extras stay in `Run.metadata` / event `data`.
+**Map BA-domain metrics onto the spec facet (structural-first):** the V1–V9 validator gate →
+`SpecFacet.structural` (`passed`/`total`); EARS coverage → `ears_coverage`; missing sections →
+`missing_sections`; validation errors → `validation_errors`; plus `finalize_method` /
+`completion_reason` / `decisions` as recorded. The 6-dim `completeness` / `dimensions` ride
+along as a structurally-**derived** readout (not LLM-judged). `spec_version` →
+`RunArtifact.version`. Only genuinely freeform extras stay in `Run.metadata` / event `data`.
 
 **Project is a first-class field, not metadata:** map BA's `project_id` /
 `project_name` (it enriches `/runs/all`) → `Run.project` (`ProjectRef`). It's the
@@ -396,8 +400,9 @@ app = agent.fastapi_app()
       payloads carrying `schema_version`.
 - [ ] Canonical events are emitted (`run.started` … `run.completed`,
       `tool.called`, `hitl.requested`/`hitl.resolved`).
-- [ ] BA's metrics ride on the typed `SpecFacet` (completeness/dimensions/validation
-      errors); only genuinely freeform extras stay in `metadata` / event `data`.
+- [ ] BA's metrics ride on the typed `SpecFacet` (structural gate / ears_coverage /
+      missing_sections / validation errors; completeness as a derived readout); only
+      genuinely freeform extras stay in `metadata` / event `data`.
 - [ ] BA's flow-observer still works.
 - [ ] `python -m agency_sdk.conformance <ba_url>` passes.
 
