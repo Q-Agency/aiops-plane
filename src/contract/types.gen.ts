@@ -155,7 +155,7 @@ export interface WorkItem {
   metadata?: { [k: string]: unknown };
 }
 /**
- * Deterministic structural-validator gate (V1–V9, zero LLM) — the real spec-quality signal.
+ * The structural validator gate (8 zero-LLM validators; V3 retired) — the real spec-quality signal.
  *
  * This interface was referenced by `AgencyOSSDLCAgentContract`'s JSON-Schema
  * via the `definition` "StructuralSummary".
@@ -171,7 +171,7 @@ export interface StructuralSummary {
   total?: number;
 }
 /**
- * BA — the specification. Quality is assessed by deterministic structural validators (V1–V9, zero LLM); the 6-dimension `completeness` is DERIVED from those checks (per-check score caps), not LLM-judged.
+ * BA — the specification. Quality is assessed by the structural validator gate (8 zero-LLM validators; V3 retired); the 6-dimension `completeness` is DERIVED from those checks (per-check score caps), not LLM-judged.
  *
  * This interface was referenced by `AgencyOSSDLCAgentContract`'s JSON-Schema
  * via the `definition` "SpecFacet".
