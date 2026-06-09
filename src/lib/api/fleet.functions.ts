@@ -13,6 +13,14 @@ import type {
   SpecReport,
 } from "../gateway/ba-adapter.server";
 import { COMPLETENESS_DIMS } from "../gateway/ba-adapter.server";
+import {
+  auditEnabled,
+  eventToAuditRow,
+  listAuditLog,
+  recordAuditRows,
+  type AuditEntry,
+  type AuditRow,
+} from "../db/audit.server";
 
 // Re-export so client components can type the getSpecReportFn result without importing
 // the `.server` module directly.
@@ -146,6 +154,35 @@ export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
       if (r.status === "fulfilled" && r.value[1]) observability[r.value[0]] = r.value[1];
     }
     return { fleet, runs, approvals, events, observability };
+  },
+);
+
+// Re-export so client components can type the audit list without importing the .server module.
+export type { AuditEntry } from "../db/audit.server";
+
+export type AuditData = { enabled: boolean; entries: AuditEntry[] };
+
+/** The control-plane audit ledger. Ingests each agent's durable lifecycle events
+ *  (reset / approve) into the dashboard's own Supabase (idempotently), then returns the
+ *  ledger newest-first. No-op + empty when the audit DB isn't configured (env unset). */
+export const getAuditFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<AuditData> => {
+    if (!auditEnabled()) return { enabled: false, entries: [] };
+    const systems = getSystems();
+    // Best-effort ingest: pull recent events from every agent, append the auditable ones.
+    // Ingest failures must not blank the view, so they're swallowed.
+    try {
+      const settled = await Promise.allSettled(systems.map((s) => adapterFor(s.id).getEvents(s)));
+      const rows: AuditRow[] = settled
+        .flatMap((r) => (r.status === "fulfilled" ? r.value : []))
+        .map(eventToAuditRow)
+        .filter((r): r is AuditRow => r !== null);
+      if (rows.length) await recordAuditRows(rows);
+    } catch {
+      // network / DB hiccup — fall through and show whatever's already stored
+    }
+    const entries = await listAuditLog(200).catch(() => [] as AuditEntry[]);
+    return { enabled: true, entries };
   },
 );
 
