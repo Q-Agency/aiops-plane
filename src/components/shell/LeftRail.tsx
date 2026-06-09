@@ -15,6 +15,7 @@ import {
   Megaphone,
   ShieldCheck,
   PlugZap,
+  Settings,
   ChevronLeft,
 } from "lucide-react";
 import { useState } from "react";
@@ -36,6 +37,7 @@ const items = [
   { to: "/observability", label: "Observability", icon: Activity },
   { to: "/approvals", label: "Approvals", icon: CheckCircle2 },
   { to: "/connections", label: "Connections", icon: PlugZap },
+  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function LeftRail() {

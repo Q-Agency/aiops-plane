@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TraceabilityRouteImport } from './routes/traceability'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PodRouteImport } from './routes/pod'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as OrchestrationRouteImport } from './routes/orchestration'
@@ -30,6 +31,11 @@ import { Route as AgentsAgentIdRouteImport } from './routes/agents.$agentId'
 const TraceabilityRoute = TraceabilityRouteImport.update({
   id: '/traceability',
   path: '/traceability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PodRoute = PodRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
   '/pod': typeof PodRoute
+  '/settings': typeof SettingsRoute
   '/traceability': typeof TraceabilityRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
 }
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
   '/pod': typeof PodRoute
+  '/settings': typeof SettingsRoute
   '/traceability': typeof TraceabilityRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
 }
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
   '/pod': typeof PodRoute
+  '/settings': typeof SettingsRoute
   '/traceability': typeof TraceabilityRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
 }
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/orchestration'
     | '/pipeline'
     | '/pod'
+    | '/settings'
     | '/traceability'
     | '/agents/$agentId'
   fileRoutesByTo: FileRoutesByTo
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/orchestration'
     | '/pipeline'
     | '/pod'
+    | '/settings'
     | '/traceability'
     | '/agents/$agentId'
   id:
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/orchestration'
     | '/pipeline'
     | '/pod'
+    | '/settings'
     | '/traceability'
     | '/agents/$agentId'
   fileRoutesById: FileRoutesById
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   OrchestrationRoute: typeof OrchestrationRoute
   PipelineRoute: typeof PipelineRoute
   PodRoute: typeof PodRoute
+  SettingsRoute: typeof SettingsRoute
   TraceabilityRoute: typeof TraceabilityRoute
 }
 
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/traceability'
       fullPath: '/traceability'
       preLoaderRoute: typeof TraceabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pod': {
@@ -401,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrchestrationRoute: OrchestrationRoute,
   PipelineRoute: PipelineRoute,
   PodRoute: PodRoute,
+  SettingsRoute: SettingsRoute,
   TraceabilityRoute: TraceabilityRoute,
 }
 export const routeTree = rootRouteImport

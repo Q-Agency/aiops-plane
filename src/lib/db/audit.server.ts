@@ -107,6 +107,62 @@ export async function recordAuditRows(rows: AuditRow[]): Promise<number> {
   return rows.length;
 }
 
+export type AuditStatus = {
+  configured: boolean; // both env vars present
+  url: string | null; // the non-secret project URL (key is NEVER returned)
+  reachable: boolean; // a live query succeeded
+  rowCount: number | null;
+  lastOccurredAt: string | null;
+  error: string | null;
+};
+
+function parseTotal(contentRange: string | null): number | null {
+  // PostgREST count=exact returns e.g. "0-0/123" — the total follows the slash.
+  const total = contentRange?.split("/")?.[1];
+  const n = total ? Number(total) : NaN;
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Live connection status for the Settings page: configured?, reachable?, row count, and the
+ *  most recent action. Returns only the non-secret URL — never the service-role key. */
+export async function auditStatus(): Promise<AuditStatus> {
+  const cfg = config();
+  const off: AuditStatus = {
+    configured: false,
+    url: null,
+    reachable: false,
+    rowCount: null,
+    lastOccurredAt: null,
+    error: null,
+  };
+  if (!cfg) return off;
+  try {
+    const res = await sb(cfg, `${REST}?select=occurred_at&order=occurred_at.desc&limit=1`, {
+      method: "GET",
+      headers: { prefer: "count=exact" },
+    });
+    if (!res.ok) {
+      return { ...off, configured: true, url: cfg.url, error: `HTTP ${res.status}` };
+    }
+    const rows = (await res.json()) as { occurred_at: string }[];
+    return {
+      configured: true,
+      url: cfg.url,
+      reachable: true,
+      rowCount: parseTotal(res.headers.get("content-range")),
+      lastOccurredAt: rows[0]?.occurred_at ?? null,
+      error: null,
+    };
+  } catch (e) {
+    return {
+      ...off,
+      configured: true,
+      url: cfg.url,
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
+
 /** The ledger, newest action first. Empty when not configured. */
 export async function listAuditLog(limit = 200): Promise<AuditEntry[]> {
   const cfg = config();

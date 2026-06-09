@@ -15,6 +15,7 @@ import type {
 import { COMPLETENESS_DIMS } from "../gateway/ba-adapter.server";
 import {
   auditEnabled,
+  auditStatus,
   eventToAuditRow,
   listAuditLog,
   recordAuditRows,
@@ -157,8 +158,12 @@ export const getCommandCenterFn = createServerFn({ method: "GET" }).handler(
   },
 );
 
-// Re-export so client components can type the audit list without importing the .server module.
-export type { AuditEntry } from "../db/audit.server";
+// Re-export so client components can type the audit list/status without importing .server.
+export type { AuditEntry, AuditStatus } from "../db/audit.server";
+
+/** Live status of the dashboard's audit database (for the Settings page). Returns the
+ *  non-secret URL + reachability/stats; the service-role key is never returned. */
+export const getAuditStatusFn = createServerFn({ method: "GET" }).handler(() => auditStatus());
 
 export type AuditData = { enabled: boolean; entries: AuditEntry[] };
 
