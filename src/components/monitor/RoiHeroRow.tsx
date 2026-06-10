@@ -5,12 +5,19 @@
  * net-of-fees ROI multiple; the whole row deep-links to /economics
  * ("promoted here, full story there" — the full reveal + Edit assumptions
  * live on Overview / ROI).
+ *
+ * ROLES slice: the exported RoiHeroRow now wraps the hero in the
+ * RoleLandingRouter — this is Row 0 of the standard-mode "/" cockpit, and
+ * index.tsx is frozen, so the role-scoped landing switch (PM cockpit /
+ * QA gate queue / sponsor digest) mounts HERE. PM view renders the hero
+ * exactly as before.
  */
 
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { aggregates, liveTier } from "@/mock/economics";
 import { cn } from "@/lib/utils";
+import { RoleLandingRouter } from "@/components/roles/RoleLandingRouter";
 import { useRoiAssumptions } from "./useRoiAssumptions";
 
 const usd = (n: number) =>
@@ -54,7 +61,16 @@ function Metric({
   );
 }
 
+/** Standard-mode "/" Row 0 — hosts the role-landing switch (see header). */
 export function RoiHeroRow() {
+  return (
+    <RoleLandingRouter>
+      <RoiHeroRowCore />
+    </RoleLandingRouter>
+  );
+}
+
+function RoiHeroRowCore() {
   const { derived } = useRoiAssumptions();
   const hasMerged = aggregates.mergedCount > 0;
 

@@ -23,6 +23,7 @@ import {
   type IncidentStatus,
   type RecoveryActionKind,
 } from "@/mock/incidents";
+import { useDemoTick } from "@/mock/demo-bus";
 import { IncidentInbox } from "./IncidentInbox";
 import { IncidentDetail } from "./IncidentDetail";
 import { RecoveryConfirmDialog, type RecoveryCommit } from "./RecoveryConfirmDialog";
@@ -39,6 +40,8 @@ export function IncidentsView({ deepLinkId }: IncidentsViewProps) {
   const navigate = useNavigate();
   // Mutation seam re-render: INCIDENTS is module state; bump after each commit.
   const [, setSeq] = useState(0);
+  // Demo Director staged incident flips land in INCIDENTS — repaint on tick.
+  useDemoTick();
   const [selectedId, setSelectedId] = useState<string | null>(deepLinkId ?? null);
   const [recoveringId, setRecoveringId] = useState<string | null>(null);
   const [dialog, setDialog] = useState<{ incidentId: string; action: RecoveryActionKind } | null>(

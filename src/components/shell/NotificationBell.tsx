@@ -19,6 +19,7 @@ import {
   NotificationRow,
   groupByRecency,
 } from "@/components/notifications/NotificationRow";
+import { useDemoTick } from "@/mock/demo-bus";
 import {
   CURRENT_USER_ID,
   isRead,
@@ -41,6 +42,10 @@ export function NotificationBell() {
     setOverlay(readOverlay());
     setMounted(true);
   }, []);
+
+  // Demo Director staged events append via pushNotification — repaint on tick
+  // so the bell pulses the moment a staged beat lands.
+  useDemoTick();
 
   const all = notificationsFor(CURRENT_USER_ID);
   const unread = mounted ? all.filter((n) => !isRead(n, overlay)).length : 0;

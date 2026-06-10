@@ -3,6 +3,7 @@ import { LeftRail } from "./LeftRail";
 import { TopBar } from "./TopBar";
 import { CommandPalette } from "./CommandPalette";
 import { PodCopilot } from "@/components/copilot/PodCopilot";
+import { DemoDirectorOverlay } from "@/components/demo/DemoDirectorOverlay";
 import { LiveProvider } from "@/hooks/useLiveTicker";
 import { SectionAssistantProvider } from "@/components/assistant/SectionAssistant";
 import { PodProvider } from "@/lib/pods/pod-store";
@@ -28,6 +29,8 @@ export function AppShell({ children, user }: { children: ReactNode; user: AppUse
           {mock && <CommandPalette />}
           {/* ⌘J — Pod Copilot overlay (wave 2, P1-A1) */}
           {mock && <PodCopilot />}
+          {/* ⌘⇧D — Demo Director presenter overlay (wave-2 COMPLETION); renders nothing until summoned */}
+          {mock && <DemoDirectorOverlay />}
         </PodProvider>
       </SectionAssistantProvider>
     </LiveProvider>

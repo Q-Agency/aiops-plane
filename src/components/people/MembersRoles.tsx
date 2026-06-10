@@ -12,6 +12,7 @@
  */
 
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Check, MailPlus, ShieldAlert, UserMinus, Users2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -135,9 +136,17 @@ export function MembersRoles() {
             · who&apos;s on the pod, what they can do
           </span>
         </div>
-        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setInviteOpen(true)}>
-          <MailPlus className="size-3.5" /> Invite
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/settings/roles"
+            className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Roles &amp; Access →
+          </Link>
+          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setInviteOpen(true)}>
+            <MailPlus className="size-3.5" /> Invite
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-3 items-start">

@@ -3,6 +3,7 @@ import { ChevronDown, ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { isMock } from "@/lib/experience";
+import { isReadOnlyViewRole, useViewRole } from "@/mock/view-role";
 import type { AppUser } from "@/lib/auth/types";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -81,15 +82,22 @@ export function LeftRail({ user }: { user: AppUser }) {
   // mock-fed items (and any group left empty) disappear; badges are mock-fed
   // so they are suppressed wholesale.
   const isReal = !isMock(user);
-  const groups = useMemo<NavGroup[]>(
-    () =>
-      isReal
-        ? NAV.map((g) => ({ ...g, items: g.items.filter((it) => it.live === true) })).filter(
-            (g) => g.items.length > 0,
-          )
-        : NAV,
-    [isReal],
-  );
+  // ROLES (additive, mock-only, AFTER the experience gate): when the PM is
+  // viewing as a read-only persona (sponsor/viewer), trim the rail to the
+  // MONITOR read surfaces (+ Settings below) and hide actionable badges.
+  // Real-mode logic is untouched.
+  const { role: viewRole } = useViewRole();
+  const readOnlyView = !isReal && isReadOnlyViewRole(viewRole);
+  const hideBadges = isReal || readOnlyView;
+  const groups = useMemo<NavGroup[]>(() => {
+    if (isReal) {
+      return NAV.map((g) => ({ ...g, items: g.items.filter((it) => it.live === true) })).filter(
+        (g) => g.items.length > 0,
+      );
+    }
+    if (readOnlyView) return NAV.filter((g) => g.pillar === "MONITOR");
+    return NAV;
+  }, [isReal, readOnlyView]);
 
   // ⌘B / Ctrl+B toggles the rail (client-only listener — SSR-safe).
   useEffect(() => {
@@ -122,6 +130,15 @@ export function LeftRail({ user }: { user: AppUser }) {
             </div>
           )}
         </div>
+
+        {/* read-only persona chip — under the brand (view-as sponsor/viewer) */}
+        {readOnlyView && (
+          <div className={cn("pt-2 shrink-0", collapsed ? "grid place-items-center" : "px-3")}>
+            <span className="text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-border bg-white/5 text-muted-foreground">
+              {collapsed ? "RO" : "VIEW-ONLY"}
+            </span>
+          </div>
+        )}
 
         <nav className="p-2 flex-1 overflow-y-auto scrollbar-thin">
           {groups.map((group, i) =>
@@ -162,7 +179,7 @@ export function LeftRail({ user }: { user: AppUser }) {
                       item={item}
                       collapsed={collapsed}
                       pathname={pathname}
-                      hideBadge={isReal}
+                      hideBadge={hideBadges}
                     />
                   ))}
                 </CollapsibleContent>
@@ -183,7 +200,7 @@ export function LeftRail({ user }: { user: AppUser }) {
                       item={item}
                       collapsed={collapsed}
                       pathname={pathname}
-                      hideBadge={isReal}
+                      hideBadge={hideBadges}
                     />
                   ))}
                 </div>
@@ -198,7 +215,7 @@ export function LeftRail({ user }: { user: AppUser }) {
             item={SETTINGS_ITEM}
             collapsed={collapsed}
             pathname={pathname}
-            hideBadge={isReal}
+            hideBadge={hideBadges}
           />
           <button
             onClick={() => setCollapsed((c) => !c)}

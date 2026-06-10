@@ -10,6 +10,15 @@
  *   - inline decisions REQUIRE a typed reason (both approve and reject)
  *     and write the mock decision log (recordGateDecision)
  *   - rows decided on the review surface render as resolved stamps
+ *
+ * Wave-2 GATES slice:
+ *   - P1-G1 policy chips on every row (artifact gate policy where the gate
+ *     maps to a pipeline artifact, else the agent policy) + "sampled
+ *     1-in-5" hint on auto-with-sampling rows
+ *   - responsive <md: the list collapses to stacked cards sorted by SLA
+ *     urgency (most-overdue first) linking to /approvals/$gateId; filters
+ *     collapse into a single select. Desktop is untouched (md: prefixes).
+ *   - decisions also land on the session audit ledger (audit-bridge)
  */
 
 import { useMemo, useState } from "react";
@@ -33,7 +42,16 @@ import {
   clarificationGates, gateDecisions, recordGateDecision,
   type ClarificationGate, type GateDecision,
 } from "@/mock/approvals";
-import { REJECT_REASON_MIN_CHARS } from "@/components/gates/gate-config";
+import {
+  artifactKindForGate, REJECT_REASON_MIN_CHARS, SAMPLED_HINT,
+} from "@/components/gates/gate-config";
+import { GatePolicyChip } from "@/components/gates/GatePolicyChip";
+import { artifactGatePolicyFor, gatePolicyFor } from "@/mock/gate-policies";
+import { useDemoTick } from "@/mock/demo-bus";
+import { appendAuditMock } from "@/mock/audit-bridge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import type { AgentId } from "@/mock/types";
 
 type Gate = Approval["gate"];
@@ -94,9 +112,37 @@ function agentOf(id: AgentId) {
 const decisionFor = (gateId: string): GateDecision | undefined =>
   gateDecisions.find((d) => d.gateId === gateId);
 
+/**
+ * P1-G1 policy bits for one row — the artifact gate policy where the gate
+ * maps to a pipeline ArtifactKind (approvals), else the agent policy alone
+ * (clarifications).
+ */
+function policyBitsFor(r: GateRow) {
+  const agentId = r.kind === "approval" ? GATE_AGENT_ID[r.a.gate] : r.c.agentId;
+  const artifactKind = r.kind === "approval" ? artifactKindForGate(r.a.gate) : null;
+  const artifactPolicy = artifactKind ? artifactGatePolicyFor(artifactKind) : undefined;
+  return {
+    policy: gatePolicyFor(agentId),
+    artifactPolicy,
+    sampled: artifactPolicy?.reviewMode === "auto-with-sampling",
+  };
+}
+
+/** "⚠ 4h over SLA" / "⚠ 25m over SLA" — mobile card breach copy. */
+function overSlaLabel(m: number): string {
+  const over = Math.max(1, m - SLA_MIN);
+  return over >= 60 ? `${Math.floor(over / 60)}h over SLA` : `${over}m over SLA`;
+}
+
+/** Single-select mobile filter — kind, mine, or breach (<md only). */
+type MobileFilter = "all" | "approvals" | "clarifications" | "mine" | "breach";
+
 export function ApprovalsView() {
   const { approvals, tickets, approve, reject } = useLive();
+  // re-render when the Demo Director lands a staged mock mutation
+  const demoTick = useDemoTick();
   const [kind, setKind] = useState<KindFilter>("all");
+  const [mobileFilter, setMobileFilter] = useState<MobileFilter>("all");
   const [gate, setGate] = useState<Gate | "all">("all");
   const [approver, setApprover] = useState<string>("all");
   const [humanFilter, setHumanFilter] = useState<string>("all");
@@ -129,7 +175,7 @@ export function ApprovalsView() {
     }));
     return [...fromApprovals, ...fromClarifications].sort((x, y) => x.openedAt - y.openedAt);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [approvals, decisionTick]);
+  }, [approvals, decisionTick, demoTick]);
 
   const unresolved = useMemo(
     () => rows.filter((r) => !decisionFor(r.id)),
@@ -151,6 +197,22 @@ export function ApprovalsView() {
       return true;
     });
   }, [rows, kind, gate, approver, humanFilter, ageBucket]);
+
+  /* mobile (<md) card stack — single-select filter, most-overdue first */
+  const mobileRows = useMemo(() => {
+    return unresolved
+      .filter((r) => {
+        switch (mobileFilter) {
+          case "approvals": return r.kind === "approval";
+          case "clarifications": return r.kind === "clarification";
+          case "mine": return assignedToMe(r);
+          case "breach": return ageMin(r.openedAt) >= SLA_MIN;
+          default: return true;
+        }
+      })
+      .sort((a, b) => a.openedAt - b.openedAt); // oldest = most over SLA first
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unresolved, mobileFilter]);
 
   /* per-human summary across ALL unresolved gates (ignores filters) */
   const perHuman = useMemo(() => {
@@ -188,6 +250,7 @@ export function ApprovalsView() {
       gateId: a.id, ticketId: a.ticketId, gateKind: "approval",
       decision: "approved", reason, actor: null,
     });
+    appendAuditMock({ action: "gate.approved", target: a.id, detail: reason });
     approve(a.id); // row collapses out of the live queue
     setDecisionTick((n) => n + 1);
     toast.success(`${a.ticketId} approved — moved forward`, {
@@ -200,6 +263,7 @@ export function ApprovalsView() {
       gateId: a.id, ticketId: a.ticketId, gateKind: "approval",
       decision: "rejected", reason: feedback, actor: null,
     });
+    appendAuditMock({ action: "gate.rejected", target: a.id, detail: feedback });
     reject(a.id);
     setDecisionTick((n) => n + 1);
     const back = GATE_AGENT[a.gate].name;
@@ -214,6 +278,7 @@ export function ApprovalsView() {
       gateId: c.id, ticketId: c.ticketId, gateKind: "clarification",
       decision: "answered", reason: answer, actor: null,
     });
+    appendAuditMock({ action: "clarification.answered", target: c.id, detail: answer });
     setDecisionTick((n) => n + 1);
     setExpanded(null);
     toast.success(`Answer sent to ${agentOf(c.agentId).name} — rerunning`, {
@@ -263,14 +328,18 @@ export function ApprovalsView() {
       {/* header */}
       <div>
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">human gates</div>
-        <h1 className="text-xl font-semibold tracking-tight">Gates</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          <span className="md:hidden">My gates</span>
+          <span className="hidden md:inline">Gates</span>
+        </h1>
         <div className="text-xs text-muted-foreground mt-0.5">
-          Every pending human checkpoint — approvals to sign off and clarifications the agents need answered.
+          <span className="md:hidden">Sorted by SLA urgency — tap a gate to review and decide.</span>
+          <span className="hidden md:inline">Every pending human checkpoint — approvals to sign off and clarifications the agents need answered.</span>
         </div>
       </div>
 
-      {/* stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* stats (desktop) */}
+      <div className="hidden md:grid md:grid-cols-4 gap-3">
         <Stat label="Gates pending"     value={stats.pending} sub={`${counts.approvals} approvals · ${counts.clarifications} clarifications`} />
         <Stat label="Avg gate age"      value={`${stats.avgMin}m`} sub={`SLA · ${SLA_MIN}m`} />
         <Stat
@@ -287,8 +356,8 @@ export function ApprovalsView() {
         />
       </div>
 
-      {/* per-human summaries */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+      {/* per-human summaries (desktop) */}
+      <div className="hidden md:grid sm:grid-cols-2 lg:grid-cols-5 gap-2">
         {perHuman.map(({ human, count, gates }) => {
           const color = `var(--agent-${human.primaryAgentId})`;
           const active = humanFilter === human.id;
@@ -323,8 +392,27 @@ export function ApprovalsView() {
         })}
       </div>
 
+      {/* mobile filter — everything collapses into one select (<md) */}
+      <div className="md:hidden flex items-center gap-2">
+        <Select value={mobileFilter} onValueChange={(v) => setMobileFilter(v as MobileFilter)}>
+          <SelectTrigger className="h-8 flex-1 text-xs bg-white/5 border-border">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All gates · {counts.all}</SelectItem>
+            <SelectItem value="approvals" className="text-xs">Approvals · {counts.approvals}</SelectItem>
+            <SelectItem value="clarifications" className="text-xs">Clarifications · {counts.clarifications}</SelectItem>
+            <SelectItem value="mine" className="text-xs">Assigned to me · {stats.mine}</SelectItem>
+            <SelectItem value="breach" className="text-xs">Over SLA · {stats.breaches}</SelectItem>
+          </SelectContent>
+        </Select>
+        <span className="text-[11px] font-mono text-muted-foreground shrink-0">
+          {mobileRows.length} of {counts.all}
+        </span>
+      </div>
+
       {/* kind switch — the unified-queue reframe */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="hidden md:flex items-center gap-3 flex-wrap">
         <div className="glass-panel p-1 inline-flex gap-1">
           {([
             ["all", `All · ${counts.all}`],
@@ -350,8 +438,8 @@ export function ApprovalsView() {
         </span>
       </div>
 
-      {/* filters */}
-      <div className="glass-panel px-3 py-2 flex items-center gap-2 flex-wrap text-xs">
+      {/* filters (desktop) */}
+      <div className="glass-panel px-3 py-2 hidden md:flex items-center gap-2 flex-wrap text-xs">
         <Filter className="size-3.5 text-muted-foreground" />
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono mr-1">filter</span>
 
@@ -398,7 +486,32 @@ export function ApprovalsView() {
       </div>
 
       {/* list */}
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+        {/* mobile card stack (<md) — most-overdue first, cards open the review surface */}
+        <div className="md:hidden space-y-2">
+          {allClear && (
+            <div className="glass-panel p-10 text-center space-y-3">
+              <CheckCircle2 className="size-10 text-status-done mx-auto" />
+              <div className="text-sm font-medium">No gates waiting on you</div>
+              <div className="text-xs text-muted-foreground">We'll notify you the moment one opens.</div>
+            </div>
+          )}
+          {!allClear && mobileRows.length === 0 && (
+            <div className="glass-panel p-8 text-center text-sm text-muted-foreground">
+              No gates match this filter.
+            </div>
+          )}
+          {mobileRows.map((r) => (
+            <MobileGateCard
+              key={r.id}
+              row={r}
+              ticket={ticketOf(r.kind === "approval" ? r.a.ticketId : r.c.ticketId)}
+            />
+          ))}
+        </div>
+
+        {/* desktop list (unchanged) */}
+        <div className="hidden md:block space-y-2">
         {allClear && (
           <div className="glass-panel p-12 text-center space-y-3">
             <CheckCircle2 className="size-10 text-status-done mx-auto" />
@@ -436,6 +549,7 @@ export function ApprovalsView() {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
@@ -479,9 +593,84 @@ function ResolvedGateRow({
   );
 }
 
+/* ---------- mobile gate card (<md) ---------- */
+
+function MobileGateCard({ row, ticket }: { row: GateRow; ticket?: Ticket }) {
+  const isApproval = row.kind === "approval";
+  const agent = isApproval ? GATE_AGENT[row.a.gate] : agentOf(row.c.agentId);
+  const Icon = isApproval ? GATE_ICON[row.a.gate] : MessageCircleQuestion;
+  const kindLabel = isApproval ? row.a.gate : "Clarification";
+  const { policy, artifactPolicy, sampled } = policyBitsFor(row);
+  const m = ageMin(row.openedAt);
+  const overdue = m >= SLA_MIN;
+  const aging = !overdue && m >= 30;
+  const who = isApproval
+    ? row.a.approver
+    : accountableFor(row.c.agentId).name.split(" ")[0];
+
+  return (
+    <Link
+      to="/approvals/$gateId"
+      params={{ gateId: row.id }}
+      className={cn(
+        "glass-panel block p-3 space-y-2 active:bg-white/[0.04] transition-colors",
+        overdue && "border-l-2 border-l-status-error",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[10px] font-mono border shrink-0"
+          style={{ color: agent.color, borderColor: `color-mix(in oklab, ${agent.color} 40%, transparent)`, background: `color-mix(in oklab, ${agent.color} 10%, transparent)` }}
+        >
+          <Icon className="size-3" />
+          {kindLabel}
+        </span>
+        <span className="flex-1" />
+        <span
+          suppressHydrationWarning
+          className={cn(
+            "inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border shrink-0",
+            overdue
+              ? "border-status-error/40 bg-status-error/10 text-status-error"
+              : aging
+                ? "border-status-waiting/40 bg-status-waiting/10 text-status-waiting"
+                : "border-status-done/40 bg-status-done/10 text-status-done",
+          )}
+        >
+          {overdue ? <AlertTriangle className="size-3" /> : <Clock className="size-3" />}
+          {overdue ? `⚠ ${overSlaLabel(m)}` : `Due in ${SLA_MIN - m}m`}
+        </span>
+      </div>
+
+      <div className="flex items-start gap-2">
+        <span className="font-mono text-xs text-foreground/90 shrink-0 pt-px">
+          {isApproval ? row.a.ticketId : row.c.ticketId}
+        </span>
+        <span className="text-sm leading-snug line-clamp-2">
+          {isApproval ? (ticket?.title ?? "") : row.c.question}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <GatePolicyChip policy={policy} artifactPolicy={artifactPolicy} compact />
+        {sampled && (
+          <span className="text-[9px] font-mono text-muted-foreground/70">{SAMPLED_HINT}</span>
+        )}
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground">
+          <UserCircle2 className="size-3" /> {who}
+        </span>
+        <span className="text-[10px] font-mono text-muted-foreground truncate max-w-[16ch]">
+          {isApproval ? row.a.artifact : `${agent.name} asks`}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 /* ---------- approval row ---------- */
 
-function ApprovalRow({
+/** Exported for reuse by the QA-scoped "/" landing (roles/ScopedGateLanding). */
+export function ApprovalRow({
   approval, ticket, open, onToggle, onApprove, onReject,
 }: {
   approval: Approval;
@@ -497,6 +686,11 @@ function ApprovalRow({
   const breached = m >= SLA_MIN;
   const mine = approval.approver === ME;
   const fullReviewPrimary = FULL_REVIEW_PRIMARY.has(approval.gate);
+  // P1-G1 — the gate's policy regime, keyed by artifact kind
+  const policy = gatePolicyFor(GATE_AGENT_ID[approval.gate]);
+  const artifactKind = artifactKindForGate(approval.gate);
+  const artifactPolicy = artifactKind ? artifactGatePolicyFor(artifactKind) : undefined;
+  const sampled = artifactPolicy?.reviewMode === "auto-with-sampling";
   const [reason, setReason] = useState("");
   const approveDisabled = reason.trim().length === 0;
   const rejectDisabled = reason.trim().length < REJECT_REASON_MIN_CHARS;
@@ -521,6 +715,13 @@ function ApprovalRow({
           <Icon className="size-3" />
           {approval.gate}
         </span>
+
+        <GatePolicyChip policy={policy} artifactPolicy={artifactPolicy} compact className="shrink-0" />
+        {sampled && (
+          <span className="hidden lg:inline text-[9px] font-mono text-muted-foreground/70 shrink-0">
+            {SAMPLED_HINT}
+          </span>
+        )}
 
         <span className="font-mono text-xs text-foreground/90">{approval.ticketId}</span>
         <span className="text-sm truncate flex-1">{ticket.title}</span>
@@ -619,7 +820,8 @@ function ApprovalRow({
 
 /* ---------- clarification row ---------- */
 
-function ClarificationRow({
+/** Exported for reuse by the QA-scoped "/" landing (roles/ScopedGateLanding). */
+export function ClarificationRow({
   gate, ticket, open, onToggle, onAnswer,
 }: {
   gate: ClarificationGate;
@@ -656,6 +858,8 @@ function ClarificationRow({
           <MessageCircleQuestion className="size-3" />
           Clarification
         </span>
+
+        <GatePolicyChip policy={gatePolicyFor(gate.agentId)} compact className="shrink-0" />
 
         <span className="font-mono text-xs text-foreground/90">{gate.ticketId}</span>
         <span className="text-sm truncate flex-1">{gate.question}</span>

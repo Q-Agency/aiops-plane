@@ -10,7 +10,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  AlertTriangle, CheckCircle2, ExternalLink, Flame, Gauge, XCircle,
+  AlertTriangle, CheckCircle2, ExternalLink, Flame, Gauge, MoonStar, XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { fmtDateTime } from "@/lib/time";
 import {
-  breachesFor, slaDefinitions, slaSummary, slaTargetLabel,
+  breachesFor, slaClockSubline, slaDefinitions, slaSummary, slaTargetLabel,
   SLA_STATUS_LABELS, type SlaDefinition, type SlaStatus,
 } from "@/mock/sla";
 import { cn } from "@/lib/utils";
@@ -161,6 +161,7 @@ export function SlaStatusTab() {
             <tbody>
               {rows.map((s) => {
                 const meta = STATUS_META[s.status];
+                const clockLine = slaClockSubline(s);
                 return (
                   <tr
                     key={s.id}
@@ -175,6 +176,24 @@ export function SlaStatusTab() {
                       <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
                         {s.metric.replace("_", " ")}
                       </div>
+                      {/* P1-O1 clock mode — coverage clocks pause when nobody is staffed */}
+                      {clockLine && (
+                        <div
+                          className="text-[10px] font-mono text-muted-foreground/60 mt-0.5 flex items-center gap-1"
+                          title="coverage_hours clock — the SLA timer pauses outside the pod's staffed window, so overnight waits are not fake breaches"
+                        >
+                          <MoonStar className="size-2.5 shrink-0" />
+                          {clockLine}
+                        </div>
+                      )}
+                      {s.wouldBe24x7 != null && (
+                        /* honesty hint: the fake-overnight-breach fix, made visible */
+                        <div className="text-[10px] font-mono text-status-waiting/90 mt-0.5">
+                          would read {fmtVal(s.wouldBe24x7, s.unit)} under a 24×7 clock
+                          {s.comparator === "lte" && s.wouldBe24x7 > s.targetValue ? " — a breach" : ""}
+                          {" · "}overnight idle excluded, not hidden
+                        </div>
+                      )}
                     </td>
                     <td className="px-3 py-2.5">
                       <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">

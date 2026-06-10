@@ -66,3 +66,40 @@ export function addTicket(input: AddTicketInput): Ticket {
 export function ticketById(id: string): Ticket | undefined {
   return tickets.find((t) => t.id === id);
 }
+
+/* ------------------------------------------------------------------ */
+/* Demo Director seam (wave-2 COMPLETION) — additive flag, never reshapes */
+/* ------------------------------------------------------------------ */
+
+export interface TicketRestagePatch {
+  stage?: Ticket["stage"];
+  state?: Ticket["state"];
+  updatedAt?: number;
+}
+
+/**
+ * Flags an existing ticket for a staged demo beat (stage/state/updatedAt
+ * only — same live `tickets` reference every consumer reads). Returns the
+ * PREVIOUS values of exactly the patched fields so the Demo Director's
+ * checkpoint restore can put them back; null = unknown id. Derived
+ * module-load datasets (approvals, economics) intentionally do NOT
+ * re-derive — same contract as addTicket above.
+ */
+export function restageTicket(id: string, patch: TicketRestagePatch): TicketRestagePatch | null {
+  const t = ticketById(id);
+  if (!t) return null;
+  const prev: TicketRestagePatch = {};
+  if (patch.stage !== undefined) {
+    prev.stage = t.stage;
+    t.stage = patch.stage;
+  }
+  if (patch.state !== undefined) {
+    prev.state = t.state;
+    t.state = patch.state;
+  }
+  if (patch.updatedAt !== undefined) {
+    prev.updatedAt = t.updatedAt;
+    t.updatedAt = patch.updatedAt;
+  }
+  return prev;
+}

@@ -43,6 +43,8 @@ This repo's **standard mode** (login `qai@q.agency` / `demo`; `bun install && bu
 
 **Wave 2 (also built):** `/welcome` accountability handshake, `/memory` constitution & amendments (absorbs `/knowledge`, which now redirects), the **Pod Copilot** (⌘J — ask-with-receipts + confirm-first proposed actions, canned/no-LLM and badged as such), `/pilot` scorecard, `/org` portfolio rollup, `/artifacts` deliverables shelf (rejected-iteration diffs, snapshot-at-clearance stamp), `/status` platform status, and the chrome-less **`/share/$token`** client report viewer. All wave-2 mutations write to a **session audit overlay** (`src/mock/audit-bridge.ts`) that surfaces in Compliance under "this session" — the demo's actions provably land on the ledger UI.
 
+**Wave 2 completion (also built):** the **Settings trust surface** (tenancy posture, per-agent **models & subprocessors** disclosure, connected-tool scopes, data & retention, export) with the **Gate policies & autonomy** tab — per-artifact policy table + the L0→L3 **autonomy ladder** (system-proposed, human-granted on validator-streak evidence, with the auto-clear preview stat; every change → `policy.changed`); **policy chips** on the gates queue and review header; **capacity & coverage** on `/pod` (working hours, OOO + deputy, the 24h coverage strip, saturation, audited reassignment) and SLA clock modes; the **Demo Director** (⌘⇧D presenter overlay staging the 3-minute script into the real mock stores); **role-scoped landings** (view-as: Exec Digest, QA queue, read-only rail, `/settings/roles`); and **responsive gates** (mobile card stack + sticky decision bar — no `/m/` fork).
+
 **Where things live:**
 
 | Concern | Location |

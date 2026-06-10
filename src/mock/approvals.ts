@@ -139,3 +139,22 @@ export function openGateCount(): number {
     clarificationGates.filter((c) => !isGateResolved(c.id)).length
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Demo Director seam (wave-2 COMPLETION) — additive flag, never reshapes */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Re-times a gate (approval "appr-…" or clarification "clar-…") so a staged
+ * demo beat lands it "just now" in every queue that orders by openedAt.
+ * Returns the PREVIOUS openedAt for checkpoint restore; null = unknown id.
+ */
+export function restageGate(gateId: string, openedAt: number = Date.now()): number | null {
+  const gate =
+    approvals.find((a) => a.id === gateId) ??
+    clarificationGates.find((c) => c.id === gateId);
+  if (!gate) return null;
+  const prev = gate.openedAt;
+  gate.openedAt = openedAt;
+  return prev;
+}

@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   ExternalLink,
   History,
+  Loader2,
   ShieldAlert,
   Undo2,
   X,
@@ -53,6 +54,8 @@ export interface DecisionPanelProps {
   /** Hard-failing deterministic checks — approving overrides them (note required). */
   failingCount: number;
   resolvedDecision: GateDecision | null;
+  /** Decision in flight — buttons spin + disable (shared with the mobile bar). */
+  submitting?: boolean;
   onApproveRequest: () => void;
   onReject: () => void;
   onAnswer: () => void;
@@ -67,6 +70,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
       setReason,
       failingCount,
       resolvedDecision,
+      submitting = false,
       onApproveRequest,
       onReject,
       onAnswer,
@@ -182,24 +186,27 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
         {isClarification ? (
           <button
             type="button"
-            disabled={answerDisabled}
+            disabled={answerDisabled || submitting}
             onClick={onAnswer}
-            className="w-full h-9 rounded-md border border-primary/50 bg-primary/15 text-primary text-xs font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-primary/25 transition-colors"
+            className="w-full h-9 rounded-md border border-primary/50 bg-primary/15 text-primary text-xs font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-primary/25 transition-colors inline-flex items-center justify-center gap-1.5"
           >
+            {submitting && <Loader2 className="size-3.5 animate-spin" />}
             Send answer
           </button>
         ) : (
           <div className="grid grid-cols-1 gap-2">
             <button
               type="button"
+              disabled={submitting}
               onClick={onApproveRequest}
-              className="h-9 rounded-md border border-status-done/50 bg-status-done/15 text-status-done text-xs font-semibold uppercase tracking-wider hover:bg-status-done/25 transition-colors inline-flex items-center justify-center gap-1.5"
+              className="h-9 rounded-md border border-status-done/50 bg-status-done/15 text-status-done text-xs font-semibold uppercase tracking-wider hover:bg-status-done/25 transition-colors inline-flex items-center justify-center gap-1.5 disabled:opacity-40"
             >
-              <Check className="size-3.5" /> Approve {detail.gateLabel.split(" ")[0].toLowerCase()}
+              {submitting ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}{" "}
+              Approve {detail.gateLabel.split(" ")[0].toLowerCase()}
             </button>
             <button
               type="button"
-              disabled={rejectDisabled}
+              disabled={rejectDisabled || submitting}
               onClick={onReject}
               title={
                 rejectDisabled
@@ -208,7 +215,8 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
               }
               className="h-9 rounded-md border border-status-error/50 bg-status-error/15 text-status-error text-xs font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-status-error/25 transition-colors inline-flex items-center justify-center gap-1.5"
             >
-              <X className="size-3.5" /> Reject &amp; return to {agentName}
+              {submitting ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />}{" "}
+              Reject &amp; return to {agentName}
             </button>
           </div>
         )}

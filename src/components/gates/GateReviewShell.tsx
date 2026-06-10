@@ -23,8 +23,10 @@ import {
   ArrowLeft,
   Bot,
   Check,
+  ChevronDown,
   Clock,
   ExternalLink,
+  Loader2,
   MessageCircleQuestion,
   ShieldCheck,
   X,
@@ -40,12 +42,21 @@ import {
 } from "@/mock/approvals";
 import { accountableFor } from "@/mock/humans";
 import { agents as allAgents } from "@/mock/agents";
+import { artifactGatePolicyFor, gatePolicyFor } from "@/mock/gate-policies";
+import { appendAuditMock } from "@/mock/audit-bridge";
 import { useLive } from "@/hooks/useLiveTicker";
 import { ValidatorPanel } from "@/components/governance/ValidatorPanel";
+import { GatePolicyChip } from "./GatePolicyChip";
 import { SpecDocument, splitSections } from "./SpecDocument";
 import { EarsCriteriaList, EARS_BLOCK_ID } from "./EarsCriteriaList";
 import { DecisionPanel } from "./DecisionPanel";
-import { NEXT_STAGE_AFTER_APPROVAL, REJECT_REASON_MIN_CHARS } from "./gate-config";
+import {
+  artifactKindForGate,
+  NEXT_STAGE_AFTER_APPROVAL,
+  REJECT_REASON_MIN_CHARS,
+  REVIEW_MODE_LABEL,
+  SAMPLED_HINT,
+} from "./gate-config";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -116,6 +127,10 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [earsFlash, setEarsFlash] = useState(false);
+  // submitting = the brief optimistic-submit beat (spinner + disabled actions)
+  const [submitting, setSubmitting] = useState(false);
+  // <md only — validators collapse behind a toggle (desktop always open)
+  const [mobileValidatorsOpen, setMobileValidatorsOpen] = useState(false);
   const [resolvedDecision, setResolvedDecision] = useState<GateDecision | null>(
     () => gateDecisions.find((d) => d.gateId === detail.gateId) ?? null,
   );
@@ -127,7 +142,12 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   const agentName = agent?.name ?? detail.agentId.toUpperCase();
   const isClarification = detail.kind === "clarification";
   const failingCount = detail.validators.filter((v) => v.status === "fail").length;
+  const passingCount = detail.validators.filter((v) => v.status === "pass").length;
   const nextStage = NEXT_STAGE_AFTER_APPROVAL[detail.gateLabel] ?? "the next stage";
+  // P1-G1 — the policy regime behind this gate (artifact row where mapped)
+  const gatePolicy = gatePolicyFor(detail.agentId);
+  const artifactKind = isClarification ? null : artifactKindForGate(detail.gateLabel);
+  const artifactPolicy = artifactKind ? artifactGatePolicyFor(artifactKind) : undefined;
   const sections = useMemo(
     () => splitSections(detail.specMarkdown).sections,
     [detail.specMarkdown],
@@ -151,27 +171,46 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   }
 
   function decide(decision: GateDecisionVerb) {
-    const entry = recordGateDecision({
-      gateId: detail.gateId,
-      ticketId: detail.ticketId,
-      gateKind: detail.kind,
-      decision,
-      reason: reason.trim(),
-      actor: null, // when-only until auth
-    });
-    setResolvedDecision(entry);
-    emit("human", detail.ticketId);
-    const msg =
-      decision === "approved"
-        ? `${detail.ticketId} approved — advancing to ${nextStage}. Recorded in the audit log.`
-        : decision === "rejected"
-          ? `${detail.ticketId} returned to ${agentName} — rerunning with your note as added context.`
-          : `Answer sent to ${agentName} — rerunning.`;
-    toast.success(msg);
-    navigate({ to: "/approvals" });
+    if (submitting) return;
+    setSubmitting(true);
+    // brief submit beat — action bars show spinner + disable, then resolve
+    window.setTimeout(() => {
+      const entry = recordGateDecision({
+        gateId: detail.gateId,
+        ticketId: detail.ticketId,
+        gateKind: detail.kind,
+        decision,
+        reason: reason.trim(),
+        actor: null, // when-only until auth
+      });
+      // session audit ledger — vocabulary: gate.approved|rejected|override, clarification.answered
+      appendAuditMock({
+        action:
+          decision === "answered"
+            ? "clarification.answered"
+            : decision === "rejected"
+              ? "gate.rejected"
+              : failingCount > 0
+                ? "gate.override"
+                : "gate.approved",
+        target: detail.gateId,
+        detail: reason.trim(),
+      });
+      setResolvedDecision(entry);
+      emit("human", detail.ticketId);
+      const msg =
+        decision === "approved"
+          ? `${detail.ticketId} approved — advancing to ${nextStage}. Recorded in the audit log.`
+          : decision === "rejected"
+            ? `${detail.ticketId} returned to ${agentName} — rerunning with your note as added context.`
+            : `Answer sent to ${agentName} — rerunning.`;
+      toast.success(msg);
+      navigate({ to: "/approvals" });
+    }, 450);
   }
 
   function requestApprove() {
+    if (submitting) return;
     if (failingCount > 0 && reason.trim().length === 0) {
       focusNote(
         `${failingCount} structural ${failingCount === 1 ? "check is" : "checks are"} failing — approving overrides ${failingCount === 1 ? "it" : "them"}; type your override note first.`,
@@ -182,6 +221,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   }
 
   function requestReject() {
+    if (submitting) return;
     if (reason.trim().length < REJECT_REASON_MIN_CHARS) {
       focusNote(`Reject requires a typed reason (min ${REJECT_REASON_MIN_CHARS} chars).`);
       return;
@@ -212,6 +252,14 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           <span className="text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
             {detail.gateLabel}
           </span>
+          {/* P1-G1 — the gate's policy regime + review mode */}
+          <GatePolicyChip policy={gatePolicy} artifactPolicy={artifactPolicy} compact />
+          {artifactPolicy && (
+            <span className="text-[10px] font-mono text-muted-foreground">
+              Review mode: {REVIEW_MODE_LABEL[artifactPolicy.reviewMode]}
+              {artifactPolicy.reviewMode === "auto-with-sampling" && ` · ${SAMPLED_HINT}`}
+            </span>
+          )}
           <span className="hidden md:inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <Bot className="size-3.5" /> {agentName} · {accountable.name} accountable
           </span>
@@ -228,22 +276,24 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
             {detail.artifactLabel}
           </span>
           <div className="flex-1" />
-          {/* sticky header decisions (approval kind, while undecided) */}
+          {/* sticky header decisions (approval kind, while undecided; <md uses the bottom bar) */}
           {!isClarification && !resolved && (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <button
                 type="button"
+                disabled={submitting}
                 onClick={requestApprove}
-                className="h-8 px-3 rounded-md border border-status-done/50 bg-status-done/15 text-status-done text-[11px] font-semibold uppercase tracking-wider hover:bg-status-done/25 transition-colors inline-flex items-center gap-1.5"
+                className="h-8 px-3 rounded-md border border-status-done/50 bg-status-done/15 text-status-done text-[11px] font-semibold uppercase tracking-wider hover:bg-status-done/25 transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                <Check className="size-3.5" /> Approve
+                {submitting ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />} Approve
               </button>
               <button
                 type="button"
+                disabled={submitting}
                 onClick={requestReject}
-                className="h-8 px-3 rounded-md border border-status-error/50 bg-status-error/15 text-status-error text-[11px] font-semibold uppercase tracking-wider hover:bg-status-error/25 transition-colors inline-flex items-center gap-1.5"
+                className="h-8 px-3 rounded-md border border-status-error/50 bg-status-error/15 text-status-error text-[11px] font-semibold uppercase tracking-wider hover:bg-status-error/25 transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                <X className="size-3.5" /> Reject
+                {submitting ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />} Reject
               </button>
             </div>
           )}
@@ -393,15 +443,34 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
             )}
           </div>
 
-          {/* right rail: validators + decision */}
+          {/* right rail (single column <xl): validators + decision (decision LAST) */}
           <div className="space-y-5">
             {!isClarification && detail.validators.length > 0 && (
               <div id={VALIDATOR_PANEL_ID} className="scroll-mt-24">
-                <ValidatorPanel
-                  checks={detail.validators}
-                  compact
-                  onCheckClick={() => flashEars()}
-                />
+                {/* <md: validators collapse behind this toggle (desktop unaffected) */}
+                <button
+                  type="button"
+                  onClick={() => setMobileValidatorsOpen((o) => !o)}
+                  className="md:hidden w-full flex items-center justify-between rounded-md border border-status-done/30 bg-panel/40 backdrop-blur-md px-3 py-2.5"
+                >
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
+                    <ShieldCheck className="size-3.5 text-status-done" />
+                    Validators · {passingCount}/{detail.validators.length} structural · deterministic
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "size-4 text-muted-foreground transition-transform",
+                      mobileValidatorsOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+                <div className={cn(mobileValidatorsOpen ? "block mt-2 md:mt-0" : "hidden md:block")}>
+                  <ValidatorPanel
+                    checks={detail.validators}
+                    compact
+                    onCheckClick={() => flashEars()}
+                  />
+                </div>
               </div>
             )}
 
@@ -413,12 +482,56 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
               setReason={setReason}
               failingCount={failingCount}
               resolvedDecision={resolvedDecision}
+              submitting={submitting}
               onApproveRequest={requestApprove}
               onReject={requestReject}
               onAnswer={() => decide("answered")}
             />
           </div>
         </div>
+
+        {/* <md sticky bottom action bar — decision-reason canon intact */}
+        {!resolved && (
+          <div className="md:hidden sticky bottom-0 z-10 -mx-4 -mb-4 mt-4 border-t border-border bg-background/90 backdrop-blur-md px-4 pt-3 pb-4 space-y-2">
+            {isClarification ? (
+              <button
+                type="button"
+                disabled={reason.trim().length === 0 || submitting}
+                onClick={() => decide("answered")}
+                className="w-full h-11 rounded-md border border-primary/50 bg-primary/15 text-primary text-sm font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-primary/25 transition-colors inline-flex items-center justify-center gap-2"
+              >
+                {submitting && <Loader2 className="size-4 animate-spin" />}
+                Send answer
+              </button>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={requestApprove}
+                    className="h-11 rounded-md border border-status-done/50 bg-status-done/15 text-status-done text-sm font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-status-done/25 transition-colors inline-flex items-center justify-center gap-1.5"
+                  >
+                    {submitting ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    disabled={reason.trim().length < REJECT_REASON_MIN_CHARS || submitting}
+                    onClick={requestReject}
+                    className="h-11 rounded-md border border-status-error/50 bg-status-error/15 text-status-error text-sm font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-status-error/25 transition-colors inline-flex items-center justify-center gap-1.5"
+                  >
+                    {submitting ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4" />}
+                    Reject
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
+                  A reason is required on reject and is written to the audit log.
+                </p>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* approve confirm (C4) */}

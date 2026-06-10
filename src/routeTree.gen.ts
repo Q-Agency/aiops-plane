@@ -39,6 +39,7 @@ import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareTokenRouteImport } from './routes/share.$token'
+import { Route as SettingsRolesRouteImport } from './routes/settings_.roles'
 import { Route as PodsNewRouteImport } from './routes/pods.new'
 import { Route as ApprovalsGateIdRouteImport } from './routes/approvals_.$gateId'
 import { Route as AgentsAgentIdRouteImport } from './routes/agents.$agentId'
@@ -193,6 +194,11 @@ const ShareTokenRoute = ShareTokenRouteImport.update({
   path: '/share/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRolesRoute = SettingsRolesRouteImport.update({
+  id: '/settings_/roles',
+  path: '/settings/roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PodsNewRoute = PodsNewRouteImport.update({
   id: '/pods/new',
   path: '/pods/new',
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/agents/$agentId': typeof AgentsAgentIdRoute
   '/approvals/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
+  '/settings/roles': typeof SettingsRolesRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRoutesByTo {
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/agents/$agentId': typeof AgentsAgentIdRoute
   '/approvals/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
+  '/settings/roles': typeof SettingsRolesRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRoutesById {
@@ -313,6 +321,7 @@ export interface FileRoutesById {
   '/agents/$agentId': typeof AgentsAgentIdRoute
   '/approvals_/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
+  '/settings_/roles': typeof SettingsRolesRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRouteTypes {
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/approvals/$gateId'
     | '/pods/new'
+    | '/settings/roles'
     | '/share/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/approvals/$gateId'
     | '/pods/new'
+    | '/settings/roles'
     | '/share/$token'
   id:
     | '__root__'
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/approvals_/$gateId'
     | '/pods/new'
+    | '/settings_/roles'
     | '/share/$token'
   fileRoutesById: FileRoutesById
 }
@@ -455,6 +467,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   ApprovalsGateIdRoute: typeof ApprovalsGateIdRoute
   PodsNewRoute: typeof PodsNewRoute
+  SettingsRolesRoute: typeof SettingsRolesRoute
   ShareTokenRoute: typeof ShareTokenRoute
 }
 
@@ -670,6 +683,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings_/roles': {
+      id: '/settings_/roles'
+      path: '/settings/roles'
+      fullPath: '/settings/roles'
+      preLoaderRoute: typeof SettingsRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pods/new': {
       id: '/pods/new'
       path: '/pods/new'
@@ -737,6 +757,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   ApprovalsGateIdRoute: ApprovalsGateIdRoute,
   PodsNewRoute: PodsNewRoute,
+  SettingsRolesRoute: SettingsRolesRoute,
   ShareTokenRoute: ShareTokenRoute,
 }
 export const routeTree = rootRouteImport

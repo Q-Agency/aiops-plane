@@ -362,3 +362,36 @@ export function reassignIncident(id: string, humanId: string, reason?: string): 
   incident.accountableHumanId = humanId;
   return recoverIncident(id, "reassign-human", reason);
 }
+
+/* ------------------------------------------------------------------ */
+/* Demo Director seam (wave-2 COMPLETION) — additive flag, never reshapes */
+/* ------------------------------------------------------------------ */
+
+export interface IncidentRestagePatch {
+  status?: IncidentStatus;
+  openedMinAgo?: number;
+}
+
+/**
+ * Flips a seeded incident for a staged demo beat (status/openedMinAgo only
+ * — timelines and recovery actions stay untouched). Returns the PREVIOUS
+ * values of exactly the patched fields so the Demo Director's checkpoint
+ * restore can put them back; null = unknown id.
+ */
+export function restageIncident(
+  id: string,
+  patch: IncidentRestagePatch,
+): IncidentRestagePatch | null {
+  const incident = incidentById(id);
+  if (!incident) return null;
+  const prev: IncidentRestagePatch = {};
+  if (patch.status !== undefined) {
+    prev.status = incident.status;
+    incident.status = patch.status;
+  }
+  if (patch.openedMinAgo !== undefined) {
+    prev.openedMinAgo = incident.openedMinAgo;
+    incident.openedMinAgo = patch.openedMinAgo;
+  }
+  return prev;
+}
