@@ -9,14 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TraceabilityRouteImport } from './routes/traceability'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PodRouteImport } from './routes/pod'
 import { Route as PipelineRouteImport } from './routes/pipeline'
+import { Route as PilotRouteImport } from './routes/pilot'
+import { Route as OrgRouteImport } from './routes/org'
 import { Route as OrchestrationRouteImport } from './routes/orchestration'
 import { Route as ObservabilityRouteImport } from './routes/observability'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as IntakeRouteImport } from './routes/intake'
@@ -29,16 +34,28 @@ import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as CommsRouteImport } from './routes/comms'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as BillingRouteImport } from './routes/billing'
+import { Route as ArtifactsRouteImport } from './routes/artifacts'
 import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShareTokenRouteImport } from './routes/share.$token'
 import { Route as PodsNewRouteImport } from './routes/pods.new'
 import { Route as ApprovalsGateIdRouteImport } from './routes/approvals_.$gateId'
 import { Route as AgentsAgentIdRouteImport } from './routes/agents.$agentId'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TraceabilityRoute = TraceabilityRouteImport.update({
   id: '/traceability',
   path: '/traceability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -61,6 +78,16 @@ const PipelineRoute = PipelineRouteImport.update({
   path: '/pipeline',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PilotRoute = PilotRouteImport.update({
+  id: '/pilot',
+  path: '/pilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrgRoute = OrgRouteImport.update({
+  id: '/org',
+  path: '/org',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrchestrationRoute = OrchestrationRouteImport.update({
   id: '/orchestration',
   path: '/orchestration',
@@ -74,6 +101,11 @@ const ObservabilityRoute = ObservabilityRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryRoute = MemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -136,6 +168,11 @@ const BillingRoute = BillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtifactsRoute = ArtifactsRouteImport.update({
+  id: '/artifacts',
+  path: '/artifacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApprovalsRoute = ApprovalsRouteImport.update({
   id: '/approvals',
   path: '/approvals',
@@ -149,6 +186,11 @@ const AgentsRoute = AgentsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShareTokenRoute = ShareTokenRouteImport.update({
+  id: '/share/$token',
+  path: '/share/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PodsNewRoute = PodsNewRouteImport.update({
@@ -171,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRouteWithChildren
   '/approvals': typeof ApprovalsRoute
+  '/artifacts': typeof ArtifactsRoute
   '/billing': typeof BillingRoute
   '/catalog': typeof CatalogRoute
   '/comms': typeof CommsRoute
@@ -183,22 +226,29 @@ export interface FileRoutesByFullPath {
   '/intake': typeof IntakeRoute
   '/knowledge': typeof KnowledgeRoute
   '/login': typeof LoginRoute
+  '/memory': typeof MemoryRoute
   '/notifications': typeof NotificationsRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
+  '/org': typeof OrgRoute
+  '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
   '/pod': typeof PodRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/status': typeof StatusRoute
   '/traceability': typeof TraceabilityRoute
+  '/welcome': typeof WelcomeRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
   '/approvals/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
+  '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRouteWithChildren
   '/approvals': typeof ApprovalsRoute
+  '/artifacts': typeof ArtifactsRoute
   '/billing': typeof BillingRoute
   '/catalog': typeof CatalogRoute
   '/comms': typeof CommsRoute
@@ -211,23 +261,30 @@ export interface FileRoutesByTo {
   '/intake': typeof IntakeRoute
   '/knowledge': typeof KnowledgeRoute
   '/login': typeof LoginRoute
+  '/memory': typeof MemoryRoute
   '/notifications': typeof NotificationsRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
+  '/org': typeof OrgRoute
+  '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
   '/pod': typeof PodRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/status': typeof StatusRoute
   '/traceability': typeof TraceabilityRoute
+  '/welcome': typeof WelcomeRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
   '/approvals/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
+  '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agents': typeof AgentsRouteWithChildren
   '/approvals': typeof ApprovalsRoute
+  '/artifacts': typeof ArtifactsRoute
   '/billing': typeof BillingRoute
   '/catalog': typeof CatalogRoute
   '/comms': typeof CommsRoute
@@ -240,17 +297,23 @@ export interface FileRoutesById {
   '/intake': typeof IntakeRoute
   '/knowledge': typeof KnowledgeRoute
   '/login': typeof LoginRoute
+  '/memory': typeof MemoryRoute
   '/notifications': typeof NotificationsRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
+  '/org': typeof OrgRoute
+  '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
   '/pod': typeof PodRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/status': typeof StatusRoute
   '/traceability': typeof TraceabilityRoute
+  '/welcome': typeof WelcomeRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
   '/approvals_/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
+  '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -258,6 +321,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/approvals'
+    | '/artifacts'
     | '/billing'
     | '/catalog'
     | '/comms'
@@ -270,22 +334,29 @@ export interface FileRouteTypes {
     | '/intake'
     | '/knowledge'
     | '/login'
+    | '/memory'
     | '/notifications'
     | '/observability'
     | '/orchestration'
+    | '/org'
+    | '/pilot'
     | '/pipeline'
     | '/pod'
     | '/reports'
     | '/settings'
+    | '/status'
     | '/traceability'
+    | '/welcome'
     | '/agents/$agentId'
     | '/approvals/$gateId'
     | '/pods/new'
+    | '/share/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/agents'
     | '/approvals'
+    | '/artifacts'
     | '/billing'
     | '/catalog'
     | '/comms'
@@ -298,22 +369,29 @@ export interface FileRouteTypes {
     | '/intake'
     | '/knowledge'
     | '/login'
+    | '/memory'
     | '/notifications'
     | '/observability'
     | '/orchestration'
+    | '/org'
+    | '/pilot'
     | '/pipeline'
     | '/pod'
     | '/reports'
     | '/settings'
+    | '/status'
     | '/traceability'
+    | '/welcome'
     | '/agents/$agentId'
     | '/approvals/$gateId'
     | '/pods/new'
+    | '/share/$token'
   id:
     | '__root__'
     | '/'
     | '/agents'
     | '/approvals'
+    | '/artifacts'
     | '/billing'
     | '/catalog'
     | '/comms'
@@ -326,23 +404,30 @@ export interface FileRouteTypes {
     | '/intake'
     | '/knowledge'
     | '/login'
+    | '/memory'
     | '/notifications'
     | '/observability'
     | '/orchestration'
+    | '/org'
+    | '/pilot'
     | '/pipeline'
     | '/pod'
     | '/reports'
     | '/settings'
+    | '/status'
     | '/traceability'
+    | '/welcome'
     | '/agents/$agentId'
     | '/approvals_/$gateId'
     | '/pods/new'
+    | '/share/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentsRoute: typeof AgentsRouteWithChildren
   ApprovalsRoute: typeof ApprovalsRoute
+  ArtifactsRoute: typeof ArtifactsRoute
   BillingRoute: typeof BillingRoute
   CatalogRoute: typeof CatalogRoute
   CommsRoute: typeof CommsRoute
@@ -355,25 +440,45 @@ export interface RootRouteChildren {
   IntakeRoute: typeof IntakeRoute
   KnowledgeRoute: typeof KnowledgeRoute
   LoginRoute: typeof LoginRoute
+  MemoryRoute: typeof MemoryRoute
   NotificationsRoute: typeof NotificationsRoute
   ObservabilityRoute: typeof ObservabilityRoute
   OrchestrationRoute: typeof OrchestrationRoute
+  OrgRoute: typeof OrgRoute
+  PilotRoute: typeof PilotRoute
   PipelineRoute: typeof PipelineRoute
   PodRoute: typeof PodRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
+  StatusRoute: typeof StatusRoute
   TraceabilityRoute: typeof TraceabilityRoute
+  WelcomeRoute: typeof WelcomeRoute
   ApprovalsGateIdRoute: typeof ApprovalsGateIdRoute
   PodsNewRoute: typeof PodsNewRoute
+  ShareTokenRoute: typeof ShareTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/traceability': {
       id: '/traceability'
       path: '/traceability'
       fullPath: '/traceability'
       preLoaderRoute: typeof TraceabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -404,6 +509,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PipelineRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pilot': {
+      id: '/pilot'
+      path: '/pilot'
+      fullPath: '/pilot'
+      preLoaderRoute: typeof PilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/org': {
+      id: '/org'
+      path: '/org'
+      fullPath: '/org'
+      preLoaderRoute: typeof OrgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orchestration': {
       id: '/orchestration'
       path: '/orchestration'
@@ -423,6 +542,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory': {
+      id: '/memory'
+      path: '/memory'
+      fullPath: '/memory'
+      preLoaderRoute: typeof MemoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -509,6 +635,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BillingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artifacts': {
+      id: '/artifacts'
+      path: '/artifacts'
+      fullPath: '/artifacts'
+      preLoaderRoute: typeof ArtifactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/approvals': {
       id: '/approvals'
       path: '/approvals'
@@ -528,6 +661,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/share/$token': {
+      id: '/share/$token'
+      path: '/share/$token'
+      fullPath: '/share/$token'
+      preLoaderRoute: typeof ShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pods/new': {
@@ -569,6 +709,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRouteWithChildren,
   ApprovalsRoute: ApprovalsRoute,
+  ArtifactsRoute: ArtifactsRoute,
   BillingRoute: BillingRoute,
   CatalogRoute: CatalogRoute,
   CommsRoute: CommsRoute,
@@ -581,16 +722,22 @@ const rootRouteChildren: RootRouteChildren = {
   IntakeRoute: IntakeRoute,
   KnowledgeRoute: KnowledgeRoute,
   LoginRoute: LoginRoute,
+  MemoryRoute: MemoryRoute,
   NotificationsRoute: NotificationsRoute,
   ObservabilityRoute: ObservabilityRoute,
   OrchestrationRoute: OrchestrationRoute,
+  OrgRoute: OrgRoute,
+  PilotRoute: PilotRoute,
   PipelineRoute: PipelineRoute,
   PodRoute: PodRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
+  StatusRoute: StatusRoute,
   TraceabilityRoute: TraceabilityRoute,
+  WelcomeRoute: WelcomeRoute,
   ApprovalsGateIdRoute: ApprovalsGateIdRoute,
   PodsNewRoute: PodsNewRoute,
+  ShareTokenRoute: ShareTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

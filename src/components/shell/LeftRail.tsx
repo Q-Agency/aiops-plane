@@ -1,24 +1,29 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronDown, ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { isMock } from "@/lib/experience";
+import type { AppUser } from "@/lib/auth/types";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { NAV, SETTINGS_ITEM, navBadgeCount, type NavItem } from "./nav";
+import { NAV, SETTINGS_ITEM, navBadgeCount, type NavGroup, type NavItem } from "./nav";
 
 function RailLink({
   item,
   collapsed,
   pathname,
+  hideBadge,
 }: {
   item: NavItem;
   collapsed: boolean;
   pathname: string;
+  /** Real-mode: badge counts are fed by mock data — never render them. */
+  hideBadge?: boolean;
 }) {
   const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
-  const count = item.badgeKey ? navBadgeCount(item.badgeKey) : 0;
+  const count = !hideBadge && item.badgeKey ? navBadgeCount(item.badgeKey) : 0;
   const Icon = item.icon;
 
   const link = (
@@ -36,6 +41,11 @@ function RailLink({
       )}
       <Icon className="size-4 shrink-0" />
       {!collapsed && <span className="truncate">{item.label}</span>}
+      {!collapsed && item.tag && (
+        <span className="ml-auto text-[9px] font-mono px-1 py-px rounded border border-primary/40 bg-primary/10 text-primary leading-none tracking-wider">
+          {item.tag}
+        </span>
+      )}
       {!collapsed && count > 0 && (
         <Badge
           variant="outline"
@@ -62,10 +72,24 @@ function RailLink({
   );
 }
 
-export function LeftRail() {
+export function LeftRail({ user }: { user: AppUser }) {
   const [collapsed, setCollapsed] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // EXPERIENCE GATE: real-mode accounts see ONLY live-connected destinations —
+  // mock-fed items (and any group left empty) disappear; badges are mock-fed
+  // so they are suppressed wholesale.
+  const isReal = !isMock(user);
+  const groups = useMemo<NavGroup[]>(
+    () =>
+      isReal
+        ? NAV.map((g) => ({ ...g, items: g.items.filter((it) => it.live === true) })).filter(
+            (g) => g.items.length > 0,
+          )
+        : NAV,
+    [isReal],
+  );
 
   // ⌘B / Ctrl+B toggles the rail (client-only listener — SSR-safe).
   useEffect(() => {
@@ -100,7 +124,7 @@ export function LeftRail() {
         </div>
 
         <nav className="p-2 flex-1 overflow-y-auto scrollbar-thin">
-          {NAV.map((group, i) =>
+          {groups.map((group, i) =>
             group.pillar === "ADVANCED" ? (
               <Collapsible key={group.pillar} open={advancedOpen} onOpenChange={setAdvancedOpen}>
                 {collapsed ? (
@@ -138,6 +162,7 @@ export function LeftRail() {
                       item={item}
                       collapsed={collapsed}
                       pathname={pathname}
+                      hideBadge={isReal}
                     />
                   ))}
                 </CollapsibleContent>
@@ -158,6 +183,7 @@ export function LeftRail() {
                       item={item}
                       collapsed={collapsed}
                       pathname={pathname}
+                      hideBadge={isReal}
                     />
                   ))}
                 </div>
@@ -168,7 +194,12 @@ export function LeftRail() {
 
         <div className="p-2 pt-0 shrink-0">
           <Separator className="mb-2" />
-          <RailLink item={SETTINGS_ITEM} collapsed={collapsed} pathname={pathname} />
+          <RailLink
+            item={SETTINGS_ITEM}
+            collapsed={collapsed}
+            pathname={pathname}
+            hideBadge={isReal}
+          />
           <button
             onClick={() => setCollapsed((c) => !c)}
             className="mt-2 w-full h-8 rounded-md border border-border bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10 flex items-center justify-center cursor-pointer"

@@ -9,6 +9,7 @@ import {
 } from "@/mock/humans";
 import type { AgentId } from "@/mock/types";
 import { MembersRoles } from "@/components/people/MembersRoles";
+import { useAcceptance, UNACCEPTED_HUMAN_ID } from "@/components/welcome/acceptance";
 import { cn } from "@/lib/utils";
 
 const agentMeta = (id: AgentId) => {
@@ -19,6 +20,8 @@ const agentMeta = (id: AgentId) => {
 export function PodView() {
   const map = useMemo(() => ownershipMap(), []);
   const humans = useMemo(() => activeHumans(), []);
+  // P1-O2: coverage is accepted, not assigned — null until /welcome's Accept.
+  const acceptance = useAcceptance();
   const orderedAgents: AgentId[] = ["curator", "ba", "pm", "sa", "tasklist", "dev", "review", "qa"];
 
   return (
@@ -128,7 +131,7 @@ export function PodView() {
 
       {/* matrix */}
       <section className="space-y-2">
-        <SectionHead icon={Shield} title="Accountability matrix" sub="Filled = accountable · empty column = uncovered" />
+        <SectionHead icon={Shield} title="Accountability matrix" sub="Filled = accountable · amber = assigned, not yet accepted · empty column = uncovered" />
         <div className="glass-panel overflow-auto">
           <table className="w-full text-xs">
             <thead>
@@ -193,7 +196,17 @@ export function PodView() {
                       const m = agentMeta(aid);
                       return (
                         <td key={aid} className="px-2 py-2 text-center">
-                          {owns ? (
+                          {owns && h.id === UNACCEPTED_HUMAN_ID && !acceptance ? (
+                            /* assigned — not yet accepted (P1-O2): amber until
+                               the /welcome handshake writes the acceptance */
+                            <Link
+                              to="/welcome"
+                              title={`${h.name} assigned to ${m.name} — not yet accepted. Open the accountability handshake.`}
+                              className="inline-flex items-center justify-center size-7 rounded font-mono font-bold text-[11px] border border-dashed border-status-waiting/70 bg-status-waiting/10 text-status-waiting hover:bg-status-waiting/25 transition-colors"
+                            >
+                              A
+                            </Link>
+                          ) : owns ? (
                             <span
                               title={`${h.name} accountable for ${m.name}`}
                               className="inline-flex items-center justify-center size-7 rounded font-mono font-bold text-[11px] border"

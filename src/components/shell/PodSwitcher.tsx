@@ -5,7 +5,7 @@
  */
 
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check, ChevronDown, Plus } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, LayoutGrid, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { podSummaryLine, usePods, type LaunchedPod } from "@/lib/pods/pod-store";
@@ -104,6 +104,14 @@ export function PodSwitcher() {
           <Link to="/pods/new" className="flex items-center gap-2">
             <Plus className="size-3.5 text-primary" />
             <span className="font-medium">New Pod</span>
+            <ArrowRight className="size-3.5 ml-auto text-muted-foreground" />
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/org" className="flex items-center gap-2">
+            <LayoutGrid className="size-3.5 text-muted-foreground" />
+            <span>View all pods</span>
             <ArrowRight className="size-3.5 ml-auto text-muted-foreground" />
           </Link>
         </DropdownMenuItem>

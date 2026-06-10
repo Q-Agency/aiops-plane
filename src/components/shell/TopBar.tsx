@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut, Search } from "lucide-react";
+import { MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut, Search, Sparkles } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import { useTheme } from "@/hooks/useTheme";
 import { unackedOpen, nextDailyDigest } from "@/mock/comms";
@@ -71,78 +71,96 @@ export function TopBar({ user }: { user: AppUser }) {
 
       <div className="flex-1" />
 
-      <button
-        type="button"
-        onClick={openCommandPalette}
-        title="Search everything (⌘K)"
-        className="hidden md:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-      >
-        <Search className="size-3.5" />
-        <span>Search</span>
-        <kbd className="text-[10px] font-mono px-1 py-0.5 rounded border border-border bg-white/5">
-          ⌘K
-        </kbd>
-      </button>
+      {/* ----- Mock-fed chrome (Spend·24h ticker, comms digest/escalations,
+             system health, overnight loop, bell, ⌘K, section assistant,
+             Pod Copilot) — standard experience ONLY. Real mode renders none
+             of it until each surface is live-connected. ----- */}
+      {!isReal && (
+        <>
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            title="Search everything (⌘K)"
+            className="hidden md:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+          >
+            <Search className="size-3.5" />
+            <span>Search</span>
+            <kbd className="text-[10px] font-mono px-1 py-0.5 rounded border border-border bg-white/5">
+              ⌘K
+            </kbd>
+          </button>
 
-      <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
-        <span className={cn("size-2 rounded-full dot-pulse", healthColor)} />
-        <span className="text-xs text-muted-foreground">SYSTEM</span>
-        <span className="text-xs font-medium uppercase">
-          {health === "green" ? "Healthy" : health}
-        </span>
-      </div>
+          <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
+            <span className={cn("size-2 rounded-full dot-pulse", healthColor)} />
+            <span className="text-xs text-muted-foreground">SYSTEM</span>
+            <span className="text-xs font-medium uppercase">
+              {health === "green" ? "Healthy" : health}
+            </span>
+          </div>
 
-      <div
-        className={cn(
-          "flex items-center gap-2 px-2.5 h-8 rounded-md border text-xs font-medium",
-          overnight
-            ? "border-primary/40 bg-primary/10 text-primary"
-            : "border-border bg-white/5 text-muted-foreground",
-        )}
-        title={overnight ? "Overnight autonomous run active" : "Daytime mode"}
-      >
-        {overnight ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
-        {overnight ? "OVERNIGHT" : "DAY"}
-      </div>
+          <div
+            className={cn(
+              "flex items-center gap-2 px-2.5 h-8 rounded-md border text-xs font-medium",
+              overnight
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border bg-white/5 text-muted-foreground",
+            )}
+            title={overnight ? "Overnight autonomous run active" : "Daytime mode"}
+          >
+            {overnight ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
+            {overnight ? "OVERNIGHT" : "DAY"}
+          </div>
 
-      <Link
-        to="/comms"
-        title={openEsc > 0 ? `${openEsc} unacknowledged escalation(s)` : "No open escalations"}
-        className={cn(
-          "hidden sm:flex items-center gap-1.5 px-2.5 h-8 rounded-md border text-xs font-medium transition-colors",
-          openEsc > 0
-            ? "border-status-error/50 bg-status-error/10 text-status-error animate-pulse"
-            : "border-border bg-white/5 text-muted-foreground hover:text-foreground",
-        )}
-      >
-        <AlertTriangle className="size-3.5" />
-        <span className="font-mono tabular-nums">{openEsc}</span>
-        <span className="text-[10px] uppercase tracking-wider">ESC</span>
-      </Link>
+          <Link
+            to="/comms"
+            title={openEsc > 0 ? `${openEsc} unacknowledged escalation(s)` : "No open escalations"}
+            className={cn(
+              "hidden sm:flex items-center gap-1.5 px-2.5 h-8 rounded-md border text-xs font-medium transition-colors",
+              openEsc > 0
+                ? "border-status-error/50 bg-status-error/10 text-status-error animate-pulse"
+                : "border-border bg-white/5 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <AlertTriangle className="size-3.5" />
+            <span className="font-mono tabular-nums">{openEsc}</span>
+            <span className="text-[10px] uppercase tracking-wider">ESC</span>
+          </Link>
 
-      <Link
-        to="/comms"
-        title="Next scheduled digest"
-        className="hidden md:flex items-center gap-1.5 px-2.5 h-8 rounded-md border border-border bg-white/5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        suppressHydrationWarning
-      >
-        <Clock className="size-3.5" />
-        <span className="text-[10px] uppercase tracking-wider">Next digest</span>
-        <span className="font-mono text-foreground tabular-nums" suppressHydrationWarning>
-          {digestLabel}
-        </span>
-      </Link>
+          <Link
+            to="/comms"
+            title="Next scheduled digest"
+            className="hidden md:flex items-center gap-1.5 px-2.5 h-8 rounded-md border border-border bg-white/5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            suppressHydrationWarning
+          >
+            <Clock className="size-3.5" />
+            <span className="text-[10px] uppercase tracking-wider">Next digest</span>
+            <span className="font-mono text-foreground tabular-nums" suppressHydrationWarning>
+              {digestLabel}
+            </span>
+          </Link>
 
-      <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Spend·24h
-        </span>
-        <span className="font-mono text-sm text-foreground">${tokenSpend.toFixed(2)}</span>
-      </div>
+          <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Spend·24h
+            </span>
+            <span className="font-mono text-sm text-foreground">${tokenSpend.toFixed(2)}</span>
+          </div>
 
-      <NotificationBell />
+          <NotificationBell />
 
-      <AssistantTriggerButton />
+          <AssistantTriggerButton />
+
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("aiops:copilot-toggle"))}
+            title="Pod Copilot · ⌘J"
+            aria-label="Open Pod Copilot"
+            className="size-8 rounded-md border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/70 hover:shadow-[0_0_12px_var(--primary)] transition-all flex items-center justify-center cursor-pointer"
+          >
+            <Sparkles className="size-3.5" />
+          </button>
+        </>
+      )}
 
       <button
         onClick={toggle}

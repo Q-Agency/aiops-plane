@@ -7,8 +7,10 @@ import {
 import { agents as allAgents } from "@/mock/agents";
 import type { AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
+import { mockOnlyBeforeLoad } from "@/lib/experience";
 
 export const Route = createFileRoute("/orchestration")({
+  beforeLoad: mockOnlyBeforeLoad,
   component: OrchestrationView,
 });
 

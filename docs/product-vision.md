@@ -187,7 +187,7 @@ A **route-to-pillar migration table** (every existing route → its pillar desti
 
 ## 7. Mock-First Build Order
 
-Ordered to make the demo arc demoable earliest, highest-leverage first. **Status (2026-06-10): items #1–#12 are SHIPPED in the mock** (commits `f76ee4a` — pillar IA, multi-pod shell, New-Pod wizard at `/pods/new?step=…`; `69014e0` — gate review at `/approvals/$gateId`, incidents, notifications, reports, billing, intake); **#13 remains open**, plus the Wave 2 list below.
+Ordered to make the demo arc demoable earliest, highest-leverage first. **Status (2026-06-10): items #1–#12 are SHIPPED in the mock** (commits `f76ee4a` — pillar IA, multi-pod shell, New-Pod wizard at `/pods/new?step=…`; `69014e0` — gate review at `/approvals/$gateId`, incidents, notifications, reports, billing, intake), **and the Wave-2 slice is SHIPPED** (the eight surfaces + the per-user experience gate — see the Wave 2 register below); **#13 remains open**.
 
 1. **IA reorg + multi-pod shell + pod switcher.** Regroup the existing 16 routes under FIRE UP / RUN / MONITOR / Advanced; add the pod-switcher TopBar and tenancy badge. Ship the route-to-pillar migration table. *(Reframes everything; unblocks the rest.)*
 2. **FIRE UP wizard (the missing 30 seconds).** Blueprints → Catalog → Connect tiles → People matrix → Slack → Readiness → Launch. Reuse `agents.ts`, `humans.ts`, PodView, `comms.ts`; extend `probeAgentFn` for mocked health. *This is the top priority — it's the most-sold, least-built experience.*
@@ -205,7 +205,9 @@ Ordered to make the demo arc demoable earliest, highest-leverage first. **Status
 
 **Sales-engineering deliverable (alongside the mock):** the **competitive teardown one-pager** — suite teammates (GitHub Agent HQ, Atlassian Rovo, ServiceNow) vs. autonomous coders (Devin, Cursor) vs. Agency OS — promoted from §9's open questions to a committed build-order deliverable.
 
-**Wave 2 (post-slice-2) — specced, not yet in the mock:** gate policies & autonomy UI · human capacity/coverage surfaces · `/welcome` (accountability handshake) · `/memory` (constitution & amendments; absorbs `/knowledge`) · Pod Copilot (TopBar + ⌘J) · `/pilot` · `/org` · `/share/$token` · `/artifacts` (deliverables library) · `/status` · Demo Director · role-scoped landings · responsive gates.
+**Wave 2 — SHIPPED (2026-06-10 slice):** `/welcome` (accountability handshake) · `/memory` (constitution & amendments; absorbs `/knowledge`, which now redirects) · Pod Copilot (TopBar sparkle + ⌘J; canned ask-with-receipts + confirm-first actions, badged no-LLM) · `/pilot` · `/org` · `/share/$token` (chrome-less, no-auth client report viewer) · `/artifacts` (deliverables shelf with rejected-iteration diffs) · `/status` — plus the **per-user experience gate**: the standard login (qai) renders the full mock product while the real-mode login renders ONLY live-connected surfaces (`src/lib/experience.ts`; mock routes redirect real-mode to `/`, mock TopBar chrome unmounts), and a **session audit overlay** (`src/mock/audit-bridge.ts`) makes every wave-2 action land visibly in Compliance under a "this session" divider. Supporting datasets shipped: `gate-policies.ts` (per-agent SLA + autonomy ladder seed), `memory.ts`, `pilot.ts`, `artifacts.ts`, `status.ts`, `copilot.ts`, `share.ts`.
+
+**Wave 2 — still open:** gate policies & autonomy **UI** (the dataset + `GatePolicyChip` shipped as the seed) · human capacity/coverage surfaces · Demo Director (⌘⇧D staged-event engine) · role-scoped landings · responsive gates.
 
 ---
 

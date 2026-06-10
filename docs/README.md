@@ -37,7 +37,11 @@ Agency OS is the operating system for **agent–human SDLC pods**: a curated tea
 
 This repo's **standard mode** (login `qai@q.agency` / `demo`; `bun install && bun run dev`) is the working frontend vision: look & feel, interaction patterns, copy, and information architecture, built screen-by-screen from the screens doc.
 
-**What's built** (vision §7 build order): the pillar-grouped shell, multi-pod switcher + tenancy badge, the complete **FIRE UP wizard** (blueprints → agent catalog with the chain-closure pipeline preview → connector OAuth-style dialogs with status write-back → accountability matrix → Slack wiring → readiness/launch), the **ROI hero** + economics reframe, the **governance moat panel** (deterministic validators walled from LLM signals), the **client-grade gate review** (`/approvals/$gateId`), **Incidents & Recovery**, **notifications** (bell + inbox + prefs) and the **⌘K palette**, **SLA & client reports**, **roles & members**, **usage & billing**, and **work intake**. The original mock dashboard views (pipeline, comms, compliance, knowledge, observability…) fill the rest.
+**The experience is gated by login** (`src/lib/experience.ts`): the standard user gets the full mock product; the **real-mode** user (live BA federation) gets ONLY live-connected surfaces — every mock-only route redirects real-mode to `/`, and mock TopBar chrome (bell, ⌘K, copilot, spend/digest chips) unmounts. The mock cannot leak into the live cockpit, and live behavior is never altered by mock work.
+
+**What's built** (vision §7 build order): the pillar-grouped shell, multi-pod switcher + tenancy badge, the complete **FIRE UP wizard** (blueprints → agent catalog with the chain-closure pipeline preview → connector OAuth-style dialogs with status write-back → accountability matrix → Slack wiring → readiness/launch), the **ROI hero** + economics reframe, the **governance moat panel** (deterministic validators walled from LLM signals), the **client-grade gate review** (`/approvals/$gateId`), **Incidents & Recovery**, **notifications** (bell + inbox + prefs) and the **⌘K palette**, **SLA & client reports**, **roles & members**, **usage & billing**, and **work intake**. The original mock dashboard views (pipeline, comms, compliance, observability…) fill the rest.
+
+**Wave 2 (also built):** `/welcome` accountability handshake, `/memory` constitution & amendments (absorbs `/knowledge`, which now redirects), the **Pod Copilot** (⌘J — ask-with-receipts + confirm-first proposed actions, canned/no-LLM and badged as such), `/pilot` scorecard, `/org` portfolio rollup, `/artifacts` deliverables shelf (rejected-iteration diffs, snapshot-at-clearance stamp), `/status` platform status, and the chrome-less **`/share/$token`** client report viewer. All wave-2 mutations write to a **session audit overlay** (`src/mock/audit-bridge.ts`) that surfaces in Compliance under "this session" — the demo's actions provably land on the ledger UI.
 
 **Where things live:**
 
@@ -85,4 +89,4 @@ This repo's **standard mode** (login `qai@q.agency` / `demo`; `bun install && bu
 
 ---
 
-*Updated 2026-06-10. Companion commits: the planning set (3c9d5f1), P0 application (bfb8dff and siblings), mock slice 1 (f76ee4a), mock slice 2 (see git log). Questions start at [`product-vision.md`](./product-vision.md).*
+*Updated 2026-06-10. Companion commits: the planning set (3c9d5f1), P0 application (bfb8dff and siblings), mock slice 1 (f76ee4a), mock slice 2 (69014e0), wave 2 + experience gate (see git log). Questions start at [`product-vision.md`](./product-vision.md).*

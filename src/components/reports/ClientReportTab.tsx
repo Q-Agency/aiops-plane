@@ -4,8 +4,9 @@
  * card island inside the dark shell. No neon, no scanlines, no mono
  * chips — plain language a sponsor reads in 60 seconds.
  *
- * Action bar: period selector + Copy share link (mock toast) +
- * Export PDF (mock toast) + Mark as sent (draft → sent, local).
+ * Action bar: period selector + Copy share link (copies the real
+ * /share/$token viewer URL, P1-H4) + Export PDF (mock toast) +
+ * Mark as sent (draft → sent, local).
  *
  * Honesty: `headline.humanHoursSaved` renders as "human-hours freed" (C2);
  * breached SLAs are shown with their mitigation note, never hidden.
@@ -19,9 +20,10 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  currentReport, reportById, reports, REPORT_SHARE_URL,
+  currentReport, reportById, reports,
   type ReportGate, type WeeklyReport,
 } from "@/mock/report";
+import { SHARE_LINKS, effectiveShareState } from "@/mock/share";
 import type { Stage } from "@/mock/types";
 import { cn } from "@/lib/utils";
 
@@ -65,12 +67,22 @@ export function ClientReportTab() {
   const isSent = report.status === "sent" || report.id in sentOverride;
 
   const copyShareLink = async () => {
-    try {
-      await navigator.clipboard.writeText(REPORT_SHARE_URL);
-    } catch {
-      /* clipboard unavailable — toast still confirms the mock link */
+    // The live token for the weekly report — its /share/$token viewer (P1-H4).
+    const link = SHARE_LINKS.find(
+      (l) => l.kind === "weekly_report" && effectiveShareState(l) === "active",
+    );
+    if (!link) {
+      toast.error("No active share link for this report");
+      return;
     }
-    toast.success("Report link copied", { description: REPORT_SHARE_URL });
+    const url = `${window.location.origin}/share/${link.token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      /* clipboard unavailable — toast still shows the link */
+    }
+    const daysLeft = Math.max(1, Math.ceil((link.expiresAt - Date.now()) / 86_400_000));
+    toast.success(`Share link copied — expires in ${daysLeft} days`, { description: url });
   };
 
   const exportPdf = () => {
@@ -128,7 +140,7 @@ export function ClientReportTab() {
 /* The report sheet — CLIENT-CLEAN (light paper card, plain language)   */
 /* ------------------------------------------------------------------ */
 
-function ClientStatusReport({
+export function ClientStatusReport({
   report, isSent, sentAt,
 }: {
   report: WeeklyReport;
@@ -307,7 +319,7 @@ function ClientStatusReport({
 /* Report pieces                                                        */
 /* ------------------------------------------------------------------ */
 
-function ReportBlock({ title, children }: { title: string; children: React.ReactNode }) {
+export function ReportBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
       <h3 className="text-[11px] uppercase tracking-widest text-slate-400 font-medium mb-2.5">

@@ -7,9 +7,10 @@ import {
 import {
   PROFILES, FRAMEWORK_LABEL, AUDIT, SOURCES, RESIDENCY_SPLIT, PROVENANCE, CONTROLS, RISKS,
   ATTESTATIONS, controlsByStatus,
-  type Framework, type RegulatoryProfile, type AuditEntry, type ControlStatus,
+  type Framework, type RegulatoryProfile, type ControlStatus,
   type RiskSeverity, type RiskStatus,
 } from "@/mock/compliance";
+import { useSessionAudit } from "@/mock/audit-bridge";
 import { humans } from "@/mock/humans";
 import { agents as seedAgents } from "@/mock/agents";
 import { tickets } from "@/mock/tickets";
@@ -57,7 +58,9 @@ const riskStatusLabel: Record<RiskStatus, string> = {
   open: "OPEN", mitigating: "MITIGATING", accepted: "ACCEPTED", closed: "CLOSED",
 };
 
-const actionDot = (a: AuditEntry["action"]) =>
+// Widened to string so session-overlay verbs (accountability.accepted,
+// constitution.amended, …) share the same dot vocabulary as seeded actions.
+const actionDot = (a: string) =>
   a.startsWith("gate.approved") ? "bg-status-done" :
   a.startsWith("gate.rejected") ? "bg-status-error" :
   a === "escalation.raised" ? "bg-agent-qa" :
@@ -81,6 +84,23 @@ export function ComplianceView() {
           (actorFilter === "all" || `${e.actor.kind}:${e.actor.id}` === actorFilter),
       ).sort((a, b) => b.ts - a.ts),
     [ticketFilter, actorFilter],
+  );
+
+  // Session overlay (wave 2): rows appended by THIS browser session's actions
+  // (accountability.accepted, constitution.amended, data.exported, …) render
+  // above the seeded ledger under a "this session" divider. Session rows
+  // carry no seeded actor id, so any specific actor filter hides them; the
+  // ticket filter matches against the row target (e.g. "appr-AM-142").
+  const sessionAudit = useSessionAudit();
+  const sessionRows = useMemo(
+    () =>
+      actorFilter !== "all"
+        ? []
+        : sessionAudit
+            .filter((e) => ticketFilter === "all" || (e.target ?? "").includes(ticketFilter))
+            .slice()
+            .reverse(),
+    [sessionAudit, ticketFilter, actorFilter],
   );
 
   const filteredControls = CONTROLS.filter((c) =>
@@ -178,6 +198,48 @@ export function ComplianceView() {
           </div>
         </div>
         <div className="divide-y divide-border max-h-[420px] overflow-auto">
+          {sessionRows.length > 0 && (
+            <>
+              <div className="px-4 py-1.5 bg-primary/[0.04] flex items-center gap-2">
+                <span className="size-1.5 rounded-full bg-primary dot-pulse shrink-0" />
+                <span className="text-[10px] font-mono uppercase tracking-wider text-primary/90">
+                  this session · {sessionRows.length}
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground truncate">
+                  appended live from your actions in this workspace
+                </span>
+              </div>
+              {sessionRows.map((e) => (
+                <div key={`session-${e.id}`} className="px-4 py-2.5 hover:bg-white/[0.02]">
+                  <div className="flex items-start gap-3">
+                    <span className="w-3.5 shrink-0" aria-hidden />
+                    <span className={cn("size-1.5 rounded-full mt-2 shrink-0", actionDot(e.action))} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-[11px] text-muted-foreground">{fmtUtc(e.at)}</span>
+                        <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/5 border border-border">
+                          {e.action}
+                        </span>
+                        {e.target && (
+                          <span className="text-xs font-mono text-primary">{e.target}</span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          by {e.actor.kind === "human" ? (e.actor.name ?? "you") : "system"}
+                        </span>
+                        <span className="text-[9px] font-mono px-1 py-px rounded border border-primary/30 bg-primary/10 text-primary/80 tracking-wider">
+                          SESSION
+                        </span>
+                      </div>
+                      {e.detail && <div className="text-sm mt-0.5 truncate">{e.detail}</div>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="px-4 py-1 bg-white/[0.02] text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                earlier — seeded ledger
+              </div>
+            </>
+          )}
           {filteredAudit.map((e) => {
             const isOpen = expanded === e.id;
             return (

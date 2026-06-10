@@ -6,6 +6,7 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
+import { mockOnlyBeforeLoad } from "@/lib/experience";
 import {
   NotificationsView,
   type NotificationsTab,
@@ -14,6 +15,7 @@ import {
 const TABS: NotificationsTab[] = ["inbox", "preferences", "rules", "digests"];
 
 export const Route = createFileRoute("/notifications")({
+  beforeLoad: mockOnlyBeforeLoad,
   validateSearch: (search: Record<string, unknown>): { tab?: NotificationsTab } => {
     const tab = search.tab;
     return TABS.includes(tab as NotificationsTab) ? { tab: tab as NotificationsTab } : {};

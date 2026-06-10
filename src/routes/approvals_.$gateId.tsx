@@ -8,9 +8,11 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
+import { mockOnlyBeforeLoad } from "@/lib/experience";
 import { GateReviewShell } from "@/components/gates/GateReviewShell";
 
 export const Route = createFileRoute("/approvals_/$gateId")({
+  beforeLoad: mockOnlyBeforeLoad,
   head: () => ({ meta: [{ title: "Gate Review · Agency OS" }] }),
   component: GateReviewRoute,
 });

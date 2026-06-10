@@ -6,9 +6,11 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
+import { mockOnlyBeforeLoad } from "@/lib/experience";
 import { WorkIntakeView } from "@/components/intake/WorkIntakeView";
 
 export const Route = createFileRoute("/intake")({
+  beforeLoad: mockOnlyBeforeLoad,
   head: () => ({ meta: [{ title: "Work Intake · Agency OS" }] }),
   validateSearch: (search: Record<string, unknown>): { sim?: "error" } =>
     search.sim === "error" ? { sim: "error" } : {},

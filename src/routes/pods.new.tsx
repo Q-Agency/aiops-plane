@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { mockOnlyBeforeLoad } from "@/lib/experience";
 import { WizardShell } from "@/components/fireup/WizardShell";
 
 const wizardSearchSchema = z.object({
@@ -7,6 +8,7 @@ const wizardSearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/pods/new")({
+  beforeLoad: mockOnlyBeforeLoad,
   validateSearch: wizardSearchSchema,
   head: () => ({ meta: [{ title: "New Pod · Agency OS" }] }),
   component: NewPodRoute,

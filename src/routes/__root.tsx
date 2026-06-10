@@ -78,6 +78,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ location }) => {
+    // /share/$token is account-less (the token IS the auth): no login
+    // redirect, and a null user keeps the AppShell off the client-clean
+    // sheet (RootComponent renders a bare <Outlet /> when user is null).
+    if (location.pathname.startsWith("/share/")) {
+      return { user: null };
+    }
     const user = await fetchUser();
     const onLoginPage = location.pathname === "/login";
     if (!user && !onLoginPage) {

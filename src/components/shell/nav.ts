@@ -8,12 +8,14 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
+  BookMarked,
   Bot,
+  Briefcase,
   CheckCircle2,
   CreditCard,
-  Database,
   DollarSign,
   FileBarChart,
+  FlaskConical,
   GitBranch,
   Hourglass,
   Inbox,
@@ -21,12 +23,14 @@ import {
   LayoutDashboard,
   Megaphone,
   Network,
+  Package,
   PlugZap,
   Rocket,
   Scale,
   ScrollText,
   Settings,
   ShieldCheck,
+  Signal,
   Siren,
   Store,
   Users,
@@ -61,13 +65,23 @@ export type NavTo =
   | "/traceability"
   | "/agents"
   | "/knowledge"
-  | "/settings";
+  | "/settings"
+  | "/memory"
+  | "/pilot"
+  | "/org"
+  | "/artifacts"
+  | "/status"
+  | "/welcome";
 
 export interface NavItem {
   to: NavTo;
   label: string;
   icon: LucideIcon;
   badgeKey?: NavBadgeKey;
+  /** Visible to real-mode (live-connected) accounts. Default: mock-only. */
+  live?: boolean;
+  /** Tiny mono chip rendered after the label, e.g. "PILOT". */
+  tag?: string;
 }
 
 export interface NavGroup {
@@ -84,7 +98,7 @@ export const NAV: NavGroup[] = [
     items: [
       { to: "/pods/new", label: "New Pod", icon: Rocket },
       { to: "/catalog", label: "Catalog", icon: Store },
-      { to: "/connections", label: "Connections", icon: PlugZap },
+      { to: "/connections", label: "Connections", icon: PlugZap, live: true },
       { to: "/pod", label: "People & Roles", icon: Users },
     ],
   },
@@ -92,7 +106,7 @@ export const NAV: NavGroup[] = [
     pillar: "RUN",
     label: "RUN",
     items: [
-      { to: "/", label: "Command Center", icon: LayoutDashboard },
+      { to: "/", label: "Command Center", icon: LayoutDashboard, live: true },
       { to: "/pipeline", label: "Pipeline", icon: KanbanSquare },
       { to: "/intake", label: "Work Intake", icon: Inbox },
       { to: "/approvals", label: "Gates", icon: CheckCircle2, badgeKey: "gates" },
@@ -104,30 +118,39 @@ export const NAV: NavGroup[] = [
     pillar: "MONITOR",
     label: "MONITOR",
     items: [
-      { to: "/economics", label: "Overview · ROI", icon: DollarSign },
-      { to: "/governance", label: "Governance", icon: Scale },
+      { to: "/economics", label: "Overview · ROI", icon: DollarSign, live: true },
+      { to: "/governance", label: "Governance", icon: Scale, live: true },
       { to: "/pod", label: "Accountability", icon: ShieldCheck },
       { to: "/reports", label: "SLA & Reports", icon: FileBarChart },
-      { to: "/compliance", label: "Compliance & Audit", icon: ScrollText },
+      { to: "/compliance", label: "Compliance & Audit", icon: ScrollText, live: true },
       { to: "/billing", label: "Usage & Billing", icon: CreditCard },
+      { to: "/memory", label: "Memory & Rules", icon: BookMarked },
+      { to: "/pilot", label: "Pilot", icon: FlaskConical, tag: "PILOT" },
+      { to: "/org", label: "Portfolio", icon: Briefcase },
+      { to: "/artifacts", label: "Deliverables", icon: Package },
     ],
   },
   {
     pillar: "ADVANCED",
     label: "ADVANCED · technical",
     items: [
-      { to: "/observability", label: "Observability", icon: Activity },
+      { to: "/observability", label: "Observability", icon: Activity, live: true },
       { to: "/orchestration", label: "Orchestration", icon: Network },
-      { to: "/flow", label: "Flow", icon: Hourglass },
+      { to: "/flow", label: "Flow", icon: Hourglass, live: true },
       { to: "/traceability", label: "Traceability", icon: GitBranch },
-      { to: "/agents", label: "Agents", icon: Bot },
-      { to: "/knowledge", label: "Knowledge", icon: Database },
+      { to: "/agents", label: "Agents", icon: Bot, live: true },
+      { to: "/status", label: "Platform status", icon: Signal },
     ],
   },
 ];
 
 /** Pinned below ADVANCED, above the collapse button. */
-export const SETTINGS_ITEM: NavItem = { to: "/settings", label: "Settings", icon: Settings };
+export const SETTINGS_ITEM: NavItem = {
+  to: "/settings",
+  label: "Settings",
+  icon: Settings,
+  live: true,
+};
 
 /** Badge counts (mock): open gates of BOTH kinds (approvals + clarifications,
  * minus session-resolved) via openGateCount(); open incidents DERIVED from incidents.ts. */
