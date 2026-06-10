@@ -16,8 +16,10 @@ import { Route as PodRouteImport } from './routes/pod'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as OrchestrationRouteImport } from './routes/orchestration'
 import { Route as ObservabilityRouteImport } from './routes/observability'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as IntakeRouteImport } from './routes/intake'
 import { Route as IncidentsRouteImport } from './routes/incidents'
 import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as FlowRouteImport } from './routes/flow'
@@ -31,6 +33,7 @@ import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PodsNewRouteImport } from './routes/pods.new'
+import { Route as ApprovalsGateIdRouteImport } from './routes/approvals_.$gateId'
 import { Route as AgentsAgentIdRouteImport } from './routes/agents.$agentId'
 
 const TraceabilityRoute = TraceabilityRouteImport.update({
@@ -68,6 +71,11 @@ const ObservabilityRoute = ObservabilityRouteImport.update({
   path: '/observability',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -76,6 +84,11 @@ const LoginRoute = LoginRouteImport.update({
 const KnowledgeRoute = KnowledgeRouteImport.update({
   id: '/knowledge',
   path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntakeRoute = IntakeRouteImport.update({
+  id: '/intake',
+  path: '/intake',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IncidentsRoute = IncidentsRouteImport.update({
@@ -143,6 +156,11 @@ const PodsNewRoute = PodsNewRouteImport.update({
   path: '/pods/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApprovalsGateIdRoute = ApprovalsGateIdRouteImport.update({
+  id: '/approvals_/$gateId',
+  path: '/approvals/$gateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgentsAgentIdRoute = AgentsAgentIdRouteImport.update({
   id: '/$agentId',
   path: '/$agentId',
@@ -162,8 +180,10 @@ export interface FileRoutesByFullPath {
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
   '/incidents': typeof IncidentsRoute
+  '/intake': typeof IntakeRoute
   '/knowledge': typeof KnowledgeRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
@@ -172,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/traceability': typeof TraceabilityRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
+  '/approvals/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
 }
 export interface FileRoutesByTo {
@@ -187,8 +208,10 @@ export interface FileRoutesByTo {
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
   '/incidents': typeof IncidentsRoute
+  '/intake': typeof IntakeRoute
   '/knowledge': typeof KnowledgeRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
@@ -197,6 +220,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/traceability': typeof TraceabilityRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
+  '/approvals/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
 }
 export interface FileRoutesById {
@@ -213,8 +237,10 @@ export interface FileRoutesById {
   '/flow': typeof FlowRoute
   '/governance': typeof GovernanceRoute
   '/incidents': typeof IncidentsRoute
+  '/intake': typeof IntakeRoute
   '/knowledge': typeof KnowledgeRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/pipeline': typeof PipelineRoute
@@ -223,6 +249,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/traceability': typeof TraceabilityRoute
   '/agents/$agentId': typeof AgentsAgentIdRoute
+  '/approvals_/$gateId': typeof ApprovalsGateIdRoute
   '/pods/new': typeof PodsNewRoute
 }
 export interface FileRouteTypes {
@@ -240,8 +267,10 @@ export interface FileRouteTypes {
     | '/flow'
     | '/governance'
     | '/incidents'
+    | '/intake'
     | '/knowledge'
     | '/login'
+    | '/notifications'
     | '/observability'
     | '/orchestration'
     | '/pipeline'
@@ -250,6 +279,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/traceability'
     | '/agents/$agentId'
+    | '/approvals/$gateId'
     | '/pods/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -265,8 +295,10 @@ export interface FileRouteTypes {
     | '/flow'
     | '/governance'
     | '/incidents'
+    | '/intake'
     | '/knowledge'
     | '/login'
+    | '/notifications'
     | '/observability'
     | '/orchestration'
     | '/pipeline'
@@ -275,6 +307,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/traceability'
     | '/agents/$agentId'
+    | '/approvals/$gateId'
     | '/pods/new'
   id:
     | '__root__'
@@ -290,8 +323,10 @@ export interface FileRouteTypes {
     | '/flow'
     | '/governance'
     | '/incidents'
+    | '/intake'
     | '/knowledge'
     | '/login'
+    | '/notifications'
     | '/observability'
     | '/orchestration'
     | '/pipeline'
@@ -300,6 +335,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/traceability'
     | '/agents/$agentId'
+    | '/approvals_/$gateId'
     | '/pods/new'
   fileRoutesById: FileRoutesById
 }
@@ -316,8 +352,10 @@ export interface RootRouteChildren {
   FlowRoute: typeof FlowRoute
   GovernanceRoute: typeof GovernanceRoute
   IncidentsRoute: typeof IncidentsRoute
+  IntakeRoute: typeof IntakeRoute
   KnowledgeRoute: typeof KnowledgeRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   ObservabilityRoute: typeof ObservabilityRoute
   OrchestrationRoute: typeof OrchestrationRoute
   PipelineRoute: typeof PipelineRoute
@@ -325,6 +363,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   TraceabilityRoute: typeof TraceabilityRoute
+  ApprovalsGateIdRoute: typeof ApprovalsGateIdRoute
   PodsNewRoute: typeof PodsNewRoute
 }
 
@@ -379,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObservabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -391,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/knowledge'
       fullPath: '/knowledge'
       preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intake': {
+      id: '/intake'
+      path: '/intake'
+      fullPath: '/intake'
+      preLoaderRoute: typeof IntakeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/incidents': {
@@ -484,6 +537,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PodsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/approvals_/$gateId': {
+      id: '/approvals_/$gateId'
+      path: '/approvals/$gateId'
+      fullPath: '/approvals/$gateId'
+      preLoaderRoute: typeof ApprovalsGateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agents/$agentId': {
       id: '/agents/$agentId'
       path: '/$agentId'
@@ -518,8 +578,10 @@ const rootRouteChildren: RootRouteChildren = {
   FlowRoute: FlowRoute,
   GovernanceRoute: GovernanceRoute,
   IncidentsRoute: IncidentsRoute,
+  IntakeRoute: IntakeRoute,
   KnowledgeRoute: KnowledgeRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   ObservabilityRoute: ObservabilityRoute,
   OrchestrationRoute: OrchestrationRoute,
   PipelineRoute: PipelineRoute,
@@ -527,6 +589,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   TraceabilityRoute: TraceabilityRoute,
+  ApprovalsGateIdRoute: ApprovalsGateIdRoute,
   PodsNewRoute: PodsNewRoute,
 }
 export const routeTree = rootRouteImport

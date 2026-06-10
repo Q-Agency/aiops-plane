@@ -1,12 +1,22 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Scale, FileText, ShieldAlert, CheckCircle2, XCircle, GitPullRequest,
   HelpCircle, Filter, Clock, User2, Bot, X, MinusCircle, PlusCircle, ArrowRight,
+  ShieldCheck, ExternalLink, BarChart3,
 } from "lucide-react";
 import {
   constitutions, violations, prGates, openDecisions,
   type Constitution, type Violation, type Severity, type CbId,
 } from "@/mock/governance";
+import {
+  assessedSpecs, moatChecks, moatValidators, structuralReadiness,
+  facetCompleteness, facetCompletenessAvg, FACET_DIMENSIONS, FACET_LABELS,
+} from "@/mock/governance-moat";
+import { ValidatorPanel } from "@/components/governance/ValidatorPanel";
+import {
+  LlmJudgePanel, StructuralVsSemanticNote, TrustBanner,
+} from "@/components/governance/MoatPanels";
 import { agents as allAgents } from "@/mock/agents";
 import type { AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
@@ -51,24 +61,199 @@ export function GovernanceView() {
     [cbFilter, sevFilter],
   );
 
+  const specs = useMemo(() => assessedSpecs(), []);
+  const readiness = useMemo(() => structuralReadiness(), []);
+  const aggregateChecks = useMemo(() => moatChecks(), []);
+  const validatorMeta = useMemo(() => {
+    const rows = moatValidators();
+    return Object.fromEntries(
+      rows.map((r) => [
+        r.id,
+        {
+          coverage: r.coverage,
+          blocksReadiness: r.blocksReadiness,
+          failingSpecs: r.failingSpecs,
+          warnSpecs: r.warnSpecs,
+        },
+      ]),
+    );
+  }, []);
+
   return (
     <div className="p-4 lg:p-6 h-full flex flex-col min-h-0 gap-4 overflow-y-auto scrollbar-thin">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
-            constitution compliance
+            governance
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">Governance</h1>
-          <div className="text-xs text-muted-foreground mt-0.5">
-            The ruleset every agent runs inside — constitutions, violations, merge gates and open architectural decisions.
+          <h1 className="text-xl font-semibold tracking-tight">Spec quality — the moat</h1>
+          <div className="text-xs text-muted-foreground mt-0.5 max-w-2xl">
+            Structural quality, checked deterministically. This measures whether the spec is
+            well-formed and complete in structure — not whether it is semantically correct.
           </div>
         </div>
         <div className="text-[11px] font-mono text-muted-foreground glass-panel px-3 py-1.5">
-          <span className="text-foreground">{constitutions.length}</span> constitutions
+          <span className="text-foreground">{specs.length}</span> specs assessed
           <span className="mx-1.5">·</span>
           <span className="text-status-error">{violations.filter((v) => v.status === "open").length}</span> open violations
           <span className="mx-1.5">·</span>
           <span className="text-status-waiting">{openDecisions.filter((d) => d.status !== "exploring").length}</span> decisions pending
+        </div>
+      </div>
+
+      {/* (2) Trust banner — the badge */}
+      <TrustBanner readiness={readiness} />
+
+      {/* (3) The two walls — deterministic vs LLM-assisted. Spatial split, never tabs. */}
+      <div className="grid gap-4 xl:grid-cols-[3fr_2fr] items-start">
+        <ValidatorPanel
+          checks={aggregateChecks}
+          meta={validatorMeta}
+          headline={`${aggregateChecks.filter((c) => c.status === "pass").length} of ${aggregateChecks.length} validators green across ${specs.length} specs`}
+          onCheckClick={() => {}}
+        />
+        <LlmJudgePanel />
+      </div>
+
+      <StructuralVsSemanticNote />
+
+      {/* (5) Per-spec structural table */}
+      <section className="space-y-2">
+        <SectionHead
+          icon={ShieldCheck}
+          title="Structural results per spec"
+          sub="Deterministic 8-check readout per emitted spec · click into the open review where one exists"
+        />
+        <div className="glass-panel overflow-hidden">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border bg-white/[0.02]">
+                <Th>spec</Th><Th>codebase</Th><Th>stage</Th><Th>structural</Th><Th>failing checks</Th><Th className="text-right">review</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {specs.map((s) => {
+                const fails = s.failing.length;
+                const warns = s.warning.length;
+                return (
+                  <tr key={s.ticketId} className="border-b border-border last:border-b-0 hover:bg-white/[0.02]">
+                    <td className="px-3 py-2">
+                      <span className="font-mono text-[11px] text-muted-foreground mr-2">{s.ticketId}</span>
+                      <span className="text-foreground">{s.title}</span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <span
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded border"
+                        style={{ color: cbTone[s.codebase], borderColor: `color-mix(in oklab, ${cbTone[s.codebase]} 50%, transparent)` }}
+                      >{cbLabel[s.codebase]}</span>
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">{s.stage.replace(/-/g, " ")}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "font-mono text-[11px] tabular-nums",
+                          fails ? "text-status-error" : warns ? "text-status-waiting" : "text-status-done",
+                        )}>
+                          {s.checks.filter((c) => c.status === "pass").length}/{s.checks.length}
+                        </span>
+                        <div className="h-1.5 w-20 rounded-full bg-white/5 overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full",
+                              fails ? "bg-status-error/70" : warns ? "bg-status-waiting/70" : "bg-status-done/70",
+                            )}
+                            style={{ width: `${s.score}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      {fails === 0 && warns === 0 ? (
+                        <span className="text-[10px] font-mono text-status-done">all green</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {s.failing.map((id) => (
+                            <span key={id} className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-status-error/40 bg-status-error/10 text-status-error">
+                              {id.split("_")[0]}
+                            </span>
+                          ))}
+                          {s.warning.map((id) => (
+                            <span key={id} className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-status-waiting/40 bg-status-waiting/10 text-status-waiting">
+                              {id.split("_")[0]}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {s.reviewGateId ? (
+                        <Link
+                          to="/approvals/$gateId"
+                          params={{ gateId: s.reviewGateId }}
+                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                        >
+                          Open review <ArrowRight className="size-3" />
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/agents/$agentId"
+                          params={{ agentId: "ba" }}
+                          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                        >
+                          BA trace <ExternalLink className="size-3" />
+                        </Link>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* (4) Facet completeness — counted, not graded */}
+      <section className="space-y-2">
+        <SectionHead
+          icon={BarChart3}
+          title="Facet completeness"
+          sub={`counted from extracted facets (structural) · avg ${facetCompletenessAvg}%`}
+        />
+        <div className="glass-panel p-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          {FACET_DIMENSIONS.map((d) => {
+            const v = facetCompleteness[d];
+            return (
+              <div key={d}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground truncate">
+                    {FACET_LABELS[d]}
+                  </span>
+                  <span className={cn(
+                    "text-[11px] font-mono tabular-nums",
+                    v >= 85 ? "text-status-done" : v >= 70 ? "text-status-waiting" : "text-status-error",
+                  )}>{v}%</span>
+                </div>
+                <div className="mt-1.5 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full",
+                      v >= 85 ? "bg-status-done/70" : v >= 70 ? "bg-status-waiting/70" : "bg-status-error/70",
+                    )}
+                    style={{ width: `${v}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className="border-t border-border pt-4 mt-1">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono mb-1">
+          constitution compliance
+        </div>
+        <div className="text-xs text-muted-foreground">
+          The ruleset every agent runs inside — constitutions, violations, merge gates and open architectural decisions.
         </div>
       </div>
 

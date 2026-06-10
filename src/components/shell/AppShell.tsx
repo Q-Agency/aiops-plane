@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { LeftRail } from "./LeftRail";
 import { TopBar } from "./TopBar";
+import { CommandPalette } from "./CommandPalette";
 import { LiveProvider } from "@/hooks/useLiveTicker";
 import { SectionAssistantProvider } from "@/components/assistant/SectionAssistant";
 import { PodProvider } from "@/lib/pods/pod-store";
@@ -18,6 +19,8 @@ export function AppShell({ children, user }: { children: ReactNode; user: AppUse
               <main className="flex-1 overflow-auto scrollbar-thin">{children}</main>
             </div>
           </div>
+          {/* ⌘K — mounted once for every route (C7) */}
+          <CommandPalette />
         </PodProvider>
       </SectionAssistantProvider>
     </LiveProvider>

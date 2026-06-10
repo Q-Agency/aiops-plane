@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut } from "lucide-react";
+import { MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut, Search } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import { useTheme } from "@/hooks/useTheme";
 import { unackedOpen, nextDailyDigest } from "@/mock/comms";
@@ -11,6 +11,8 @@ import type { AppUser } from "@/lib/auth/types";
 import { ProjectSwitcher } from "./ProjectSwitcher";
 import { PodSwitcher } from "./PodSwitcher";
 import { TenancyBadge } from "./TenancyBadge";
+import { NotificationBell } from "./NotificationBell";
+import { openCommandPalette } from "./CommandPalette";
 
 function useUtcClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -69,6 +71,19 @@ export function TopBar({ user }: { user: AppUser }) {
 
       <div className="flex-1" />
 
+      <button
+        type="button"
+        onClick={openCommandPalette}
+        title="Search everything (⌘K)"
+        className="hidden md:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+      >
+        <Search className="size-3.5" />
+        <span>Search</span>
+        <kbd className="text-[10px] font-mono px-1 py-0.5 rounded border border-border bg-white/5">
+          ⌘K
+        </kbd>
+      </button>
+
       <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
         <span className={cn("size-2 rounded-full dot-pulse", healthColor)} />
         <span className="text-xs text-muted-foreground">SYSTEM</span>
@@ -124,6 +139,8 @@ export function TopBar({ user }: { user: AppUser }) {
         </span>
         <span className="font-mono text-sm text-foreground">${tokenSpend.toFixed(2)}</span>
       </div>
+
+      <NotificationBell />
 
       <AssistantTriggerButton />
 

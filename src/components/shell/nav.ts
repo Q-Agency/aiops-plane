@@ -16,6 +16,7 @@ import {
   FileBarChart,
   GitBranch,
   Hourglass,
+  Inbox,
   KanbanSquare,
   LayoutDashboard,
   Megaphone,
@@ -30,8 +31,8 @@ import {
   Store,
   Users,
 } from "lucide-react";
-import { approvals } from "@/mock/approvals";
-import { INCIDENTS_OPEN_COUNT } from "@/mock/incidents-stub";
+import { openGateCount } from "@/mock/approvals";
+import { INCIDENTS_OPEN_COUNT } from "@/mock/incidents";
 
 export type NavPillar = "FIRE UP" | "RUN" | "MONITOR" | "ADVANCED";
 
@@ -45,6 +46,7 @@ export type NavTo =
   | "/connections"
   | "/pod"
   | "/pipeline"
+  | "/intake"
   | "/approvals"
   | "/comms"
   | "/incidents"
@@ -92,6 +94,7 @@ export const NAV: NavGroup[] = [
     items: [
       { to: "/", label: "Command Center", icon: LayoutDashboard },
       { to: "/pipeline", label: "Pipeline", icon: KanbanSquare },
+      { to: "/intake", label: "Work Intake", icon: Inbox },
       { to: "/approvals", label: "Gates", icon: CheckCircle2, badgeKey: "gates" },
       { to: "/comms", label: "Comms & Escalations", icon: Megaphone },
       { to: "/incidents", label: "Incidents", icon: Siren, badgeKey: "incidents" },
@@ -126,7 +129,8 @@ export const NAV: NavGroup[] = [
 /** Pinned below ADVANCED, above the collapse button. */
 export const SETTINGS_ITEM: NavItem = { to: "/settings", label: "Settings", icon: Settings };
 
-/** Badge counts (mock): open gates from approvals, open incidents from the stub. */
+/** Badge counts (mock): open gates of BOTH kinds (approvals + clarifications,
+ * minus session-resolved) via openGateCount(); open incidents DERIVED from incidents.ts. */
 export function navBadgeCount(key: NavBadgeKey): number {
-  return key === "gates" ? approvals.length : INCIDENTS_OPEN_COUNT;
+  return key === "gates" ? openGateCount() : INCIDENTS_OPEN_COUNT;
 }

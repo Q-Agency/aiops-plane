@@ -10,6 +10,9 @@ import {
   type TicketEconomics, type CostStage,
 } from "@/mock/economics";
 import { agents as allAgents } from "@/mock/agents";
+import { RoiHeroBand } from "@/components/monitor/RoiHeroBand";
+import { BudgetPanel } from "@/components/monitor/BudgetPanel";
+import { useRoiAssumptions } from "@/components/monitor/useRoiAssumptions";
 import { cn } from "@/lib/utils";
 
 const stageColor = (s: CostStage) => {
@@ -27,6 +30,8 @@ export function EconomicsView() {
   const [sort, setSort] = useState<SortKey>("total");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [mergedOnly, setMergedOnly] = useState(false);
+  // hours→$ figures re-derive live from the editable assumptions (C2).
+  const { derived: roi } = useRoiAssumptions();
 
   const rows = useMemo(() => {
     const list = mergedOnly ? ticketEconomics.filter((t) => t.merged) : ticketEconomics;
@@ -54,21 +59,27 @@ export function EconomicsView() {
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
-            per-ticket cost & ROI
+            return on investment · this period
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">Unit Economics</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Overview / ROI</h1>
           <div className="text-xs text-muted-foreground mt-0.5">
-            What it actually costs to ship one ticket — token spend by stage, human gate-minutes, reruns and the ROI vs a human-only team.
+            The CFO view — hours your pod freed, what shipping actually cost, and where the run-rate is headed vs. your budget cap.
           </div>
         </div>
         <RoiHeadline />
       </div>
 
-      {/* Derived metrics */}
+      {/* Hero KPI band — the canonical trio, staged honestly (C2) */}
+      <RoiHeroBand />
+
+      {/* Run-rate vs. budget — bound the unbounded-cost fear */}
+      <BudgetPanel />
+
+      {/* Secondary KPI band (operator detail) */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
         <KpiTile icon={GitMerge}    label="Cost / merged PR"       value={fmtUsd(aggregates.costPerMerged)} sub={`${aggregates.mergedCount} merged`} />
         <KpiTile icon={Layers}      label="Cost / story point"     value={fmtUsd(aggregates.costPerStoryPoint)} sub="blended" />
-        <KpiTile icon={Users2}      label="Human-hours displaced"  value={`${aggregates.humanHoursDisplaced}h`} sub={fmtUsd(aggregates.humanHoursDisplacedUsd) + " @ $" + HUMAN_RATE_PER_HOUR + "/h"} />
+        <KpiTile icon={Users2}      label="Human-hours freed"      value={`${aggregates.humanHoursDisplaced}h`} sub={fmtUsd(roi.hoursFreedUsd) + " @ $" + roi.rate + "/h · " + roi.source} />
         <KpiTile icon={Cpu}         label="Local-vLLM offload"     value={fmtUsd(aggregates.offloadSavings)} sub={`vs cloud-only on ${fmtUsd(aggregates.totalLocal)} local`} tone="positive" />
         <KpiTile icon={Moon}        label="Overnight batch save"   value={fmtUsd(aggregates.batchSavings)} sub="~50% discount" tone="positive" />
         <KpiTile icon={DollarSign}  label="Total agent spend"      value={fmtUsd(aggregates.totalCost)} sub={`${fmtUsd(aggregates.totalCloud)} cloud + ${fmtUsd(aggregates.totalLocal)} local`} />
@@ -179,20 +190,22 @@ export function EconomicsView() {
 /* ----------------------------- pieces -------------------------------- */
 
 function RoiHeadline() {
-  const totalSavedUsd = aggregates.humanHoursDisplacedUsd - aggregates.totalCost;
+  // Re-derives live from the editable assumptions; NET of plan fees (C2).
+  const { derived } = useRoiAssumptions();
   return (
-    <div className="glass-panel px-4 py-2.5 flex items-center gap-4" suppressHydrationWarning>
+    <div className="glass-panel px-4 py-3 flex items-center gap-4" suppressHydrationWarning>
       <div>
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">ROI · this period</div>
-        <div className="text-2xl font-semibold tabular-nums" suppressHydrationWarning>
-          {aggregates.roiMultiple}<span className="text-base text-muted-foreground">×</span>
+        <div className="text-3xl font-semibold tabular-nums" suppressHydrationWarning>
+          {derived.roiMultiple}<span className="text-base text-muted-foreground">×</span>
         </div>
+        <div className="text-[10px] font-mono text-muted-foreground">net of plan fees</div>
       </div>
-      <div className="h-10 w-px bg-border" />
+      <div className="h-12 w-px bg-border" />
       <div className="text-[11px] font-mono leading-tight" suppressHydrationWarning>
-        <div className="text-foreground tabular-nums">{fmtUsd(aggregates.humanHoursDisplacedUsd)} <span className="text-muted-foreground">human work</span></div>
-        <div className="text-muted-foreground tabular-nums">− {fmtUsd(aggregates.totalCost)} agent spend</div>
-        <div className="text-status-done tabular-nums">= {fmtUsd(totalSavedUsd)} net</div>
+        <div className="text-foreground tabular-nums">{fmtUsd(derived.hoursFreedUsd)} <span className="text-muted-foreground">human work at ${derived.rate}/h</span></div>
+        <div className="text-muted-foreground tabular-nums">− {fmtUsd(derived.allInCostUsd)} compute + plan fees</div>
+        <div className="text-status-done tabular-nums">= {fmtUsd(derived.netUsd)} net</div>
       </div>
     </div>
   );

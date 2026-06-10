@@ -8,6 +8,7 @@ import {
   activeHumans, agentsOf, ownershipMap,
 } from "@/mock/humans";
 import type { AgentId } from "@/mock/types";
+import { MembersRoles } from "@/components/people/MembersRoles";
 import { cn } from "@/lib/utils";
 
 const agentMeta = (id: AgentId) => {
@@ -39,6 +40,9 @@ export function PodView() {
           <span className="text-foreground">{orderedAgents.length}</span> agents
         </div>
       </div>
+
+      {/* members & roles (C11) — management surface; matrix below stays the hero */}
+      <MembersRoles />
 
       {/* roster */}
       <section className="space-y-2">

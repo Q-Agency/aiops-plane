@@ -266,7 +266,16 @@ export function PodProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setState(withSamplePod(JSON.parse(raw) as Partial<PodsState>));
+      if (raw) {
+        const stored = JSON.parse(raw) as Partial<PodsState>;
+        // C12: ALL draft/pods updates are functional (prev => next) so
+        // same-tick updates don't race — hydration must not clobber a
+        // draft created before this effect ran.
+        setState((prev) => {
+          const next = withSamplePod(stored);
+          return prev.draft && !next.draft ? { ...next, draft: prev.draft } : next;
+        });
+      }
     } catch {
       /* corrupt storage — keep defaults */
     }

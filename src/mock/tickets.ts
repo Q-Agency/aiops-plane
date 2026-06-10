@@ -1,4 +1,4 @@
-import type { Ticket } from "./types";
+import type { Codebase, Ticket } from "./types";
 
 const now = Date.now();
 const min = 60_000;
@@ -22,3 +22,47 @@ export const tickets: Ticket[] = [
   { id: "AM-130", title: "Mobile onboarding flow",      stage: "ready-qa",     state: "idle",     approver: "Luka",   codebase: "mobile",  priority: "P2", overnightEligible: true,  createdAt: now - 20*hr, updatedAt: now - 110*min },
   { id: "AM-128", title: "Search autocomplete",         stage: "spec-review",  state: "waiting",  approver: "Ana",    codebase: "web",     priority: "P2", overnightEligible: true,  createdAt: now - 9*hr,  updatedAt: now - 22*min },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Work-intake seam (slice 2, C10) — /intake pulls land here           */
+/* ------------------------------------------------------------------ */
+
+export interface AddTicketInput {
+  /** Tracker id (e.g. "AM-109"); auto-generated "AM-9xx" when composing by hand. */
+  id?: string;
+  title: string;
+  priority?: Ticket["priority"];
+  codebase?: Codebase;
+  approver?: string;
+}
+
+let composeSeq = 900;
+
+/**
+ * Mock seam for Work Intake: unshifts a new Backlog ticket into the live
+ * `tickets` array (same reference every consumer reads), so pulled rows
+ * appear at the top of the Pipeline Backlog column on the next render.
+ * Derived module-load datasets (approvals, economics) intentionally do NOT
+ * re-derive — a freshly pulled ticket has no gates or spend yet.
+ */
+export function addTicket(input: AddTicketInput): Ticket {
+  const ts = Date.now();
+  const t: Ticket = {
+    id: input.id ?? `AM-${++composeSeq}`,
+    title: input.title.trim(),
+    stage: "backlog",
+    state: "idle",
+    approver: input.approver ?? "Ana",
+    codebase: input.codebase ?? "web",
+    priority: input.priority ?? "P2",
+    overnightEligible: false,
+    createdAt: ts,
+    updatedAt: ts,
+  };
+  tickets.unshift(t);
+  return t;
+}
+
+export function ticketById(id: string): Ticket | undefined {
+  return tickets.find((t) => t.id === id);
+}

@@ -1,19 +1,21 @@
+/**
+ * /incidents — Incidents & Recovery (C5). Deep-linkable via ?incident=<id>
+ * (bell notifications, ⌘K, /comms escalations).
+ */
+
 import { createFileRoute } from "@tanstack/react-router";
-import { Siren } from "lucide-react";
-import { PlaceholderPage } from "@/components/shell/PlaceholderPage";
+import { IncidentsView } from "@/components/incidents/IncidentsView";
 
 export const Route = createFileRoute("/incidents")({
-  head: () => ({ meta: [{ title: "Incidents · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Incidents & Recovery · Agency OS" }] }),
+  validateSearch: (search: Record<string, unknown>): { incident?: string } =>
+    typeof search.incident === "string" && search.incident.length > 0
+      ? { incident: search.incident }
+      : {},
   component: IncidentsRoute,
 });
 
 function IncidentsRoute() {
-  return (
-    <PlaceholderPage
-      icon={Siren}
-      title="Incidents & Recovery"
-      purpose="Tool disconnects, stuck runs and SLA breaches land here — triage and recover, with every action written to the audit ledger."
-      buildOrder={6}
-    />
-  );
+  const { incident } = Route.useSearch();
+  return <IncidentsView deepLinkId={incident} />;
 }

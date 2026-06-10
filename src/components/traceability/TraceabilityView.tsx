@@ -341,7 +341,7 @@ export function ContextPreview({ ticket }: { ticket: Ticket }) {
   );
 }
 
-function MarkdownLite({ text }: { text: string }) {
+export function MarkdownLite({ text }: { text: string }) {
   // tiny renderer: # / ## / ### / -/ [ ] / **bold** / `code` / blockquote
   const lines = text.split("\n");
   return (

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Moon, Sun, RotateCcw, Bot, User2, Repeat2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Moon, Sun, RotateCcw, Bot, User2, Repeat2, Plus } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import type { Stage, Ticket, AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,7 @@ function stageProgress(stage: Stage): number {
   return Math.round(((idx + 1) / COLS.length) * 100);
 }
 
-export function PipelineBoard() {
+export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: string } = {}) {
   const { tickets: liveTickets, emit } = useLive();
   const [tickets, setTickets] = useState<Ticket[]>(() => [...liveTickets, ...extraTickets]);
   const [overnight, setOvernight] = useState(false);
@@ -126,6 +127,13 @@ export function PipelineBoard() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Work Intake CTA (C10) — how tickets actually enter the pod */}
+          <Link
+            to="/intake"
+            className="h-9 px-3 rounded-md border border-primary/50 bg-primary/15 text-primary text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-1.5 hover:bg-primary/25 transition-colors"
+          >
+            <Plus className="size-3.5" /> Add work
+          </Link>
           <div className="glass-panel px-1 py-1 inline-flex text-xs font-mono">
             <button
               onClick={() => setOvernight(false)}
@@ -221,6 +229,18 @@ export function PipelineBoard() {
 
                 {/* cards */}
                 <div className="px-2 pb-2 flex-1 overflow-y-auto scrollbar-thin space-y-2 min-h-[80px]">
+                  {/* empty Backlog → Work Intake (every add-work CTA deep-links to /intake) */}
+                  {col.id === "backlog" && items.length === 0 && (
+                    <Link
+                      to="/intake"
+                      className="block rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
+                    >
+                      No work yet — add a ticket or connect Teamwork/Jira.
+                      <span className="mt-1.5 inline-flex items-center gap-1 text-primary font-semibold">
+                        Add work →
+                      </span>
+                    </Link>
+                  )}
                   {items.map((t) => (
                     <TicketCard
                       key={t.id}
@@ -228,6 +248,7 @@ export function PipelineBoard() {
                       col={col}
                       overnight={overnight}
                       isRunning={!!running[t.id]}
+                      flagged={t.id === highlightTicketId}
                       onDragStart={() => setDragId(t.id)}
                       onDragEnd={() => setDragId(null)}
                       onReject={() => col.prev && moveTicket(t.id, col.prev)}
@@ -279,12 +300,14 @@ export function PipelineBoard() {
 }
 
 function TicketCard({
-  t, col, overnight, isRunning, onDragStart, onDragEnd, onReject, mounted,
+  t, col, overnight, isRunning, flagged, onDragStart, onDragEnd, onReject, mounted,
 }: {
   t: Ticket;
   col: Col;
   overnight: boolean;
   isRunning: boolean;
+  /** ?ticket=<id> deep link from Work Intake — draws the highlight ring. */
+  flagged?: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
   onReject: () => void;
@@ -308,6 +331,7 @@ function TicketCard({
         "group relative rounded-md border bg-panel/60 p-2.5 cursor-grab active:cursor-grabbing hover-lift",
         "border-border hover:border-primary/40",
         highlight && "border-primary/60 shadow-[0_0_24px_-6px_rgba(108,99,255,0.6)]",
+        flagged && "border-primary/70 ring-1 ring-primary/50 shadow-[0_0_24px_-6px_var(--primary)]",
       )}
     >
       {isRunning && (
