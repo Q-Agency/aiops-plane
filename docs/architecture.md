@@ -187,6 +187,15 @@ plumbing); SA and Dev adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-
     _deletes_ the spec, so the record can't live in the thing being deleted). Server-only
     (service-role, RLS-locked, never in the browser); **ingested** from each agent's durable
     lifecycle events — not a second source of truth, a durable sink. See §10.
+  - **Second write path (registered 2026-06): dashboard-originated actions write
+    directly.** Ingestion covers *agent-originated* lifecycle events; actions that
+    **originate in the dashboard** — gate approve/reject/override, pod/agent
+    pause/resume, policy changes (budget cap, retention, Slack rewiring, roles),
+    reassignment acceptance, report sends, data exports — are written to the **same**
+    `audit_log` **server-side via the service-role key** (same Supabase project, same
+    append-only table, never from the browser). There is no agent event to ingest for
+    these, so the direct write *is* the record. The product mock's `audit-bridge.ts`
+    is the draft of exactly this function.
   - **Dashboard control-plane data** (real users/auth, the system registry,
     memberships/roles) → the **same small Postgres** at the real-auth milestone, plus
     **Supabase Auth**.

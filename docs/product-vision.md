@@ -13,7 +13,17 @@
 
 **Who it's for.** The buyer and primary operator is a **client-side PM / delivery lead** at an organization that wants Q's SDLC agents working their backlog. Secondary stakeholders — an **engineering lead**, a **QA lead**, and a **client sponsor / exec** — consume the same pod through role-scoped surfaces. None of them are platform engineers; the product must be operable by a non-engineer 24/7.
 
-**The wedge.** Every competitor sells one of two things: *builder tools for engineers* (LangGraph, CrewAI, n8n) or *trust-the-AI autonomy* (Devin, Cursor agents, Copilot Workspace). We sell the opposite of both — **a governed pipeline a non-technical owner can run and be accountable for**, with one accountable human per agent, unified human-in-the-loop gates, a **deterministic (zero-LLM) spec-quality moat**, an audit ledger that survives a reset, and **per-delivery-unit economics attributable to a named accountable human**.
+**The wedge.** The 2026 field sells one of three things — and we are deliberately the third:
+
+| Who | What they sell | The limit |
+|---|---|---|
+| **Suite teammates** — GitHub Agent HQ, Atlassian Rovo, ServiceNow AI Control Tower | Agents governed *inside one vendor's suite* | Governance stops at the suite boundary; built for that suite's users |
+| **Autonomous coders** — Devin, Cursor agents | Trust-the-AI output, engineer-operated | Accountability is diffuse; a non-engineer cannot run or prove it |
+| **Agency OS** | A **cross-tool agent–human pod**: one accountable human per agent, unified human-in-the-loop gates, a **deterministic (zero-LLM) spec-quality moat**, an audit ledger that survives a reset, and **provable per-delivery-unit economics** — **operable by a non-engineer** | — |
+
+**Counter-position:** the suites chart their own agents; we govern the pod *across all of their tools* and keep the evidence — **the system of record for AI delivery governance**.
+
+**The moat's second act — earned autonomy.** The zero-LLM validators are not only a quality gate; they are the **precondition machine for safe delegation**. Agents climb an autonomy ladder — **L0 review-all → L1 batch → L2 sample 1-in-5 → L3 auto-clear low-risk** — where promotion criteria are *deterministic validator streaks* ("BA eligible for L2: 47 consecutive 8/8 specs, 4% rejection"), proposed by the system, **granted by the accountable human, and written to the ledger**. Competitors' autonomy preconditions are vibes; ours are checked in code. Autonomy you can audit your way into.
 
 **One-line positioning.** *Not an autonomous coder you must trust — a governed agent–human pipeline you can prove.*
 
@@ -99,7 +109,7 @@ The front door, and the single most load-bearing missing surface. Today `/connec
 
 **Pipeline Board.** **[REUSE `src/routes/pipeline.tsx`]** Kanban over the lifecycle (`backlog → in_progress → waiting → ready → approved → delivered`, plus `reset/blocked/error`). This is where work visibly flows during the demo.
 
-**Approvals & Clarifications (unified gates).** **[REUSE `src/routes/approvals.tsx`]** One queue, two kinds (clarification + approval). The key upgrade: the **top 1–2 gates (spec approval) get a client-grade review surface inside Agency OS** — render the SPEC.md, the EARS criteria, the structural validator results, with Approve/Reject + **required reason/comment**. Deep-link to the agent's own tool (BA's flow-observer) only as a fallback. A paying client PM should not be dropped into internal tooling to do their core job.
+**Approvals & Clarifications (unified gates).** **[REUSE `src/routes/approvals.tsx`]** One queue, two kinds (clarification + approval). The key upgrade: the **top 1–2 gates (spec approval) get a client-grade review surface inside Agency OS** — render the SPEC.md, the EARS criteria, the structural validator results, with Approve/Reject — a typed reason is **required on reject and override**; clean approvals offer **optional structured quick-reason chips** (no mandatory prose, so the ledger never fills with "Looks good" ×40). Deep-link to the agent's own tool (BA's flow-observer) only as a fallback. A paying client PM should not be dropped into internal tooling to do their core job.
 
 **Comms & Escalations.** **[REUSE `src/routes/comms.tsx` + `src/mock/comms.ts`]** Agent-initiated Slack/Teamwork posts, escalations with severity/routedTo/SLA. Surfaces the *paused/escalated* state from the Command Center.
 
@@ -111,13 +121,13 @@ The front door, and the single most load-bearing missing surface. Today `/connec
 
 **MONITOR landing / ROI hero.** **[REFRAME `src/routes/economics.tsx` + `src/mock/economics.ts`]** Lead with `humanHoursDisplaced` (displayed as *human-hours freed*), `costPerMerged`, `costPerStoryPoint`. Add **projected monthly run-rate** and a **budget cap** to answer the unbounded-cost fear — not just historical spend. Reframed from operator cost-debugging to **client consumption transparency**.
 
-**Governance (the moat).** **[REUSE `src/routes/governance.tsx` + `src/mock/governance.ts`]** Spec quality: 6-dimension completeness, EARS coverage, structural readiness. The critical UX fix: **visually separate and badge the deterministic, zero-LLM structural validators** (EARS coverage, section parity, AC-ID parity, business-rule references, etc. — checked in code, no model in the loop) from any LLM-judge signal. The skeptical buyer's reflex is *"the AI is grading its own homework."* The badge — *"validated deterministically, no LLM in the loop"* — is the hardest-to-copy headline claim. We also fix the oversell: it is **structural quality, not semantic** — the language must say so (resolving gap B1/B4).
+**Governance (the moat).** **[REUSE `src/routes/governance.tsx` + `src/mock/governance.ts`]** Spec quality: 6-dimension completeness, EARS coverage, structural readiness. The critical UX fix: **visually separate and badge the deterministic, zero-LLM structural validators** (EARS coverage, section parity, AC-ID parity, business-rule references, etc. — checked in code, no model in the loop) from any LLM-judge signal. The skeptical buyer's reflex is *"the AI is grading its own homework."* The badge — *"validated deterministically, no LLM in the loop"* — is the hardest-to-copy headline claim. We also fix the oversell: it is **structural quality, not semantic** — the language must say so (resolving gap B1/B4). And the moat is pipeline-wide by claim, not one-seventh: a **deterministic gate matrix** names the zero-LLM checks per artifact kind — **design:** section parity + ADR presence; **code:** build/lint/SAST/license; **test:** coverage/mutation; **release:** SLSA provenance + DORA — and the same deterministic streaks are the promotion evidence for the autonomy ladder (§1, §5).
 
 **Accountability.** **[REFRAME `/pod` read-only matrix]** The setup-time matrix, now showing live workload, SLA status, and gate ownership. Empty column = uncovered risk.
 
 **SLA & Client Reporting.** **[NEW, sources Economics + Governance + lifecycle]** Today SLAs are only a raw `slaBreaches` counter in `humans.ts`. We add **SLA definitions per stage/pod** (response time, gate-clearance time, delivery cadence) with **target-vs-actual + breach history**, and a **shareable/exportable weekly client status report** (items delivered, gates cleared, cycle time, cost) framed for a sponsor — not operator dials.
 
-**Compliance & Audit.** **[REUSE `src/routes/compliance.tsx`, dashboard-owned Supabase audit ledger]** Append-only `audit_log` of state-changing actions (reset/approve) that **outlives agent data** (BA's reset deletes the spec). The upgrade: **human-decision audit** — when a human clears/rejects a gate, capture *actor + timestamp + decision + reason*, render it on the artifact and in the trail. This depends on real identity, so the **null `actor`** is honestly shown as *"when-only"* until auth v2 (§8); the record shape is designed now.
+**Compliance & Audit.** **[REUSE `src/routes/compliance.tsx`, dashboard-owned Supabase audit ledger]** Append-only `audit_log` of state-changing actions (reset/approve) that **outlives agent data** (BA's reset deletes the spec). The upgrade: **human-decision audit** — when a human clears/rejects a gate, capture *actor + timestamp + decision + reason* (typed reason on reject/override; structured quick-reason chips on approve), render it on the artifact and in the trail. This depends on real identity, so the **null `actor`** is honestly shown as *"when-only"* until auth v2 (§8); the record shape is designed now.
 
 **Advanced / Platform drawer.** **[REUSE, demoted]** Observability (`/observability`, health + log tail + infra telemetry), Orchestration (`/orchestration`, topology DAG + queue), Flow Analytics (`/flow`), Traceability (`/traceability`). These are credibility for a technical buyer but over-built for the PM persona — **demote, don't delete**, behind an Advanced section for technical users.
 
@@ -128,9 +138,10 @@ The front door, and the single most load-bearing missing surface. Today `/connec
 - **Agents & Catalog** — curated seven-role Q catalog; install/remove per pod; contract-version + conformance badge; capability/cost/latency cards. *(New catalog UI over `src/mock/agents.ts`.)*
 - **Topology & Pipeline** — auto-wired produces↔consumes edges; lifecycle stages; kanban board. *(Reuse `/pipeline`, `/orchestration` topology.)*
 - **Connectors** — per-pod tool connections with shown scopes, health checks, Live-vs-Roadmap honesty; reframed `/connections`. **Credential vault deferred** (§8).
-- **People / RBAC / Pods** — pod as configurable object; accountable-human matrix; role personas + invites + role-scoped landings. *(Reuse `humans.ts`, PodView; new roles layer.)*
-- **HITL & Accountability** — unified gates queue; client-grade spec-approval surface; required reason/comment; one accountable human per agent; recovery controls. *(Reuse `/approvals`; new review surface + incidents.)*
-- **Governance** — 6-dimension completeness; **badged zero-LLM structural validators**; honest structural-vs-semantic language. *(Reuse `/governance`.)*
+- **People / RBAC / Pods** — pod as configurable object; accountable-human matrix; role personas + invites + role-scoped landings. Humans carry **capacity and calendar**: `workingHours`, `status` (available/OOO), a named `delegateId`, and `capacityGatesPerDay` — agents run 24/7, humans don't, and the model says so. *(Reuse `humans.ts`, PodView; new roles layer.)*
+- **HITL & Accountability** — unified gates queue; client-grade spec-approval surface; typed reason **required on reject/override**, optional quick-reason chips on approve; one accountable human per agent; recovery controls. Coverage is **accepted, not assigned**: reassignment requires a one-tap **audited acceptance**; the matrix gains a **coverage timeline strip** (time-gaps get the same red "uncovered" treatment) and optional deputy chips (one **A** stays the invariant); a **throttle policy** pauses upstream intake when a human's open gates exceed capacity (amber pod state); SLA clocks support a coverage-hours mode ("clock paused outside coverage"); **"Escalate to Q"** is a first-class audited recovery action, with a **"Q-managed start"** blueprint option (Q staff hold accountable roles weeks 1–4, then hand over). *(Reuse `/approvals`; new review surface + incidents.)*
+- **Governance** — 6-dimension completeness; **badged zero-LLM structural validators**; honest structural-vs-semantic language; the **autonomy ladder** (L0 review-all → L1 batch → L2 sample 1-in-5 → L3 auto-low-risk; promotion on deterministic validator streaks, granted by the accountable human, written to the ledger); the **deterministic gate matrix** per artifact kind (design: section parity + ADR presence; code: build/lint/SAST/license; test: coverage/mutation; release: SLSA provenance + DORA — all zero-LLM). *(Reuse `/governance`.)*
+- **Code-side integration** — the Dev agent works in the client's repo under a **bot git identity** (signed commits, `Co-authored-by:` the accountable human); every PR carries the **PR contract** (spec link + gate id + validator summary in the description); and the **gate↔PR mirroring rule**: the code-review gate *is* the GitHub PR review — the webhook resolves the gate, the dashboard shows status and deep-links out — the deliberate inverse of the spec gate, justified per persona (engineers review code in GitHub; PMs review specs in Agency OS). *(Mock: `src/mock/code-integration.ts` with two seeded PRs + a FIRE UP readiness check "Bot collaborator invited · branch-protection compatible".)*
 - **Economics & Billing** — ROI hero (human-hours freed, cost-per-merged, cost-per-story-point — live tier badged per §1); run-rate + budget cap; client-facing usage-vs-plan summary + budget alerts + monthly statement. *(Reframe `/economics`; new billing view.)*
 - **Compliance & Audit** — append-only ledger surviving reset; human-decision attribution; data export/retention surface. *(Reuse `/compliance`; new export/retention.)*
 - **DevOps** — DevOps/Release agent as a pipeline stage with DORA metrics (plan→approve→apply, strongest gates); platform LLMOps (version pinning, eval gates) **named, deferred** (§8).
@@ -164,7 +175,7 @@ Left rail (pillar-grouped):
        Compliance & Audit             [/compliance]
        Usage & Billing                [NEW]
   ── ADVANCED (technical users)
-       Observability · Orchestration · Flow · Traceability   [demoted]
+       Observability · Orchestration · Flow · Traceability · Agents (/agents)   [demoted]
   ── Settings (incl. tenancy/security posture, data export & retention)
 ```
 
@@ -176,13 +187,13 @@ A **route-to-pillar migration table** (every existing route → its pillar desti
 
 ## 7. Mock-First Build Order
 
-Ordered to make the demo arc demoable earliest, highest-leverage first. **Planning only.**
+Ordered to make the demo arc demoable earliest, highest-leverage first. **Status (2026-06-10): items #1–#12 are SHIPPED in the mock** (commits `f76ee4a` — pillar IA, multi-pod shell, New-Pod wizard at `/pods/new?step=…`; `69014e0` — gate review at `/approvals/$gateId`, incidents, notifications, reports, billing, intake); **#13 remains open**, plus the Wave 2 list below.
 
 1. **IA reorg + multi-pod shell + pod switcher.** Regroup the existing 16 routes under FIRE UP / RUN / MONITOR / Advanced; add the pod-switcher TopBar and tenancy badge. Ship the route-to-pillar migration table. *(Reframes everything; unblocks the rest.)*
 2. **FIRE UP wizard (the missing 30 seconds).** Blueprints → Catalog → Connect tiles → People matrix → Slack → Readiness → Launch. Reuse `agents.ts`, `humans.ts`, PodView, `comms.ts`; extend `probeAgentFn` for mocked health. *This is the top priority — it's the most-sold, least-built experience.*
 3. **ROI hero on the MONITOR/Command Center landing.** Promote `economics.ts` numbers; add run-rate + budget cap. *(Cheapest path to the wow moment.)*
 4. **Governance moat badge.** Separate + badge zero-LLM structural validators; fix structural-vs-semantic language. *(The closing differentiator; cheap, high-trust.)*
-5. **Client-grade gate review surface** + required reason/comment on `/approvals`. *(Core RUN demo beat; sets up human-decision audit.)*
+5. **Client-grade gate review surface** on `/approvals` (as-built: `/approvals/$gateId`, `GateReviewShell`) — typed reason required on reject/override, optional quick-reason chips on approve. *(Core RUN demo beat; sets up human-decision audit.)*
 6. **Incidents & Recovery inbox** with recovery controls wired to the audit ledger. *(Makes the product operable, not just observable.)*
 7. **Notifications inbox + preferences + mobile "my gates" view.** *(Closes the HITL loop.)*
 8. **SLA definitions + shareable weekly client report.** *(The sponsor-facing artifact.)*
@@ -191,6 +202,10 @@ Ordered to make the demo arc demoable earliest, highest-leverage first. **Planni
 11. **Sandbox / demo pod with seed data** — a one-click pre-loaded pod (in-flight specs, gates, an incident, a delivered item) badged *Sample*, plus non-blank empty-states for real pods. *(Maps onto rich existing `src/mock/*`; the cheapest evaluation asset.)*
 12. **Global ⌘K search + list filters.** *(Daily-driver polish.)*
 13. **Data export & retention + security/access posture in Settings; in-product help/coach-marks; accessibility pass on client-facing surfaces.** *(Trust + usability tail.)*
+
+**Sales-engineering deliverable (alongside the mock):** the **competitive teardown one-pager** — suite teammates (GitHub Agent HQ, Atlassian Rovo, ServiceNow) vs. autonomous coders (Devin, Cursor) vs. Agency OS — promoted from §9's open questions to a committed build-order deliverable.
+
+**Wave 2 (post-slice-2) — specced, not yet in the mock:** gate policies & autonomy UI · human capacity/coverage surfaces · `/welcome` (accountability handshake) · `/memory` (constitution & amendments; absorbs `/knowledge`) · Pod Copilot (TopBar + ⌘J) · `/pilot` · `/org` · `/share/$token` · `/artifacts` (deliverables library) · `/status` · Demo Director · role-scoped landings · responsive gates.
 
 ---
 
@@ -216,6 +231,10 @@ The mock-first mandate lets us defer the *how* — but nothing is dropped silent
 | **Connector ownership split** | Today connectors are **agent-owned `SourceBinding`s — read-only federation** (declared on the agent card); later they become **vault-backed pod `Connection`s** the control plane owns. Connect tiles are badged accordingly. | The Connect-tile experience is identical either way; only ownership and credential custody differ behind it. | Before any pod-owned credential is stored (pairs with the vault row above). |
 | **Regulatory mapping (EU AI Act)** | The `/compliance` "AI Act deployer readiness" panel maps controls→articles (matrix = Art 26(2) oversight, ledger = 26(6) logs, incidents = 26(5), gate reasons = oversight evidence) and exports a deployer evidence pack. This row is the line between **claims we mock now** and **certification work later**. | The screens *are* the evidence surfaces, re-labeled; the mapping is honest about being designed, not certified. | Before selling compliance claims to an EU deployer — Article 26 applies **2026-08-02**. |
 | **Model-plane residency & subprocessor terms** | "Models & subprocessors" panel in Settings (per agent: provider, pinned model, processing region, retention terms) with Live/Roadmap honesty ("EU-region inference: Roadmap"); one line in the tenancy popover. | The surfaces are mocked now so the EU-West badge is substantiated by an inspectable claim; real provider terms are a procurement artifact, not a build. | Before the first EU client DPA. |
+| **Human-capacity & coverage runtime** | The *model and surfaces* ship now (§5): `workingHours`/OOO/delegate/`capacityGatesPerDay` on `Human`, coverage timeline strip, intake throttle policy, coverage-hours SLA clocks, audited reassignment acceptance. The *runtime mechanism* — calendar sync, live intake throttling, delegate failover — is deferred. | Capacity surfaces and policy shapes demo fully on mock data; enforcement needs the control ops (v0.6) and real identity. | Before the first 24/7 pilot runs overnight against real SLA clocks — calendar-blind clocks would paint fake breach walls on the sponsor-facing SLA screen. |
+| **Platform availability & DR** | Stated uptime target + ledger RPO; **degraded mode designed now**: agents continue working when the dashboard is down, gates remain answerable in Slack, the ledger backfills on reconnect — with an App Shell degraded-mode banner, **gap-marker rows** in Compliance ("sync gap 02:10–02:34" — the when-only honesty pattern), and a per-tenant `/status` page (component health, 90-day uptime) doubling as a procurement artifact. | The banner, gap markers, and status page are mockable surfaces; real SLOs and DR need real infra. | Before a platform SLA enters a contract — and before the ledger is sold as gap-free. |
+| **Adversarial-input threat model** | The pod ingests untrusted third-party text by design (customer tickets, Slack, Drive) and holds write scopes. Mock now: an **input-provenance chip** on spec review ("Sources: 1 customer-submitted ticket · 2 internal docs — external content treated as untrusted") + a `suspicious-input` incident kind (one seed); validators + gates + provenance framed as the layered injection defense. SDK-side filters/canaries and per-connector write allowlists deferred. | Provenance cues and incident surfaces demo the posture; the real filters live SDK-side, not in the dashboard. | Before a pod holds write scopes on a real client tool. |
+| **Work language & validator i18n** | `language` on blueprints/pod drafts with a FIRE UP select ("Working language — specs, reports, and gates are produced in this language"). Stance: **EARS keywords stay English as a structural convention, with localized body text** — defensible and demo-sayable; validator locale packs are the deferred alternative. | The language select and copy mock now; the 8 zero-LLM validators parse English EARS keywords today, so the stance must be stated, not implied. | Before the first non-English pilot. |
 
 ---
 
@@ -234,13 +253,32 @@ The mock-first mandate lets us defer the *how* — but nothing is dropped silent
 - **Audit `actor=null` vs. multi-actor product.** *Resolved:* identity is product-blocking (moved out of "v2 nicety"); design the attributed-decision record now, honestly show "when-only" until auth lands.
 
 **Open questions (to answer during mock + first pilot):**
-- Pricing/packaging for dedicated-per-client (platform fee + usage? per-merged-unit? per-seat?) — asked immediately after the ROI reveal.
+- Pricing/packaging for dedicated-per-client — **v0 hypothesis now stated in §9.5** (tenant platform fee + per-active-pod fee + outcome component in the ROI unit); the open question narrows to validating the levels and the outcome share in the first pilots.
 - Time-to-first-value target: what is the credible "live in N minutes" promise for pod fire-up?
 - How much of SA (and which downstream agent) must be real for the pilot, vs. mocked, to be credible?
-- Competitive teardown: the head-to-head one-pager vs. orchestration frameworks and autonomous coders for sales engineers.
+- *(Competitive teardown — promoted from open question to a committed build-order deliverable, §7.)*
 - **Change management & coexistence** with the client's existing delivery org: who negotiates the scope-of-work slice, how dual-track runs without turf war, and the scripted answer to *"what happens to our BA?"* — *nothing is taken away: the pod works the slice you give it, your BA reviews and ratifies its specs, and the hours freed are redeployed to the backlog you couldn't staff.*
 
 **Top residual risk:** the demo opening (FIRE UP) is the unbuilt part, so build order item #2 is non-negotiable. The moat is *control*, but agent demos instinctively show *autonomy* — leading with control/ROI must be deliberately staged in every demo.
+
+---
+
+## 9.5 Pricing Hypothesis (v0) & Product Metrics
+
+**Pricing hypothesis (v0).** A working hypothesis to be validated against the first pilots — *not* a rate card, and it replaces the accidental mock-copy price ("delivery units" are killed everywhere). Three components, all metered by surfaces the product already has:
+
+- **Tenant platform fee** — **$3–5k/mo** *(hypothesis)* for the dedicated tenant: isolated infra/DB, the ledger, compliance surfaces.
+- **Per-active-pod fee** — **$2–4k/mo** *(hypothesis)* per running pod.
+- **Outcome component** — priced **in the same unit the ROI screen measures**: per **approved artifact** now, per **merged ticket** as agents ship; defensible at **10–25% of demonstrated savings** *(hypothesis)*. The audit ledger is the meter — every line item links to a gate a human cleared.
+- **Pilot** — fixed-fee, credited to year one on conversion.
+
+The billing surface's pricing-simulator card models exactly these three components against the current month's actuals.
+
+**Product metrics.**
+
+- **North star: approved artifacts per pod-week.**
+- **Activation: time-to-first-approved-artifact (TTFAA) < 24h** — surfaced as a timer chip on the post-launch ribbon.
+- Supporting: gate-clearance latency, pods per client, pilot→annual conversion.
 
 ---
 
@@ -257,7 +295,7 @@ The mock-first mandate lets us defer the *how* — but nothing is dropped silent
 - **Provenance** / **Ledger** — leans into the audit/accountability/provable moat.
 - **Q Delivery Cloud** — leans into the dedicated-per-client, Q-curated framing.
 
-**Pushbacks to pre-empt in every pitch:** *Trust* → surface zero-LLM validators. *Control* → pause/kill-pod affordance. *Data* → tenancy/residency badge. *Lock-in* → contract-version + conformance badge (swappable by contract). *Cost* → budget cap + projected run-rate. *Runtime* → managed-dedicated-runtime roadmap line, one sentence from the main flow.
+**Pushbacks to pre-empt in every pitch:** *Trust* → surface zero-LLM validators. *Control* → pause/kill-pod affordance. *Data* → tenancy/residency badge. *Lock-in* → contract-version + conformance badge (swappable by contract). *Cost* → budget cap + projected run-rate. *Runtime* → managed-dedicated-runtime roadmap line, one sentence from the main flow. *Exit* → the **offboarding pack** (artifacts + constitution + complete ledger + decommission attestation): "here's what you keep if you fire us" — the anti-lock-in close.
 
 *Lead with control and ROI, not autonomy.*
 

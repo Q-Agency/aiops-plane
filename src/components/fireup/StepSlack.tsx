@@ -147,7 +147,7 @@ function previewFor(event: SlackEventId): PreviewMessage | null {
         ? {
             headline: `Approval needed · ${c.ticketId ?? ""}`.trim(),
             body: c.body,
-            actions: ["Approve", "Request changes"],
+            actions: ["Open gate review →"],
           }
         : null;
     }
@@ -513,8 +513,9 @@ export function StepSlack() {
                   )}
                 </Label>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Approval gates posted here can be cleared by the team — maps to the pod&apos;s
-                  approver list.
+                  Approvals announced here are deep-link-only — the link opens the gate review for
+                  the accountable human (or their delegate); acting for someone else is recorded as
+                  an override. Clarifications stay anyone-can-answer in-channel.
                 </p>
               </div>
               <div className="shrink-0">
@@ -531,14 +532,14 @@ export function StepSlack() {
             {!draft.approverChannelId && (
               <p className="mt-2 text-[11px] text-status-waiting flex items-center gap-1.5">
                 <Info className="size-3 shrink-0" />
-                Pick an approver channel so approval gates can be actioned.
+                Pick an approver channel so approval announcements reach the accountable human.
               </p>
             )}
             {approverDiffers && (
               <p className="mt-2 text-[11px] text-muted-foreground flex items-center gap-1.5">
                 <Info className="size-3 shrink-0" />
-                Approvals will post to {channelLabel(approvalRow.channelId)} and be actionable in{" "}
-                {channelLabel(draft.approverChannelId)}.
+                Approvals announce in {channelLabel(approvalRow.channelId)}; the gate deep link
+                posts to {channelLabel(draft.approverChannelId)} for the accountable human.
               </p>
             )}
           </div>

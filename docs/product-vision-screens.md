@@ -4,7 +4,7 @@
 
 **How to read.** Tags on each screen: **NEW** (build from scratch) · **REFRAME** (existing surface, re-framed for the product) · **REUSE** (existing component, minor change). Screens are grouped by the FIRE UP / RUN / MONITOR pillars (the agreed nav spine in `product-vision.md` §6). The **build sequence** is in `product-vision.md` §7 — start with the IA reorg + app shell, then the FIRE UP wizard. The consolidated list of every **new mock dataset/shape** to add is in the appendix at the end.
 
-> **Note on route naming:** the wizard-step routes vary between specs (e.g. `/fire-up/new` vs `/new-pod?step=…`); the Coverage & consistency review at the end flags this — pick one scheme when mocking. Specs are otherwise self-consistent per pillar.
+> **Note on route naming — RESOLVED as-built:** the historical wizard-route fork (`/fire-up/*` vs `/new-pod/*` vs `/pods/new`) is settled. The canonical wizard route is **`/pods/new?step=blueprint|agents|connect|people|slack|golive`** (as-built: `src/routes/pods.new.tsx`; step bodies in `src/components/fireup/`). Every wizard reference below uses this form; the Coverage & consistency review's item #2 records the resolution.
 
 
 ---
@@ -17,10 +17,10 @@
 - **Persona & entry:** Every signed-in persona lands inside this on every authenticated route. It is the first thing rendered after `/login`.
 - **Layout:** Unchanged outer skeleton from `AppShell.tsx` — a full-height flex row: `<LeftRail/>` (fixed width, collapsible) on the left, then a `min-w-0` column containing `<TopBar/>` (h-14) over `<main class="flex-1 overflow-auto scrollbar-thin">`. Keep both providers (`LiveProvider`, `SectionAssistantProvider`) wrapping the tree.
 - **Components:** REUSE `AppShell` shell, `LiveProvider`, `SectionAssistantProvider`, `AssistantTriggerButton`. The change is entirely inside `LeftRail` and `TopBar` (specced below). No new shell wrapper needed.
-- **States:** *Loading* — SSR renders shell immediately; main shows the route's own skeleton. *Error* — route-level error boundary fills `main`; shell + nav stay interactive so the user can navigate away. *No-pod edge-case* — if the active pod is null (org with zero pods), `main` renders a global empty-state CTA ("Fire up your first pod") and RUN/MONITOR rail groups render disabled (see LeftRail states).
+- **States:** *Loading* — SSR renders shell immediately; main shows the route's own skeleton. *Error* — route-level error boundary fills `main`; shell + nav stay interactive so the user can navigate away. *No-pod edge-case* — if the active pod is null (org with zero pods), `main` renders a global empty-state CTA ("Fire up your first pod") and RUN/MONITOR rail groups render disabled (see LeftRail states). *Degraded mode (platform honesty — Blind spot 5)* — when the control plane can't reach the gateway/ledger, a full-width amber **degraded-mode banner** renders under the TopBar: **"Agency OS is degraded — your agents continue working; gates remain answerable in Slack; the ledger backfills on reconnect."** A "details →" link opens `/status`; any sync outage is later surfaced as a gap-marker row in Compliance — the when-only honesty pattern extended to the platform itself.
 - **Mock data:** none new at this level; consumes `project`/`projects` (`src/mock/project.ts`) via children. Pod scope handled by `PodSwitcher` below.
 - **Interactions:** `⌘B` toggles rail collapse (already wired in `sidebar.tsx`; mirror the shortcut into `LeftRail`). `⌘K` opens the command palette (new, specced below). Nothing else changes at the shell frame.
-- **Copy:** n/a (frame only).
+- **Copy:** frame itself n/a. Degraded-mode banner: "**Agency OS is degraded** — your agents continue working; gates remain answerable in Slack; the ledger backfills on reconnect. Details →" (links `/status`).
 - **Demo note:** This is the persistent frame for the whole 3-min arc; the demo never leaves it.
 
 ---
@@ -31,7 +31,7 @@
 - **Layout:** Same `<aside>` as today (`w-56` expanded / `w-14` collapsed, `bg-panel/40 backdrop-blur-md`, brand header h-14, collapse button pinned at the bottom). Inside `<nav>`, render **grouped sections** instead of a flat map: a small uppercase group label (`text-[10px] tracking-wider text-muted-foreground px-2.5 pt-3 pb-1`) then that group's links. ADVANCED is a `Collapsible` (default collapsed) so platform views are demoted, not deleted. Keep the active-item neon left-bar (`absolute left-0 … bg-primary shadow`).
 - **Components:** REUSE the existing `Link`/`useRouterState` active-detection pattern and per-item icon render. Build NEW: a `NavGroup` sub-component (label + children) and wrap ADVANCED in `Collapsible`/`CollapsibleTrigger`/`CollapsibleContent` (shadcn). Keep collapse toggle button. When `collapsed`, hide group labels and render items as icon-only with shadcn `Tooltip` showing the label (today there is no tooltip in collapsed mode — add it).
 - **States:** *Populated* — full grouped tree (see Copy for the exact item→route map). *Collapsed* — icons only, group labels hidden, dividers (`Separator`) between groups, tooltips on hover. *Active* — neon left-bar + `bg-primary/15`. *Locked/no-pod edge-case* — when there is no active pod, FIRE UP shows only "New Pod" (enabled); RUN + MONITOR items render `aria-disabled`, muted, non-navigable, with tooltip "Launch a pod to enable." *Role-scoped* — items the active role cannot access are hidden (not greyed): e.g. Viewer sees no FIRE UP group. *Badge edge-case* — Gates and Incidents items show a count badge (shadcn `Badge`, neon for >0) sourced from open gates / open incidents.
-- **Mock data:** Drive the structure from a NEW static config array `NAV: { pillar: "FIRE UP"|"RUN"|"MONITOR"|"ADVANCED"; items: { to; label; icon; minRole?: Role; badgeKey?: "gates"|"incidents" }[] }[]`. Badge counts come from existing mock (`approvals` open count; a NEW `incidents` dataset owned by that cluster — here just read its open count). Role from `AppUser` (extend with `role`, see Pod Switcher spec).
+- **Mock data:** Drive the structure from a NEW static config array `NAV: { pillar: "FIRE UP"|"RUN"|"MONITOR"|"ADVANCED"; items: { to; label; icon; minRole?: Role; badgeKey?: "gates"|"incidents" }[] }[]`. Badge counts come from existing mock (`approvals` open count; a NEW `incidents` dataset owned by that cluster — here just read its open count). Role from `AppUser` (extend with `role`, see Pod Switcher spec). *(As-built: the Gates badge derives from `openGateCount()` in `src/mock/approvals.ts` — both kinds, approvals + clarifications, minus session-resolved; the Incidents badge is a load-time snapshot, see `src/components/shell/nav.ts`.)*
 - **Interactions:** Click → navigate (TanStack `Link`). Group labels are non-interactive except ADVANCED (click toggles the collapsible). Collapse button + `⌘B` toggle rail width and persist via the `sidebar_state` cookie pattern. Badge counts live-update via `useLive`.
 - **Copy — the exact rail (route → pillar migration baked in):**
   - **FIRE UP** — `New Pod` → `/pods/new` (NEW) · `Catalog` → `/catalog` (NEW) · `Connections` → `/connections` (REFRAME) · `People & Roles` → `/pod` (REFRAME).
@@ -52,7 +52,7 @@
 - **Layout:** Same `<header class="h-14 border-b … flex items-center px-4 gap-4">`. Left cluster: `<PodSwitcher/>` then the **tenancy badge** (NEW). Then `flex-1` spacer. Right cluster, in order: **⌘K search trigger** (NEW) · existing telemetry chips (SYSTEM health, DAY/OVERNIGHT, ESC, Next digest, Spend·24h) · `AssistantTriggerButton` · theme toggle · UTC clock · separator · **notification bell** (NEW, replaces nothing — added) · **user/role menu** (REFRAME of the current name+logout block into a `DropdownMenu`).
 - **Components:** REUSE the telemetry chips, `useLive`, `useUtcClock`, `useTheme`, `AssistantTriggerButton`, the `Live · not connected` badge logic. Build/replace: `PodSwitcher` (NEW, see below — supersedes the standard-mode static button and reuses the real-mode `ProjectSwitcher` styling). NEW `TenancyBadge`. NEW `CommandTrigger` (button that opens the palette; shadcn `Button` + `⌘K` kbd hint). NEW `NotificationBell` (shadcn `Popover` + `Badge` count). REFRAME user block into shadcn `DropdownMenu` (`Avatar` + name/email + role) with items: Profile, Switch role (mock), Sign out (calls existing `logoutFn`).
 - **States:** *Loading* — pod switcher shows a skeleton until pods resolve; clock shows `--:--:-- UTC` (already handled). *Populated* — all chips live. *Bell empty* — bell icon, no badge, popover empty-state. *Bell populated* — neon `Badge` with unread count; popover lists recent notifications. *Escalation edge-case* — keep the pulsing red ESC chip when `unackedOpen()>0`. *Real-but-unconnected* — keep the amber `Live · not connected` badge. *Density edge-case* — below `md`, collapse telemetry chips (already gated by `hidden md:flex`); keep pod switcher, tenancy badge, ⌘K, bell, user menu always visible.
-- **Mock data:** Tenancy badge from a NEW field block on the active pod: `tenancy: { mode: "Dedicated"; region: "EU-West"; isolatedDb: true; residencyNote: string }` (add to pod mock — see Pod Switcher). Notifications from a NEW lightweight `notifications` mock: `{ id; kind: "gate"|"incident"|"escalation"|"digest"|"system"; title; ts; read: boolean; deepLink: string }` (the Notifications cluster owns the full inbox; the bell just reads the latest N + unread count). Spend/health/digest from existing `useLive`/`comms` as today.
+- **Mock data:** Tenancy badge from a NEW field block on the active pod: `tenancy: { mode: "Dedicated"; region: "EU-West"; isolatedDb: true; residencyNote: string }` (add to pod mock — see Pod Switcher). *(Shape superseded — see Appendix `tenancy.ts`, the single source; the badge reads a subset.)* Notifications from a NEW lightweight `notifications` mock: `{ id; kind: "gate"|"incident"|"escalation"|"digest"|"system"; title; ts; read: boolean; deepLink: string }` (the Notifications cluster owns the full inbox; the bell just reads the latest N + unread count). Spend/health/digest from existing `useLive`/`comms` as today.
 - **Interactions:** ⌘K (and clicking the trigger) opens the command palette. Bell click → popover with last ~6 notifications + "View all" → `/notifications`; clicking a row deep-links via `deepLink` and marks read. User menu → role switch re-scopes the rail and default landing (mock); Sign out runs `logoutFn` → invalidate → `/login` (existing flow). Tenancy badge click → `Popover` showing the data-handling statement (region, isolated DB, retention summary, model plane) and a link to Settings → Security posture.
 - **Copy:** Tenancy badge: `Dedicated · EU-West · Isolated DB` with a shield glyph; popover heading "Your data stays yours" + line "Dedicated infrastructure and an isolated database for {pod.client}. Data residency: EU-West." + one model-plane line: "Content is processed by each agent's pinned model provider under zero-retention terms; storage, memory, and the ledger stay in your EU-West tenant. EU-region inference: Roadmap." (links to Settings → Tenancy & Security → Models & subprocessors). ⌘K trigger placeholder: "Search runs, gates, people…  ⌘K". Bell empty-state: "You're all caught up." User menu role line: "Pod Admin · {pod.name}".
 - **Demo note:** Opening beat — the presenter points at the tenancy badge ("dedicated, isolated, EU-West") to pre-empt the data objection before touching FIRE UP; the bell + ⌘K establish this as an operable product, not a dashboard.
@@ -108,7 +108,7 @@
 ## FIRE UP
 
 
-### New-Pod Wizard Shell — `/fire-up/new` (NEW)
+### New-Pod Wizard Shell — `/pods/new` (steps via `?step=blueprint|agents|connect|people|slack|golive`) (NEW)
 - **Purpose:** The container that frames the entire 6-step pod fire-up flow — a persistent stepper, progress, save/resume, and back/next navigation — into which every step screen renders.
 - **Normative — chrome ownership:** `WizardShell` owns ALL chrome (header, stepper, footer nav, autosave; LeftRail unchanged); step specs define body content ONLY — any step-local chrome described in the step specs below is superseded. Canonical step labels: **Blueprint · Agents · Connect · People · Slack · Go live**. **Steps flag, Readiness blocks** — steps surface problems as amber flags rather than hard-blocking navigation; the Readiness step is the single hard launch gate.
 - **Persona & entry:** Pod Admin / PM (buyer, primary operator). Entered from the left-rail FIRE UP → "New Pod" item, from a global "+ New Pod" button in the TopBar pod switcher dropdown, or from an empty-state CTA ("You have no pods yet — fire one up"). Engineering/QA leads can open it read-only but only the PM role can Launch.
@@ -119,7 +119,7 @@
 - **Components:**
   - REUSE shadcn: `progress` (top progress bar), `button` (footer nav, save/exit), `tooltip` (per-step status + disabled-Continue reason), `input` (inline pod-name edit), `badge` (per-step status pills), `alert-dialog` (confirm "Save & exit" / "Discard draft"), `sonner` (autosave + resume toasts), `separator`.
   - REUSE existing: `AppShell`, `TopBar`, `LeftRail` (unchanged); `SectionAssistant` (the wizard exposes a context-aware "Help me set this up" assistant panel).
-  - NEW components: `fire-up/WizardShell` (layout + state machine), `fire-up/WizardStepper` (the 6-segment indicator), `fire-up/WizardFooterNav` (back/continue/launch), `fire-up/useWizardDraft` (hook: holds draft state, derives per-step validity, persists to a cookie/localStorage so refresh/resume works without a DB — same throwaway-persistence pattern as `probeAgentFn`).
+  - NEW components: `fire-up/WizardShell` (layout + state machine), `fire-up/WizardStepper` (the 6-segment indicator), `fire-up/WizardFooterNav` (back/continue/launch), `fire-up/useWizardDraft` (hook: holds draft state, derives per-step validity, persists to a cookie/localStorage so refresh/resume works without a DB — same throwaway-persistence pattern as `probeAgentFn`). *(As-built: the component home is `src/components/fireup/` — `WizardShell.tsx` + step bodies `StepBlueprint/StepAgents/StepConnect/StepScope/StepPeople/StepSlack/StepGoLive`; step registry in `steps.ts`.)*
 - **States:**
   - *Empty / fresh start:* step 1 (Blueprints) active, all others muted; Continue disabled until a blueprint or "Start from scratch" is chosen.
   - *Loading / resume:* on mount, if a saved draft exists, show a top `alert` banner "Resume your draft pod 'AutoMarket Web Pod'? — last edited 14m ago [Resume] [Start fresh]" before rendering the step.
@@ -127,7 +127,7 @@
   - *Step-invalid:* segment shows amber dot + "Needs attention"; Continue disabled with tooltip naming the missing item (e.g. "Add at least one agent").
   - *Error (autosave fail):* autosave indicator flips to "Couldn't save — retrying" (amber) and Save buttons stay enabled.
   - *Edge — final step not ready:* "Launch pod" rendered disabled with a tooltip listing the unmet readiness items, deep-linking back to the offending step.
-- **Mock data:** Drives off a NEW in-memory draft object `PodDraft` (add to a new `src/mock/podDraft.ts`). Fields: `id`, `name`, `blueprintId: string | null` ("web-app" | "mobile" | "maintenance" | "scratch"), `agentIds: AgentId[]`, `connectionIds: string[]`, `accountability: Record<AgentId, string | null>` (humanId), `slackConfig: { approverChannel: string | null; eventChannels: Record<string,string> }`, `slas: { responseMin: number; gateClearMin: number; deliveryCadence: string }`, `stepStatus: Record<1|2|3|4|5|6, "todo"|"current"|"done"|"error">`, `updatedAt: number`. Step-screens (Catalog/People/etc., other clusters) read+mutate this same object; the shell owns `name`, `stepStatus`, `updatedAt`, `blueprintId`.
+- **Mock data:** Drives off a NEW in-memory draft object `PodDraft`. *(Shape superseded — see Appendix `fireup.ts PodDraft`, the canonical aggregator; no separate `podDraft.ts`. As-built: draft + pod state live in `src/lib/pods/pod-store.tsx`, persisted to localStorage `aiops_pods_v1`.)* Fields: `id`, `name`, `blueprintId: string | null` ("web-app" | "mobile" | "maintenance" | "scratch"), `agentIds: AgentId[]`, `connectionIds: string[]`, `accountability: Record<AgentId, string | null>` (humanId), `slackConfig: { approverChannel: string | null; eventChannels: Record<string,string> }`, `slas: { responseMin: number; gateClearMin: number; deliveryCadence: string }`, `stepStatus: Record<1|2|3|4|5|6, "todo"|"current"|"done"|"error">`, `updatedAt: number`. Step-screens (Catalog/People/etc., other clusters) read+mutate this same object; the shell owns `name`, `stepStatus`, `updatedAt`, `blueprintId`.
 - **Interactions:**
   - Choosing a blueprint or "Start from scratch" on step 1 enables Continue and (for a blueprint) pre-fills `agentIds`/`connectionIds`/`slas`/recommended roles into the draft, then advances to step 2.
   - Continue advances + marks the step `done`; Back returns without losing state; clicking a completed stepper segment jumps to it.
@@ -138,7 +138,7 @@
 
 ---
 
-### Step 1 — Pod Blueprints — `/fire-up/new` (step 1) (NEW)
+### Step 1 — Pod Blueprints — `/pods/new?step=blueprint` (NEW)
 - **Purpose:** The 60-second start: pick a delivery-pod blueprint (Web App / Mobile / Maintenance) that pre-fills the entire wizard, or "Start from scratch" as the escape hatch.
 - **Persona & entry:** Pod Admin / PM, landing as the first body of the wizard shell (above). It is the default active step.
 - **Layout:** Inside the wizard step body. Single column:
@@ -155,19 +155,19 @@
   - *Selected (blueprint):* one card ringed + checked, detail preview panel expands, Continue enabled; re-selecting another card swaps the preview.
   - *Selected (Start from scratch):* the scratch card highlights, no preview panel, Continue enabled (advances to an empty Catalog step).
   - *Edge — switching after pre-fill:* if the PM already advanced and comes back to change blueprint, show an `alert-dialog` "Switching blueprint will replace your current agent/connector selections. Keep going?" to protect downstream edits.
-- **Mock data:** NEW dataset `src/mock/blueprints.ts` exporting `blueprints: PodBlueprint[]`. `PodBlueprint` fields: `id` ("web-app" | "mobile" | "maintenance"), `name`, `tagline` (one-line outcome), `icon` (lucide name), `popular?: boolean`, `agentIds: AgentId[]` (pre-selected agents), `suggestedConnectorIds: string[]` (e.g. "jira","slack","github","drive","email","teamwork" — matching the Connect-tiles cluster), `defaultSlas: { responseMin: number; gateClearMin: number; deliveryCadence: string }`, `recommendedRoles: { agentId: AgentId; roleLabel: string }[]`. Seed three:
+- **Mock data:** NEW dataset `src/mock/blueprints.ts` exporting `blueprints: PodBlueprint[]`. `PodBlueprint` fields: `id` ("web-app" | "mobile" | "maintenance"), `name`, `tagline` (one-line outcome), `icon` (lucide name), `popular?: boolean`, `agentIds: AgentId[]` (pre-selected agents), `suggestedConnectorIds: string[]` (e.g. "jira","slack","github","drive","email","teamwork" — matching the Connect-tiles cluster), `defaultSlas: { responseMin: number; gateClearMin: number; deliveryCadence: string }`, `recommendedRoles: { agentId: AgentId; roleLabel: string }[]`, `language: string` (default working language, e.g. `"en"` — see the working-language select below; Blind spot 7). Seed three:
   - **web-app** — "Ship features on a web codebase" — agents `[ba, sa, uiux, tasklist, dev, review, qa]`, connectors `[teamwork, slack, github, jira, drive]`, SLAs `{responseMin:30, gateClearMin:240, deliveryCadence:"weekly"}`, `popular:true`.
   - **mobile** — "Deliver mobile releases (Flutter)" — agents `[ba, sa, dev, qa]`, connectors `[teamwork, github, slack]`, SLAs `{60, 480, "biweekly"}`.
   - **maintenance** — "Keep a live product healthy" — agents `[ba, dev, review, qa]`, connectors `[slack, teamwork, jira, email]`, SLAs `{15, 120, "continuous"}`. The "Start from scratch" card is hard-coded in the component, not in the dataset.
   - **Connector-honesty ordering (load-bearing):** `suggestedConnectorIds` are ordered **live-first** (Teamwork / Slack / GitHub), with Roadmap connectors (Jira / Drive / Email) trailing and rendered as **Optional · Roadmap** chips — a blueprint never leads with a connector the buyer can't connect today.
-- **Interactions:** Clicking a blueprint card selects it (radio semantics), expands its preview tabs, and enables Continue. Continue writes the blueprint's `agentIds`/`suggestedConnectorIds`/`defaultSlas`/`recommendedRoles` into `PodDraft` and advances to step 2 (Catalog) with those agents pre-toggled. "Start from scratch" sets `blueprintId="scratch"`, leaves draft arrays empty, advances to an empty Catalog. Hovering a connector chip shows a `tooltip` with its Live-vs-Roadmap honesty badge (consistent with the Connect-tiles cluster).
-- **Copy:** Heading "Choose a pod blueprint". Sub "Pick a proven shape and adjust later — nothing here is locked in." Card CTAs are the cards themselves; selected card shows "Selected ✓". Scratch card: title "Start from scratch", body "Hand-pick every agent, tool and person.", tag "Full control". Preview tab labels "Agents · Connectors · SLAs & roles". Continue "Continue →". Switch-warning dialog "Replace current selections?".
+- **Interactions:** Clicking a blueprint card selects it (radio semantics), expands its preview tabs, and enables Continue. A **working-language `select`** sits under the grid (defaults from the blueprint's `language`; written to `PodDraft.language`): "Working language — specs, reports, and gates are produced in this language." EARS keywords stay **English as a structural convention** with localized body text — the stated validator-i18n stance (Blind spot 7), so the deterministic checks keep working in any working language. Continue writes the blueprint's `agentIds`/`suggestedConnectorIds`/`defaultSlas`/`recommendedRoles` (+ `language`) into `PodDraft` and advances to step 2 (Catalog) with those agents pre-toggled. "Start from scratch" sets `blueprintId="scratch"`, leaves draft arrays empty, advances to an empty Catalog. Hovering a connector chip shows a `tooltip` with its Live-vs-Roadmap honesty badge (consistent with the Connect-tiles cluster).
+- **Copy:** Heading "Choose a pod blueprint". Sub "Pick a proven shape and adjust later — nothing here is locked in." Card CTAs are the cards themselves; selected card shows "Selected ✓". Scratch card: title "Start from scratch", body "Hand-pick every agent, tool and person.", tag "Full control". Preview tab labels "Agents · Connectors · SLAs & roles". Working-language select label "Working language" · helper "Specs, reports, and gates are produced in this language. EARS keywords stay English — a structural convention the validators check; body text is localized." Continue "Continue →". Switch-warning dialog "Replace current selections?".
 - **Demo note:** Opens the 0:00 FIRE UP beat — the presenter clicks **"Web App Delivery Pod"**, the preview shows the full chain — BA, SA, UI/UX, Tasklist, Dev, Review, QA — already wired with Teamwork/Slack/GitHub (Jira shown honestly as Optional · Roadmap), and one click pre-fills the whole wizard. This is the visible payoff of "fire up a pod in minutes" and the single most load-bearing new surface in the demo.
 
 
 ### Agent Catalog — `/catalog`  (NEW)
 - **Purpose:** Pick the curated Q SDLC agents for this pod from a card grid, see what each produces/consumes + indicative cost/latency + contract conformance, and watch a live produces→consumes pipeline preview assemble as agents are added.
-- **Persona & entry:** Pod Admin / PM, in the FIRE UP flow. Entered as **wizard step 2** from Pod Blueprints (a blueprint pre-selects a set of agents), or directly from the left rail `Catalog` item. Exits forward to step 3 (Connect Tools).
+- **Persona & entry:** Pod Admin / PM, in the FIRE UP flow. Entered as **wizard step 2** (`/pods/new?step=agents`) from Pod Blueprints (a blueprint pre-selects a set of agents), or directly from the left rail `Catalog` item (the standalone `/catalog` route). Exits forward to step 3 (Connect Tools).
 - **Layout:** Chrome: provided by WizardShell (see Wizard Shell spec); this spec defines body content only. Body is a **two-column resizable split** (`resizable`): LEFT (≈64%) = the catalog card grid (responsive `grid` 1/2/3 cols, `scroll-area`); RIGHT (≈36%, sticky) = the **Pipeline Preview** panel (see its own spec below). A thin summary bar sits above the grid: `{n} agents · {m} of 8 pipeline stages wired · included in plan · ~Ym latency` with a `Reset to blueprint` ghost link (the summary bar never shows raw per-ticket COGS — consumption detail lives in MONITOR → Usage & Billing).
 - **Components:**
   - shadcn: `card` (one per agent), `badge` (role/contract/conformance/Live-Roadmap), `switch` (add/remove toggle on each card), `dialog` (agent detail card — see below), `button`, `breadcrumb`, `resizable`, `scroll-area`, `separator`, `tooltip` (explain conformance badge), `hover-card` (quick produces/consumes peek on the contract badge), `sonner` (toast on add/remove).
@@ -245,7 +245,7 @@
 - UI/UX and DevOps/Release appear in the vision's seven-role table but have **no record in `agents.ts`** — add two `Agent`+`CatalogFacet` stubs (`uiux` consumes `["design"]`/produces `uix-ui-spec`; `devops` produces `release`/consumes `["test"]`). Knowledge needs **no stub** — it is the existing `curator` record surfaced as an installable card (see above). Recommend adding the two stubs so the catalog visibly shows all seven SDLC roles the pitch promises.
 
 
-### Connect Tools — `/new-pod?step=connect` (wizard step 3) — NEW (reframes `/connections`)
+### Connect Tools — `/pods/new?step=connect` (wizard step 3) — NEW (reframes `/connections`)
 - **Purpose:** Connect the pod's external tools (Jira, Drive, Email, Slack, GitHub, Teamwork) via OAuth-style Connect tiles with mocked reachability/health, scopes shown at connect-time, and honest Live-vs-Roadmap badges.
 - **Persona & entry:** Pod Admin / PM, mid-wizard. Lands here from FIRE UP step 2 (Catalog) "Next → Connect tools", or via the left rail "Connections" item (which renders the same component standalone, see Connections Hub spec below). The set of tiles shown is filtered/sorted by the agents picked in step 2 (e.g. picking Dev surfaces GitHub as *required*).
 - **Layout:** Chrome: provided by WizardShell (see Wizard Shell spec); this spec defines body content only. Main region under the app shell `max-w-5xl`:
@@ -288,7 +288,7 @@
 
 ---
 
-### Scope of Work (Connect sub-screen 3b) — `/new-pod?step=connect&sub=scope`  (NEW)
+### Scope of Work (Connect sub-screen 3b) — `/pods/new?step=connect&sub=scope`  (NEW)
 - **Purpose:** The brownfield coexistence surface — pick which **slice** of the client's existing backlog the pod owns, so the pod neither swallows the whole board nor starves. A sub-screen of the Connect step (3b): the canonical six step labels (Blueprint · Agents · Connect · People · Slack · Go live) are unchanged.
 - **Persona & entry:** Pod Admin / PM, surfaced inside wizard step 3 the moment a ticketing connector (Teamwork or Jira) is connected — an inline "Scope the work →" card under the connected tile expands into this sub-screen. Re-editable post-launch from the Connections Hub ("Edit scope" on the ticketing tile).
 - **Layout:** Chrome: provided by WizardShell; this spec defines body content only. Two-column split: LEFT = the **slice picker** — a stacked filter builder: `Project` (`select`, e.g. "AutoMarket"), `Labels` (multi-select chips, e.g. `pod-owned`), `Components` (multi-select, e.g. "Search", "Listings"), combined with AND semantics and a plain-language sentence rendering of the rule below the controls. RIGHT = the **live preview** — a scrollable list of the matching tickets (id, title, status, age) with a count header "{matching} of {total} tickets in scope", re-filtering live as the rule changes. A full-width reassurance `alert` (info) sits under both columns.
@@ -318,7 +318,7 @@
 - **Demo note:** Not in the core 3-min arc, but it's the **persistent home** of the Connect experience and the target of the Incidents "tool-disconnected → re-authorize" recovery loop; show only if the incident-recovery beat is demoed.
 
 
-### Accountable People — `/new-pod/people` (wizard step 4)  (NEW)
+### Accountable People — `/pods/new?step=people` (wizard step 4)  (NEW)
 - **Purpose:** Assign exactly one accountable human per agent before the pod can launch; flag any uncovered agent as a setup-time risk.
 - **Persona & entry:** Pod Admin / PM, arriving from wizard step 3 (Connect Tools) via the "Next" CTA or the WizardShell stepper; can also deep-link from the Readiness Checklist when "every agent has an accountable human" is unchecked.
 - **Layout:** Chrome: provided by WizardShell (see Wizard Shell spec; LeftRail unchanged); this spec defines body content only. Body is a two-region split:
@@ -328,7 +328,7 @@
 - **Components:**
   - REUSE: the matrix table markup + `agentMeta`/avatar-chip styling from `pod/PodView.tsx` (lift into a shared `AccountabilityMatrix`); `SectionHead`/`Metric` helpers.
   - shadcn: `table` (matrix), `avatar` (roster + cells), `command` (the searchable people-picker inside the assign-cell popover and the invite dialog's existing-person search), `select` (per-column "Assign accountable →" fallback for no-drag/a11y), `dialog` (Invite by email), `input`+`label`+`form` (invite form), `alert` (coverage banner), `badge` (role/SLA/"Invited" pills), `tooltip` (cell hover "X accountable for Y"), `button`, `separator`, `sonner` (invite-sent toast).
-  - NEW: `AccountablePeopleStep` (orchestration), `PersonCard` (draggable roster card w/ HTML5 drag or dnd-kit), `AssignCell` (drop target + click-to-assign popover), `InviteByEmailDialog`, `CoverageBanner`.
+  - NEW: `AccountablePeopleStep` (orchestration), `PersonCard` (draggable roster card w/ HTML5 drag or dnd-kit; carries **capacity hints** — working-hours chip, `capacityGatesPerDay`, availability dot from the P1-O1 `humans.ts` fields), `AssignCell` (drop target + click-to-assign popover), `InviteByEmailDialog`, `CoverageBanner`.
 - **States:**
   - *Empty (fresh pod):* every agent column shows the `⚠ uncovered` header treatment from PodView (red-tinted `bg-status-error/10`); coverage banner reads "0 of N agents covered". Roster shows the 5 org humans from `humans.ts` as draggable cards.
   - *Loading:* matrix + roster `skeleton` rows.
@@ -337,8 +337,10 @@
   - *Invited-but-unaccepted:* person card shows an "Invited · link active" `badge`; can still be assigned (mock allows pre-acceptance assignment).
   - *Error (invite fails):* inline `form` error "Couldn't generate invite link — try again"; nothing assigned.
   - *Edge — drag onto already-covered column:* replaces the accountable human (single-owner invariant), prior owner returns to roster availability; toast "Reassigned {agent} to {name}".
+  - *Edge — saturated human (P1-O1):* assigning one human past their capacity shows an amber hint on their card — "Ana covers 3 agents · est. ~9 gates/day vs capacity 10" — warn-not-block (Readiness carries the coverage advisory); a human marked OOO shows a muted "OOO — gates route to {delegate}" chip.
 - **Mock data:** Drives off `src/mock/humans.ts` (`humans`, `OWNERSHIP`, `agentsOf`, `activeHumans`) and the agent set from `src/mock/agents.ts` (columns = agents added in step 2; default to `coreAgents`). NEW mock additions:
   - Extend `Human` with optional invite fields: `email?: string`, `status?: "org" | "invited" | "active"`, `invitedAtIso?: string`, `inviteLink?: string` (mock one-time URL like `https://agencyos.app/invite/ix_8fa3…`).
+  - Capacity & coverage fields (P1-O1, appendix `humans.ts`): `workingHours`, `availability: "available" | "ooo"`, `delegateId`, `capacityGatesPerDay` — drive the roster-card capacity hints and the saturation warn.
   - NEW `src/mock/pod-setup.ts`: `assignments: Record<AgentId, string | null>` (working draft, initialized empty for a fresh pod, or from `OWNERSHIP` for the sample pod); helper `uncoveredAgents(assignments, agentIds): AgentId[]`; `pendingInvites: Invite[]` where `Invite = { id; email; role; inviteLink; invitedAtIso; assignedAgentId?: AgentId }`.
 - **Interactions:**
   - Drag a `PersonCard` onto an `AssignCell`/column header → writes `assignments[agentId] = humanId`, column de-flags, banner recomputes.
@@ -346,18 +348,18 @@
   - **Invite by email:** dialog with `email` input + `role` `select` (Pod Admin / Engineering Lead / QA Lead / Sponsor / Viewer — from product-vision §3) → "Send invite" generates a mocked one-time link, shows it with a copy button, toast "Invite sent · one-time link copied", adds an `invited` card to the roster, optionally auto-assigns to the column that opened the dialog.
   - Click an assigned cell's avatar → small popover with "Reassign" / "Clear".
   - `Next` is **always enabled** (steps flag, Readiness blocks): while `uncoveredAgents().length > 0`, an amber chip beside Next reads "{n} uncovered — you'll be blocked at launch". The Readiness step remains the single hard gate.
-- **Copy:** Title "Who's accountable?" · sub "Assign one human per agent. An empty column is an uncovered risk — every agent needs an owner before launch." · Coverage banner (empty) "No agents covered yet — drag a person onto each agent." · (done) "Every agent has an accountable human. ✓" · Invite dialog title "Invite by email" / helper "They'll get a one-time link to join this pod." / CTA "Send invite" · Uncovered chip "{n} uncovered — you'll be blocked at launch." · Column warning "⚠ uncovered".
+- **Copy:** Title "Who's accountable?" · sub "Assign one human per agent. An empty column is an uncovered risk — every agent needs an owner before launch." · Coverage banner (empty) "No agents covered yet — drag a person onto each agent." · (done) "Every agent has an accountable human. ✓" · Invite dialog title "Invite by email" / helper "They'll get a one-time link to join this pod." / CTA "Send invite" · Uncovered chip "{n} uncovered — you'll be blocked at launch." · Column warning "⚠ uncovered" · Capacity hint "{name} covers {n} agents · est. ~{g} gates/day vs capacity {cap}" · OOO chip "OOO — gates route to {delegate}".
 - **Demo note:** The 0:00–0:30 FIRE UP beat. After connecting tools, the presenter **drags two accountable people** (Ana → BA, Marin → SA) into the matrix; the red "uncovered" columns flip green live — this is the **accountability-matrix wow beat** (product-vision §1: "an empty column = uncovered risk"). Keep the drag deliberately visible.
 
 ---
 
-### Wire Slack — `/new-pod/slack` (wizard step 5)  (NEW)
+### Wire Slack — `/pods/new?step=slack` (wizard step 5)  (NEW)
 - **Purpose:** Map pod events to Slack channels (clarification gates, approvals, escalations, daily brief) and pick the single approver channel — surfacing real BA behavior (`slack_approver_ids`, Slack MCP) as plain configuration.
 - **Persona & entry:** Pod Admin / PM, from step 4 ("Next: Wire Slack"); reachable from Readiness Checklist "Slack wired" row. Slack tile must be connected in step 3 — if not, this step shows a connect-first gate.
 - **Layout:** Chrome: provided by `WizardShell` (see Wizard Shell spec — header, stepper, footer nav); this spec defines body content only. Body is a single-column stack of **event-routing rows** plus a right-side (or below) **live message preview**:
   - **Header strip:** connected Slack workspace badge ("Connected · Q-Agency workspace · 7 channels") + Live/Roadmap honesty badge (Slack = Live).
   - **Routing card** with 4 event rows, each: `[event icon + label + description]` … `[channel Select v]`. Events: **Clarification gates**, **Approvals**, **Escalations**, **Daily brief**.
-  - **Approver channel** row, visually separated (`separator` + accent), with helper "Approvals posted here can be actioned by anyone in the channel." Maps to `slack_approver_ids`.
+  - **Approver channel** row, visually separated (`separator` + accent), with helper "Approvals announced here are **deep-link-only** — the link opens the gate review (My Gates) behind sign-in, role check, and the decision-reason path, routed to the gate's **accountable human or their delegate**." (P1-G2: an in-channel Approve button would bypass every control MONITOR sells.) Behind the deep link an emergency **"act on behalf of {name}"** path exists — recorded as `gate.override` with a required typed reason. **Clarifications stay anyone-can-answer in-channel** — the asymmetry is deliberate and stated in copy. Maps to `slack_approver_ids` — note: **BA's real `slack_approver_ids` behavior (anyone-in-list actions approvals in-channel) must converge to this deep-link model before any compliance claim is sold.**
   - **Right rail / preview panel:** a mocked Slack message card showing what the selected event will look like in the chosen channel (reuses `comms.ts` `body`/`preview` copy).
 - **Components:**
   - shadcn: `select` (channel pickers — one per event row + approver), `card` (routing card + preview), `badge` (Live/connected/channel-type pills), `label`, `switch` (per-event "Enabled" toggle so an event can be muted), `separator`, `avatar` (Slack workspace/bot avatar in preview), `command` (searchable channel picker if channel count is high — wrap in a `popover`/`dialog`), `alert` (connect-first gate), `tooltip`, `button`, `sonner` (toast on save).
@@ -369,9 +371,9 @@
   - *Empty/unconfigured:* each row defaults to a smart suggestion (e.g. all → `#automarket-dev`, brief → `#automarket-leads`) shown as a placeholder "Suggested: #automarket-dev"; nothing hard-required except approver channel.
   - *Configured:* preview panel renders the message for the focused/last-changed row; approver channel shows a green "Approver" `badge`.
   - *Event muted:* row `switch` off → channel `select` disabled, preview shows "This event won't be posted to Slack."
-  - *Error (no approver chosen):* `Next` allowed but Readiness "Slack wired" stays partial; inline hint "Pick an approver channel so approval gates can be actioned."
+  - *Error (no approver chosen):* `Next` allowed but Readiness "Slack wired" stays partial; inline hint "Pick an approver channel so approval announcements reach the accountable human."
   - *Edge — same channel for everything:* allowed; small info note "All events route to #automarket-dev — consider splitting escalations."
-- **Mock data:** NEW `src/mock/slack-wiring.ts`:
+- **Mock data:** NEW `src/mock/slack-wiring.ts` *(shape superseded for the routing draft — the canonical draft state is Appendix `fireup.ts SlackWiring`; `slack-wiring.ts` keeps only channel/workspace content)*:
   - `slackWorkspace = { name: "Q-Agency", connected: true, botName: "AgencyOS", avatarColor }`.
   - `slackChannels: { id: string; name: string; type: "public" | "private"; memberCount: number }[]` — seed `#automarket-dev`, `#automarket-leads`, `#automarket-qa`, `#automarket-escalations`, `DM → Zlatko` (reuse the channel labels already in `comms.ts`).
   - `eventRouting: { event: "clarification" | "approval" | "escalation" | "daily_brief"; label; description; enabled: boolean; channelId: string | null; defaultChannelId }[]`.
@@ -380,41 +382,44 @@
 - **Interactions:**
   - Change a row's channel `select` → updates `eventRouting[i].channelId`, re-renders `SlackMessagePreview` with that event's mock body in that channel header.
   - Toggle a row `switch` → enable/disable posting for that event.
-  - Pick **Approver channel** → sets `approverChannelId`, badges the row; if it differs from the Approvals routing channel, show note "Approvals will post to {X} and be actionable in {approver}."
+  - Pick **Approver channel** → sets `approverChannelId`, badges the row; if it differs from the Approvals routing channel, show note "Approvals announce in {X}; the gate deep link posts to {approver} for the accountable human."
   - `Next` (WizardShell footer, canonical label "Next: Go live") → persists wiring into `pod-setup` draft, toast "Slack wired · 4 events routed", advances to step 6 **Go live** (the Readiness checklist, out of this cluster).
-- **Copy:** Title "Wire Slack" · sub "Tell the pod where to talk. Route each event to a channel, and pick where approvals get actioned." · Event labels/descriptions: **Clarification gates** — "When an agent needs an answer to keep going." · **Approvals** — "When an artifact needs human sign-off." · **Escalations** — "When something's stuck, failing, or breaching SLA." · **Daily brief** — "A once-a-day digest of what shipped, what's at gates, what's blocked." · Approver row label "Approver channel" / helper "Approval gates posted here can be cleared by the team — maps to the pod's approver list." · Connect-gate "Connect Slack to wire your pod's notifications." · CTA "Next: Go live" (WizardShell footer). · Save toast "Slack wired · 4 events routed".
+- **Copy:** Title "Wire Slack" · sub "Tell the pod where to talk. Route each event to a channel, and pick where approvals get actioned." · Event labels/descriptions: **Clarification gates** — "When an agent needs an answer to keep going." · **Approvals** — "When an artifact needs human sign-off." · **Escalations** — "When something's stuck, failing, or breaching SLA." · **Daily brief** — "A once-a-day digest of what shipped, what's at gates, what's blocked." · Approver row label "Approver channel" / helper "Approvals announced here are deep-link-only — the link opens the gate review for the accountable human (or their delegate); acting for someone else is recorded as an override. Clarifications can be answered by anyone in the channel." · Connect-gate "Connect Slack to wire your pod's notifications." · CTA "Next: Go live" (WizardShell footer). · Save toast "Slack wired · 4 events routed".
 - **Demo note:** Tail of the FIRE UP beat (≈0:25). Presenter sets **Clarification gates → #automarket-dev** and **Approver channel → #automarket-leads** in two clicks; the live preview shows the exact Slack clarification card that will fire in the 0:30 RUN beat — visually pre-wiring the clarification gate the PM answers moments later. Establishes that the Slack clarification in RUN is configured here, not magic.
 
 
-### Readiness Checklist & Launch — `/fire-up/readiness`  (NEW)
-- **Purpose:** The final wizard step — a one-glance gate that proves the pod is launch-ready (agents added, every agent has an accountable human, required tools connected, Slack wired) and exposes a single **Launch pod** action that is disabled until all blockers clear.
+### Readiness Checklist & Launch — `/pods/new?step=golive` (wizard step 6)  (NEW)
+- **Purpose:** The final wizard step — a one-glance gate that proves the pod is launch-ready (agents added, every agent has an accountable human, required tools connected, Slack wired, budget cap set, SLA targets confirmed) and exposes a single **Launch pod** action that is disabled until all blockers clear. Also hosts the **Targets & budget** sub-screen (6a) — the surface that actually sets SLAs and bounds spend before launch (P1-C4).
 - **Persona & entry:** Pod Admin / PM, arriving as step 6/6 from the FIRE UP wizard (after Wire Slack). Also re-enterable later from the left rail **FIRE UP › New Pod** to relaunch a paused/draft pod. Back/Next stepper at top; "Back" returns to Wire Slack.
-- **Layout:** Chrome: provided by WizardShell (see Wizard Shell spec); this spec defines body content only. Two-column on `xl`, stacked on smaller. Left column (`flex-1`): the **Readiness checklist** card — one row per check, each expandable. Right column (`xl:w-[380px]`, `xl:sticky xl:top-4`): the **Launch panel** — a circular/linear readiness gauge, the pod summary, and the **Launch pod** CTA. A persistent **blocker banner** (`Alert`) sits above the checklist when anything is red.
+- **Layout:** Chrome: provided by WizardShell (see Wizard Shell spec); this spec defines body content only. Two-column on `xl`, stacked on smaller. Left column (`flex-1`): the **Targets & budget panel (sub-screen 6a)** stacked ABOVE the **Readiness checklist** card — one row per check, each expandable. Right column (`xl:w-[380px]`, `xl:sticky xl:top-4`): the **Launch panel** — a circular/linear readiness gauge, the pod summary, and the **Launch pod** CTA. A persistent **blocker banner** (`Alert`) sits above the checklist when anything is red.
+  - **Sub-screen 6a — Targets & budget (panel above the checklist; the six wizard labels are unchanged):** (1) **SLA targets** — the blueprint's `defaultSlas` expanded into editable `SlaDefinition` rows (metric · target · unit; `clockMode` defaults to `coverage_hours`); (2) **Monthly budget cap** — a cap `input` with a projected-consumption preview line and an `onCapReached` policy `select`: **alert · pause-new-work · hard-pause**; (3) a **plan summary chip** (plan name + platform/pod fee line, labeled *pricing hypothesis*); (4) **pilot criteria** rows, rendered only when the tenant is `mode: "pilot"`. Confirming the panel satisfies the two new Readiness checks ("Budget cap set", "SLA targets confirmed").
 - **Components:**
   - shadcn: `Card`/`CardHeader`/`CardContent`/`CardFooter` (checklist + launch panel), `Progress` (readiness % bar), `Button` (Launch pod / Fix / Back), `Alert` + `AlertTitle` + `AlertDescription` (blocker banner), `Accordion` or `Collapsible` (expand a check to see its sub-items), `Badge` (per-check status pill, Live/Roadmap on tool rows), `Tooltip` (why a check is blocked), `Avatar` (accountable-human chips), `Separator`, `alert-dialog` (launch confirm — only when overrideable warnings exist).
   - Reuse existing view components: the accountability mini-matrix can reuse the chip/cell rendering pattern from `PodView.tsx` (agent-colored "A" cells, ⚠ uncovered column) as a compact read-only strip inside the "Every agent has an accountable human" check. Reuse `lucide-react` icons already in the codebase (`CheckCircle2`, `AlertTriangle`, `Clock`, `Shield`, `Users`, `PlugZap`, `Activity`).
-  - NEW components to build: `ReadinessChecklist` (maps over checks), `ReadinessRow` (icon + label + status pill + detail/CTA), `LaunchPanel` (gauge + summary + CTA), `ReadinessGauge` (ring built from the same conic-gradient pattern as `Ring` in `RealCommandCenter.tsx`, or just `Progress` ring-styled), `LaunchOverlay` (the launching transition — see next screen).
+  - NEW components to build: `ReadinessChecklist` (maps over checks), `ReadinessRow` (icon + label + status pill + detail/CTA), `LaunchPanel` (gauge + summary + CTA), `ReadinessGauge` (ring built from the same conic-gradient pattern as `Ring` in `RealCommandCenter.tsx`, or just `Progress` ring-styled), `LaunchOverlay` (the launching transition — see next screen), `TargetsBudgetPanel` (the 6a sub-screen: `SlaTargetRow` editable rows + `BudgetCapField` with the `onCapReached` select + plan chip + pilot-criteria rows).
 - **States:**
   - **Loading:** checklist rows render as `Skeleton` bars (4–6 rows); gauge shows an indeterminate `Progress`.
   - **Blocked (the "not yet" state):** at least one check is `blocked` — reachable in the continuous walkthrough because the steps flag rather than block (step 4 warns; Readiness is the single hard gate). Blocker `Alert` (variant `destructive`) at top: "2 things to fix before launch." Each failing row shows a red status pill, a one-line reason, and a **Fix** button that deep-links back into the offending wizard step (Catalog / People / Connections / Slack). The **Launch pod** CTA is `disabled` (opacity-50) with a tooltip "Resolve all required checks to launch." Gauge shows e.g. `66%` in amber.
-  - **Warn (overrideable):** all *required* checks pass but an *advisory* check is amber (e.g. "No Knowledge sources connected", "1 agent shares an accountable human with 3 others"). Launch is **enabled** but a warning `Alert` (default variant, amber accent) lists advisories; clicking Launch opens an `alert-dialog` "Launch with 1 warning?" → Launch anyway / Review.
+  - **Warn (overrideable):** all *required* checks pass but an *advisory* check is amber (e.g. "No Knowledge sources connected", "1 agent shares an accountable human with 3 others", "No coverage 22:00–06:00 — overnight gates queue until morning" — the P1-O1 coverage advisory derived from `humans.ts workingHours`). Launch is **enabled** but a warning `Alert` (default variant, amber accent) lists advisories; clicking Launch opens an `alert-dialog` "Launch with 1 warning?" → Launch anyway / Review.
   - **All-green (the money state):** every required check passes, gauge at `100%` glowing primary/green, header micro-copy "Pod is ready to launch." Launch CTA is solid primary, full-width, slightly glowing (`glow-pulse`-style). A green success `Alert` "All systems go — 7 agents, 4 accountable humans (one human can cover several agents), 3 tools connected, Slack wired."
   - **Launching:** clicking Launch swaps the panel/overlay to the transition screen (below).
   - **Edge cases:** *zero agents* → checklist collapses to a single primary blocker "Add at least one agent" linking to Catalog, all other checks greyed/`pending`. *Tool disconnected after passing* (health re-probe failed) → that row flips back to blocked and the gauge drops; surfaced honestly. *Roadmap tool selected as "required"* → row badge "Roadmap" with note "mocked connection — Live at GA," counts as satisfied for the demo but visibly flagged.
 - **Mock data:** NEW dataset `src/mock/fireup.ts` (shared across the whole FIRE UP wizard cluster; this screen is its consumer/aggregator). Shape:
-  - `PodDraft`: `{ id, name, blueprintId, tenancy: { mode: "dedicated", region: "EU-West", isolatedDb: true }, agentIds: AgentId[], connections: ConnectionDraft[], accountability: Record<AgentId, string | null> /* humanId or null */, slack: SlackWiring, status: "draft" | "launching" | "live" }`.
+  - `PodDraft`: `{ id, name, blueprintId, tenancy: { mode: "dedicated", region: "EU-West", isolatedDb: true }, agentIds: AgentId[], connections: ConnectionDraft[], accountability: Record<AgentId, string | null> /* humanId or null */, slack: SlackWiring, budget: { monthlyCapUsd: number; onCapReached: "alert" | "pause-new-work" | "hard-pause" } /* set by the 6a panel */, status: "draft" | "launching" | "live" }`.
   - `ConnectionDraft`: `{ tool: "jira"|"drive"|"email"|"slack"|"github"|"teamwork", label, availability: "live"|"roadmap", health: "connected"|"unreachable"|"unconfigured", scopes: string[], required: boolean }`.
   - `SlackWiring`: `{ approverChannel: string | null, mappings: { event: "clarification"|"approval"|"escalation"|"daily-brief"; channel: string }[] }`.
-  - `ReadinessCheck` (derived, computed by a `computeReadiness(draft)` selector — not stored): `{ id: "agents"|"accountability"|"tools"|"slack"|"knowledge"; label, status: "pass"|"blocked"|"warn"|"pending", severity: "required"|"advisory", detail: string, fixRoute: string, items?: { label, ok: boolean }[] }`. Pull agent identities from `src/mock/agents.ts` (`coreAgents`), humans from `src/mock/humans.ts` (`humans`, `OWNERSHIP` as the default accountability seed), and Slack/channel labels from `src/mock/comms.ts` (`SCHEDULED`/channel strings). `computeReadiness` returns `{ checks, requiredAllPass: boolean, anyWarn: boolean, pct: number }` where `pct = passed required ÷ total required × 100`.
+  - `ReadinessCheck` (derived, computed by a `computeReadiness(draft)` selector — not stored): `{ id: "agents"|"accountability"|"tools"|"slack"|"budget"|"sla_targets"|"coverage"|"code_integration"|"knowledge"; label, status: "pass"|"blocked"|"warn"|"pending", severity: "required"|"advisory", detail: string, fixRoute: string, items?: { label, ok: boolean }[] }` (`budget`/`sla_targets` = the two new required checks satisfied by the 6a panel; `coverage` = the P1-O1 advisory; `code_integration` = the Blind-spot-3 advisory — "Bot collaborator invited · branch-protection compatible", rendered only when GitHub is connected, reading `src/mock/code-integration.ts`). Pull agent identities from `src/mock/agents.ts` (`coreAgents`), humans from `src/mock/humans.ts` (`humans`, `OWNERSHIP` as the default accountability seed), and Slack/channel labels from `src/mock/comms.ts` (`SCHEDULED`/channel strings). `computeReadiness` returns `{ checks, requiredAllPass: boolean, anyWarn: boolean, pct: number }` where `pct = passed required ÷ total required × 100`.
   - Seed a **happy-path "all green" draft** (the AutoMarket pod: the 7-agent chain BA+SA+UI/UX+Tasklist+Dev+Review+QA, covered by Ana/Marin/Ivan/Petra — one human covers several agents; Teamwork+Slack+GitHub connected, Slack wired) **and a "blocked" draft** (QA has no accountable human → accountability blocked; GitHub `unconfigured` → tools blocked) so both demo states are one prop away.
 - **Interactions:**
   - Click a check row → `Collapsible`/`Accordion` expands its `items[]` (e.g. per-agent accountable-human list with ⚠ on the empty one; per-tool health with scopes).
   - **Fix** on a blocked row → router `navigate(check.fixRoute)` back into that wizard step; on return, `computeReadiness` re-runs and the row updates live.
   - **Launch pod** (enabled) → if `anyWarn` open the confirm `alert-dialog`, else go straight to launching. On confirm: set `draft.status = "launching"`, mount `LaunchOverlay`, write a mock `pod.launched` entry to the audit ledger (`actor` null per §8 — "when-only"), then route to `/` (Command Center) on completion.
+  - Editing the **6a panel** writes `slas`/`budget` to the draft; confirming flips the **"Budget cap set"** and **"SLA targets confirmed"** checks to pass — the demo gains a "we bound the spend before launch" beat.
   - **Back** → previous wizard step. A `sonner` toast confirms autosave of the draft ("Draft saved").
 - **Copy:**
   - Header: "Readiness" · sub "Step 6 of 6 — confirm the pod is ready, then go live."
-  - Check labels: "Agents added", "Every agent has an accountable human", "Required tools connected", "Slack wired", "Knowledge sources (optional)".
+  - Check labels: "Agents added", "Every agent has an accountable human", "Required tools connected", "Slack wired", "Budget cap set", "SLA targets confirmed", "Coverage hours (advisory)", "Bot collaborator invited · branch-protection compatible (advisory, when GitHub is connected)", "Knowledge sources (optional)".
+  - 6a panel: title "Targets & budget" · sub "Bound the spend and confirm targets before you go live." · cap policy labels "Alert only / Pause new work / Hard pause" · plan chip "Growth · pricing hypothesis" · confirm "Targets confirmed ✓".
   - Blocked banner: "**2 things to fix before launch** — resolve the required checks below to enable launch."
   - All-green banner: "**All systems go.** 7 agents · 4 accountable humans (one human can cover several) · 3 tools connected · Slack wired."
   - CTA: "**Launch pod**" (primary) / disabled tooltip "Resolve all required checks to launch." / Fix-row buttons: "Fix in Catalog", "Assign owner", "Connect tool", "Wire Slack."
@@ -424,7 +429,7 @@
 
 ---
 
-### Launching / Transition — `/fire-up/readiness` (launch overlay state)  (NEW)
+### Launching / Transition — `/pods/new?step=golive` (launch overlay state)  (NEW)
 - **Purpose:** The brief, confidence-building transition between clicking **Launch pod** and landing on the Command Center — proves the pod "stood up" without faking real infra (per §8, this is fast in-tenant config, not provisioning).
 - **Persona & entry:** Same PM, immediately after clicking Launch on the all-green readiness gate. No nav; this is a modal-style overlay that owns the screen.
 - **Layout:** Full-bleed centered overlay (a `Card` ~max-w-md on a dimmed backdrop, or a full-screen glass panel) over the dimmed wizard. Centered: pod name, an animated **launch sequence list** (3–5 steps), and an overall `Progress` bar. No left rail interaction during launch (rail dimmed).
@@ -457,7 +462,22 @@
 
 ---
 
-**New mock file to add (shared by the whole FIRE UP cluster):** `/Users/zlatko.matokanovic/Documents/Development/aiops_dashboard/AI Ops Hub/src/mock/fireup.ts` — `PodDraft`, `ConnectionDraft`, `SlackWiring`, `ReadinessCheck`, `LAUNCH_STEPS`, plus `computeReadiness(draft)` selector and two seed drafts (all-green + blocked). It reuses identities from `src/mock/agents.ts` (`coreAgents`), `src/mock/humans.ts` (`humans`, `OWNERSHIP`), and channel labels from `src/mock/comms.ts`. New route group `src/routes/fire-up/*` (or a single `fire-up.readiness.tsx` if the wizard is one route with steps); the launch overlay is a state within the readiness route, and the post-launch landing reuses the existing `/` (`src/routes/index.tsx` → `RealCommandCenter`) with the added `FirstRunRibbon`.
+**New mock file to add (shared by the whole FIRE UP cluster):** `/Users/zlatko.matokanovic/Documents/Development/aiops_dashboard/AI Ops Hub/src/mock/fireup.ts` — `PodDraft`, `ConnectionDraft`, `SlackWiring`, `ReadinessCheck`, `LAUNCH_STEPS`, plus `computeReadiness(draft)` selector and two seed drafts (all-green + blocked). It reuses identities from `src/mock/agents.ts` (`coreAgents`), `src/mock/humans.ts` (`humans`, `OWNERSHIP`), and channel labels from `src/mock/comms.ts`. *(As-built: the wizard is ONE route — `src/routes/pods.new.tsx` at `/pods/new?step=…` — with step bodies in `src/components/fireup/`; the launch overlay is a state within the `golive` step; draft/pod state lives in `src/lib/pods/pod-store.tsx` (localStorage `aiops_pods_v1`), and the post-launch landing reuses the existing `/` (`src/routes/index.tsx`) with the added `FirstRunRibbon`.)*
+
+
+---
+
+### Welcome & Accountability Handshake — `/welcome`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The accountable human's first session (P1-O2): a role **charter**, a guided **first-gate walkthrough**, and an explicit, audited **"Accept accountability"** action. Coverage isn't assigned, it's accepted — and provable.
+- **Persona & entry:** Any invited human (PM / Eng Lead / QA Lead / deputy) following their one-time invite link, or deep-linked from an amber "assigned — not yet accepted" matrix cell on `/pod`. Renders inside the AppShell; rail de-emphasized until acceptance.
+- **Layout:** Single centered column (`max-w-3xl`), three stacked stages with slim progress dots: (1) **Charter card** — "You're accountable for the **BA Agent**" + what it produces, the gate-clearance SLA and policy chip (from `gate-policies.ts`), and what rejecting does ("your note becomes the agent's added context"); (2) **First-gate walkthrough** — `GateReviewShell` in read-only coach-mark mode over a Sample-pod gate (4 marks: read the spec → check the validators → the decision panel → where the decision lands in the ledger); (3) **Accept accountability** — a duties summary + the primary CTA.
+- **Components:** shadcn `card`, `button`, `badge`, `progress`, `alert-dialog` (accept confirm), `tooltip`, `avatar`, `separator`. REUSE `GateReviewShell` (read-only sample mode), `GatePolicyChip`, agent color tokens, `humans.ts`/`OWNERSHIP`. NEW: `WelcomeFlow`, `CharterCard`, `FirstGateWalkthrough` (coach-mark overlay), `AcceptAccountabilityPanel`.
+- **States:** *fresh (invited, unaccepted):* full three-stage flow; CTA enables once the walkthrough has been opened. *already-accepted:* collapses to a read-only charter + "Accepted · {date}" stamp with the ledger pointer. *multiple agents:* one charter card per covered agent; a single Accept covers all, listed explicitly in the confirm. *deputy variant:* the covers-not-owns charter ("you cover when {name} is OOO; accountability stays with {name}"). *error (invalid/expired invite):* "This invite link has expired — ask your Pod Admin to re-send it."
+- **Mock data:** No new dataset — joins `humans.ts` (invite fields + assignments), `gate-policies.ts` (the charter's policy line), and a Sample-pod gate from `gate-detail.ts`. Accept writes **`accountability.accepted`** via `appendAuditMock` (audit-bridge); the `/pod` matrix renders assigned-but-unaccepted cells amber until then.
+- **Interactions:** Stage CTAs advance; coach-marks step through the sample gate; **Accept accountability** → `alert-dialog` ("This is recorded in the audit ledger") → writes `accountability.accepted`, flips the matrix cell from amber to the solid "A", routes to the role's landing. "This isn't me / wrong role" → notifies the Pod Admin (mock toast).
+- **Copy:** Title "Welcome — you're the accountable human." Charter: "You're accountable for the **BA Agent** — it produces SPEC.md; you clear its gates within {sla}; rejecting returns work with your note as the agent's added context." CTA "**Accept accountability**". Confirm body "Acceptance is written to the audit ledger. Coverage is accepted, not assigned." Accepted stamp "Accepted · {date} · ledger #{n}". Expired: "This invite link has expired — ask your Pod Admin to re-send it."
+- **Demo note:** Optional FIRE UP epilogue — flip to Ana's invite, accept on screen, and point at the matrix cell turning solid plus the `accountability.accepted` ledger row: the accountability story is end-to-end provable, not an org chart.
 
 
 ---
@@ -587,11 +607,11 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 ### Gates — Approvals + Clarifications (unified queue) — `/approvals`  (REFRAME)
 - **Purpose:** One queue, **two kinds** of human checkpoint — *approval* gates (artifact sign-off) and *clarification* gates (agent needs an answer to proceed). The single place a human clears everything blocking the pod.
 - **Persona & entry:** PM (all gates), QA Lead and Engineering Lead (role-scoped subsets). Entry: RUN rail, the Command Center human-gate queue, the notification bell ("my gates"), a Slack deep-link, or a Pipeline review card.
-- **Layout:** Reuses AppShell. Header (kicker "human gates" + title "Gates"). Below: the existing 4-up stat strip, then per-human summary chips, then the filter bar, then the gate list. The KEY reframe: add a **kind switch** (`tabs` or `toggle-group`: "All · Approvals · Clarifications") and a leading **kind glyph** on every row. Each row stays an accordion that expands to a decision panel.
+- **Layout:** Reuses AppShell. Header (kicker "human gates" + title "Gates"). Below: the existing 4-up stat strip, then per-human summary chips, then the filter bar, then the gate list. The KEY reframe: add a **kind switch** (`tabs` or `toggle-group`: "All · Approvals · Clarifications") and a leading **kind glyph** on every row. Each row also carries a **gate-policy chip** (from `gate-policies.ts`, P1-G1: e.g. `PM · 1-eye · ≤4h · L0 review-all`) so the policy behind every checkpoint is visible at the row. Each row stays an accordion that expands to a decision panel.
 - **Components:**
   - REUSE: `src/components/approvals/ApprovalsView.tsx` (stats, per-human chips, filters, `ApprovalRow`, `ArtifactPreview` which already renders Spec/Design/Tasks/Code/QA previews — extend it with a `uix-ui-spec` renderer for the UI/UX stage), `accountableFor`/`activeHumans`.
   - shadcn primitives: `tabs` (kind switch), `badge` (gate/kind/SLA chips), `accordion` or `collapsible` (replace hand-rolled expand), `textarea` + `form` (the required reason — see below), `tooltip`, `select` (approver/age filters on small screens), `sonner` (existing toasts).
-  - NEW components: **`ClarificationCard`** — for `kind==="clarification"` rows: renders the agent's question, the proposed options/free-text answer field, and a "Send answer" button (the BA Slack clarification gate surfaced in-app). **`RequiredReason`** — a shared reason/comment field made **mandatory on BOTH approve and reject** (today only reject requires feedback); Approve is disabled until a comment is entered (a one-line "Looks good — ship it" is acceptable but must be typed → this is what feeds human-decision audit).
+  - NEW components: **`ClarificationCard`** — for `kind==="clarification"` rows: renders the agent's question, the proposed options/free-text answer field, and a "Send answer" button (the BA Slack clarification gate surfaced in-app). **`RequiredReason`** — the shared decision-reason field. **Canon (P1-G1):** a typed reason is **REQUIRED on reject and on override**; **approve** offers optional structured **quick-reason chips** ("Meets EARS" · "Validators 8/8" · "Scope confirmed") plus an optional free-text note — clean approvals stay one click, so the ledger never fills with forced "Looks good" attestations. The reject reason feeds the agent's rerun context and the human-decision audit. *(As-built note: the shipped mock — GateReviewShell + the Gates queue, build #12 — already implements exactly this policy.)* **`GatePolicyChip`** — renders the row's `GatePolicy` summary.
 - **States:**
   - *empty:* "All clear — no gates waiting. The pod is running unblocked." with a subtle check illustration.
   - *loading:* `skeleton` rows.
@@ -599,38 +619,42 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - *SLA breach edge:* rows ≥60m old get red `AlertTriangle` + "breach" meta; the stat tile turns error-toned (existing).
   - *filtered-empty:* "No gates match these filters."
   - *resolved (optimistic):* on decide, row collapses out with a toast and the count decrements.
-- **Mock data:** `src/mock/approvals.ts` (derived from `tickets.ts`) for approval gates. NEW: extend with **clarification** gates — add a `ClarificationGate[]` to `approvals.ts` (or a `gates.ts`) with fields: `id`, `ticketId`, `kind:"clarification"`, `agentId:AgentId`, `question:string`, `options?:string[]`, `proposedAnswer?:string`, `accountable:string` (human id), `openedAt:number`. Maps to the contract's `HITLGate{ kind:'approval'|'clarification'; state:'open'|'resolved'|'expired' }`. Reuse `mock/governance.ts` `openDecisions` as the seed material for 2–3 clarifications (e.g. "Geo search engine: PostGIS vs Elasticsearch?" routed to Marin).
+- **Mock data:** `src/mock/approvals.ts` (derived from `tickets.ts`) for approval gates. NEW: extend with **clarification** gates — add a `ClarificationGate[]` to `approvals.ts` (or a `gates.ts`) with fields: `id`, `ticketId`, `kind:"clarification"`, `agentId:AgentId`, `question:string`, `options?:string[]`, `proposedAnswer?:string`, `accountable:string` (human id), `openedAt:number`. Maps to the contract's `HITLGate{ kind:'approval'|'clarification'; state:'open'|'resolved'|'expired' }`. Reuse `mock/governance.ts` `openDecisions` as the seed material for 2–3 clarifications (e.g. "Geo search engine: PostGIS vs Elasticsearch?" routed to Marin). NEW `src/mock/gate-policies.ts` (shape in the appendix) supplies the per-`ArtifactKind` `GatePolicy` rendered as each row's policy chip and the gate-review header chip.
 - **Interactions:**
   - Switch kind tab → filters the list to approvals / clarifications / all.
-  - Expand an **approval** row → renders the artifact preview + decision panel. For **Spec Review** (and Design Review), the primary CTA is **"Open full review →"** which routes to the client-grade Gate Review surface; inline approve/reject remains as a fast path but still requires the reason field.
-  - Expand a **clarification** row → answer inline (pick option or type), "Send answer" → ticket unblocks, toast "Answer sent to BA Agent — rerunning."
-  - Approve (with required reason) → ticket advances a stage, toast, audit record written.
-  - Reject (with required reason) → ticket returns to the producing agent with feedback as added context, `rerunCount++`.
-- **Copy:** Title "Gates"; helper "Every pending human checkpoint — approvals to sign off and clarifications the agents need answered." Kind tabs: "All / Approvals / Clarifications." Reason label: "Decision note (required)"; approve placeholder "Why is this good enough to ship?"; reject placeholder "What's missing or wrong? This becomes the agent's added context on rerun." Empty: "All clear — the pod is running unblocked."
+  - Expand an **approval** row → renders the artifact preview + decision panel. For **Spec Review** (and Design Review), the primary CTA is **"Open full review →"** which routes to the client-grade Gate Review surface; inline approve/reject remains as a fast path (reject still requires the typed reason).
+  - Expand a **clarification** row → answer inline (pick option or type), "Send answer" → ticket unblocks, toast "Answer sent to BA Agent — rerunning," audited as `clarification.answered`.
+  - Approve (optional quick-reason chips/note) → ticket advances a stage, toast, audit record written (`gate.approved`, chips/note captured as `reason`).
+  - Reject (typed reason REQUIRED) → ticket returns to the producing agent with the reason as added context, `rerunCount++` (`gate.rejected`).
+- **Copy:** Title "Gates"; helper "Every pending human checkpoint — approvals to sign off and clarifications the agents need answered." Kind tabs: "All / Approvals / Clarifications." Reason label: "Decision note (required on reject)"; approve quick-reason chips "Meets EARS" · "Validators 8/8" · "Scope confirmed" + optional note placeholder "Add a note (optional)"; reject placeholder "What's missing or wrong? This becomes the agent's added context on rerun." Policy chip e.g. "PM · 1-eye · ≤4h · L0 review-all." Empty: "All clear — the pod is running unblocked."
 - **Demo note:** 0:30 RUN beat — "a Slack clarification gate fires; the PM answers; the spec advances to ready; an approval gate appears in the unified queue." This screen shows both kinds in one place; the PM answers the clarification here, then opens the spec approval.
 
 ---
 
 ### Spec Review (client-grade gate review) — `/approvals/$gateId`  (NEW)
-- **Purpose:** The KEY new surface — a **client-grade, in-app review of a SPEC.md**: render the spec, the EARS acceptance criteria, and the **deterministic (zero-LLM) structural validator results**, then **Approve / Reject with a REQUIRED reason/comment**. A paying PM signs off here, inside Agency OS — never dropped into the BA's own tool except as a labeled fallback.
-- **Persona & entry:** PM (spec owner) and BA-accountable human (Ana). Entry: from a Pipeline "Open review →" card in Spec Review, from a Gates row "Open full review →", from a Slack approval link, or Cmd-K. Generalizes to `/approvals/$gateId` so Design/UIX-UI-Spec/Tasks/Dev/QA reviews can reuse the same shell with their own facet renderer; **Spec is the fleshed-out one.**
-- **Layout:** Full-height AppShell content. Top: a **review header bar** — ticket id + title, gate kind badge ("Spec approval"), producing agent (BA), accountable human avatar, SLA/age chip, and right-aligned **Approve / Reject** buttons (sticky). Body is a 3-region grid:
+- **Purpose:** The KEY new surface — a **client-grade, in-app review of a SPEC.md**: render the spec, the EARS acceptance criteria, the agent's own notes, and the **deterministic (zero-LLM) structural validator results**, then **Approve (one click, optional quick-reason chips) / Reject (typed reason REQUIRED)**. A paying PM signs off here, inside Agency OS — never dropped into the BA's own tool except as a labeled fallback.
+- **Persona & entry:** PM (spec owner) and BA-accountable human (Ana). Entry: from a Pipeline "Open review →" card in Spec Review, from a Gates row "Open full review →", from a Slack approval link, or Cmd-K. Generalizes to `/approvals/$gateId` so Design/UIX-UI-Spec/Tasks/Dev/QA reviews can reuse the same shell with their own facet renderer; **Spec is the fleshed-out one.** *(As-built: route file `src/routes/approvals_.$gateId.tsx` — the trailing underscore un-nests it from `/approvals` on purpose; `ApprovalsView` has no `Outlet`.)*
+- **Layout:** Full-height AppShell content. Top: a **review header bar** — ticket id + title, gate kind badge ("Spec approval"), producing agent (BA), accountable human avatar, SLA/age chip, a **gate-policy chip** ("PM · 1-eye · ≤4h · L0 review-all", from `gate-policies.ts`), an **input-provenance chip** ("Sources: 1 customer-submitted ticket · 2 internal docs — external content treated as untrusted"), and right-aligned **Approve / Reject** buttons (sticky). Body is a 3-region grid:
   - **Left rail (≈220px):** an in-document **outline/section nav** (Problem, User stories, Acceptance criteria, Non-goals) + the validator summary score.
-  - **Center (1fr):** the rendered **SPEC.md** (via `MarkdownLite`), with the **EARS acceptance-criteria** block called out as a structured, checkable list.
-  - **Right rail (≈320px):** the **Structural Validator panel** (badged "Validated deterministically — no LLM in the loop") + the **Decision panel** (required reason, Approve/Reject, deep-link fallback, prior-decision history).
+  - **Center (1fr):** the rendered **SPEC.md** (via `MarkdownLite`), with the **EARS acceptance-criteria** block called out as a structured, checkable list; below the doc, a collapsible **run-story timeline** (the plain-language run narrative).
+  - **Right rail (≈320px):** the **Agent's notes panel** (badged "Self-reported by the agent · advisory") ABOVE the **Structural Validator panel** (badged "Validated deterministically — no LLM in the loop") + the **Decision panel** (quick-reason chips on approve, required reason on reject, deep-link fallback, prior-decision history).
 - **Components:**
   - REUSE: `SpecPreview`/`MarkdownLite` from `TraceabilityView.tsx` (renders `specMd(ticket)`); `accountableFor`/`humans`; `buildLineage` (for the rejection-loop history of this ticket); the `Ticket` from `useLive`.
   - shadcn primitives: `scroll-area` (center doc), `card` (validator + decision panels), `badge` (the zero-LLM badge, EARS pass/fail chips, SLA), `separator`, `progress` (validator score ring/bar), `textarea` + `form` (required reason), `alert-dialog` (confirm "Approve — this advances the ticket and is recorded in the audit log"), `tooltip`, `breadcrumb` (Pipeline / Spec Review / AM-142), `tabs` (optional: "Spec | EARS | Validators | History").
   - NEW components:
-    - **`SpecReviewShell`** — the route layout + header + sticky decision bar.
+    - **`GateReviewShell`** — the route layout + header + sticky decision bar; one shell, per-kind facet renderers. *(The P1-H2 rename `SpecReviewShell` → `GateReviewShell` is DONE as-built: `src/components/gates/GateReviewShell.tsx`.)*
     - **`EarsCriteriaList`** — renders each acceptance criterion in EARS shape with a per-criterion structural badge (has trigger? has measurable response? has AC-ID?). Checkbox-style, read-only validator state (NOT a human checklist).
     - **`StructuralValidatorPanel`** — the moat surface: a list of **deterministic checks** with pass/fail/warn, each labeled "checked in code." Headline badge: *"Validated deterministically — no LLM in the loop."* Sub-line: *"Structural quality, not semantic — we check shape, not meaning."* (honest language per vision §3-ACT III).
-    - **`DecisionPanel`** — required reason field; Approve disabled until non-empty; Reject requires reason; writes the human-decision audit record; shows the deep-link fallback as a quiet secondary link.
+    - **`DecisionPanel`** — the reason-policy canon (P1-G1, as-built): **Approve is enabled immediately**, with optional structured quick-reason chips + an optional note; a typed reason is **REQUIRED on Reject** and on **overriding** failing checks (recorded as `gate.override`); writes the human-decision audit record; shows the deep-link fallback as a quiet secondary link.
+    - **`AgentNotesPanel`** — the agent's self-report (`agentSelfReport`): **assumptions as flaggable rows** (flagging one pre-fills the reject reason), open questions, per-section **confidence dots**, and citations deep-linking into knowledge/constitution sources. Badged **"Self-reported by the agent · advisory"** — a third, clearly-walled signal class beside the deterministic checks and the LLM-advisory signals; it must never visually blend with either wall.
+    - **`RunStoryTimeline`** — the plain-language run narrative derived from `trace.ts`/flow: sources read, clarifications asked & answered, checks run, cost — the same story the weekly report links per delivered item ("every delivered item links to its run story").
+    - **`ProvenanceChip`** — the input-provenance header chip; external/customer-submitted content is flagged untrusted (part of the layered injection defense).
 - **States:**
   - *loading:* skeleton doc + skeleton validator rows.
   - *populated (default):* full spec + criteria + validators; some validators warn (demoable imperfection).
   - *all-pass:* validator panel header turns green, "Structurally ready — 8/8 checks pass."
-  - *has-failures:* failing checks pinned to top in red; Approve still allowed but a `tooltip`/inline note warns "2 structural checks failing — approving overrides them" (override reason captured).
+  - *has-failures:* failing checks pinned to top in red; Approve still allowed but a `tooltip`/inline note warns "2 structural checks failing — approving overrides them" (recorded as `gate.override`; a typed override reason is REQUIRED).
+  - *agent-notes:* populated by default (2–3 assumptions + 1 open question + confidence dots); flagging an assumption tints the row amber and pre-fills the reject note; empty → "No self-reported notes for this run."
   - *already-decided:* if the gate is resolved, the decision panel collapses to a read-only stamp "Approved by Zlatko · 12m ago · 'reason'" with the audit pointer.
   - *rejected-then-fixed history:* if `rerunCount>0`, a banner "This spec was returned once — v2" with the prior feedback (from `buildLineage().reject`).
   - *error / spec unavailable:* "Couldn't render the spec in-app" + prominent **"Open in BA flow-observer ↗"** fallback deep-link.
@@ -638,14 +662,16 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - Body: `specMd(ticket)` from `mock/trace.ts` (already EARS-flavored: "Endpoint p95 latency < 200ms", "Empty state renders…", "Pagination uses cursor"). 
   - NEW mock to add (in `trace.ts` or a new `mock/specReview.ts`): a **`specValidators(ticket)`** returning `{ score:number, checks: Array<{ id:ValidatorCheckId; label:string; kind:"structural"; status:"pass"|"warn"|"fail"; detail:string; deterministic:true }> }`. The check ids are **BA's real validator registry ids** (from `agents/ba/pipeline/validators.py` `_STRUCTURAL_CHECK_IDS`; V3 retired), seeded **all 8**: `V1_ears_coverage` (every AC is EARS-formatted; <80% coverage fails), `V2_missing_section` (all canonical SPEC.md sections present), `V4_ac_id_parity` (AC IDs match between Sections 4 ↔ 11), `V5_br_references` (every business rule referenced in Section 14 exists in Section 5), `V6_eh_message_parity` (error-handling messages match between Sections 14 ↔ 7), `V7_decision_confidence_parity` (Low-confidence decisions marked consistently), `V8_metadata_header` (spec metadata header present), `V9_duplicate_ids` (no duplicate IDs within an owning section). Plus **`earsCriteria(ticket)`** returning `Array<{ id:string; text:string; trigger:string; response:string; measurable:boolean; valid:boolean }>` parsed from the AC block. Reuse `mock/governance.ts` constitution rule ids for the `V5_br_references` detail copy.
   - Decision history: derive from `buildLineage(ticket)` (`reject.feedback`, `approver`, `approvedAtOffsetMin`).
+  - NEW (same `specReview.ts`, shapes in the appendix — *as-built file name: `src/mock/gate-detail.ts`*): **`agentSelfReport(ticket)`** (assumptions/open questions/section confidence/citations — the Agent's-notes panel), **`runStory(ticket)`** (the plain-language run timeline), **`inputProvenance(ticket)`** (the provenance chip). Note: **`earsCriteria()` binds to BA's real `/structured-ac` endpoint** (the spec `structured` block) once live — the mock mirrors its shape.
 - **Interactions:**
   - Click an outline section → scrolls the center doc.
   - Click a validator check → scrolls/highlights the offending AC in the center pane.
-  - Type a **decision note** (required) → enables Approve.
+  - **Flag an assumption** in the Agent's notes → the row tints amber and its text pre-fills the reject reason field.
+  - **Approve is enabled immediately** — quick-reason chips ("Meets EARS", "Validators 8/8") and a free-text note are optional; a typed reason is REQUIRED only on **Reject** and when **overriding** failing checks.
   - **Approve** → `alert-dialog` confirm "This advances AM-142 to Ready for Design and is recorded in the audit log." → on confirm: ticket advances, audit record written (`actor` shown as "when-only" until auth), toast, route back to Gates with the gate cleared.
   - **Reject** → same required note → ticket returns to BA with the note as added context, `rerunCount++`, toast "Returned to BA Agent — rerunning."
   - **Deep-link fallback** ("Open in BA flow-observer ↗") → opens the agent's own tool in a new tab; only visible as a quiet secondary action, prominent only in the error state.
-- **Copy:** Breadcrumb "Pipeline / Spec Review / AM-142." Header gate badge "Spec approval." Validator headline "Validated deterministically — no LLM in the loop." Validator sub "Structural quality, not semantic — we check the shape of the spec, not whether it's the right idea." EARS section label "Acceptance criteria (EARS)." Decision label "Decision note (required)." Approve CTA "Approve spec"; confirm body "Advances AM-142 to Ready for Design. Recorded in the audit log."; Reject CTA "Reject & return to BA." Fallback link "Open in BA flow-observer ↗." Override warning "2 structural checks are failing — approving overrides them; your note is required."
+- **Copy:** Breadcrumb "Pipeline / Spec Review / AM-142." Header gate badge "Spec approval." Policy chip "PM · 1-eye · ≤4h · L0 review-all." Provenance chip "Sources: 1 customer-submitted ticket · 2 internal docs — external content treated as untrusted." Agent's-notes badge "Self-reported by the agent · advisory." Validator headline "Validated deterministically — no LLM in the loop." Validator sub "Structural quality, not semantic — we check the shape of the spec, not whether it's the right idea." EARS section label "Acceptance criteria (EARS)." Decision label "Decision note (required on reject · optional on approve)." Approve CTA "Approve spec"; confirm body "Advances AM-142 to Ready for Design. Recorded in the audit log."; Reject CTA "Reject & return to BA." Run-story header "How this spec was made." Fallback link "Open in BA flow-observer ↗." Override warning "2 structural checks are failing — approving overrides them; a typed override reason is required."
 - **Demo note:** The headline RUN→close beat. 0:30 "the PM approves on a client-grade review surface inside Agency OS"; 2:45 close reuses **this same validator panel** to land the moat line — "checked deterministically, not graded by another model." This screen is the single most load-bearing NEW surface in the cluster — it carries both the "client-grade product, not internal tooling" and the "zero-LLM moat" claims.
 
 
@@ -664,7 +690,7 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - *error:* "Comms stream unavailable" inline banner (`alert`, destructive) — non-blocking; escalation tracker still renders from last-known.
   - *edge:* an escalation with `status: "open"` and `openedMinAgo` past SLA renders with the neon glow already in `EscalationRow`; if a matching incident exists, the new link cell is solid (primary), else disabled with tooltip "No incident — recovery not required."
 - **Mock data:** `src/mock/comms.ts` unchanged for the core. Add ONE derived helper in `comms.ts`: `incidentIdFor(esc: Escalation): string | null` — maps an escalation's `ticketId` + `trigger` to an incident id in the new incidents mock (below), so the cross-link is data-driven, not hard-coded.
-- **Interactions:** Filters (agent/channel/trigger) narrow the log live. Click a comm row → expand body + trigger reason (existing). Click ticketId → `/traceability` (existing). Click **"Open in Incidents →"** on an escalation → navigates to `/incidents?incident=<id>` with that incident pre-opened in the detail pane. "preview next send" disclosure on scheduled cards (existing).
+- **Interactions:** Filters (agent/channel/trigger) narrow the log live. Click a comm row → expand body + trigger reason (existing). Click ticketId → `/traceability` (existing). Click **"Open in Incidents →"** on an escalation → navigates to `/incidents/$id` (the canonical incident URL) with that incident pre-opened in the detail pane. "preview next send" disclosure on scheduled cards (existing).
 - **Copy:** Header "Communications & Escalations" / "Agent-initiated outbound · scheduled or threshold-triggered" (keep). New column header "Recovery". Link label "Open in Incidents →". Disabled tooltip "No incident — recovery not required."
 - **Demo note:** 1:30 beat — after the spec advances and the clarification fires, this screen shows the *threshold* trigger that posted to Slack and the open design-stale escalation routed to Marin, setting up the pivot to Incidents & Recovery as the "what now?" answer.
 
@@ -693,7 +719,7 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 - **Mock data (NEW — add `src/mock/incidents.ts`):** Define the incident shape. Fields:
   - `Incident`:
     - `id: string` (e.g. `"inc1"`)
-    - `type: IncidentType` = `"agent-down" | "run-failed" | "gate-overdue" | "tool-disconnected" | "sync-stale"`
+    - `type: IncidentType` = `"agent-down" | "run-failed" | "gate-overdue" | "tool-disconnected" | "sync-stale" | "suspicious-input"` (Blind spot 6 — adversarial-input honesty: an ingested external item that trips the injection heuristics surfaces as an incident, not a silent drop)
     - `severity: EscSeverity` (reuse `"low"|"med"|"high"|"critical"` from comms.ts)
     - `status: IncidentStatus` = `"open" | "recovering" | "resolved"`
     - `title: string` (one-line, e.g. "QA Agent unresponsive · liveness lost 6m")
@@ -710,7 +736,7 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
     - `linkedEscalationId?: string` (back-reference into `ESCALATIONS`)
     - `linkedCommId?: string` (back-reference into `COMMS`)
     - `timeline: IncidentEvent[]`
-  - `RecoveryActionKind` = `"retry-run" | "resume-run" | "reauth-tool" | "reassign-human" | "pause-agent" | "restart-agent"`
+  - `RecoveryActionKind` = `"retry-run" | "resume-run" | "reauth-tool" | "reassign-human" | "pause-agent" | "restart-agent" | "escalate-to-q"` (P1-O3: **"Escalate to Q"** is a first-class recovery action — engineer-class faults the PM persona cannot triage get a real, audited path instead of unaudited email)
   - `IncidentEvent`: `{ id: string; tsOffsetMin: number; kind: "detected" | "notified" | "auto-attempt" | "human-action" | "recovery-failed" | "resolved"; label: string; actor?: string | null }` (`actor` null = "when-only", honoring the audit register).
   - Seed ~6–7 incidents mapping onto existing comms/escalations so the cross-links resolve:
     1. `agent-down` — QA Agent liveness lost (severity high, suggested `restart-agent`, links nothing).
@@ -720,19 +746,22 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
     5. `sync-stale` — HubSpot/Drive sync amber > 12h (severity med, links the Curator digest `c18`; suggested `reauth-tool`).
     6. `run-failed` — AM-149 quality gate failing 3x, sql-injection blocker (links `esc2`; suggested `resume-run` after fix, manual triage).
     7. one **resolved** example (e.g. AM-149 source conflict, `resolved` via `resume-run`) so the Resolved tab is non-empty.
+    8. `suspicious-input` — ONE seed (Blind spot 6): "Customer-submitted ticket AM-151 contains instruction-shaped content — quarantined for review" (severity med, `detectedBy: "input filter"`, suggested `pause-agent` on the consuming agent, links the ticket; resolving requires a human look — pairs with the Spec Review provenance chip).
   - Helpers to export: `openIncidents()`, `incidentsByType()`, `incidentById(id)`, and the cross-ref `incidentIdFor(esc)` consumed by `/comms`. The recovery action → audit write is mocked by a `recoverIncident(id, action, reason?)` that pushes a `human-action` then `resolved` event and returns an `AuditEntry`-shaped object (mirroring the dashboard `audit_log` row: `{ action, target, actor: null, ts }`).
 - **Interactions:**
-  - Click an inbox row → loads it in the detail pane (URL `?incident=<id>` so it's deep-linkable from `/comms` and the bell).
+  - Click an inbox row → loads it in the detail pane (canonical entity URL `/incidents/$id` so it's deep-linkable from `/comms` and the bell; `?incident=` survives only as a list-filter alias — see the CROSS-CUTTING Canonical URLs block).
   - Filter bar narrows the inbox live (type/severity/status/agent).
   - Click a **recovery control** → opens `RecoveryConfirmDialog`. Destructive/ownership-changing actions (reassign-human, restart-agent, pause-agent) require a `textarea` reason; retry/resume/reauth confirm with a single click. On confirm: incident → `status:"recovering"` (controls disabled, spinner), timeline appends a `human-action` event, then after a short mocked delay → `resolved` (or `recovery-failed` for the forced-fail demo), a `sonner` toast "Recovery action recorded · written to audit ledger ✓" fires, and the row restyles/moves to Resolved.
-  - **reassign-human** opens a `select` of `humans.ts` people; on confirm updates `accountableHumanId` and echoes into the accountability story.
+  - **reassign-human** opens a `select` of `humans.ts` people; on confirm the reassignment is **pending until the new human accepts** — a one-tap audited **acceptance** (P1-O1: writes `human.reassigned`, then `accountability.accepted` on accept; the incident stays `recovering` until accepted — coverage is accepted, not assigned). Then updates `accountableHumanId` and echoes into the accountability story.
+  - **escalate-to-q** opens a confirm (`textarea` reason) → files a Q-side ticket with the incident timeline attached; the incident gains a "With Q · tracked" status chip and stays visible in-pod until Q resolves; audited like every recovery action. Seeded engineer-class faults (run-failed TS2345, the sql-injection blocker) carry it as the suggested fallback for the non-engineer PM.
   - **reauth-tool** opens a mocked OAuth-style "Reconnect <tool>" step (a `dialog` with the tool's scopes, "Reconnect" button) — re-using the Connect-tile language from FIRE UP; on success the `tool-disconnected`/`sync-stale` incident resolves.
   - "Linked comms / escalation" footer link → `/comms` (deep-links the matching escalation row).
 - **Copy:**
   - Title "Incidents & Recovery" · subtitle "Detect, decide, recover — every action is logged."
   - Counter "3 open · 1 critical".
   - Suggested-action callout: "Suggested: Restart QA Agent — liveness probe has had no heartbeat for 6m." with a primary "Restart agent" button.
-  - Recovery control labels: "Retry run", "Resume run", "Re-authenticate tool", "Reassign accountable human", "Pause agent", "Restart agent".
+  - Recovery control labels: "Retry run", "Resume run", "Re-authenticate tool", "Reassign accountable human", "Pause agent", "Restart agent", "Escalate to Q".
+  - Reassign acceptance: "Waiting for {name} to accept — accountability transfers on their tap, and both steps land in the ledger." Escalate-to-Q chip: "With Q · tracked".
   - Confirm dialog: "Restart QA Agent? This interrupts any in-flight step. Add a reason for the audit ledger." Reason placeholder "Why are you restarting? (recorded with timestamp)". Confirm CTA "Restart & log".
   - Toast "Recovery action recorded · written to audit ledger ✓".
   - Empty state "No open incidents · pod is healthy".
@@ -799,15 +828,16 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 - **Purpose:** The client-facing reframe of operator economics into **consumption transparency**: what the pod consumed this period vs. the plan/budget, budget-alert state, and a downloadable monthly usage statement. Answers "what am I being billed for, and am I within budget?"
 - **Persona & entry:** Pod Admin/PM (owns the budget) and Client Sponsor/Exec (sees the statement). Entered from left rail (MONITOR group, last item) or from the Overview/ROI over-cap alert deep-link.
 - **Layout:** AppShell content column, `p-4 lg:p-6`, `space-y-4`:
-  1. **Header** — eyebrow "USAGE & BILLING", title "Usage & Billing", sub "Consumption vs. your plan for this billing period", right-aligned **plan chip** ("Dedicated · Growth plan") + **"Export statement" button**.
+  1. **Header** — eyebrow "USAGE & BILLING", title "Usage & Billing", sub "Consumption vs. your plan for this billing period", right-aligned **plan chip** ("Dedicated tenant · pilot — *pricing hypothesis*") + **"Export statement" button**.
   2. **Plan & budget summary row** — 3 cards: **Plan & cap** (plan name, monthly cap, billing period dates), **Consumed this period** (MTD spend, % of cap, big `progress` bar), **Projected at period end** (run-rate projection, over/under cap delta).
   3. **Budget alerts panel** — NEW: list of alert rules and their current state (e.g. "Alert at 80% of cap — TRIGGERED 2 days ago"), each with a status badge and a toggle.
   4. **Consumption breakdown** — reuse the existing `BreakdownTable` pattern but client-framed: usage **by agent/stage** (BA/SA/Dev/QA…) and **by codebase/project**, columns = Items, Units consumed, Amount, Share bar. Sourced from `ticketEconomics` stage rollups.
-  5. **Monthly usage statement** — NEW: a table of past billing periods (month, items delivered, units consumed, amount, status: Paid / Current / Estimated) with a per-row "Download" (PDF mock).
+  5. **Monthly usage statement** — NEW: a table of past billing periods (month, items delivered, amount, status: Paid / Current / Estimated) with a per-row "Download" (PDF mock); line items link to the gate decisions behind them ("every line item links to a gate a human cleared").
+  6. **Pricing simulator card** — NEW: this month's actual consumption modeled under the three §9.5 scenarios (tenant platform fee + per-active-pod fee · + outcome per approved artifact · + outcome per merged ticket), every figure labeled *pricing hypothesis*, the whole card badged **"MODELING — not a quote"**.
 - **Components:**
   - shadcn: `card`, `progress` (consumed-vs-cap), `badge` (plan tier, alert status, cap status), `table` (statement + breakdown), `button` (Export / Download), `switch` (alert toggle), `popover` or `dialog` (edit cap / edit alert threshold), `tabs` (breakdown: "By agent" / "By project"), `alert` (over-cap banner), `tooltip` (unit definition), `separator`.
   - REUSE: `BreakdownTable` from `RealEconomicsView.tsx` (the share-bar table is a perfect fit — generalize its `rows` shape), `KpiTile`/`Kpi` glass tiles, `fmtUsd` helpers, `aggregates`/`ticketEconomics`/`stageLabel` from `src/mock/economics.ts`.
-  - NEW: `UsageStatementTable` (period rows + download), `BudgetAlertRow` (rule label + state badge + toggle), `PlanSummaryCards`, `ConsumptionVsCapCard` (the headline progress card). A "unit" concept maps mock dollars → consumption units for client legibility.
+  - NEW: `UsageStatementTable` (period rows + download), `BudgetAlertRow` (rule label + state badge + toggle), `PlanSummaryCards`, `ConsumptionVsCapCard` (the headline progress card), `PricingSimulator` (the three-scenario modeling card). Consumption is denominated in the ROI unit (approved artifacts / merged tickets) — no separate "delivery unit" concept (killed per vision §9.5).
 - **States:**
   - *empty:* new pod, no consumption → "No usage yet this period. Charges appear as your pod works." Plan + cap cards still render; statement table shows only the current (estimated, $0) period.
   - *loading:* skeleton cards + table rows.
@@ -816,50 +846,26 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - *edge — alert triggered:* top-of-page `alert` (amber) "You've used 82% of your monthly budget. Projected to reach 104% by Jun 30." with "Adjust cap" CTA; the matching alert row badge = "Triggered".
   - *edge — over cap:* `alert` turns red "Over budget cap for this period"; consumed progress bar overfills past 100% (capped visually with an over-bar marker).
   - *edge — no cap:* cards show "No cap set" + "Set a budget cap" CTA; alerts disabled with hint "Set a cap to enable budget alerts."
-- **Mock data:** Reuses `economics.ts` `aggregates` + new `budget` (above). ADD these NEW exports to `economics.ts`:
+- **Mock data:** **As-built: `src/mock/billing.ts`** (no `economics.ts` plan exports — billing imports economics to avoid a cycle). Shapes (§9.5-aligned — no "delivery unit", no fixed price):
   ```
-  plan: {
-    name: "Growth";                 // plan tier label
-    tenancy: "Dedicated";           // matches TopBar tenancy badge
-    monthlyPlatformFeeUsd: number;  // e.g. 2500 flat
-    includedUnits: number;          // units bundled in the plan
-    unitName: "delivery unit";      // client-legible name for a consumed unit
-    usdPerUnit: number;             // overage rate, e.g. 1.00 → maps $ to units
-    billingPeriodStart: string;     // ISO date
-    billingPeriodEnd: string;       // ISO date
-  }
-
-  budgetAlerts: Array<{
-    id: string;
-    label: string;                  // "80% of monthly cap"
-    thresholdPct: number;           // 80
-    channel: "email" | "in_app" | "slack";
-    enabled: boolean;
-    state: "armed" | "triggered";
-    triggeredAt: string | null;     // ISO or null
-  }>;
-
-  usageStatements: Array<{
-    periodId: string;               // "2026-06"
-    label: string;                  // "June 2026"
-    itemsDelivered: number;         // merged count for the period
-    unitsConsumed: number;          // derived from spend / usdPerUnit
-    platformFeeUsd: number;
-    consumptionUsd: number;         // = totalCost-equivalent for the period
-    totalUsd: number;               // fee + consumption
-    status: "current" | "paid" | "estimated";
-  }>;
+  plan: BillingPlan                  // Dedicated tenant · pilot; §9.5 hypothesis framing, pricing-TBD note
+  budget: Budget                     // monthlyCapUsd + capStatus "on_track" | "watch" | "over"
+  budgetAlerts: BudgetAlert[]        // thresholdPct, channel, enabled, state "armed" | "triggered"
+  usageStatements: UsageStatement[]  // period rows; StatementLineItem[] each linking to a gate decision
+  consumptionByAgent() / consumptionByProject(): ConsumptionRow[]   // derived from ticketEconomics
+  PRICING_SIMULATOR_BADGE = "MODELING — not a quote"
+  pricingScenarios: PricingScenario[]  // "platform_pod" | "outcome_per_artifact" | "outcome_per_merged"
   ```
-  Breakdown rows are derived from `ticketEconomics` (group `stages[].stage` → agent; group by `t.cb` → project), reusing `stageLabel` for display. Generate 3–4 trailing `usageStatements` (Mar–Jun 2026) so the statement table reads as a history.
+  The three `pricingScenarios` model exactly vision §9.5's components (platform fee + per-active-pod fee, + outcome per approved artifact, + outcome per merged ticket) against the current month's actuals; statement history covers Mar–Jun 2026.
 - **Interactions:** "Export statement" → toasts (`sonner`) "Statement downloaded" (mock PDF). Per-period "Download" → same mock. Alert `switch` → flips `enabled`, toast confirms. "Adjust cap" / "Set cap" → `popover` with a number input writing `budget.monthlyCapUsd` (client-state only); re-derives `capStatus` and the progress bars live. Breakdown `tabs` re-scope the table (agent ↔ project). The over-cap alert's "Adjust cap" is the same popover.
-- **Copy:** Header sub "Consumption vs. your plan for this billing period." Plan card: "Dedicated · Growth — $2,500/mo platform fee · 2,500 delivery units included." Consumed card big-number label "Used this period", under it "{pct}% of cap". Projected card: "Projected by {periodEnd}" + delta chip "$X under cap" / "$X over cap". Alert row example "Notify at 80% of monthly cap · email". Statement columns "Period · Items delivered · Units · Amount · Status." Export CTA "Export statement". Empty: "No usage yet this period. Charges appear as your pod works." Over-cap banner: "Over budget cap for this period — projected $X by {date}." Unit tooltip: "A delivery unit ≈ one agent-processed work item; your plan includes 2,500/mo."
+- **Copy:** Header sub "Consumption vs. your plan for this billing period." Plan card: "Dedicated tenant · pilot — pricing finalized with your pilot agreement" (*pricing hypothesis* chip; no dollar figure). Consumed card big-number label "Used this period", under it "{pct}% of cap". Projected card: "Projected by {periodEnd}" + delta chip "$X under cap" / "$X over cap". Alert row example "Notify at 80% of monthly cap · in-app + Slack". Statement columns "Period · Items delivered · Amount · Status." Export CTA "Export statement". Empty: "No usage yet this period. Charges appear as your pod works." Over-cap banner: "Over budget cap for this period — projected $X by {date}." Simulator badge: "MODELING — not a quote."
 - **Demo note:** Optional close-of-MONITOR beat. After the ROI hero, one click to Usage & Billing shows the same numbers as **client consumption vs. a bounded plan with budget alerts** — reinforcing the "Cost → budget cap + projected run-rate" pushback answer from the pitch. Not a core 3-min beat; the over-cap alert state is the most demoable single screen if shown.
 
 
 ### Governance (the moat) — `/governance`  (REFRAME)
 - **Purpose:** Prove spec quality with a deterministic, zero-LLM structural moat visually separated and badged apart from any LLM-judge signal; say honestly "structural quality, not semantic."
 - **Persona & entry:** QA Lead (primary) and Client Sponsor/Exec (read-only trust beat). Lands from the MONITOR rail and from the Command Center "spec quality" KPI tile; in the 3-min demo arc this is the **2:45 close** — the hardest-to-copy headline claim.
-- **Layout:** Standard `AppShell` content region. Top to bottom: (1) Header with route eyebrow + title + honesty-subline; (2) **Trust-banner strip** spanning full width — the badge; (3) **two clearly-walled validator panels** in a 60/40 grid on `xl` (left = Deterministic, right = LLM-assisted), stacked on smaller; (4) Completeness-by-dimension panel (full width); (5) Per-spec table (full width). The wall between the two validator panels is the load-bearing design decision — different border treatment, different icon, different header chip.
+- **Layout:** Standard `AppShell` content region. Top to bottom: (1) Header with route eyebrow + title + honesty-subline; (2) **Trust-banner strip** spanning full width — the badge; (3) **two clearly-walled validator panels** in a 60/40 grid on `xl` (left = Deterministic, right = LLM-assisted), stacked on smaller; (4) Completeness-by-dimension panel (full width); (5) Per-spec table (full width). The wall between the two validator panels is the load-bearing design decision — different border treatment, different icon, different header chip. The header band also carries an **"Overrides this period"** `Kpi` (P1-G1: count of `gate.override` ledger actions in the window, deep-linking to Compliance filtered to overrides) — **"0 overrides in 30 days" is itself a trust artifact**.
 - **Components:**
   - REUSE wholesale from `RealGovernanceView.tsx`: `Kpi` tile, `ScoreCell`, the completeness-by-dimension bar block, the per-spec `<table>`, the `glass-panel`/`scoreTone` helpers, `Header`.
   - shadcn: `badge` (the deterministic badge + per-validator pass/fail pills), `tooltip` (hover "what does this check?" on each validator), `tabs` is NOT used here — the split must be spatial, not tabbed (a tab would let the skeptic ignore the distinction). `separator` between the two walls. `hover-card` on the deterministic badge to expand the "no model in the loop" explanation. `accordion` (optional) inside the deterministic panel to expand per-check detail. `alert` for the honesty callout (structural-vs-semantic).
@@ -877,6 +883,7 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - `structuralValidators: { id: ValidatorCheckId, label, descriptor, check: "deterministic", status: "pass"|"fail"|"partial", coverage: number /*0-100*/, detail: string, blocksReadiness: boolean }[]` — seed with **all 8 of BA's real validator registry ids** (same enum as `specValidators`; V3 retired): `V1_ears_coverage` ("Every AC is EARS-formatted — coverage ≥80%"), `V2_missing_section` ("All canonical SPEC.md sections present"), `V4_ac_id_parity` ("AC IDs match between Sections 4 ↔ 11"), `V5_br_references` ("Referenced business rules exist in Section 5"), `V6_eh_message_parity` ("Error-handling messages match between Sections 14 ↔ 7"), `V7_decision_confidence_parity` ("Low-confidence decisions marked consistently"), `V8_metadata_header` ("Spec metadata header present"), `V9_duplicate_ids` ("No duplicate IDs within an owning section") — both seed sets render **8/8**, matching the RUN gate's validator panel check-for-check.
   - `llmSignals: { id, label, score: number /*0-1*/, kind: "judge"|"persona", advisory: true, note: string }[]` — `judge_agreement`, `persona_approval`.
   - `structuralReadiness: { pct: number, blocking: number /*count of failing blockers*/ }`.
+  - `overridesThisPeriod` — derived by counting `gate.override` rows in the audit bridge (`audit-bridge.ts`); no new dataset.
   - Reuse the existing `GovernanceData.summary.completeness` 6-dimension object for the completeness panel (no change).
 - **Interactions:** Hover a deterministic validator row → `tooltip` shows the exact rule it checks ("checked in code, no LLM"). Click a validator row → `accordion`/`drawer` reveals which specs failed it (links into the per-spec table, filtered). Click a spec row → deep-link to `/agents/$agentId` (BA) trace, reusing existing `Link`. Hover the deterministic badge → `hover-card` expands: "These checks run as pure functions over the spec AST. No model scores them. Results are reproducible." Toggling has no destructive effect — read-only surface.
 - **Copy:**
@@ -888,12 +895,13 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - Deterministic panel header: **"Deterministic structural validators"**; sub: *"Pure code over the spec — reproducible, model-free."*
   - LLM panel header: **"LLM-assisted signals"**; sub: *"Advisory only — does not block readiness."*
   - Failing-validator pill: **"blocks readiness"**.
+  - Overrides KPI: **"Overrides this period"** · sub *"0 overrides in 30 days — overrides are rare, reason-required, and on the record."*
 - **Demo note:** This is the **2:45 close**. Presenter points at the emerald **"no model in the loop"** badge, then at the walled-off amber LLM panel: *"the AI is not grading its own homework — these checks are code."* The failing-validator red row (if staged) is the "and it actually catches gaps" punch.
 
 ### Accountability — `/pod`  (REFRAME)
 - **Purpose:** The live accountability matrix — one accountable human per agent, with live workload, SLA status, and gate ownership; an empty column is flagged as uncovered risk.
 - **Persona & entry:** Pod Admin/PM (primary) and Client Sponsor/Exec (the answer to "who is responsible when it's wrong?"). Lands from the MONITOR rail; in the demo it's the **1:45 MONITOR** beat right after the ROI reveal.
-- **Layout:** Reuse the existing `PodView.tsx` two-section layout (Roster grid + Accountability matrix), and ADD a third band between header and roster: an **at-a-risk strip** (uncovered-column count + SLA-breach count + overdue-gates count as three `Kpi`-style tiles). Keep: header, Roster card grid (`md:2 xl:3`), the sticky-left matrix table. The matrix grows a per-cell SLA/gate-ownership treatment.
+- **Layout:** Reuse the existing `PodView.tsx` two-section layout (Roster grid + Accountability matrix), and ADD a third band between header and roster: an **at-a-risk strip** (uncovered-column count + SLA-breach count + overdue-gates count as three `Kpi`-style tiles). ADD a fourth band under the risk strip: the **coverage timeline strip** (P1-O1) — a 24h × 7-day band per agent column, built from each accountable human's `workingHours`/`availability`; hours with no available accountable human (or delegate) render with the **same red "uncovered" treatment as an empty matrix column — the signature motif extended into time**. Matrix cells gain an optional **deputy chip** (a small "D" beside the "A"; the single accountable "A" stays the invariant — a deputy covers, never owns). Keep: header, Roster card grid (`md:2 xl:3`), the sticky-left matrix table. The matrix grows a per-cell SLA/gate-ownership treatment.
 - **Components:**
   - REUSE wholesale from `PodView.tsx`: header, `SectionHead`, the per-human `glass-panel` roster card (avatar, agent chips, the 4-up `Metric` workload block), the sticky-header accountability `<table>`, the `agentMeta` color logic, the existing SLA-breach pill.
   - shadcn: `badge` (SLA status per agent — on-track / at-risk / breached), `tooltip` (hover a matrix cell → "Ana — accountable for BA · 2 open gates · SLA on track"), `hover-card` (on a roster card → expand the human's current gate queue), `progress` (workload saturation bar per human), `avatar` (already approximated by the initials disc — keep), `alert` (the uncovered-risk banner when any column is empty).
@@ -901,17 +909,21 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
     - `RiskStrip` — three `Kpi`-style tiles: **Uncovered agents** (red if >0), **SLA breaches** (sum of `workload.slaBreaches`), **Overdue gates** (new field). Each is a count + tone, reusing the `Kpi` pattern from `RealGovernanceView`.
     - `GateOwnershipCell` — augments the existing matrix "A" cell: keeps the accountable "A" glyph but adds a tiny gate-count superscript and an SLA dot (green/amber/red). Empty cells keep the dashed placeholder; an entirely empty column keeps the existing `bg-status-error/10` + "⚠ uncovered" header treatment.
     - `SlaStatusPill` — small badge: on-track (`status-done`), at-risk (`status-waiting`), breached (`status-error`).
+    - `CoverageTimeline` — the 24h × 7d coverage band per agent column (P1-O1); gaps red-tinted, OOO hatched, delegate-covered hours rendered in the delegate's tint.
+    - `DeputyChip` — the per-cell "D" chip (delegate from `Human.delegateId`); tooltip states the covers-not-owns rule.
 - **States:**
   - *empty:* No humans assigned → reuse a centered `glass-panel` "No accountable people assigned yet. Assign one human per agent in FIRE UP → People & Roles." with a CTA `button` linking to the wizard People step.
   - *loading:* `skeleton` roster cards (3) + a skeleton matrix.
   - *populated:* full roster + matrix with live workload + SLA dots + gate counts.
   - *error:* `alert` (destructive) "Couldn't load accountability data."
   - *key edge-case — uncovered column:* the column header shows existing red "⚠ uncovered" treatment AND the `RiskStrip` "Uncovered agents" tile turns red AND an `alert` banner appears under the header: "1 agent has no accountable human — uncovered risk." *SLA-breached human:* roster card SLA pill glows (reuse existing `glow-pulse`), matrix cells for that human get a red SLA dot.
+  - *key edge-case — coverage gap (time):* the `CoverageTimeline` shows a red band (e.g. 22:00–06:00 on QA) — "No coverage — overnight gates queue to 08:00 or route to the delegate"; pairs with the SLA clock (`clockMode: "coverage_hours"` pauses the clock outside coverage, so the gap reads as queued work, not fake breaches). *OOO human:* their hours render hatched; if `delegateId` is set the band shows the delegate's tint instead of red.
 - **Mock data:** Driven by `src/mock/humans.ts` (`humans`, `OWNERSHIP`, `ownershipMap`, `agentsOf`, `activeHumans`) + `src/mock/agents.ts` for agent meta/colors — all reused unchanged. EXTEND `Human.workload` in `humans.ts` with two NEW fields to power gate-ownership + overdue:
   - `openGates: number` (gates currently owned/awaiting this human),
   - `overdueGates: number` (gates past their SLA-clearance time).
   - Optionally add a per-agent `slaStatus: "on_track" | "at_risk" | "breached"` derived map (NEW tiny helper `slaStatusFor(agentId)` in `humans.ts`) so each matrix cell can render its dot. Seed values so Marin (1 SLA breach) and Ivan (1 SLA breach) read "at-risk/breached," everyone else "on-track."
-- **Interactions:** Hover a matrix "A" cell → `tooltip` with human + agent + open-gate count + SLA status. Click an agent chip on a roster card → existing deep-link to `/agents/$agentId`. Click a roster card → `hover-card`/`drawer` listing that human's open gates with deep-links into `/approvals`. Click the `RiskStrip` "Uncovered agents" tile → scrolls/filters the matrix to the uncovered column. Click "Overdue gates" tile → deep-link into `/approvals` filtered to overdue. The uncovered-risk `alert` has a CTA **"Assign owner"** linking to FIRE UP → People & Roles.
+  - Capacity & coverage fields (P1-O1, appendix `humans.ts`): `workingHours`, `availability: "available" | "ooo"`, `delegateId`, `capacityGatesPerDay` — drive the `CoverageTimeline` and `DeputyChip`.
+- **Interactions:** Hover a matrix "A" cell → `tooltip` with human + agent + open-gate count + SLA status. Click an agent chip on a roster card → existing deep-link to `/agents/$agentId`. Click a roster card → `hover-card`/`drawer` listing that human's open gates with deep-links into `/approvals`. Click the `RiskStrip` "Uncovered agents" tile → scrolls/filters the matrix to the uncovered column. Click "Overdue gates" tile → deep-link into `/approvals` filtered to overdue. Hover a coverage gap on the `CoverageTimeline` → tooltip with the uncovered window + an **"Assign a delegate"** action. The uncovered-risk `alert` has a CTA **"Assign owner"** linking to FIRE UP → People & Roles.
 - **Copy:**
   - Title: **"Accountability"** (keep). Eyebrow: `human ↔ agent ownership` (keep).
   - Subline (keep + extend): *"Every agent has exactly one accountable human. One human can cover multiple agents. An empty column is uncovered risk."*
@@ -919,10 +931,11 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - Uncovered alert: **"{n} agent(s) have no accountable human — uncovered risk."** CTA: **"Assign owner."**
   - Matrix footnote (keep): *"Any empty column above is an uncovered risk."*
   - SLA pills: **"on track" / "at risk" / "breached."**
+  - Coverage strip header: **"Coverage"** · gap tooltip *"No coverage 22:00–06:00 — gates queue or route to the delegate."* · Deputy chip tooltip *"Deputy — covers when {name} is OOO; accountability stays with {name}."*
 - **Demo note:** The **second wow beat at 1:45**, right after the ROI reveal. Presenter lands on the matrix: *"one accountable human per agent — and the platform flags the second a column goes uncovered."* If a column is deliberately emptied during the demo, the red header + RiskStrip tile + alert all light up simultaneously — the visceral answer to the top enterprise objection, "who's responsible when it's wrong?"
 
 
-### SLA & Client Reports — `/sla` (NEW)
+### SLA & Client Reports — `/reports` (NEW — canonical route per P1-H1; `/sla` retired)
 - **Purpose:** Show SLA definitions per stage/pod (response time, gate-clearance, delivery cadence) as target-vs-actual with breach history, and surface the shareable weekly client status report from the same data.
 - **Persona & entry:** Pod Admin/PM lands here from the MONITOR rail ("SLA & Reports"); Client Sponsor/Exec lands here from a notification digest or the report deep-link. PM uses the SLA tab to spot breaches; sponsor consumes the report tab. Default tab for sponsor role = Report; for PM = SLA.
 - **Layout:** Standard AppShell (TopBar + LeftRail). Page-level `Tabs` with two tabs: **SLA Status** and **Client Report**. Header `glass-panel` row mirrors RealComplianceView's `Header`: icon tile + title "SLA & Reports" + subtitle + right-aligned pod/period selector. 
@@ -934,15 +947,18 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - NEW components to build: `SlaStatusTable` (definitions + target-vs-actual rows), `SlaBreachDrawer` (breach history timeline in a `Sheet`), `BreachSparkline` (tiny inline chart per row, reuse `chart`), `ClientStatusReport` (the composed report sheet), `ReportBlock` (titled section wrapper), `ReportActionBar` (period select + export/share).
 - **States:**
   - **Loading:** KPI tiles + table rows render `Skeleton`; report tab renders a skeleton report sheet (5 grey blocks).
-  - **Empty (no SLAs defined):** SLA tab shows centered `glass-panel` empty card — "No SLAs defined for this pod yet. SLAs are set per stage when you fire up a pod." with a secondary CTA "Use blueprint defaults".
+  - **Empty (no SLAs defined):** SLA tab shows centered `glass-panel` empty card — "No SLAs defined for this pod yet. Targets are set in FIRE UP → Go live → **Targets & budget** (sub-screen 6a), or start from blueprint defaults." with a secondary CTA "Use blueprint defaults" and a deep-link "Set targets →" into the Go live step. *(Resolves the former contradiction — a wizard surface now actually sets them.)*
   - **Empty (no report period data):** Report tab shows "Nothing delivered in this period yet. Your first weekly report generates once work clears a gate."
   - **Populated:** table with mix of `on-track` (green), `at-risk` (amber), `breached` (red) rows; report sheet fully composed.
   - **Error:** `glass-panel` error card "Couldn't load SLA data — showing last known snapshot." with a retry `button`.
   - **Edge — breached SLA:** breached rows pinned to top, red left-border accent, breach-count badge; the summary KPI "SLAs breached" tile turns red. Sponsor report shows breached SLAs honestly with a one-line "what we're doing" mitigation note.
+  - **Edge — clock paused outside coverage (P1-O1):** rows with `clockMode: "coverage_hours"` show a muted "clock paused outside coverage hours" chip overnight instead of fake breaches — breach math counts coverage hours only (24×7 stays available per SLA as `clockMode: "24x7"`).
+  - **Edge — throttled pod:** when any human's open gates exceed the throttle threshold, a banner notes "Intake paused — {name} has {n} open gates (cap {N})" with the amber pod state mirrored on the Command Center `PodControlBar`.
 - **Mock data:** NEW dataset `src/mock/sla.ts`.
   - `SlaMetric = "response_time" | "gate_clearance" | "delivery_cadence" | "rework_rate"`.
   - `SlaStatus = "on_track" | "at_risk" | "breached"`.
-  - `SlaDefinition { id: string; podId: string; metric: SlaMetric; label: string; scope: "pod" | Stage; targetValue: number; unit: "min" | "hr" | "per_week" | "pct"; comparator: "lte" | "gte"; actualValue: number; status: SlaStatus; breachCount30d: number; trend: number[] /* last 7 buckets, drives BreachSparkline */; lastBreachAt?: number /* ms */ }`.
+  - `SlaDefinition { id: string; podId: string; metric: SlaMetric; label: string; scope: "pod" | Stage; targetValue: number; unit: "min" | "hr" | "per_week" | "pct"; comparator: "lte" | "gte"; actualValue: number; status: SlaStatus; breachCount30d: number; trend: number[] /* last 7 buckets, drives BreachSparkline */; lastBreachAt?: number /* ms */; clockMode: "24x7" | "coverage_hours" /* P1-O1: coverage_hours pauses the clock outside the accountable human's workingHours */ }`.
+  - Pod-level `throttlePolicy { maxOpenGatesPerHuman: number; onExceed: "pause-intake" }` (P1-O1) — when a human's open gates exceed N, upstream intake pauses and the pod shows the amber "throttled" state on `PodControlBar`; the intake pause is audited.
   - `SlaBreach { id: string; slaId: string; occurredAt: number; actualValue: number; targetValue: number; stage: Stage; workItemId?: string; workItemTitle?: string; durationOverMin: number; note?: string }`.
   - Seed ~6 definitions over the AutoMarket pod (BA spec response ≤ 30min, gate clearance ≤ 4h, design-review clearance ≤ 8h, delivery cadence ≥ 3/week, rework rate ≤ 15%, overall pod response ≤ 60min) with 1–2 breached so the demo has red. ~8 `SlaBreach` rows referencing real ticket ids from `tickets.ts` (AM-138, AM-149) for credibility.
   - NEW dataset `src/mock/report.ts` (the weekly report):
@@ -955,7 +971,7 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - SLA row click → `SlaBreachDrawer` `Sheet` opens with that SLA's breach timeline; each breach row deep-links to the work item / `/pipeline`.
   - Report tab "Export" `dropdown-menu` → PDF / CSV / Copy share link → fires `sonner` toast "Report link copied" / "PDF exported (mock)". "Mark as sent" flips draft→sent and writes a `data.exported`-style entry into the audit ledger story (see Compliance screen) — toast "Weekly report sent to sponsor".
   - "Print" uses the report sheet's print-friendly layout.
-- **Copy:** Header subtitle: "Service-level targets per stage, and the weekly status report your sponsor reads." SLA status legend: "On track / At risk / Breached". Report title: "Weekly Status — AutoMarket Pod". Report intro line: "Here's what your pod delivered this week." Export CTA: "Export report". Share CTA: "Copy share link". Empty SLA: "No SLAs defined for this pod yet." Breach drawer title: "Breach history — Spec gate clearance".
+- **Copy:** Header subtitle: "Service-level targets per stage, and the weekly status report your sponsor reads." SLA status legend: "On track / At risk / Breached". Clock chip: "Clock paused outside coverage hours". Throttle banner: "Intake paused — {name} has {n} open gates (cap {N})." Report title: "Weekly Status — AutoMarket Pod". Report intro line: "Here's what your pod delivered this week." Export CTA: "Export report". Share CTA: "Copy share link". Empty SLA: "No SLAs defined for this pod yet." Breach drawer title: "Breach history — Spec gate clearance".
 - **Demo note:** 1:45 MONITOR beat — after the ROI hero, flip to SLA & Reports → "every stage has a target, here's target-vs-actual, one's at-risk and here's the breach history" → switch to the Client Report tab and "this is the one-click weekly status your sponsor gets" → Export. The sponsor-facing artifact that turns telemetry into a sellable deliverable.
 
 ### Compliance & Audit — `/compliance` (REFRAME)
@@ -963,11 +979,11 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 - **Persona & entry:** PM and Compliance/Exec land from MONITOR rail "Compliance & Audit"; also reached from a gate's "View in audit" link (`/approvals`) and from the Client Report's "Mark as sent" action. Read-mostly; export is the only action.
 - **Layout:** Keep RealComplianceView's structure (it's already the live, server-backed view). Reframe to two stacked sections inside the existing `space-y-4 p-4 lg:p-6` container, fed by `getAuditFn` (the real Supabase ledger):
   - **Header** (`glass-panel`, unchanged shape) + a new "Export ledger" `button` on the right next to the `{count} events` chip.
-  - **Section A — Human decisions (new, on top):** a filtered, richer view of `gate.approved` / `gate.rejected`-class actions rendered as decision cards/rows that foreground the human attribution: actor avatar (or a dashed "unattributed" placeholder), decision badge, target artifact, and the **required reason** captured at the gate.
-  - **Section B — Full audit trail:** the existing `table` (When / Action / Agent / Target / Project / Actor), kept verbatim as the complete append-only log, now with the actor column wired to render attribution when present.
+  - **Section A — Human decisions (new, on top):** a filtered, richer view of `gate.approved` / `gate.rejected` / `gate.override`-class actions rendered as decision cards/rows that foreground the human attribution: actor avatar (or a dashed "unattributed" placeholder), decision badge, target artifact, and the **reason** captured at the gate (typed and required on reject/override; optional quick-reason chips on approve — the P1-G1 canon).
+  - **Section B — Full audit trail:** the existing `table` (When / Action / Agent / Target / Project / Actor), kept verbatim as the complete append-only log, now with the actor column wired to render attribution when present. Interleaved **gap-marker rows** (Blind spot 5): when ledger ingest was down, a muted hatched row reads "**sync gap 02:10–02:34** — events in this window were not captured (the agent bus is ephemeral); the gap is permanent and shown, not hidden" — the when-only honesty pattern applied to the platform itself. Mirrors the `/status` degraded-mode story.
   - **Section C — AI Act deployer readiness (NEW):** a `glass-panel` re-labeling the same controls as regulatory evidence. (1) A **control→article mapping table** (4 rows): Accountability matrix → **Art 26(2)** assigned human oversight · Append-only ledger → **Art 26(6)** log retention · Incidents & Recovery → **Art 26(5)** serious-incident reporting · Gate decisions-with-reasons → human-oversight evidence. (2) A one-click **"Deployer evidence pack"** export button — joins the ledger + decision reasons + accountability-matrix history into one bundle. (3) A **retention indicator** chip: "Ledger retained 12mo · exceeds Art 26 minimum." (4) One **NIST AI RMF crosswalk line** for US buyers: "These controls also map to NIST AI RMF GOVERN/MANAGE — crosswalk included in the evidence pack."
 - **Components:**
-  - shadcn primitives: `table` (existing), `badge`, `avatar` (NEW use — actor identity), `tooltip` (hash / "when-only" explainer), `tabs` OR `toggle-group` (All actions / Human decisions / Resets) for the filter, `button` + `dropdown-menu` (export CSV/JSON), `hover-card` (full reason on a decision row), `separator`.
+  - shadcn primitives: `table` (existing), `badge`, `avatar` (NEW use — actor identity), `tooltip` (hash / "when-only" explainer), `tabs` OR `toggle-group` for the filter — the compliance filter buckets (P1-G4): **All / Decisions / Policy changes / Recovery / Pod control / Resets**, mapped over the `AuditAction` enum in `audit-bridge.ts` — `button` + `dropdown-menu` (export CSV/JSON), `hover-card` (full reason on a decision row), `separator`.
   - Reuse: `RealComplianceView` (extend in place), `getAuditFn`/`AuditEntry`/`AuditData` types from `fleet.functions.ts`, `fmtDateTime`, `ACTION_META` map (extend with `rejected` + decision entries), `cn`, `glass-panel`.
   - NEW components: `HumanDecisionList` (Section A), `DecisionRow` (actor + decision + reason), `ActorChip` (avatar-or-unattributed, with "when-only" tooltip), `LedgerExportMenu`, `AiActReadinessPanel` (Section C — the control→article table is a static config in the component, no new dataset) + `EvidencePackExport` (extends `LedgerExportMenu`).
 - **States:**
@@ -977,17 +993,20 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - **Populated:** Section A shows decision rows; Section B shows the full ledger.
   - **Edge — actor null (the honest "when-only" state):** `ActorChip` renders a dashed-outline avatar with a "—" and a `tooltip`/`hover-card`: "Who isn't captured yet — only when & what. Decision attribution arrives with sign-in (auth v2)." The decision/reason still render; only the identity is pending. This is the load-bearing honesty moment.
   - **Edge — reason missing on an older entry:** reason field shows muted "No reason recorded" rather than blank.
+  - **Edge — sync gap (Blind spot 5):** a gap-marker row renders inside Section B at its chronological position ("sync gap 02:10–02:34"); it is excluded from counts/filters but always visible in "All" — a ledger sold as gap-free must show its gaps.
   - **Error:** swallowed by `getAuditFn` (returns empty) — view degrades to empty state, never blanks.
 - **Mock data:** Primary driver stays the REAL `getAuditFn` ledger (Supabase `audit_log`, actions `reset`/`approved`). To demo the decision-attribution upgrade without auth, extend the `AuditEntry` record SHAPE (and seed mock fallback) with the designed-now fields:
   - Add to the audit record: `decision?: "approved" | "rejected"`, `reason?: string | null`, `actor?: string | null` (already present, kept null = when-only), `gate_kind?: "approval" | "clarification"`.
   - For the mock/demo path, reuse `src/mock/compliance.ts` `AUDIT` (it already has `actor: { kind, id }`, `action: "gate.approved"|"gate.rejected"`, and `rationale` — map `rationale`→`reason`, `actor.id`→attributed actor) so Section A is richly populated in mock mode even while the live Supabase actor stays null. No new dataset required; map the two shapes in the view.
+  - Seed **3–4 `policy.changed {field, before, after}` rows** in the audit bridge (budget cap raised, approver channel rewired, retention window change, autonomy grant L0→L1) so the **Policy changes** bucket is non-empty — "every action is written to the ledger" must include policy mutations, not just two verbs (P1-G4).
+  - Seed **one sync-gap marker** (`{ kind: "gap", from: "02:10", to: "02:34" }`-shaped sidecar row, matching the `/status` uptime seed's degraded stretch) so the gap-marker rendering is demoable.
 - **Interactions:**
-  - Filter `toggle-group` (All / Human decisions / Resets) re-filters both the full table and Section A.
+  - Filter `toggle-group` (All / Decisions / Policy changes / Recovery / Pod control / Resets) re-filters both the full table and Section A.
   - A decision row → `hover-card` with full reason + artifact ref + tamper-evident `hash`/`prevHash` (from `compliance.ts` mock) as a "chain intact" indicator.
   - "Export ledger" → CSV/JSON of the current filter (mock download) → `sonner` toast; in mock mode this also appends a `data.exported` entry, demonstrating the ledger recording its own export.
   - **"Deployer evidence pack"** (Section C) → mock bundled export (ledger + reasons + matrix history) → toast "Evidence pack generated (mock)"; also appends a `data.exported` entry.
   - Deep-link in: `/approvals` "View in audit" scrolls to the matching `gate.approved` row (anchor by target id).
-- **Copy:** Header (existing): "Durable, append-only record of state-changing actions across the fleet — kept in the control plane so it survives an agent deleting its own data." Section A title: "Human decisions". Section A subtitle: "Who approved or rejected each gate, and why — captured at decision time." When-only tooltip: "Actor capture arrives with sign-in. Today we record when & what; who is honestly shown as '—'." Section C title: "AI Act deployer readiness". Section C subtitle: "Your oversight controls, mapped to EU AI Act Article 26 deployer obligations — designed now, certified later." Retention chip: "Ledger retained 12mo · exceeds Art 26 minimum." NIST line: "Also maps to NIST AI RMF GOVERN/MANAGE — crosswalk in the evidence pack." Evidence-pack CTA: "Deployer evidence pack". Footer (extend existing): "Audited: resets, approvals, and gate rejections. Actor (who) is captured once sign-in lands; until then, when & what only." Export CTA: "Export ledger".
+- **Copy:** Header (existing): "Durable, append-only record of state-changing actions across the fleet — kept in the control plane so it survives an agent deleting its own data." Section A title: "Human decisions". Section A subtitle: "Who approved or rejected each gate, and why — captured at decision time." When-only tooltip: "Actor capture arrives with sign-in. Today we record when & what; who is honestly shown as '—'." Section C title: "AI Act deployer readiness". Section C subtitle: "Your oversight controls, mapped to EU AI Act Article 26 deployer obligations — designed now, certified later." Retention chip: "Ledger retained 12mo · exceeds Art 26 minimum." NIST line: "Also maps to NIST AI RMF GOVERN/MANAGE — crosswalk in the evidence pack." Evidence-pack CTA: "Deployer evidence pack". Footer (extend existing): "Audited: the full action vocabulary — pod/agent control, gate decisions & overrides, clarification answers, recovery actions, reassignments & accountability acceptances, policy changes, constitution amendments, report sends, data exports, resets. Actor (who) is captured once sign-in lands; until then, when & what only." Export CTA: "Export ledger". Gap-marker row: "sync gap {from}–{to} — events in this window were not captured; gaps are permanent and shown."
 - **Demo note:** 1:45 MONITOR close-out — after the gate is approved in the RUN beat (`/approvals`), open `/compliance`: "that approval is now in a durable ledger that outlives the agent — and when sign-in lands, this column names the human who approved and shows their reason." For an EU buyer, point at Section C: "the matrix, the ledger, the incidents, the gate reasons — these *are* your Article 26 deployer evidence; one click exports the pack." Pair with the governance zero-LLM moat as the 2:45 close.
 
 ### Accountability — Human Decision Audit panel — `/pod` (REFRAME, shared component)
@@ -1009,16 +1028,89 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 - **Demo note:** Optional accountability beat after the ROI/SLA reveal — "one accountable human per agent, and here's their decision trail with reasons and clearance times." Reinforces the accountability-matrix wow beat; secondary to the SLA/report and Compliance beats.
 
 
+### Pod Memory & Constitution — `/memory`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The compounding moat surface (P1-A2): the pod's per-client **Constitution** (rules with provenance), **Proposed amendments** mined from rejection-reason clusters (ratified through a gate, on the record), and **What it knows** (sources with an audited Forget). RESOLVES the orphaned `/knowledge` route — it folds in here as section 3 (coverage review #3).
+- **Persona & entry:** PM / QA Lead (ratify, forget), Sponsor read-only. MONITOR rail "Memory & Rules" (wave 2); deep-linked from a Spec Review citation chip and from `/compliance` amendment evidence.
+- **Layout:** AppShell content, three stacked sections: (1) **Constitution** — rule list grouped by category; each row: rule text, **provenance badge** ("Blueprint default" / "Client-provided" / "Ratified {date} — from rejection cluster"), and the gate decisions citing it; (2) **Proposed amendments** — cards: the draft rule + its mined evidence ("3 specs rejected for missing error-state ACs → proposed rule"), evidence deep-links to `/compliance`, **Ratify / Dismiss** actions; (3) **What it knows** — the source list (lifts the existing `KnowledgeView` rendering) with scopes, last-sync, and an audited **"Forget this"**.
+- **Components:** shadcn `card`, `badge`, `accordion` (rule categories), `alert-dialog` (ratify/forget confirms), `hover-card` (evidence peek), `button`, `scroll-area`, `tooltip`, `separator`. REUSE `KnowledgeView` source rows + `src/mock/knowledge.ts`; constitution rule ids from `governance.ts`; `appendAuditMock`. NEW: `ConstitutionList`, `AmendmentCard`, `KnowledgeSourcesPanel`, `ProvenanceBadge`.
+- **States:** *populated:* seeded rules + 2 proposed amendments + sources. *empty constitution (new pod):* "Your pod starts with the blueprint's defaults — rules accrue as you reject with reasons." *no proposals:* "No amendment proposals yet — rejection reasons are mined into draft rules weekly." *forgotten source:* row collapses to a tombstone "Forgotten · {date} · on the record." *error:* destructive `alert` + retry.
+- **Mock data:** NEW `src/mock/memory.ts` — `ConstitutionRule { id; text; category; provenance: "blueprint" | "client" | "ratified-amendment"; ratifiedAt?: number; citedByGateIds: string[] }`, `AmendmentProposal { id; draftText; minedFrom: { rejectionGateIds: string[]; clusterLabel: string }; state: "proposed" | "ratified" | "dismissed" }`. Sources reuse `knowledge.ts`. Ratify writes **`constitution.amended`** via `appendAuditMock`; Forget is recorded as `policy.changed { field: "knowledge.sources", before, after }` (staying inside the P1-G4 vocabulary).
+- **Interactions:** **Ratify** → `alert-dialog` ("Recorded in the ledger") → rule joins the Constitution with provenance "Ratified {date}"; **Dismiss** requires a short typed reason (consistent with the reject canon); **Forget this** → confirm → source tombstones + audit row; a rule row expands its citing decisions (deep-link `/compliance` anchored); a source row expands scopes.
+- **Copy:** Title "Memory & Constitution". Sub "Your standards become the pod's standards — through a gate, on the record." Amendment example: "3 specs rejected for missing error-state ACs → proposed: 'Every AC set includes error-state criteria.'" CTAs "Ratify (recorded)" / "Dismiss". Forget confirm: "Forget this source? The pod stops drawing on it; the removal is recorded." Provenance badges "Blueprint default" / "Client-provided" / "Ratified {date}".
+- **Demo note:** The compounding-moat beat — after a reject in RUN, show the rejection cluster already mined into a draft rule: the pod learns your standards through the same gates that govern it.
+
+### Pilot Scorecard — `/pilot`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The pilot motion surface (P1-C3): targets-vs-actuals against the pilot criteria set in FIRE UP → Go live → Targets & budget (6a), a week 1–6 strip, the human baseline, and the end-of-pilot conversion sheet.
+- **Persona & entry:** PM + Sponsor. MONITOR rail item rendered **only when the tenant is `mode: "pilot"`**; deep-linked from the post-launch ribbon's TTFAA chip.
+- **Layout:** AppShell content: (1) header — pilot window + days-remaining chip; (2) **targets-vs-actuals tiles** (reuse the SLA target-vs-actual pattern): TTFAA < 24h, approved artifacts per pod-week, gate-clearance p50, validator pass-rate, spend vs cap; (3) **week 1–6 strip** — one column per week, per-metric status dots; (4) **baseline panel** — the `roiAssumptions` baseline ("senior BA, 4h/spec · {source}" — *your numbers, not ours*); (5) **conversion sheet** — pilot fee credited to year one + the annual plan summary (both labeled *pricing hypothesis*) + "Generate conversion sheet".
+- **Components:** shadcn `card`, `progress`, `badge`, `table`, `button`, `select` (period), `tooltip`, `separator`, `chart` (week strip). REUSE `KpiTile`, the `SlaStatusTable` row pattern, the `roiAssumptions` edit affordance. NEW: `PilotTargetsBand`, `PilotWeekStrip`, `BaselinePanel`, `ConversionSheet`.
+- **States:** *mid-pilot populated* (default). *early (week 1):* most tiles "—" with "first signal expected by {date}". *target missed:* honest red tile + a one-line mitigation note (same honesty rule as the sponsor report). *pilot ended:* banner "Pilot window closed — conversion sheet ready" + export. *not in pilot mode:* hidden from the rail; direct nav shows a calm empty state "This pod isn't running a pilot."
+- **Mock data:** NEW `src/mock/pilot.ts` — `PilotPlan { podId; startIso; endIso; criteria: { metric: string; target: number; unit: string }[]; weekly: { week: 1|2|3|4|5|6; actuals: Record<string, number> }[]; baseline: { label: string; source: "client-provided" | "Q-default" }; conversion: { pilotFeeUsd: number; creditedToYear1: true; planName: string } }` — fee figures labeled *pricing hypothesis*; actuals mirror `economics.ts aggregates` + `report.ts` so the numbers reconcile across MONITOR.
+- **Interactions:** Tile click → the underlying surface (TTFAA → `/reports`, spend → `/billing`, validator pass-rate → `/governance`). "Generate conversion sheet" → mock PDF + a `data.exported` audit row + toast. Period select re-scopes the strip.
+- **Copy:** Title "Pilot scorecard". Sub "The targets you set before launch, measured by the same ledger that runs the pod." TTFAA tile: "Time to first approved artifact — {h}h (target < 24h)". Conversion CTA "Generate conversion sheet". Footer "Pilot fee credited to year one · pricing hypothesis."
+- **Demo note:** The pilot-buyer close — "you'll know by week 6, from your own data, with the conversion math pre-filled."
+
+### Org Portfolio Rollup — `/org`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The multi-pod sponsor's rollup (P1-C2): every pod in the client org on one page — status, the canonical ROI trio, open gates/incidents, spend vs cap — and the expansion engine's home (`ExpansionHint` cards live here).
+- **Persona & entry:** Client Sponsor/Exec with more than one pod; PM for portfolio review. Entry from the pod switcher footer ("View all pods") and the Exec Digest header.
+- **Layout:** AppShell content: header (org name + period selector) → **org-level KPI band** (the canonical trio summed across pods, net of plan fees) → **pod table** — one row per pod: name, status pill (Live/Setting up/Paused), agents, accountable humans, open gates, open incidents, MTD spend vs cap bar, ROI-trio mini → an **`ExpansionHint` card** ("Listr's backlog fits the Web App Delivery blueprint — fire up a second pod →").
+- **Components:** shadcn `table`, `card`, `badge`, `progress`, `select` (period), `tooltip`, `separator`. REUSE `RoiHeroRow` (as-built `src/components/monitor/`), pod-row styling from `PodSwitcher`, `KpiTile`. NEW: `OrgRollupTable`, `ExpansionHintCard`.
+- **States:** *multi-pod populated* (default). *single pod:* renders with a "one pod live" note + the ExpansionHint. *pod paused / over-cap:* the row carries the amber/red state inline (same tones as `PodControlBar`/cap badges). *loading/error:* skeleton rows / alert + retry.
+- **Mock data:** No new dataset — derives from the as-built pod store (`src/lib/pods/pod-store.tsx`, localStorage `aiops_pods_v1`) joined with per-pod `economics.ts` aggregates and the open counts (`openGateCount()`, `incidents.ts`); each pod keeps its distinct mini-dataset (the Post-Launch demo-binding rule), so the rollup proves scoping is real.
+- **Interactions:** Row click → switches the active pod (same cookie mechanics as `PodSwitcher`) and lands on that pod's `/economics`. ExpansionHint CTA → `/pods/new?step=blueprint` pre-selected to the suggested blueprint. Period selector re-scopes the band.
+- **Copy:** Title "Your pods". KPI band labels = the canonical trio + "net of plan fees". ExpansionHint: "Backlog 'Listr' fits the Web App Delivery blueprint — fire up a second pod →". Single-pod note: "One pod live — the portfolio view grows with you."
+- **Demo note:** The expansion beat — flip from one pod's ROI to the org rollup ("this is what the CFO sees at three pods"), then click the hint straight into FIRE UP.
+
+### Deliverables — `/artifacts`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The shelf (Blind spot 4): everything the pod has produced — a filterable artifact table with approved-by joined from the ledger, a per-artifact version timeline with rejected-iteration diffs, and Export all. Carries the load-bearing rule: **approved artifacts are snapshotted into the control plane at gate-clearance** — no agent reset deletes a paid deliverable (the same rationale that created the audit DB).
+- **Persona & entry:** PM + Sponsor ("where's the spec we approved last month?"). MONITOR rail "Deliverables" (wave 2); deep-linked from weekly-report delivered items and from a gate's already-decided stamp.
+- **Layout:** AppShell content: header + filter bar (kind from `chain.ts ArtifactKind`, ticket, period, approver) → **artifact table**: kind icon, title, ticket id, version, **approved-by** (`ActorChip`, joined from the ledger), approved date, gate link → a row opens the **version timeline** (right `sheet`): each iteration v1→vN with **rejected-iteration diffs** (`MarkdownLite` render, the reject reason inline), the gate that cleared it, and the **snapshot stamp** → header-right **"Export all"**.
+- **Components:** shadcn `table`, `sheet` (version timeline), `badge`, `button`, `dropdown-menu` (export format), `scroll-area`, `tooltip`, `separator`. REUSE `MarkdownLite` + `buildLineage` (trace.ts), `ActorChip`/`DecisionRow` (Compliance family), `FilterBar` + `useListFilter`. NEW: `ArtifactsTable`, `VersionTimeline`, `SnapshotStamp`.
+- **States:** *populated* (default). *empty:* "Nothing delivered yet — approved artifacts land here the moment a gate clears, and stay here even if an agent resets." *rejected-history:* v1 renders as a struck-through diff against v2 with the reject reason. *snapshot-pending edge:* an artifact approved during a ledger sync gap shows "snapshot pending · backfills on reconnect" (mirrors the degraded-mode honesty). *error:* alert + retry.
+- **Mock data:** NEW `src/mock/artifacts.ts` — `ArtifactSnapshot { id; kind: ArtifactKind; ticketId; title; version: number; approvedByGateId: string; approvedAt: number; contentRef: string; snapshotAt: number }` + `artifactVersions(ticketId)`; approved-by joined from `audit-bridge.ts` rows. Seeds: AM-142's spec at v2 (one rejected iteration, diff demoable) + the merged ticket from `economics.ts`. The snapshot-at-gate-clearance rule stated in the file header comment (control-plane data model: `ArtifactSnapshot`).
+- **Interactions:** Filters narrow live (URL-param contract per the FilterBar spec). Row → version timeline; diff toggle per iteration; gate link → `/approvals/$gateId` (read-only decided stamp). **"Export all"** → mock zip + a `data.exported` audit row + toast.
+- **Copy:** Title "Deliverables". Sub "What your pod produced — snapshotted at gate-clearance, owned by you." Snapshot stamp: "Snapshotted at clearance · survives agent resets." Export CTA "Export all". Empty as above.
+- **Demo note:** The renewal-meeting answer — "where's the spec we approved last month?" lands here in one click, with who approved it, why v1 was rejected, and the proof it outlives the agent.
+
+### Platform Status — `/status`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The per-tenant status page (Blind spot 5): component health, 90-day uptime, the current degraded-mode state, and the honest platform story ("agents continue working when the dashboard is down") — doubling as a procurement artifact.
+- **Persona & entry:** Any member; procurement/security reviewers via a share link. Entry from Settings → Tenancy & Security ("Platform status →") and from the App Shell degraded-mode banner's "details →" link. Renders client-clean (no operator chrome needed).
+- **Layout:** Centered column: header (tenant name + overall state pill) → **component health list** (Dashboard/control plane, Ledger sync, Agent gateway, Slack bridge, Connected tools rollup) each with a state dot + last-incident line → **90-day uptime bars** per component → a **"How degradation works" card** (the three-line honesty: agents keep working; gates remain answerable in Slack; the ledger backfills with gap-markers) → footer: uptime target + ledger RPO (per the §8 "Platform availability & DR" row).
+- **Components:** shadcn `card`, `badge`, `tooltip`, `separator`, `progress`/`chart` (uptime bars). REUSE the `StatusDot` visual language. NEW: `StatusComponentRow`, `UptimeBars`, `DegradationExplainer`.
+- **States:** *all operational* (default). *degraded:* matches the App Shell banner; the affected component amber with "since {t}". *active ledger sync gap:* the Ledger row reads "sync gap open since {t} — the gap will be marked in Compliance." *historical incident:* a red uptime-bar segment with hover detail. *empty history (new tenant):* "Your 90-day history accrues from launch."
+- **Mock data:** NEW `src/mock/status.ts` — `StatusComponent { id; label; state: "operational" | "degraded" | "down"; since?: number; lastIncidentAt?: number }`, `uptimeDays: { componentId; day: string; pct: number }[]` (90 seeded days incl. one degraded stretch matching the Compliance gap-marker seed), `platformSla { uptimeTargetPct: number; ledgerRpoMin: number }`.
+- **Interactions:** Read-only. Component row expands its last incident; print/share-friendly; the shell banner deep-links here.
+- **Copy:** Title "Platform status — {tenant}". Overall pill "All systems operational" / "Degraded — your agents are unaffected". Explainer: "If Agency OS is unreachable: your agents continue working; gates remain answerable in Slack; the ledger backfills on reconnect and marks any gap honestly." Footer "Uptime target {pct}% · ledger RPO {n} min."
+- **Demo note:** The procurement pull-up — when security asks "what happens when *you* go down," this page is the one-screen answer, consistent with the gap-marked ledger.
+
+
 ---
 
 ## CROSS-CUTTING
+
+
+> ### Canonical URLs — addressing rules (NORMATIVE, P1-H1)
+> Exactly **one URL per entity**; `?param=` is a **list-filter affordance only**, never an entity address. The canon (as-built where noted):
+> - **Wizard** — `/pods/new?step=blueprint|agents|connect|people|slack|golive` *(as-built: `src/routes/pods.new.tsx`; the historical `/fire-up/*` and `/new-pod/*` forks are retired).*
+> - **Gate** — `/approvals/$gateId` *(as-built: `src/routes/approvals_.$gateId.tsx` — trailing underscore = un-nested from `/approvals` on purpose; `ApprovalsView` has no `Outlet`).* `?gate=` on `/approvals` pre-filters/highlights the list only.
+> - **Incident** — `/incidents/$id`; `?incident=` survives only as a list-filter alias.
+> - **Ticket** — `/pipeline?ticket=` is a filter+highlight, never an entity URL (a ticket's entity surfaces are its gate and trace views).
+> - **SLA & reports home** — `/reports` (the `/sla` route name is retired).
+> - **Notifications** — the TopBar bell + `/notifications`; **no left-rail item**.
+> - **Shared reports** — `/share/$token` (chrome-less; see the Shared Report Viewer spec below).
+> All `deepLink` values (in `notifications.ts`, ⌘K results, and Slack messages) use these canonical forms.
 
 
 ### Notification Bell + Inbox Popover — `(global, in TopBar)`  (NEW)
 - **Purpose:** The persistent in-app notification surface — a bell in the TopBar that opens a per-user notification inbox without leaving the current screen.
 - **Persona & entry:** Every persona (PM, Eng Lead, QA Lead, Sponsor). Entry: the `🔔` bell in the TopBar (added next to the existing ESC/digest chips), or keyboard `g n`. Replaces today's transient-only `sonner` toasts with a durable, reviewable list.
 - **Layout:** A `Popover` anchored bottom-right under the bell (width ~`w-96`, `max-h-[32rem]`). Header row: title "Notifications" + unread count badge + a "Mark all read" text button + a gear icon deep-linking to `/notifications` preferences. Body: a `ScrollArea` list of notification rows grouped by recency ("Now / Earlier today / This week"). Footer: a full-width "Open inbox" link to `/notifications`. The bell itself carries a small red count dot when `unread > 0` (mirror the existing ESC-chip `animate-pulse` treatment).
-- **Components:** `Popover` + `PopoverTrigger`/`PopoverContent`, `ScrollArea`, `Badge`, `Button` (ghost), `Tabs` is NOT needed here (keep it a flat list). Reuse `Avatar` for actor/agent icon. NEW components: `NotificationBell` (the trigger + unread dot, lives in `TopBar.tsx`), `NotificationInboxPopover`, `NotificationRow` (icon by `kind`, title, body preview, relative time, unread dot, optional inline action button).
+- **Components:** `Popover` + `PopoverTrigger`/`PopoverContent`, `ScrollArea`, `Badge`, `Button` (ghost), `Tabs` is NOT needed here (keep it a flat list). Reuse `Avatar` for actor/agent icon. NEW components: `NotificationBell` (the trigger + unread dot, lives in `TopBar.tsx`), `NotificationInboxPopover`, `NotificationRow` (icon by `kind`, title, body preview, relative time, unread dot, optional inline action button). *(There is exactly ONE `NotificationBell` — this cluster owns the spec, the shell hosts it; as-built: `src/components/shell/NotificationBell.tsx`. The TopBar spec's bell defers here — P1-H2.)*
 - **States:**
   - *empty:* bell with no dot; popover body shows centered "You're all caught up" + muted "New gates, escalations and SLA alerts will appear here."
   - *loading:* 4 `Skeleton` rows (avatar circle + two text bars).
@@ -1034,7 +1126,7 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 
 ### Notification Inbox + Preferences + Alert Rules + Digests — `/notifications`  (NEW)
 - **Purpose:** The full per-user notification center: a filterable history of all notifications, channel/event delivery preferences, SLA/incident alert rules, and stakeholder digest config.
-- **Persona & entry:** PM/operator primarily (owns alert rules + digests); any user manages their own per-event channel preferences. Entry: bell popover gear, "Open inbox" footer, or left-rail (RUN group, under Comms) — sits alongside the NEW notifications system named in vision §4.
+- **Persona & entry:** PM/operator primarily (owns alert rules + digests); any user manages their own per-event channel preferences. Entry: the bell popover gear or its "Open inbox" footer ONLY — **no left-rail item** (canonical addressing per P1-H1: notifications = bell + `/notifications`) — sits alongside the NEW notifications system named in vision §4.
 - **Layout:** Standard app-shell main region. Page header "Notifications & Alerts". A `Tabs` strip with four tabs: **Inbox** · **Preferences** · **Alert rules** · **Digests**.
   - *Inbox tab:* left a filter bar (search `Input` + `kind` filter chips + read/unread `toggle-group` + channel `Select`), right the list — reuse `NotificationRow` in a denser full-width table-like layout, paginated via `Pagination`. Bulk actions row ("Mark read", "Dismiss") appears when rows are selected (`Checkbox` per row).
   - *Preferences tab:* a `Table` matrix — rows = event types (Clarification gate, Approval gate, Escalation, SLA breach/at-risk, Incident opened, Run failed, Tool disconnected, Daily digest, Weekly report), columns = channels (In-app, Email, Slack, Push) each a `Switch`. A "muted hours / quiet hours" row with a time-range note. Channel column headers carry a Live/Roadmap `Badge` (In-app + Slack Live; Email + Push Roadmap — honesty per the Live-vs-Roadmap pattern in §4).
@@ -1056,15 +1148,15 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
 ### My Gates (mobile-first approvals) — `/m/gates`  (NEW)
 - **Purpose:** A phone-optimized surface where a PM or QA lead clears a clarification or approval gate from their pocket — the "the gate is worthless if it never reaches the human" payoff from §4.
 - **Persona & entry:** PM / QA Lead / Eng Lead on mobile. Entry: tapping a push/Slack/email notification's `deepLink` (lands directly on a single gate), or `/m/gates` for the full personal queue. Renders full-bleed (no left rail; a slim mobile top bar with pod name + back).
-- **Layout:** Single-column, max-width mobile. Top: sticky header "My gates" + filter `ToggleGroup` (All / Clarifications / Approvals) + a count badge. Body: a vertical stack of `Card` gate items, each showing: gate kind badge (Clarification|Approval), ticket id + title, artifact name, age vs SLA (green/amber/red `Badge`), accountable agent avatar. Tapping a card opens the **gate detail** as a full-height bottom `Sheet` (`side="bottom"`): rendered artifact summary (spec sections / EARS criteria for spec gates), the structural-validator result chips, and a sticky action bar at the bottom — **Approve** / **Reject** with a required reason `Textarea`, or for clarifications a free-text answer `Textarea` + Send.
-- **Components:** `Card`, `Badge`, `ToggleGroup`, `Sheet` (`side="bottom"` for the gate detail — exactly the primitive this cluster was told to use), `Textarea`, `Button`, `Avatar`, `Separator`, `ScrollArea`. Reuse the gate/decision logic and required-reason rule from the desktop `ApprovalsView` (vision §4: required reason/comment). NEW components: `MobileGatesView`, `MobileGateCard`, `MobileGateDetailSheet`.
+- **Layout:** Single-column, max-width mobile. Top: sticky header "My gates" + filter `ToggleGroup` (All / Clarifications / Approvals) + a count badge. Body: a vertical stack of `Card` gate items, each showing: gate kind badge (Clarification|Approval), ticket id + title, artifact name, age vs SLA (green/amber/red `Badge`), accountable agent avatar. Tapping a card opens the **gate detail** as a full-height bottom `Sheet` (`side="bottom"`): rendered artifact summary (spec sections / EARS criteria for spec gates), the structural-validator result chips, and a sticky action bar at the bottom — **Approve** (one tap, optional quick-reason chips) / **Reject** with a required reason `Textarea`, or for clarifications a free-text answer `Textarea` + Send.
+- **Components:** `Card`, `Badge`, `ToggleGroup`, `Sheet` (`side="bottom"` for the gate detail — exactly the primitive this cluster was told to use), `Textarea`, `Button`, `Avatar`, `Separator`, `ScrollArea`. Reuse the gate/decision logic and the decision-reason canon from the desktop Gates/Spec Review (P1-G1: typed reason required on reject/override; optional quick-reason chips on approve). NEW components: `MobileGatesView`, `MobileGateCard`, `MobileGateDetailSheet`.
 - **States:**
   - *empty:* "No gates waiting on you" + "We'll notify you the moment one opens." (the good-news state).
   - *loading:* 3 skeleton cards.
   - *populated:* gates sorted by SLA urgency (most-overdue first); overdue gates get a red left accent + "⚠ 4h over SLA".
   - *submitting:* action bar buttons show spinner + disable; on success the card collapses with a "Approved ✓" flash then removes.
   - *error:* inline destructive `Alert` in the sheet "Couldn't submit — retry"; the decision is not lost (textarea retained).
-  - *edge — reason required:* Approve/Reject disabled until reason is non-empty; helper text "A reason is required and is written to the audit log."
+  - *edge — reason required (reject):* Reject disabled until the reason is non-empty; helper text "A reason is required on reject and is written to the audit log." Approve stays one tap (chips optional).
   - *edge — already resolved elsewhere:* if the gate was cleared on desktop meanwhile, the sheet shows "This gate was already resolved by Ana 2m ago" (read-only).
 - **Mock data:** Driven by NEW `notifications.ts` (gate-kind rows) joined to existing `approvals`/`tickets` mock for the artifact + SLA. Decision writes a mock entry shaped like the audit ledger record (actor when-real, else "when-only" timestamp per §4/§8 — capture `decision`, `reason`, `ts`).
 - **Interactions:** Filter toggles scope the list. Card tap → bottom `Sheet`. Approve/Reject (with reason) or Send-answer → optimistic resolve, toast, card removed, and the desktop queue/audit reflect it. Back chevron returns to the queue; deep-linked single-gate entry shows a "View all my gates" link.
@@ -1084,9 +1176,37 @@ Two load-bearing facts for the mock-builder: (1) the live surface is `RealComman
   - *no match:* `CommandEmpty` "No results for '<q>'" + a hint "Try a ticket id (AM-142), a name, or 'gates'".
   - *loading:* (mock is sync, so n/a) — but show a thin top progress bar if a real search is wired later.
 - **Mock data:** Assembled from EXISTING mocks (no new dataset required for the index): `tickets`/`runs` → Runs group, `approvals`+`tickets` → Gates group, artifact strings from `approvals.artifact` + `agents.lastArtifact` → Artifacts, NEW `incidents` mock (owned by the Incidents cluster) → Incidents, `humans` → People, `comms`/connections mock → Connections, `projects` (`project.ts`) → Pods. Each indexed item shape: `{ id, kind: "action"|"gate"|"run"|"artifact"|"incident"|"person"|"connection"|"pod", label, sublabel, deepLink, keywords[] }`. A small NEW `recentEntities` array (ids) for the Recent group.
-- **Interactions:** Select an item → close palette + navigate to its `deepLink` (gates → `/approvals?gate=…`, run → `/pipeline?ticket=AM-142`, person → `/pod?human=ana`, incident → `/incidents/<id>`, connection → `/connections?tool=slack`, pod → switch pod). Quick actions fire their handler (e.g. "New pod" → `/new-pod`, "Pause pod" → confirm dialog). Arrow keys + Enter standard; `Esc` closes.
+- **Interactions:** Select an item → close palette + navigate to its `deepLink` (gates → `/approvals?gate=…`, run → `/pipeline?ticket=AM-142`, person → `/pod?human=ana`, incident → `/incidents/<id>`, connection → `/connections?tool=slack`, pod → switch pod). Quick actions fire their handler (e.g. "New pod" → `/pods/new`, "Pause pod" → confirm dialog). Arrow keys + Enter standard; `Esc` closes.
 - **Copy:** Input placeholder "Search runs, gates, people, incidents…  (⌘K)". Group headings as above. Empty "No results for '<q>'". TopBar chip text "Search ⌘K".
-- **Demo note:** Light touch — a single ⌘K → type "AM-142" → jump straight to the gate, shown once to convey daily-driver fluency (vision §6 names the global ⌘K palette explicitly).
+- **Demo note:** Light touch — a single ⌘K → type "AM-142" → jump straight to the gate, shown once to convey daily-driver fluency (vision §6 names the global ⌘K palette explicitly). *(As-built: the shell/xcut duplication is resolved — ONE palette, `src/components/shell/CommandPalette.tsx`; Pod Copilot below joins it as the second mode of one omnibox family.)*
+
+---
+
+### Pod Copilot — `(global overlay, TopBar + ⌘J)`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The product finally talks (P1-A1): a pod-scoped copilot for **diagnostic Q&A that cites ledger entries and gate decisions** ("ask-with-receipts"), and **NL operations rendered as proposed-action cards** confirmed through the same audited paths as the buttons. Executes the coverage review's ⌘K dedup as **one omnibox family**: ⌘K = navigate, ⌘J = ask/act — one input affordance, two modes.
+- **Persona & entry:** PM primarily; every role can ask, only roles with the `act` capability see action cards. TopBar sparkle button + `⌘J` anywhere; "Ask why" affordances on gate stamps and incident rows pre-fill the question.
+- **Layout:** Right-side `sheet` (sharing the omnibox input affordance with the as-built `CommandPalette`): input at top, conversation below. Answers are short paragraphs with **receipt chips** (ledger #, gate id, validator report) that deep-link to the canonical URLs; an NL op produces a **proposed-action card** — action summary, target, the exact audit row it will write, **Confirm / Cancel**. A persistent honesty badge sits under the input.
+- **Components:** shadcn `sheet`, `command` (input), `card` (proposed-action), `badge` (receipt chips + honesty badge), `button`, `scroll-area`, `separator`, `tooltip`. REUSE the existing `SectionAssistant` + `insights.ts` computations (`buildLineage`, gate stats, `ESCALATIONS`) — promoted from legacy chrome to a product surface; the `pausePod()/pauseAgent()` stores; `appendAuditMock`. NEW: `PodCopilot`, `ReceiptChip`, `ProposedActionCard`, `useCopilotAnswers`.
+- **States:** *idle:* suggested prompts ("What needs me?", "Why did AM-142 ship?", "Pause the QA agent"). *answer:* paragraph + receipt chips. *proposed-action pending:* card with Confirm/Cancel — **nothing executes unconfirmed**. *action confirmed:* card collapses to the written audit row ("agent.paused · ledger #…"). *can't answer:* honest fallback "I answer from pod telemetry only — try a gate, ticket, or person." *read-only role:* Q&A only; action cards never render.
+- **Mock data:** NEW `src/mock/copilot.ts` — canned Q&A keyed to the demo spine: `CopilotAnswer { q: string; answerMd: string; receipts: { kind: "ledger" | "gate" | "validator"; refId: string; label: string }[] }` + `ProposedAction { intent: "pause-pod" | "pause-agent" | "resume-agent" | "open-gate"; target: string; auditPreview: AuditEntryLike }`. Answers are computed/cited from `insights.ts`, `audit-bridge.ts`, and `gate-detail.ts` — **no LLM in the mock**, and the surface is badged accordingly.
+- **Interactions:** Type a question → answer + receipt chips (deep-link `/compliance` anchored rows, `/approvals/$gateId`). An NL op → proposed-action card → **Confirm** calls the same store mutation as the equivalent button and writes the same audit row (reason required where the button requires it); **Cancel** dismisses. `⌘J` toggles; receipts are hoverable previews.
+- **Copy:** Input placeholder "Ask the pod, or tell it what to do…  ⌘J". Honesty badge: "**Answers computed from pod telemetry · actions always confirmed by you.**" Receipt chips: "ledger #4812" / "gate AM-142" / "8/8 checks". Proposed card: "Pause QA Agent — will write `agent.paused` to the ledger (reason required)." Fallback: "I answer from the ledger, gates, and runs — not from the internet."
+- **Demo note:** The 1:30 beat upgrade — type "what needs me?" and get the open gate + escalation with receipts; "why did this ship?" answers with the approver, the reason, and the 8/8 checks. A conversational surface that is *itself* a governance feature, because every answer cites the record.
+
+---
+
+### Shared Report Viewer — `/share/$token`  (NEW)
+- **Status:** specced — not yet in the mock (build wave 2).
+- **Purpose:** The target of every "Copy share link" (P1-H4): a **chrome-less, client-clean** render of a shared report (weekly status, usage statement, exec digest) for someone with no account — with expired/revoked states, and the **view event audited**.
+- **Persona & entry:** The sponsor's CFO/stakeholder opening a link from email or Slack; no auth, no shell. Links are generated from SLA & Client Reports ("Copy share link") and Billing ("Export statement").
+- **Layout:** No AppShell — a centered client-clean sheet (light-first, no glow/scanline, client logo slot, ≥12px body — the vision §6 client-clean mode) rendering the `ClientStatusReport` blocks read-only. Slim footer: "Shared by {pod} via Agency OS · this view is recorded · link expires {date}" + a muted "What is Agency OS?" link (the funnel asset).
+- **Components:** REUSE `ClientStatusReport`/`ReportBlock` under a client-clean theme variant, `fmtDate`. shadcn `card`, `badge`, `separator`, `alert` (expired/revoked), `skeleton`. NEW: `ShareViewer`, `ClientCleanTheme` wrapper, `ShareFooter`.
+- **States:** *active:* the full report, print-friendly. *expired:* a calm, data-free card "This link has expired — ask {sender} for a fresh one." *revoked:* distinct, equally data-free "This link was revoked by the pod admin." *unknown token:* neutral not-found card. *loading:* skeleton sheet.
+- **Mock data:** NEW `src/mock/share.ts` — `ShareLink { token; kind: "weekly_report" | "usage_statement" | "exec_digest"; targetId: string; createdBy: string; createdAt: number; expiresAt: number; state: "active" | "expired" | "revoked"; views: { at: number }[] }`. Seeds: one active link to the current weekly report + one expired. Opening an active link appends a view entry + a `data.exported`-class audit row ("report viewed via share link" — the audited view event); revoking (from the report's share menu) writes `policy.changed { field: "share.state" }`.
+- **Interactions:** Read-only; print-friendly; the footer link is the only navigation. Expired/revoked states leak no report data.
+- **Copy:** Footer: "Shared by {Pod} via Agency OS · this view is recorded · expires {date}". Expired: "This link has expired. Ask {name} to share a fresh one." Revoked: "This link was revoked by the pod admin." Funnel link: "What is Agency OS?"
+- **Demo note:** The "send your CFO the ROI screen" close — copy the share link in `/reports`, open it in an incognito window, and the same reconciled numbers render client-clean while the view lands in the ledger.
 
 ---
 
@@ -1238,7 +1358,7 @@ Seed ~12–16 `notifications` mapped to existing tickets/escalations (e.g. `clar
   - *empty (brand-new real pod):* hero tiles read "—" with subtext "No delivered work yet — your first report generates once a ticket ships." Non-blank: a 3-step "what to expect" mini-checklist.
   - *loading:* skeleton hero + lists.
   - *error:* `alert` "Couldn't load this week's figures — last good snapshot shown" with a stale-data timestamp.
-- **Mock data:** `economics.ts` `aggregates` (ROI hero) + `merged` tickets (delivered list); `governance.ts` for posture chip; accountability coverage from `humans.ts`/`OWNERSHIP`. NEW small shape for SLA bars — `SlaTarget { id; label; targetMin: number; actualMin: number; breached: boolean }[]` (add to a new `src/mock/sla.ts`, or co-locate; field names: `label` e.g. "Gate clearance", `targetMin`, `actualMin`).
+- **Mock data:** `economics.ts` `aggregates` (ROI hero) + `merged` tickets (delivered list); `governance.ts` for posture chip; accountability coverage from `humans.ts`/`OWNERSHIP`. SLA bars render a `SlaTarget { id; label; targetMin; actualMin; breached }` projection. *(Shape superseded — `SlaTarget` is DERIVED from the Appendix `sla.ts SlaDefinition`, never a second stored shape; resolves coverage #15.)*
 - **Interactions:** Read-only. "Download this week's report" CTA → triggers the SLA & Reports export (PDF/CSV mock, `sonner` toast). Clicking a delivered item opens a read-only artifact peek (no actions). No state-changing affordances anywhere.
 - **Copy:** Header "{Pod} · Weekly status · {date range}". Hero tile labels "Human-hours freed", "Cost per shipped ticket" (badge "as agents ship"), "Cost per story point"; hero subcaption "≈ {n}× your plan spend, net of fees" (`roiMultiple` — its only appearance). CTA "Download this week's report". Empty "No delivered work yet — your first report generates once a ticket ships." Footer micro-note "Read-only view for sponsors. Operator controls are hidden."
 - **Demo note:** This *is* the 1:45 MONITOR ROI reveal seen through the sponsor's eyes — the "what did my money buy" wow tile, stripped of operator noise. Strong close-adjacent beat.
@@ -1247,7 +1367,7 @@ Seed ~12–16 `notifications` mapped to existing tickets/escalations (e.g. `clar
 - **Purpose:** Drop the QA Lead straight into "what needs my sign-off and what's the quality posture" — a gate queue pre-filtered to QA-owned gates plus the structural-validator panel.
 - **Persona & entry:** QA Lead default landing; also reachable via the unified `/approvals` with a "My gates" filter preset.
 - **Layout:** AppShell. Two-column: left (2/3) = scoped gate list reusing `ApprovalsQueue`/`ApprovalsView`, filtered to `gate: "QA Review"` and gates whose accountable human is the QA Lead; right (1/3) = a "Quality posture" rail showing the badged zero-LLM structural validators (reuse the governance moat panel) + a "My SLA" mini (avg approval min, breaches from `humans.ts` workload).
-- **Components:** Reuse `ApprovalsView`, `ApprovalsQueue`, `HumanGate` (the client-grade review surface); reuse the governance structural-validators panel from `RealGovernanceView`. shadcn `tabs` ("Mine" / "All gates"), `badge`, `card`. NEW `ScopedGateLanding` wrapper that injects the QA filter.
+- **Components:** Reuse `ApprovalsView` + `GateReviewShell` (the client-grade review surface — `HumanGate` is demoted to the legacy mock command-center per the registry); reuse `ValidatorPanel` for the structural-checks posture. shadcn `tabs` ("Mine" / "All gates"), `badge`, `card`. NEW `ScopedGateLanding` wrapper that injects the QA filter.
 - **States:**
   - *populated:* QA gates listed, posture rail green/amber.
   - *empty (no QA gates open):* "You're clear — no QA gates waiting" with a calm check illustration and a link "See all gates".
@@ -1255,7 +1375,7 @@ Seed ~12–16 `notifications` mapped to existing tickets/escalations (e.g. `clar
   - *error:* `alert` on gate-load failure with retry.
   - *edge — gate expired:* expired gates render with an `expired` badge and a "reopen / escalate" affordance (links to Incidents).
 - **Mock data:** `approvals.ts` filtered by `gate === "QA Review"` + accountability; `governance.ts` for the validator panel; `humans.ts` (petra) for the SLA mini.
-- **Interactions:** Approve/Reject inside the existing `HumanGate` surface with **required reason** (already part of the gate review beat). Tabs toggle Mine/All. Posture chip click → `/governance`. Expired-gate "escalate" → Incidents inbox.
+- **Interactions:** Approve/Reject via `GateReviewShell` with the reason canon (typed reason **required on reject/override**; optional quick-reason chips on approve). Tabs toggle Mine/All. Posture chip click → `/governance`. Expired-gate "escalate" → Incidents inbox.
 - **Copy:** Header "Your gate queue · QA". Tabs "Mine" / "All gates". Empty "You're clear — no QA gates waiting." Posture chip "Validated deterministically · no LLM in the loop". SLA mini "Avg clearance {n}m · {b} breaches".
 - **Demo note:** Supports the RUN gate beat from the QA persona — show the same gate the PM sees, now scoped and paired with the zero-LLM validator badge (reinforces the moat at 2:45).
 
@@ -1278,13 +1398,14 @@ Seed ~12–16 `notifications` mapped to existing tickets/escalations (e.g. `clar
 ### Settings — `/settings`  (REFRAME SettingsView)
 - **Purpose:** Upgrade the single audit-DB panel into the trust surface: tenancy/security posture, connected-tool scopes, isolation + data-handling statement, and data export & retention — the buyer-trust block the vision §8 calls for.
 - **Persona & entry:** Pod Admin / PM (full); read-only roles see posture + data-handling as read-only and lose the export/retention controls. Entry from LeftRail "Settings", and deep-linked from the tenancy badge in the TopBar (badge → `/settings#tenancy`).
-- **Layout:** AppShell, `p-4 lg:p-6 space-y-4`. Keep the existing header strip. Convert the body to a vertical stack of `glass-panel` sections (or shadcn `tabs`: "Tenancy & Security", "Connected tools", "Data & retention", "Audit database"):
+- **Layout:** AppShell, `p-4 lg:p-6 space-y-4`. Keep the existing header strip. Convert the body to a vertical stack of `glass-panel` sections (or shadcn `tabs`: "Tenancy & Security", "Connected tools", "Gate policies & autonomy", "Roles & Access", "Data & retention", "Audit database"). The **Roles & Access** tab is the Settings entry point for the `/settings/roles` spec (the P2 label-sweep fix — the Roles & Access screen now has a named home in the Settings sub-nav):
   1. **Tenancy & Security posture** (`#tenancy`) — `dl` of Deployment "Dedicated", Region "EU-West", Database "Isolated (per-client)", Encryption "At rest + in transit", with the tenancy `badge` mirrored from the TopBar; plus a **"Trust & Evidence"** link row → `/compliance` (the AI Act deployer-readiness panel + evidence-pack export live there).
   2. **Models & subprocessors** (`#models`, inside Tenancy & Security) — a per-agent table answering "who actually processes our content one LLM call deep": columns **Agent · Provider · Pinned model · Processing region · Retention terms** (e.g. BA · Anthropic · pinned model id · US (EU-region inference: **Roadmap**) · Zero-data-retention API terms), each row carrying the existing Live/Roadmap honesty badges; a footer line lists subprocessors.
   3. **Connected tools & scopes** — a table of each connector with granted scopes, Live/Roadmap badge, last health check, and a "Review scopes" action.
-  4. **Data handling & retention** — the data-handling statement, retention sliders/selects per data class, and the **Export data** controls.
-  5. **Audit database** — the existing panel, unchanged.
-- **Components:** Reuse the existing `Field`/`StatusBadge`/`glass-panel` patterns from `SettingsView.tsx`. shadcn `tabs`, `table`, `badge`, `select` (retention windows), `switch` (toggles, mocked), `button`, `alert`, `tooltip`, `separator`, `dialog` (export confirm), `sonner`. NEW `TenancyPostureCard`, `ModelPlanePanel` (reads `modelPlane.ts`), `ConnectedToolsTable`, `DataRetentionPanel`, `ExportDataDialog`.
+  4. **Gate policies & autonomy** (`#gates`) — the policy layer behind the gates (P1-G1). (a) A **gate-policy table** (one row per `ArtifactKind` from `chain.ts`): required role, N-eyes, clearance SLA, delegation, override policy, and review mode (**full · batch · auto-with-sampling**) — seeded from blueprint defaults; every edit writes `policy.changed {field, before, after}` to the ledger. (b) The **autonomy ladder** — **L0 review-all → L1 batch → L2 sample-1-in-5 → L3 auto-low-risk** — rendered per agent with its current level and promotion criteria as **deterministic validator streaks** ("BA eligible for L2: 47 consecutive 8/8 specs · 4% rejection"); promotions are **proposed by the system, granted by the accountable human, written to the ledger**. (c) The **preview stat** on any proposed policy/level change: *"this policy would have auto-cleared 14 of 22 gates last week, saving ~9h."*
+  5. **Data handling & retention** — the data-handling statement, retention sliders/selects per data class, and the **Export data** controls.
+  6. **Audit database** — the existing panel, unchanged.
+- **Components:** Reuse the existing `Field`/`StatusBadge`/`glass-panel` patterns from `SettingsView.tsx`. shadcn `tabs`, `table`, `badge`, `select` (retention windows), `switch` (toggles, mocked), `button`, `alert`, `tooltip`, `separator`, `dialog` (export confirm), `sonner`. NEW `TenancyPostureCard`, `ModelPlanePanel` (reads `modelPlane.ts`), `ConnectedToolsTable`, `GatePolicyTable` + `AutonomyLadder` (read `gate-policies.ts`; grant flow writes `policy.changed`), `DataRetentionPanel`, `ExportDataDialog`.
 - **States:**
   - *populated:* posture filled from a mock tenancy record; tools table from connectors; retention windows preset.
   - *export in-flight:* dialog → "Preparing export…" → mocked download link + toast "Export ready (audit_log.csv, runs.csv)".
@@ -1295,8 +1416,9 @@ Seed ~12–16 `notifications` mapped to existing tickets/escalations (e.g. `clar
   - `Tenancy { deployment: "Dedicated"; region: "EU-West"; isolation: "Isolated per-client DB"; encryption: "AES-256 at rest · TLS 1.3 in transit"; dataResidency: string; dpaSigned: boolean }`
   - `ConnectorScope { tool: "Jira"|"Drive"|"Email"|"Slack"|"GitHub"|"Teamwork"; status: "live"|"roadmap"; connected: boolean; scopes: string[]; lastCheck: number; health: "ok"|"degraded"|"down" }[]` (Slack/GitHub/Teamwork live; Jira/Drive/Email roadmap — match vision §4).
   - `Retention { dataClass: "audit_log"|"runs"|"artifacts"|"comms"; windowDays: number; locked: boolean }[]` (audit_log locked = "append-only, never auto-deleted").
-- **Interactions:** Tab switching. "Review scopes" → popover listing granted scopes per tool. Retention selects update local state (mocked). "Export data" → dialog → pick data classes → "Generate export" → mocked CSV/JSON download + toast. Tenancy badge in TopBar deep-links to `#tenancy`.
-- **Copy:** Section titles as above. Tenancy values "Dedicated · EU-West · Isolated per-client DB". Data-handling statement "Your data lives in a dedicated, isolated database in EU-West. Connected-tool access is scoped to the minimum required and shown at connect-time. Content is processed by each agent's pinned model provider under zero-retention terms; storage, memory, and the audit ledger remain in your EU-West tenant. EU-region inference: Roadmap. The audit ledger is append-only and outlives agent resets." Models panel sub: "Which model processes your content, where, and under what retention terms — per agent, pinned, honest." Trust & Evidence link: "Trust & Evidence → AI Act deployer readiness (/compliance)". Export CTA "Export data". Scope tooltip "Granted at connect-time · minimum required." Retention "audit_log — append-only, never auto-deleted (compliance)." Read-only note "Posture is visible to all members; export and retention require Pod Admin."
+  - NEW `src/mock/gate-policies.ts` (shape in the appendix): `gatePolicies` (the per-`ArtifactKind` table), `autonomyPromotions` (proposed/granted ladder moves), `autoClearPreview()` (powers the preview stat).
+- **Interactions:** Tab switching. "Review scopes" → popover listing granted scopes per tool. Editing a gate-policy row or granting an autonomy promotion → `alert-dialog` confirm (the preview stat rendered inside) → writes `policy.changed {field, before, after}` to the audit bridge + toast "Policy updated · recorded in the ledger". Retention selects update local state (mocked). "Export data" → dialog → pick data classes → "Generate export" → mocked CSV/JSON download + toast. Tenancy badge in TopBar deep-links to `#tenancy`.
+- **Copy:** Section titles as above. Tenancy values "Dedicated · EU-West · Isolated per-client DB". Data-handling statement "Your data lives in a dedicated, isolated database in EU-West. Connected-tool access is scoped to the minimum required and shown at connect-time. Content is processed by each agent's pinned model provider under zero-retention terms; storage, memory, and the audit ledger remain in your EU-West tenant. EU-region inference: Roadmap. The audit ledger is append-only and outlives agent resets." Models panel sub: "Which model processes your content, where, and under what retention terms — per agent, pinned, honest." Trust & Evidence link: "Trust & Evidence → AI Act deployer readiness (/compliance)". Export CTA "Export data". Scope tooltip "Granted at connect-time · minimum required." Gate-policies sub: "Who clears which gate, under what SLA — and how much autonomy each agent has earned. Every change is on the record." Autonomy grant confirm: "Grant L1 (batch review) to BA Agent? Proposed on a 47-spec validator streak — this policy would have auto-cleared 14 of 22 gates last week, saving ~9h. Recorded in the ledger." Retention "audit_log — append-only, never auto-deleted (compliance)." Read-only note "Posture is visible to all members; export, retention, and gate policies require Pod Admin."
 - **Demo note:** Pull-up for the "Data" pushback (vision §10) — the tenancy/residency + isolation + minimal-scope + append-only-audit statement is the one-screen answer to "where does our data live and who can touch it?"
 
 ### Sandbox / Sample Pod — `/` (one-click seeded pod)  (NEW)
@@ -1364,9 +1486,9 @@ Seed ~12–16 `notifications` mapped to existing tickets/escalations (e.g. `clar
 
 1. **[HIGH] ADVANCED drawer (§6 line 157-158, build #1) has NO spec.** Observability / Orchestration / Flow / Traceability are named only as REUSE/demoted in the shell cluster's migration note, but no cluster owns a spec for them — not even a one-line "REUSE as-is, demoted" entry confirming they render inside the new shell + role-filtered rail. The Pipeline/Gates clusters lean on `/orchestration`'s topology model and `/traceability`'s `MarkdownLite`/`buildLineage`; the assembler needs an explicit ADVANCED entry so these aren't dropped. **Add a short REUSE spec for the ADVANCED group.**
 
-2. **[HIGH] Route naming for the wizard is INCONSISTENT across clusters — this breaks the build.** The wizard is variously specced as `/fire-up/new` (shell cluster says `/pods/new`), `/fire-up/readiness`, `/new-pod?step=connect`, `/new-pod/people`, `/new-pod/slack`, and the shell's NAV config says `/pods/new`. Five different base paths for one wizard. The ⌘K/Command Palette and Pod Switcher both link "New pod" to `/pods/new`, but the wizard clusters use `/fire-up/*` and `/new-pod/*`. **The assembler must pick ONE base route (recommend `/fire-up/new` with `?step=` or nested `/fire-up/new/{blueprint,catalog,connect,people,slack,readiness}`) and rewrite every cross-link.** This is the single highest-risk inconsistency for a builder.
+2. **[HIGH] Route naming for the wizard is INCONSISTENT across clusters — this breaks the build.** The wizard is variously specced as `/fire-up/new` (shell cluster says `/pods/new`), `/fire-up/readiness`, `/new-pod?step=connect`, `/new-pod/people`, `/new-pod/slack`, and the shell's NAV config says `/pods/new`. Five different base paths for one wizard. The ⌘K/Command Palette and Pod Switcher both link "New pod" to `/pods/new`, but the wizard clusters use `/fire-up/*` and `/new-pod/*`. **The assembler must pick ONE base route and rewrite every cross-link.** This was the single highest-risk inconsistency for a builder. **→ RESOLVED as-built:** the canon is **`/pods/new?step=blueprint|agents|connect|people|slack|golive`** (`src/routes/pods.new.tsx`, step bodies in `src/components/fireup/`); every wizard reference in this doc now uses it, and the intro note records the resolution.
 
-3. **[MED] Knowledge (`/knowledge`) is orphaned.** §4/§5 name Knowledge as a peer service and the existing `/knowledge` route + `KnowledgeView` + `src/mock/knowledge.ts` exist. The shell migration note says "fold under People & Roles or Catalog detail" but no cluster specs it. The Catalog cluster renders Knowledge as the existing `curator` (installable, pod-wide — no stub) but does not spec the route. **Decide: demote `/knowledge` to ADVANCED, or explicitly drop it. Don't leave it unassigned.**
+3. **[MED] Knowledge (`/knowledge`) is orphaned.** §4/§5 name Knowledge as a peer service and the existing `/knowledge` route + `KnowledgeView` + `src/mock/knowledge.ts` exist. The shell migration note says "fold under People & Roles or Catalog detail" but no cluster specs it. The Catalog cluster renders Knowledge as the existing `curator` (installable, pod-wide — no stub) but does not spec the route. **Decide: demote `/knowledge` to ADVANCED, or explicitly drop it. Don't leave it unassigned.** **→ RESOLVED (P1-A2):** `/knowledge` **folds into `/memory`** (MONITOR — Pod Memory & Constitution, specced above, build wave 2) as its "What it knows" section; the old route redirects there. No ADVANCED demotion needed.
 
 4. **[MED] Build #13 (in-product help / coach-marks; a11y pass) is unspecced.** §8 names accessibility as deferred-but-required for client surfaces (wizard, gates, reports). No cluster mentions coach-marks or an a11y note. Lower priority (tail item), but flag it as a known gap so it isn't assumed covered.
 
@@ -1380,7 +1502,7 @@ Strong overall — nearly every spec covers empty/loading/populated/error plus e
 
 7. **[LOW] Per-Role Default Landing (shell) has no loading/error state** for the redirect resolver itself (e.g. role unresolved while auth mock initializes). The xcut-roles cluster's "My Workspace" router covers the unknown-role fallback better — **consolidate these two specs (see consistency #9); the shell version is thinner and partly duplicated.**
 
-8. **[LOW] Command Palette appears in TWO clusters with slightly different state lists.** Shell cluster's "Command Palette (⌘K)" and xcut cluster's "Global Command Palette (⌘K)" both spec the same overlay. The xcut version adds a "Recent" group and `recentEntities` mock; the shell version adds a pod-scope footer. Neither is wrong but a builder will build it twice. **Merge into one canonical spec (recommend the xcut version as the home, with the shell's pod-scope footer folded in).**
+8. **[LOW] Command Palette appears in TWO clusters with slightly different state lists.** Shell cluster's "Command Palette (⌘K)" and xcut cluster's "Global Command Palette (⌘K)" both spec the same overlay. The xcut version adds a "Recent" group and `recentEntities` mock; the shell version adds a pod-scope footer. Neither is wrong but a builder will build it twice. **Merge into one canonical spec (recommend the xcut version as the home, with the shell's pod-scope footer folded in).** **→ RESOLVED as-built:** one palette — `src/components/shell/CommandPalette.tsx` (xcut spec as home, shell hosts); Pod Copilot (`⌘J`, wave 2) extends the same omnibox family rather than adding a third input.
 
 ### 3. CONSISTENCY — shared components & reuse
 
@@ -1388,9 +1510,9 @@ Strong overall — nearly every spec covers empty/loading/populated/error plus e
 
 9. **[HIGH] Role-scoped landing is specced THREE times:** shell "Per-Role Default Landing", xcut-roles "My Workspace (role-scoped landing router)", and implicitly the QA Gate Queue / Exec Digest landings. The shell cluster names a `defaultLandingFor(role)` helper; xcut names `landingFor(roleId)` + `RoleLandingRouter`. **Pick one helper name and one router component.** Recommend `roles.ts: landingFor()` + `RoleLandingRouter` (xcut) as canonical and delete the shell's `defaultLandingFor`.
 
-10. **[HIGH] Command Palette duplicated** (see #8) — `CommandTrigger`/`NotificationBell` defined in shell TopBar spec; `GlobalCommandPalette`/`useCommandPaletteData` defined in xcut. Same overlay, two component names. Merge.
+10. **[HIGH] Command Palette duplicated** (see #8) — `CommandTrigger`/`NotificationBell` defined in shell TopBar spec; `GlobalCommandPalette`/`useCommandPaletteData` defined in xcut. Same overlay, two component names. Merge. **→ RESOLVED as-built:** one `CommandPalette` (`src/components/shell/CommandPalette.tsx`) and one `NotificationBell` (`src/components/shell/NotificationBell.tsx`); the TopBar spec defers to the cross-cutting specs for both.
 
-11. **[HIGH] The gate-review / decision surface is the most-shared component and is named consistently, GOOD — but the "required reason" rule is specced in 4 places with subtle drift.** run-pipeline-gates defines `RequiredReason` (required on BOTH approve and reject); the Spec Review screen defines `DecisionPanel`; mobile "My Gates" reuses "the required-reason rule"; Compliance defines `DecisionRow`/`ActorChip`. These are consistent in intent. **Action: declare `DecisionPanel` + `RequiredReason` + `ActorChip` + `DecisionRow` as a single shared component family in one cluster (run-pipeline-gates owns Decision; monitor-sla-compliance owns ActorChip/DecisionRow) and have mobile + compliance explicitly import them.** Right now each says "reuse" but two different clusters define overlapping primitives.
+11. **[HIGH] The gate-review / decision surface is the most-shared component and is named consistently, GOOD — but the "required reason" rule is specced in 4 places with subtle drift.** run-pipeline-gates defines `RequiredReason` (required on BOTH approve and reject); the Spec Review screen defines `DecisionPanel`; mobile "My Gates" reuses "the required-reason rule"; Compliance defines `DecisionRow`/`ActorChip`. These are consistent in intent. **Action: declare `DecisionPanel` + `RequiredReason` + `ActorChip` + `DecisionRow` as a single shared component family in one cluster (run-pipeline-gates owns Decision; monitor-sla-compliance owns ActorChip/DecisionRow) and have mobile + compliance explicitly import them.** Right now each says "reuse" but two different clusters define overlapping primitives. **Reason-policy RESOLVED (P1-G1 canon, supersedes any "both approve and reject" wording):** typed reason REQUIRED on **reject and override**; approve = optional structured quick-reason chips + optional note. The shipped mock (GateReviewShell + Gates queue, build #12) already complies.
 
 12. **[MED] Accountability matrix component naming forked.** fireup-people-slack lifts PodView's matrix into `AccountabilityMatrix`; monitor-governance-accountability adds `GateOwnershipCell`/`RiskStrip`/`SlaStatusPill` to PodView directly; xcut-roles adds `MembersStrip`/`InviteDialog` to PodView; fireup-people-slack ALSO has `InviteByEmailDialog`. **Two invite dialogs (`InviteByEmailDialog` vs `InviteDialog`) for the same flow on the same `/pod` component.** Pick one. And confirm `/pod` = one component serving People & Roles (FIRE UP), Accountability (MONITOR), wizard step 4, and Members & Invites — that's four entry framings on one PodView; the assembler needs a single component contract.
 
@@ -1420,6 +1542,7 @@ New datasets the specs introduce:
 - `src/mock/podControl.ts` — `PodControlState` + pause/resume helpers (run-command-center). Clean.
 - `economics.ts` extensions — `budget`, `plan`, `budgetAlerts`, `usageStatements` + `projectedMonthlyRunRate`/`budgetCapMonthly`. **Note:** run-command-center adds `projectedMonthlyRunRate`/`budgetCapMonthly` to the economics *summary*; monitor-roi-billing adds a `budget` *object* with `projectedMonthlyUsd`/`monthlyCapUsd`. **Two names for projected-run-rate and cap.** Unify on the `budget` object.
 - `src/mock/governance-moat.ts` — `structuralValidators`, `llmSignals`, `structuralReadiness` (monitor-governance). Clean.
+- `src/mock/gate-policies.ts` — `GatePolicy`, `AutonomyPromotion`, `autoClearPreview` (added by the P1-G1 gate-policies/autonomy pass; consumed by Gates rows, the gate-review header, Settings, and the `/governance` overrides KPI). Clean — single owner.
 - `src/mock/specReview.ts` (or in trace.ts) — `specValidators(ticket)`, `earsCriteria(ticket)` (run-pipeline-gates Spec Review). **Overlaps** `governance-moat.ts structuralValidators` — the Spec Review per-ticket validators and the Governance fleet-level validators share the same check vocabulary (BA's real registry ids: `V1_ears_coverage`, `V2_missing_section`, `V4_ac_id_parity`, `V5_br_references`, `V6_eh_message_parity`, `V7_decision_confidence_parity`, `V8_metadata_header`, `V9_duplicate_ids` — V3 retired; both seed 8/8). **Define the check-id enum once and share it.**
 - `src/mock/incidents.ts` — `Incident`, `RecoveryActionKind`, `IncidentEvent` + helpers (run-comms-incidents). Clean; ownership of `incidentIdFor` (#16).
 - `src/mock/sla.ts` — `SlaDefinition`, `SlaBreach` (monitor-sla). **Conflicts with** xcut `SlaTarget` (#15).
@@ -1429,6 +1552,9 @@ New datasets the specs introduce:
 - `src/mock/invites.ts` — `PendingInvite` (xcut-roles). **Duplicate of** fireup-people `Invite`/`pendingInvites` (#12).
 - `src/mock/tenancy.ts` — `Tenancy`, `ConnectorScope`, `Retention` (xcut Settings). **Conflicts** (#13, #14).
 - `src/mock/samplePod.ts` — `SAMPLE_POD` selector (xcut sandbox). Clean.
+- **Wave-2 additions (specced, not yet built):** `src/mock/code-integration.ts` (two seeded PRs + the gate↔PR mirroring rule — Blind spot 3), `memory.ts` (P1-A2), `pilot.ts` (P1-C3), `artifacts.ts` (Blind spot 4), `share.ts` (P1-H4), `status.ts` (Blind spot 5), `copilot.ts` (P1-A1) — owned by the wave-2 specs above; shapes in the appendix.
+
+**As-built file-name mapping (mock shipped through build #12 — commits `f76ee4a` + `69014e0`):** `validatorChecks.ts` landed as **`src/mock/validators.ts`**; `specReview.ts` landed as **`src/mock/gate-detail.ts`**; the `economics.ts` billing extensions (`plan`/`budgetAlerts`/`usageStatements`) landed as **`src/mock/billing.ts`**; the `tickets.ts` client-backlog extension landed as **`src/mock/backlog.ts`**; the `CatalogFacet` location decision went to **`src/mock/catalog.ts`**; `pods.ts` + the `fireup.ts` draft state landed as **`src/lib/pods/pod-store.tsx`** (localStorage `aiops_pods_v1`). Shipped as named: `chain.ts`, `connectors.ts`, `blueprints.ts`, `incidents.ts`, `notifications.ts`, `sla.ts`, `report.ts`, `roles.ts`, `intake.ts`, `governance-moat.ts`. Still planned: `tenancy.ts`, `podControl.ts`, `gate-policies.ts`, `invites.ts`, `samplePod.ts`, `audit-bridge.ts`, `modelPlane.ts`, `demoDirector.ts` + the wave-2 set.
 
 **`humans.ts` extensions requested by 4 clusters — reconcile into one edit:** invite fields (`email,status,invitedAtIso,inviteLink`) from fireup-people; `workload.openGates`/`overdueGates` + `slaStatusFor()` from monitor-governance; `decisionsToday`/`avgApprovalMin` referenced by compliance; `sponsor` member from xcut-roles. **The assembler must apply these as one coherent `Human`/`workload` shape, not four separate patches.**
 
@@ -1447,16 +1573,16 @@ The demo arc (§1, lines 22-26) is well-covered scene-by-scene, and every beat h
 ---
 
 #### Top fixes the assembler must apply, in order
-1. **Unify the wizard route** (`/fire-up/new/*`) and rewrite all cross-links (#2).
+1. **Unify the wizard route** and rewrite all cross-links (#2). ✅ **DONE as-built:** `/pods/new?step=…` (`src/routes/pods.new.tsx`).
 2. **Collapse duplicate mock files into `fireup.ts`**: kill `podDraft.ts`, fold `slack-wiring.ts` + `pod-setup.ts`; canonicalize `PodDraft`/`SlackWiring` (#mock-inventory, #19).
 3. **Canonicalize connector shape** (`connectors.ts`) + normalize connector ids; derive Settings/draft/readiness from it (#14).
 4. **Unify tenancy shape** (`tenancy.ts` as source) (#13).
 5. **Unify SLA shape** (`SlaDefinition`, derive `SlaTarget`) and the `budget` object (#15, economics note).
-6. **Dedupe the three role-landing specs and the two ⌘K specs** into one each (#9, #10).
+6. **Dedupe the three role-landing specs and the two ⌘K specs** into one each (#9, #10). *(⌘K + bell halves DONE as-built — one `CommandPalette`, one `NotificationBell` in `src/components/shell/`; role-landing dedupe still open.)*
 7. **Share the Decision/ActorChip/Validator component+check-id families** across gates/mobile/compliance/governance (#11, specReview/governance-moat).
 8. **Seed the demo spine once** — `AM-142` ticket + its spec + clarification gate + approval gate + notification, `AM-138` escalation+incident — and verify continuity FIRE UP→RUN→MONITOR (#19, #20).
 9. **Decide the mock-action→audit-ledger bridge** so pause/recover show up in Compliance (#21).
-10. **Add the missing ADVANCED-drawer spec and resolve `/knowledge`** (#1, #3); add `LAUNCH_STEPS.failable`, the two agent stubs, and a one-line a11y/help note as known tail gaps (#5, #6, #4).
+10. **Add the missing ADVANCED-drawer spec and resolve `/knowledge`** (#1, #3) — *`/knowledge` RESOLVED: folds into `/memory` (wave 2); the ADVANCED-drawer REUSE spec remains open*; add `LAUNCH_STEPS.failable`, the two agent stubs, and a one-line a11y/help note as known tail gaps (#5, #6, #4).
 
 
 ---
@@ -1465,15 +1591,21 @@ The demo arc (§1, lines 22-26) is well-covered scene-by-scene, and every beat h
 
 *Auto-consolidated across clusters: the shared components to build once, and the de-duplicated new mock-data shapes. Per-screen detail lives in the pillar sections above.*
 
-| **`InviteDialog`** | `src/components/pod/` | wizard People step; Members & Invites (`/pod`) | Single invite dialog (supersedes `InviteByEmailDialog`). Props: `email`, `roleId`, optional `assignedAgentId`; writes `invites.ts: PendingInvite`. |
-| **Decision family: `DecisionPanel` + `RequiredReason` + `DecisionRow` + `ActorChip`** | `src/components/gates/` (Decision/reason) + `src/components/compliance/` (DecisionRow/ActorChip) | Gates inline (`/approvals`); Spec Review (`/approvals/$gateId`); Mobile Gates (`/m/gates`); Compliance (`/compliance`); Accountability decision drawer | `RequiredReason` enforces a typed note on **both** approve and reject. `ActorChip` renders attributed-or-"when-only". One family, imported everywhere. |
+| Component (family) | Home | Used by | Notes |
+|---|---|---|---|
+| **`GateReviewShell`** | `src/components/gates/` | Gate review (`/approvals/$gateId`, route file `approvals_.$gateId.tsx`); `/welcome` walkthrough (read-only mode) | The client-grade review surface — one shell, per-kind facet renderers. **P1-H2 rename `SpecReviewShell` → `GateReviewShell`: DONE as-built** (`GateReviewShell.tsx` + `DecisionPanel`/`EarsCriteriaList`/`SpecDocument`). `HumanGate` is **demoted to the legacy mock command-center** — never the review surface. |
+| **`NotificationBell`** | `src/components/shell/` (host) — spec owned by the CROSS-CUTTING bell cluster | TopBar, every route | Exactly ONE bell (P1-H2). As-built: `src/components/shell/NotificationBell.tsx`. |
+| **`RoiHero` family** | `src/components/monitor/` | Command Center hero row, `/economics` hero band, Exec Digest, `/org` rollup | One implementation set (P1-H2 — supersedes the `RoiHeroTile`-vs-`HeroKpi` fork). As-built: **`RoiHeroTile` / `RoiHeroBand` / `RoiHeroRow`** + `RoiAssumptionsDialog`/`useRoiAssumptions`. |
+| **`InviteDialog`** | `src/components/pod/` | wizard People step; Members & Invites (`/pod`) | Single invite dialog (supersedes `InviteByEmailDialog`). Props: `email`, `roleId`, optional `assignedAgentId`; writes `invites.ts: PendingInvite`. *(As-built: `src/components/fireup/InviteDialog.tsx`.)* |
+| **Decision family: `DecisionPanel` + `RequiredReason` + `DecisionRow` + `ActorChip`** | `src/components/gates/` (Decision/reason) + `src/components/compliance/` (DecisionRow/ActorChip) | Gates inline (`/approvals`); Spec Review (`/approvals/$gateId`); Mobile Gates (`/m/gates`); Compliance (`/compliance`); Accountability decision drawer | `RequiredReason` enforces a typed note on **reject and override** (P1-G1 canon, as-built); **approve** offers optional structured quick-reason chips + an optional note. `ActorChip` renders attributed-or-"when-only". One family, imported everywhere. |
+| **`GatePolicyChip` + `GatePolicyTable` + `AutonomyLadder`** | `src/components/gates/` (chip) + `src/components/settings/` (table/ladder) | Gate rows (`/approvals`); gate-review header (`/approvals/$gateId`); Settings → Gate policies & autonomy | All read `gate-policies.ts` (P1-G1). Policy edits and autonomy grants write `policy.changed` via the audit bridge; `/governance` derives the "Overrides this period" KPI from `gate.override` rows. |
 | **Structural validator panels + shared check-id enum** | `src/components/governance/` (`DeterministicValidatorPanel`, `LlmJudgePanel`) + a shared `validatorChecks.ts` enum | Governance (`/governance`); Spec Review; QA Gate Queue; Mobile Gates chips | The check-id enum is **BA's real validator registry** (`V1_ears_coverage`, `V2_missing_section`, `V4_ac_id_parity`, `V5_br_references`, `V6_eh_message_parity`, `V7_decision_confidence_parity`, `V8_metadata_header`, `V9_duplicate_ids` — V3 retired), defined once; both fleet-level (`governance-moat.ts`) and per-ticket (`specValidators`) draw from it and seed **8/8**, so names match across the RUN gate and the 2:45 close. |
 | **`ConnectorTile` + `ConnectDialog` + `LiveRoadmapBadge` + `ConnectorScopeList` + `ConnectorHealthLine`** | `src/components/connectors/` | Connect Tools (wizard step 3); Connections Hub (`/connections`); Incidents reauth-tool; Settings tools table | All read `connectors.ts`. `probeConnectorFn` extends `probeAgentFn`. |
 | **`EmptyState({ icon, title, body, cta? })`** | `src/components/ui/` (or `shell/`) | every data-bearing view | The single empty-state primitive (supersedes `EmptyFleet` and all bespoke empty cards). |
 | **`FilterBar` + `useListFilter<T>`** | `src/components/shell/` | `/pipeline`, `/approvals`, `/compliance` | Reads/writes URL search params; deep-link targeting highlights the row. |
 | **`PodControlBar` + `PausedOverlay` + `AgentActionsMenu` + `EscalationsPanel`** | `src/components/command-center/` | Command Center | Drive off `podControl.ts`; mutations append to the client-side audit bridge. |
-| **`ReadinessGauge` (conic `Ring`)** | `src/components/fire-up/` | Readiness step; reusable progress ring | Lifted from the `Ring` pattern in `RealCommandCenter.tsx`. |
-| **`WizardShell` + `WizardStepper` + `WizardFooterNav` + `useWizardDraft`** | `src/components/fire-up/` | the whole `/fire-up/new` family | Owns `PodDraft` state, per-step validity, cookie/localStorage persistence. |
+| **`ReadinessGauge` (conic `Ring`)** | `src/components/fireup/` (as-built dir) | Readiness step; reusable progress ring | Lifted from the `Ring` pattern in `RealCommandCenter.tsx`. |
+| **`WizardShell` + `WizardStepper` + `WizardFooterNav` + `useWizardDraft`** | `src/components/fireup/` (as-built) | the whole `/pods/new?step=…` family | Owns `PodDraft` state, per-step validity, cookie/localStorage persistence (as-built: `pod-store.tsx`, `aiops_pods_v1`). |
 | **Client-side audit bridge (`appendAuditMock`)** | `src/mock/audit-bridge.ts` | pause/resume (`podControl`), `recoverIncident`, `pod.launched`, report "Mark as sent", ledger export | In mock mode, appends an `AuditEntry`-shaped row to a client-side array that Compliance Section A renders, so "pause pod → see it in Compliance" works without POSTing to live Supabase (coverage review #21). |
 
 ---
@@ -1495,8 +1627,10 @@ export interface Pod {
   // the full Tenancy record lives in tenancy.ts (single source).
 }
 export const pods: Pod[];        // seed: AutoMarket (live, Sample), Listr (live), Kasa (setup)
+// Pod.status:"setup" ⇔ PodDraft.status:"draft" — a "setup" pod IS the live projection of a mid-wizard
+// PodDraft; selecting it resumes /pods/new?step= at its last step. (The one-line mapping per P2.)
 ```
-Active pod id stored in the existing `aiops_project` cookie.
+Active pod id stored in the existing `aiops_project` cookie. *(As-built: `pods.ts` + the draft state are unified in `src/lib/pods/pod-store.tsx`, persisted to localStorage `aiops_pods_v1`.)*
 
 ##### `src/mock/tenancy.ts` — single source of truth for tenancy (resolves #13)
 ```ts
@@ -1524,6 +1658,9 @@ export interface PodBlueprint {
   agentIds: AgentId[]; suggestedConnectorIds: string[];   // connector ids (normalized)
   defaultSlas: { responseMin: number; gateClearMin: number; deliveryCadence: string };
   recommendedRoles: { agentId: AgentId; roleLabel: string }[];
+  language: string;   // default working language (Blind spot 7) — "specs, reports, and gates are produced
+                      // in this language"; EARS keywords stay English as a structural convention
+                      // (the validators check structure), body text localized
 }
 export const blueprints: PodBlueprint[];
 // Seeds: web-app [ba,sa,uiux,tasklist,dev,review,qa] / [teamwork,slack,github,jira,drive] {30,240,"weekly"} popular;
@@ -1551,6 +1688,7 @@ export const EDGES: { from: AgentId; to: AgentId; artifact: ArtifactKind }[];   
 export interface PodDraft {
   id: string; name: string;
   blueprintId: "web-app" | "mobile" | "maintenance" | "scratch" | null;
+  language: string;                                 // working language (Blind spot 7) — defaults from the blueprint
   tenancy: Pick<Tenancy, "deployment" | "region" | "isolation">;  // reference/subset of tenancy.ts
   agentIds: AgentId[];
   connections: ConnectionDraft[];
@@ -1561,6 +1699,7 @@ export interface PodDraft {
   accountability: Record<AgentId, string | null>;   // humanId or null (single source; no pod-setup.ts)
   slack: SlackWiring;
   slas: { responseMin: number; gateClearMin: number; deliveryCadence: string };
+  budget: { monthlyCapUsd: number; onCapReached: "alert" | "pause-new-work" | "hard-pause" };  // set by the Go live "Targets & budget" panel (sub-screen 6a)
   stepStatus: Record<1|2|3|4|5|6, "todo" | "current" | "done" | "error">;
   status: "draft" | "launching" | "live";
   updatedAt: number;
@@ -1576,7 +1715,11 @@ export interface SlackWiring {                       // canonical (resolves the 
   mappings: { event: "clarification" | "approval" | "escalation" | "daily-brief"; channel: string }[];
 }
 export interface ReadinessCheck {                    // derived by computeReadiness, not stored
-  id: "agents" | "accountability" | "tools" | "slack" | "knowledge";
+  id: "agents" | "accountability" | "tools" | "slack" | "budget" | "sla_targets" | "coverage" | "code_integration" | "knowledge";
+  // budget + sla_targets: required, satisfied by the Go live "Targets & budget" panel (6a)
+  // coverage: advisory (P1-O1) — derived from humans.ts workingHours/availability
+  // code_integration: advisory (Blind spot 3) — "Bot collaborator invited · branch-protection compatible",
+  //   rendered only when GitHub is connected; reads code-integration.ts
   label: string; status: "pass" | "blocked" | "warn" | "pending";
   severity: "required" | "advisory"; detail: string; fixRoute: string;
   items?: { label: string; ok: boolean }[];
@@ -1626,9 +1769,13 @@ export function resumeAgent(id: AgentId): void;
 
 ##### `src/mock/incidents.ts` — owns `incidentIdFor` (resolves #16)
 ```ts
-export type IncidentType = "agent-down" | "run-failed" | "gate-overdue" | "tool-disconnected" | "sync-stale";
+export type IncidentType = "agent-down" | "run-failed" | "gate-overdue" | "tool-disconnected" | "sync-stale" | "suspicious-input";
+// suspicious-input (Blind spot 6): ingested external content that trips the injection heuristics surfaces
+// as an incident (quarantined for human review) — pairs with the Spec Review input-provenance chip.
 export type IncidentStatus = "open" | "recovering" | "resolved";
-export type RecoveryActionKind = "retry-run" | "resume-run" | "reauth-tool" | "reassign-human" | "pause-agent" | "restart-agent";
+export type RecoveryActionKind = "retry-run" | "resume-run" | "reauth-tool" | "reassign-human" | "pause-agent" | "restart-agent" | "escalate-to-q";
+// escalate-to-q (P1-O3): files a Q-side ticket with the incident timeline attached; tracked in-pod; audited.
+// reassign-human (P1-O1): pending until the new human ACCEPTS — writes human.reassigned, then accountability.accepted.
 export interface IncidentEvent {
   id: string; tsOffsetMin: number;
   kind: "detected" | "notified" | "auto-attempt" | "human-action" | "recovery-failed" | "resolved";
@@ -1648,7 +1795,8 @@ export const incidentsByType: () => Record<IncidentType, Incident[]>;
 export const incidentById: (id: string) => Incident | undefined;
 export const incidentIdFor: (esc: Escalation) => string | null;   // consumed by /comms
 export function recoverIncident(id: string, action: RecoveryActionKind, reason?: string): AuditEntryLike;  // pushes events + appendAuditMock
-// Seeds ~6–7 incl. AM-138 design-stale → marin, GitHub tool-disconnected (critical), HubSpot/Drive sync-stale, one resolved.
+// Seeds ~7–8 incl. AM-138 design-stale → marin, GitHub tool-disconnected (critical), HubSpot/Drive sync-stale,
+// one resolved, and ONE suspicious-input ("ticket AM-151 contains instruction-shaped content — quarantined").
 ```
 
 ##### `src/mock/sla.ts` — single SLA shape; Exec Digest derives `SlaTarget` (resolves #15)
@@ -1660,6 +1808,7 @@ export interface SlaDefinition {
   scope: "pod" | Stage; targetValue: number; unit: "min" | "hr" | "per_week" | "pct";
   comparator: "lte" | "gte"; actualValue: number; status: SlaStatus;
   breachCount30d: number; trend: number[]; lastBreachAt?: number;
+  clockMode: "24x7" | "coverage_hours";   // P1-O1: coverage_hours pauses the clock outside the accountable human's workingHours ("clock paused outside coverage")
 }
 export interface SlaBreach {
   id: string; slaId: string; occurredAt: number; actualValue: number; targetValue: number;
@@ -1667,6 +1816,8 @@ export interface SlaBreach {
 }
 export const slaDefinitions: SlaDefinition[];   // ~6 over AutoMarket, 1–2 breached
 export const slaBreaches: SlaBreach[];           // ~8, referencing AM-138/AM-149
+export const throttlePolicy: { maxOpenGatesPerHuman: number; onExceed: "pause-intake" };
+// P1-O1: when a human's open gates exceed the cap, upstream intake pauses — amber "throttled" pod state on PodControlBar; the pause is audited.
 // Exec Digest projects SlaTarget { id; label; targetMin; actualMin; breached } from SlaDefinition — no separate file.
 ```
 
@@ -1698,17 +1849,55 @@ export const llmSignals: LlmSignal[];
 export const structuralReadiness: { pct: number; blocking: number };
 ```
 
-##### `src/mock/specReview.ts` (or fold into `trace.ts`) — shares the check-id enum
+##### `src/mock/gate-policies.ts` — the policy layer behind the gates (P1-G1)
+```ts
+export type ReviewMode = "full" | "batch" | "auto-with-sampling";
+export type AutonomyLevel = "L0_review_all" | "L1_batch" | "L2_sample_1_in_5" | "L3_auto_low_risk";
+export interface GatePolicy {
+  artifactKind: ArtifactKind;            // from chain.ts
+  requiredRole: Role["id"][];            // who may clear this gate class
+  nEyes: 1 | 2;                          // N-eyes requirement
+  slaClearMin: number;                   // clearance SLA for this gate class
+  delegation: "delegate-allowed" | "accountable-only";
+  overridePolicy: "reason-required" | "second-approver";   // overrides ALWAYS write gate.override with a typed reason
+  reviewMode: ReviewMode;
+  autonomy: AutonomyLevel;
+}
+export const gatePolicies: GatePolicy[];       // seeded from blueprint defaults (spec gate: PM · 1-eye · ≤4h · L0 review-all)
+export interface AutonomyPromotion {           // the earned-autonomy ladder, L0 → L3
+  agentId: AgentId; from: AutonomyLevel; to: AutonomyLevel;
+  criteria: string;                            // deterministic validator streaks, e.g. "47 consecutive 8/8 specs · 4% rejection"
+  state: "proposed" | "granted" | "declined";  // proposed by the SYSTEM; GRANTED by the accountable human; grant written to the ledger as policy.changed
+}
+export const autonomyPromotions: AutonomyPromotion[];  // seed: BA proposed for L2 (the streak above)
+export function autoClearPreview(p: GatePolicy): { wouldHaveCleared: number; of: number; savedHrs: number };
+// powers the Settings preview stat: "this policy would have auto-cleared 14 of 22 gates last week, saving ~9h"
+// Consumed by: GatePolicyChip on /approvals rows + the gate-review header; Settings → Gate policies & autonomy;
+// /governance "Overrides this period" KPI counts gate.override rows in audit-bridge.ts.
+```
+
+##### `src/mock/specReview.ts` — shares the check-id enum *(as-built file name: `src/mock/gate-detail.ts`)*
 ```ts
 export function specValidators(ticket: Ticket): {
   score: number;
   checks: { id: ValidatorCheckId; label: string; kind: "structural"; status: "pass" | "warn" | "fail"; detail: string; deterministic: true }[];
 };
 export function earsCriteria(ticket: Ticket): { id: string; text: string; trigger: string; response: string; measurable: boolean; valid: boolean }[];
+// earsCriteria() binds to BA's real `/structured-ac` endpoint (the spec `structured` block) once live — the mock mirrors its shape.
+export function agentSelfReport(ticket: Ticket): {        // the "Agent's notes" panel (P1-A3)
+  assumptions: { id: string; text: string }[];            // flaggable rows — flagging one pre-fills the reject reason
+  openQuestions: string[];
+  sectionConfidence: { section: string; confidence: "low" | "med" | "high" }[];   // per-section confidence dots
+  citations: { label: string; sourceId: string }[];       // deep-link into knowledge/constitution sources
+};  // rendered badged "Self-reported by the agent · advisory" — a third walled signal class (never blended with deterministic or LLM-advisory)
+export function runStory(ticket: Ticket): { ts: number; kind: "source-read" | "clarification" | "check" | "cost"; label: string }[];
+// plain-language run timeline (sources read, clarifications, checks run, cost) — feeds the weekly report ("every delivered item links to its run story")
+export function inputProvenance(ticket: Ticket): { source: string; kind: "external" | "internal"; trusted: boolean }[];
+// the Spec Review input-provenance chip ("external content treated as untrusted")
 // Keys off AM-142 for the demo spine.
 ```
 
-##### `src/mock/validatorChecks.ts` — the shared check-id enum (resolves the specReview/governance-moat overlap)
+##### `src/mock/validatorChecks.ts` — the shared check-id enum (resolves the specReview/governance-moat overlap) *(as-built file name: `src/mock/validators.ts`)*
 ```ts
 // BA's REAL validator registry ids — mirrors `_STRUCTURAL_CHECK_IDS` in the BA repo
 // (agents/ba/pipeline/validators.py). 8 zero-LLM structural validators; V3 (open-question
@@ -1787,9 +1976,27 @@ export const SAMPLE_POD: { id: "automarket-sample"; name: string; badge: "Sample
 
 ##### `src/mock/audit-bridge.ts`
 ```ts
-export interface AuditEntryLike { action: string; target?: string; actor: string | null; ts: number; decision?: "approved" | "rejected"; reason?: string | null; gate_kind?: "approval" | "clarification"; }
-export const mockAuditLog: AuditEntryLike[];        // client-side array
-export function appendAuditMock(e: AuditEntryLike): void;   // pause/recover/launch/report-send/export append here
+// The audit ACTION VOCABULARY (P1-G4) — defined once, here. "Every action is written to the
+// ledger" must cover more than two verbs: policy mutations, clarification answers, overrides,
+// acceptances, and amendments are all first-class action classes.
+export type AuditAction =
+  | "pod.launched" | "pod.paused" | "pod.resumed"
+  | "agent.paused" | "agent.resumed"
+  | "gate.approved" | "gate.rejected" | "gate.override"
+  | "clarification.answered"
+  | "incident.recovered" | "human.reassigned" | "accountability.accepted"
+  | "policy.changed"            // payload { field, before, after }
+  | "constitution.amended"
+  | "report.sent" | "data.exported" | "reset";
+export interface AuditEntryLike {
+  action: AuditAction; target?: string; actor: string | null; ts: number;
+  decision?: "approved" | "rejected"; reason?: string | null; gate_kind?: "approval" | "clarification";
+  payload?: { field: string; before: string; after: string };   // for policy.changed
+}
+export const mockAuditLog: AuditEntryLike[];        // client-side array; seed incl. 3–4 policy.changed rows
+                                                    // (budget cap raised, approver channel rewired, retention change, autonomy grant L0→L1)
+export function appendAuditMock(e: AuditEntryLike): void;   // pause/recover/launch/policy-edit/report-send/export append here
+// Compliance filter buckets map over this enum: All / Decisions / Policy changes / Recovery / Pod control / Resets.
 // Compliance Section A renders this in mock mode, so "pause pod → see it in Compliance" works without live Supabase (#21).
 ```
 
@@ -1826,6 +2033,29 @@ export function openIncident(id: string): void;
 // Ships later as the guided Sample-pod onboarding tour — demo infra and onboarding are one artifact.
 ```
 
+##### `src/mock/code-integration.ts` — the code-side integration model (Blind spot 3)
+```ts
+export interface BotGitIdentity { account: string /* "agencyos-bot" */; signedCommits: true; coAuthoredBy: string /* the accountable human */; }
+export interface SeededPr {
+  id: string; repo: string; number: number; title: string;
+  ticketId: string;                 // AM-131 / AM-149 (the seeded run-failed pair)
+  gateId: string;                   // the code-review gate this PR MIRRORS
+  description: { specLink: string; gateId: string; validatorSummary: string };  // the PR contract — in EVERY PR body
+  state: "open" | "merged";
+  branchProtectionCompatible: boolean;   // drives the FIRE UP readiness check
+}
+export const botIdentity: BotGitIdentity;
+export const seededPrs: SeededPr[];     // exactly TWO seeds (one open, one merged)
+// GATE↔PR MIRRORING RULE: the code-review gate IS the GitHub PR review — a webhook resolves the gate;
+// the dashboard shows status + deep-links out. The deliberate INVERSE of the spec gate (engineers live
+// in GitHub; PMs live here) — justified per persona. Consumed by: the FIRE UP readiness check
+// ("Bot collaborator invited · branch-protection compatible") and the Pipeline code-review column status.
+```
+
+#### Wave-2 NET-NEW files (specced above — not yet in the mock)
+
+Compact shapes; each is owned by its wave-2 spec. `memory.ts` — `ConstitutionRule { id; text; category; provenance: "blueprint"|"client"|"ratified-amendment"; ratifiedAt?; citedByGateIds[] }` + `AmendmentProposal { id; draftText; minedFrom: { rejectionGateIds[]; clusterLabel }; state }` (ratify → `constitution.amended`). `pilot.ts` — `PilotPlan { podId; startIso; endIso; criteria[]; weekly[]; baseline; conversion }` (fees labeled *pricing hypothesis*). `artifacts.ts` — `ArtifactSnapshot { id; kind: ArtifactKind; ticketId; title; version; approvedByGateId; approvedAt; contentRef; snapshotAt }` + `artifactVersions()` (**snapshot-at-gate-clearance rule** — control-plane `ArtifactSnapshot`). `share.ts` — `ShareLink { token; kind; targetId; createdBy; createdAt; expiresAt; state: "active"|"expired"|"revoked"; views[] }` (view audited as `data.exported`). `status.ts` — `StatusComponent { id; label; state; since?; lastIncidentAt? }` + `uptimeDays[]` + `platformSla { uptimeTargetPct; ledgerRpoMin }`. `copilot.ts` — `CopilotAnswer { q; answerMd; receipts[] }` + `ProposedAction { intent; target; auditPreview: AuditEntryLike }` (no LLM in the mock).
+
 #### EXTEND existing files
 
 ##### `src/mock/agents.ts` — add `CatalogFacet` + two agent stubs
@@ -1849,10 +2079,17 @@ export const catalogFacets: Record<AgentId, CatalogFacet>;   // produces/consume
 ##### `src/mock/humans.ts` — one coherent edit (reconciles the 4-cluster requests)
 ```ts
 // On Human: email?, status?: "org" | "invited" | "active", invitedAtIso?, inviteLink?
+// Capacity & coverage (P1-O1): workingHours?: { tz: string; start: string; end: string; days: number[] },
+//   availability?: "available" | "ooo"   // P1-O1's "status available|ooo" — renamed `availability` to avoid
+//                                        // colliding with the invite-lifecycle `status` field above,
+//   delegateId?: string | null,          // deputy: covers, never owns — "one A" stays the invariant
+//   capacityGatesPerDay?: number         // drives People-step capacity hints + the throttle policy
 // On Human.workload: openGates: number, overdueGates: number
 //   (decisionsToday, avgApprovalMin, slaBreaches already used by Compliance/Accountability)
 // ADD member: client-sponsor (role sponsor)
 export const slaStatusFor: (agentId: AgentId) => "on_track" | "at_risk" | "breached";  // Marin/Ivan at-risk/breached, rest on-track
+// Consumed by: CoverageTimeline + DeputyChip (/pod), PersonCard capacity hints (People step),
+// the Readiness "coverage" advisory, and SlaDefinition.clockMode ("coverage_hours").
 ```
 
 ##### `src/mock/approvals.ts` — add clarification gates
@@ -1866,7 +2103,7 @@ export const clarificationGates: ClarificationGate[];
 // Seed the AM-142 clarification once; link from Wire-Slack preview, the bell, and the Gates queue (#20).
 ```
 
-##### `src/mock/economics.ts` — add `budget`, `roiAssumptions`, `aggregates.pricePaidUsd`, `plan`, `budgetAlerts`, `usageStatements` (single `budget` object; resolves the projected-run-rate/cap naming fork)
+##### `src/mock/economics.ts` — add `budget`, `roiAssumptions`, `aggregates.pricePaidUsd`, `plan`, `budgetAlerts`, `usageStatements` (single `budget` object; resolves the projected-run-rate/cap naming fork) *(as-built: the billing trio — `plan`/`budgetAlerts`/`usageStatements` — landed in `src/mock/billing.ts`; `budget`/`roiAssumptions`/`pricePaidUsd` in `economics.ts`)*
 ```ts
 // CANONICAL METRIC TRIO — every ROI surface (Command Center hero, /economics, Exec Digest, reports)
 // renders exactly: humanHoursDisplaced · costPerMerged · costPerStoryPoint.
@@ -1885,19 +2122,18 @@ export const roiAssumptions: {
   source: "client-provided" | "Q-default";      // provenance — editable from the ROI hero ("your numbers, not ours")
 };
 // on aggregates: pricePaidUsd: number — plan fees this period; roiMultiple derives net of this, never from raw compute cost.
-export const plan: {
-  name: "Growth"; tenancy: "Dedicated"; monthlyPlatformFeeUsd: number;
-  includedUnits: number; unitName: "delivery unit"; usdPerUnit: number;
-  billingPeriodStart: string; billingPeriodEnd: string;
-};
-export const budgetAlerts: { id: string; label: string; thresholdPct: number; channel: "email" | "in_app" | "slack"; enabled: boolean; state: "armed" | "triggered"; triggeredAt: string | null }[];
-export const usageStatements: { periodId: string; label: string; itemsDelivered: number; unitsConsumed: number; platformFeeUsd: number; consumptionUsd: number; totalUsd: number; status: "current" | "paid" | "estimated" }[];  // 3–4 trailing (Mar–Jun 2026)
+// Billing shapes live in src/mock/billing.ts AS-BUILT (imports economics; avoids a cycle). §9.5-aligned — no "delivery unit", no fixed price:
+// plan: BillingPlan (Dedicated tenant · pilot — pricing-hypothesis framing, pricing-TBD note)
+// budget: Budget; budgetAlerts: BudgetAlert[] (thresholdPct, channel, armed|triggered)
+// usageStatements: UsageStatement[] w/ StatementLineItem[] each linking to a gate decision (Mar–Jun 2026 history)
+// PRICING_SIMULATOR_BADGE = "MODELING — not a quote"
+// pricingScenarios: PricingScenario[] — "platform_pod" | "outcome_per_artifact" | "outcome_per_merged" (exactly vision §9.5's three components)
 ```
 
 ##### `src/mock/tickets.ts` — seed the demo spine (resolves #19)
 - Promote in-file `extraTickets` into `tickets.ts` so the board and gates share one source.
 - Seed **`AM-142`** (in `Spec Review`, the spec→clarification→approval beat) and **`AM-138`** (design-stale, feeds the escalation/incident beat) once, so `specMd`/`specValidators`/`clarificationGates`/`notifications`/`incidents` all key off the same ids.
-- Add the **client-backlog extension** (~20 not-yet-pulled rows) that `intake.ts` and the Scope-of-Work preview filter over — the visible in/out split for the brownfield slice and Work Intake picker.
+- Add the **client-backlog extension** (~20 not-yet-pulled rows) that `intake.ts` and the Scope-of-Work preview filter over — the visible in/out split for the brownfield slice and Work Intake picker. *(As-built: the extension landed as its own file, `src/mock/backlog.ts`.)*
 
 ##### `src/mock/compliance.ts` — already has `AUDIT` (actor/decision/rationale); map `rationale`→`reason` in the Compliance view. No shape change required; the audit record is *extended* (in the view layer) with `decision?`, `reason?`, `gate_kind?` for the designed-now attribution.
 
@@ -1909,6 +2145,6 @@ export const NAV: { pillar: "FIRE UP" | "RUN" | "MONITOR" | "ADVANCED"; items: {
 
 ---
 
-**Net-new mock files (21):** `pods.ts`, `tenancy.ts`, `blueprints.ts`, `chain.ts`, `fireup.ts`, `connectors.ts`, `podControl.ts`, `incidents.ts`, `sla.ts`, `report.ts`, `governance-moat.ts`, `specReview.ts`, `validatorChecks.ts`, `notifications.ts`, `roles.ts`, `invites.ts`, `samplePod.ts`, `audit-bridge.ts`, `modelPlane.ts`, `intake.ts`, `demoDirector.ts` (+ optional `slack-wiring.ts` for channel content, `catalog.ts` if facets are split out, and the `NAV` config).
+**Net-new mock files (22 wave-1 + 7 wave-2 = 29):** wave-1 — `pods.ts`, `tenancy.ts`, `blueprints.ts`, `chain.ts`, `fireup.ts`, `connectors.ts`, `podControl.ts`, `incidents.ts`, `sla.ts`, `report.ts`, `governance-moat.ts`, `gate-policies.ts`, `specReview.ts` *(as-built: `gate-detail.ts`)*, `validatorChecks.ts` *(as-built: `validators.ts`)*, `notifications.ts`, `roles.ts`, `invites.ts`, `samplePod.ts`, `audit-bridge.ts`, `modelPlane.ts`, `intake.ts`, `demoDirector.ts` (+ optional `slack-wiring.ts` for channel content, `catalog.ts` if facets are split out — *as-built chose `catalog.ts`* — and the `NAV` config); wave-2 (specced, not yet built) — `code-integration.ts`, `memory.ts`, `pilot.ts`, `artifacts.ts`, `share.ts`, `status.ts`, `copilot.ts`. As-built additions outside the planned list: `backlog.ts` (the tickets client-backlog extension as its own file), `billing.ts` (the economics billing trio); `pods.ts` + the draft state landed as `src/lib/pods/pod-store.tsx` (localStorage `aiops_pods_v1`).
 **Extended existing files (6):** `agents.ts`, `humans.ts`, `approvals.ts`, `economics.ts`, `tickets.ts`, `compliance.ts` (view-layer map only).
 **Deliberately NOT created** (deduped per coverage review): `podDraft.ts` (→ `fireup.ts`), `pod-setup.ts` (→ `PodDraft.accountability` + `invites.ts`), a separate SLA `SlaTarget` file (→ projected from `sla.ts`), a `ConnectorScope` shape in `tenancy.ts` (→ derived from `connectors.ts`), `defaultLandingFor` (→ `roles.ts landingFor`), a second `⌘K` component, a second invite dialog, bespoke per-view empty cards (→ `EmptyState`).
