@@ -15,6 +15,7 @@ import { Route as StatusRouteImport } from './routes/status'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PodRouteImport } from './routes/pod'
+import { Route as PitchRouteImport } from './routes/pitch'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as OrgRouteImport } from './routes/org'
@@ -72,6 +73,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const PodRoute = PodRouteImport.update({
   id: '/pod',
   path: '/pod',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PitchRoute = PitchRouteImport.update({
+  id: '/pitch',
+  path: '/pitch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PipelineRoute = PipelineRouteImport.update({
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/org': typeof OrgRoute
   '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
+  '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/org': typeof OrgRoute
   '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
+  '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/org': typeof OrgRoute
   '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
+  '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
     | '/org'
     | '/pilot'
     | '/pipeline'
+    | '/pitch'
     | '/pod'
     | '/reports'
     | '/settings'
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/org'
     | '/pilot'
     | '/pipeline'
+    | '/pitch'
     | '/pod'
     | '/reports'
     | '/settings'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/org'
     | '/pilot'
     | '/pipeline'
+    | '/pitch'
     | '/pod'
     | '/reports'
     | '/settings'
@@ -459,6 +471,7 @@ export interface RootRouteChildren {
   OrgRoute: typeof OrgRoute
   PilotRoute: typeof PilotRoute
   PipelineRoute: typeof PipelineRoute
+  PitchRoute: typeof PitchRoute
   PodRoute: typeof PodRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
@@ -513,6 +526,13 @@ declare module '@tanstack/react-router' {
       path: '/pod'
       fullPath: '/pod'
       preLoaderRoute: typeof PodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pitch': {
+      id: '/pitch'
+      path: '/pitch'
+      fullPath: '/pitch'
+      preLoaderRoute: typeof PitchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pipeline': {
@@ -749,6 +769,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrgRoute: OrgRoute,
   PilotRoute: PilotRoute,
   PipelineRoute: PipelineRoute,
+  PitchRoute: PitchRoute,
   PodRoute: PodRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,

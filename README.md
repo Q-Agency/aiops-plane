@@ -20,6 +20,7 @@ bun run dev          # http://localhost:3000 (or --port 5180)
 
 - **Mock / product vision:** log in as `qai@q.agency` / `demo`
 - **Real mode (live BA federation):** log in as the real-mode user; requires `BA_AGENT_URL` + audit-DB env (see `.env.example`)
+- **Management buy-in brief:** open `/pitch` — no login, print-friendly, deep-links into the demo
 
 ```sh
 bun run build        # production build
