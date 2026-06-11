@@ -274,3 +274,23 @@
   }
 }
 
+
+/* /pitch — "See it live →" pill arrow nudge (hidden in print; respects reduced motion) */
+@keyframes pitch-pill-nudge {
+  0%,
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(3px);
+  }
+}
+.pitch-pill-arrow {
+  animation: pitch-pill-nudge 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pitch-pill-arrow {
+    animation: none;
+  }
+}

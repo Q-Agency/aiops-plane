@@ -24,31 +24,33 @@ export const tickets: Ticket[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Work-intake seam (slice 2, C10) — /intake pulls land here           */
+/* Work-intake seam (slice 2, C10) — confirmed/auto-started arrivals    */
+/* land here                                                            */
 /* ------------------------------------------------------------------ */
 
 export interface AddTicketInput {
-  /** Tracker id (e.g. "AM-109"); auto-generated "AM-9xx" when composing by hand. */
-  id?: string;
+  /**
+   * Tracker id (e.g. "AM-109") — REQUIRED: every pod ticket originates on
+   * the board (the single doorbell); Agency OS never mints ticket ids.
+   */
+  id: string;
   title: string;
   priority?: Ticket["priority"];
   codebase?: Codebase;
   approver?: string;
 }
 
-let composeSeq = 900;
-
 /**
  * Mock seam for Work Intake: unshifts a new Backlog ticket into the live
- * `tickets` array (same reference every consumer reads), so pulled rows
+ * `tickets` array (same reference every consumer reads), so started rows
  * appear at the top of the Pipeline Backlog column on the next render.
  * Derived module-load datasets (approvals, economics) intentionally do NOT
- * re-derive — a freshly pulled ticket has no gates or spend yet.
+ * re-derive — a freshly started ticket has no gates or spend yet.
  */
 export function addTicket(input: AddTicketInput): Ticket {
   const ts = Date.now();
   const t: Ticket = {
-    id: input.id ?? `AM-${++composeSeq}`,
+    id: input.id,
     title: input.title.trim(),
     stage: "backlog",
     state: "idle",

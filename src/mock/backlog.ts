@@ -201,7 +201,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-111",
     title: "Chat read-receipts bug",
-    status: "In Progress",
+    status: "To Do — Refined",
     ageLabel: "14d",
     project: "AutoMarket",
     labels: ["bug"],
@@ -228,7 +228,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-114",
     title: "SEO landing pages per region",
-    status: "Backlog",
+    status: "To Do — Refined",
     ageLabel: "11d",
     project: "AutoMarket",
     labels: ["client-owned", "frontend"],
@@ -273,7 +273,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-119",
     title: "Typeahead locale support",
-    status: "Backlog",
+    status: "To Do — Refined",
     ageLabel: "4d",
     project: "AutoMarket",
     labels: ["client-owned", "frontend"],

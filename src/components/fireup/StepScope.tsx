@@ -13,10 +13,18 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Crosshair, ListFilter, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BellRing,
+  Crosshair,
+  ListFilter,
+  ShieldCheck,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -27,6 +35,16 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePods, type ScopeRule } from "@/lib/pods/pod-store";
+import { appendAuditMock } from "@/mock/audit-bridge";
+import {
+  START_POLICY_NAME,
+  TRIGGER_HONESTY,
+  TRIGGER_RULE,
+  WRITE_BACK_MAPPING,
+  setTriggerMode,
+  useTriggerMode,
+  type TriggerMode,
+} from "@/mock/trigger";
 import {
   BACKLOG,
   BACKLOG_TOTAL,
@@ -104,6 +122,7 @@ function TicketRow({ ticket, inScope }: { ticket: BacklogTicket; inScope: boolea
 export function StepScope({ connectorId = "teamwork" }: { connectorId?: ConnectorId }) {
   const { draft, updateDraft } = usePods();
   const rule = draft?.scopeRule;
+  const triggerMode = useTriggerMode();
 
   // Mocked ticket fetch — skeleton rows on first render.
   const [loading, setLoading] = useState(true);
@@ -274,6 +293,102 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
             Showing a sample of the {rule?.connectorId === "jira" ? "Jira" : "Teamwork"} board ·{" "}
             {BACKLOG.length} of {BACKLOG_TOTAL} rows
           </div>
+        </div>
+      </div>
+
+      {/* Trigger rule — what starts the pod (vision §2, the tracker boundary) */}
+      <div className="rounded-md border border-border bg-panel/40 backdrop-blur-md p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <BellRing className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+            Trigger rule · what starts the pod
+          </span>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground flex items-center gap-1.5">
+              Start column — the doorbell
+              <span className="px-1.5 py-0.5 rounded border border-dashed border-border bg-white/5 text-muted-foreground">
+                Roadmap
+              </span>
+            </div>
+            <Select value={TRIGGER_RULE.column}>
+              <SelectTrigger disabled className="h-8 bg-white/5 border-border text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TRIGGER_RULE.column} className="text-sm">
+                  {TRIGGER_RULE.column}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              A scoped ticket entering &lsquo;{TRIGGER_RULE.column}&rsquo; on &lsquo;
+              {TRIGGER_RULE.board}&rsquo; is the start signal — the ticket itself stays in your
+              tracker.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+              Start policy default · the board is the only start signal
+            </div>
+            <RadioGroup
+              value={triggerMode}
+              onValueChange={(v) => {
+                const next = v as TriggerMode;
+                if (next === triggerMode) return;
+                // Same mutation as /intake's control → same audit guarantee
+                // (vision §2: every start-policy change lands on the ledger).
+                setTriggerMode(next);
+                appendAuditMock({
+                  action: "policy.changed",
+                  detail: `intake.startPolicy: ${START_POLICY_NAME[triggerMode]} → ${START_POLICY_NAME[next]} (set in FIRE UP · Scope of work)`,
+                });
+              }}
+              className="gap-2"
+            >
+              <label className="flex items-start gap-2 cursor-pointer">
+                <RadioGroupItem value="operator" className="mt-0.5" />
+                <span className="text-xs leading-snug">
+                  <span className="text-foreground">Confirm-first — you approve each arrival</span>{" "}
+                  <span className="text-[10px] font-mono text-status-done">
+                    recommended for new pods
+                  </span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    The board starts everything; each arrival waits for the operator&rsquo;s
+                    confirmation in Work Intake — until trust is earned.
+                  </span>
+                </span>
+              </label>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <RadioGroupItem value="tracker" className="mt-0.5" />
+                <span className="text-xs leading-snug">
+                  <span className="text-foreground">
+                    Auto-start — the drag starts the chain
+                  </span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    Entering the start column starts the chain immediately — no confirmation step.
+                  </span>
+                </span>
+              </label>
+            </RadioGroup>
+          </div>
+        </div>
+
+        <div className="rounded-md border border-border bg-white/[0.03] px-3 py-2 space-y-1">
+          <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+            Write-back mapping · read-only
+          </div>
+          {WRITE_BACK_MAPPING.map((r) => (
+            <div key={r.podStage} className="flex items-center gap-2 text-[11px] font-mono">
+              <span className="text-muted-foreground w-36 shrink-0">{r.podStage}</span>
+              <ArrowRight className="size-3 text-muted-foreground/60 shrink-0" />
+              <span className="text-foreground">{r.trackerStatus}</span>
+            </div>
+          ))}
+          <p className="text-[10px] font-mono text-muted-foreground pt-0.5">{TRIGGER_HONESTY}</p>
         </div>
       </div>
 

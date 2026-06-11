@@ -1,10 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Moon, Sun, RotateCcw, Bot, User2, Repeat2, Plus } from "lucide-react";
+import { Moon, Sun, RotateCcw, Bot, User2, Repeat2, Inbox, Link2 } from "lucide-react";
+import { toast } from "sonner";
 import { useLive } from "@/hooks/useLiveTicker";
 import type { Stage, Ticket, AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
 import { accountableFor } from "@/mock/humans";
+import { appendAuditMock } from "@/mock/audit-bridge";
+import { useDemoTick } from "@/mock/demo-bus";
+import { TRIGGER_RULE, WRITE_BACK_MAPPING } from "@/mock/trigger";
+
+/** Reject canon (same floor as the gate surfaces): a typed reason is required. */
+const REJECT_REASON_MIN = 10;
 
 type ColKind = "queue" | "agent" | "review" | "done";
 interface Col {
@@ -61,16 +68,59 @@ function stageProgress(stage: Stage): number {
   return Math.round(((idx + 1) / COLS.length) * 100);
 }
 
+/* ------------------------------------------------------------------ */
+/* Tracker boundary (vision §2) — this board is the EXECUTION view.     */
+/* Tickets LIVE in Teamwork (we never create/edit/close them); we       */
+/* mirror them here and write plain status + artifact links back via    */
+/* WRITE_BACK_MAPPING (trigger.ts) so nobody is ever asked twice.       */
+/* ------------------------------------------------------------------ */
+
+const wbStatus = (needle: string, fallback: string) =>
+  WRITE_BACK_MAPPING.find((m) => m.podStage.toLowerCase().includes(needle))?.trackerStatus ?? fallback;
+const WB_PICKUP = wbStatus("pickup", "In Progress");
+const WB_GATE = wbStatus("gate", "In Review");
+const WB_DONE = wbStatus("released", "Done + artifact links");
+
+/** Tooltip body — the full moment→status mapping, built from the canon module. */
+const WB_DETAIL =
+  `Write-back to Teamwork · board "${TRIGGER_RULE.board}" — ` +
+  WRITE_BACK_MAPPING.map((m) => `${m.podStage} → "${m.trackerStatus}"`).join(" · ") +
+  ". Plain status + artifact links are posted on the ticket automatically, [AgencyOS]-tagged so the listener ignores our own moves. Tickets live in your tracker — we never create, edit or close them.";
+
+/** Stage-derived write-back state for a card (column kind ⇄ mapping moment). */
+function writeBackFor(kind: ColKind): { label: string; pending?: boolean } {
+  switch (kind) {
+    case "agent":  return { label: `↩ wrote back: ${WB_PICKUP}` };
+    case "review": return { label: `↩ ${WB_GATE}` };
+    case "done":   return { label: `↩ ${WB_DONE}` };
+    default:       return { label: "↩ no write-back yet", pending: true };
+  }
+}
+
 export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: string } = {}) {
-  const { tickets: liveTickets, emit } = useLive();
+  const { tickets: liveTickets } = useLive();
+  // Demo-bus tick: Demo Director beats (e.g. "AM-142 arrives · BA picks it up")
+  // mutate the live mock arrays in place — subscribe so the beat repaints here.
+  const demoTick = useDemoTick();
   const [tickets, setTickets] = useState<Ticket[]>(() => [...liveTickets, ...extraTickets]);
   const [overnight, setOvernight] = useState(false);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [overCol, setOverCol] = useState<Stage | null>(null);
-  const [confirm, setConfirm] = useState<{ ticket: Ticket; to: Stage } | null>(null);
-  const [running, setRunning] = useState<Record<string, true>>({});
+  // Reject = a DECISION, not a drag (vision §2: no freeform stage moves) —
+  // the typed reason is required and lands on the session ledger.
+  const [rejecting, setRejecting] = useState<{ ticket: Ticket; prev: Stage } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Adopt tickets that entered the pod AFTER mount (intake pulls / staged
+  // arrivals unshift into the live seed array — same reference the provider
+  // holds). Same-reference return bails out of the state update when quiet.
+  useEffect(() => {
+    setTickets((ts) => {
+      const known = new Set(ts.map((t) => t.id));
+      const arrivals = liveTickets.filter((t) => !known.has(t.id));
+      return arrivals.length ? [...arrivals, ...ts] : ts;
+    });
+  }, [demoTick, liveTickets]);
 
   const grouped = useMemo(() => {
     const map: Record<Stage, Ticket[]> = Object.fromEntries(
@@ -78,39 +128,15 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
     ) as Record<Stage, Ticket[]>;
     tickets.forEach((t) => map[t.stage]?.push(t));
     return map;
-  }, [tickets]);
+    // demoTick: restage beats mutate ticket objects in place — regroup on tick
+  }, [tickets, demoTick]);
 
+  // Stage changes happen ONLY as consequences of decisions/events (vision §2
+  // "no freeform stage moves"): the demo director + live ticker move cards as
+  // agents finish; the reject dialog below moves them back with a typed
+  // reason. There is deliberately NO drag-and-drop on this board.
   const moveTicket = (id: string, to: Stage) => {
     setTickets((ts) => ts.map((t) => (t.id === id ? { ...t, stage: to, updatedAt: Date.now() } : t)));
-  };
-
-  const onDrop = (to: Stage) => {
-    if (!dragId) return;
-    const ticket = tickets.find((t) => t.id === dragId);
-    setOverCol(null);
-    setDragId(null);
-    if (!ticket || ticket.stage === to) return;
-
-    const toCol = COLS.find((c) => c.id === to)!;
-    if (toCol.kind === "review") {
-      setConfirm({ ticket, to });
-      return;
-    }
-    moveTicket(ticket.id, to);
-    if (toCol.kind === "agent") {
-      setRunning((r) => ({ ...r, [ticket.id]: true }));
-      emit(toCol.agent!, ticket.id);
-      window.setTimeout(() => {
-        setRunning((r) => {
-          const { [ticket.id]: _, ...rest } = r;
-          return rest;
-        });
-        // auto-advance to next review column
-        const nextIdx = COLS.findIndex((c) => c.id === to) + 1;
-        const next = COLS[nextIdx];
-        if (next) moveTicket(ticket.id, next.id);
-      }, 4000);
-    }
   };
 
   const overnightCount = grouped["ready-dev"].filter((t) => t.overnightEligible).length;
@@ -122,17 +148,30 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">project · automarket</div>
           <h1 className="text-xl font-semibold tracking-tight">Pipeline Board</h1>
-          <div className="text-xs text-muted-foreground mt-0.5">
+          {/* tracker-boundary subline (vision §2) — execution view, never a second kanban */}
+          <div className="text-xs text-muted-foreground mt-0.5 flex items-center flex-wrap gap-x-2 gap-y-1">
+            <span>
+              Execution view — your tracker stays the system of record. Plain status + artifact links write back automatically.
+              Cards move as agents finish and gates clear — no dragging; decisions happen on the gate surfaces.
+            </span>
+            <span
+              title={WB_DETAIL}
+              className="font-mono text-[10px] text-foreground/80 border border-border/60 bg-white/[0.03] rounded px-1.5 py-px whitespace-nowrap cursor-default"
+            >
+              tracker: Teamwork · write-back on
+            </span>
+          </div>
+          <div className="text-[11px] text-muted-foreground/70 mt-1">
             Tickets flow left → right. Agent columns mean the board event was dispatched to that agent's API and the agent activated. Review columns are human gates.
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Work Intake CTA (C10) — how tickets actually enter the pod */}
+          {/* Work Intake CTA (C10) — where board arrivals are confirmed; never "add" */}
           <Link
             to="/intake"
             className="h-9 px-3 rounded-md border border-primary/50 bg-primary/15 text-primary text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-1.5 hover:bg-primary/25 transition-colors"
           >
-            <Plus className="size-3.5" /> Add work
+            <Inbox className="size-3.5" /> Work intake
           </Link>
           <div className="glass-panel px-1 py-1 inline-flex text-xs font-mono">
             <button
@@ -168,18 +207,13 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
         <div className="flex gap-3 h-full min-w-max pb-2">
           {COLS.map((col) => {
             const items = grouped[col.id] ?? [];
-            const isOver = overCol === col.id;
             const agentVar = col.agent ? `var(--agent-${col.agent})` : undefined;
             return (
               <div
                 key={col.id}
-                onDragOver={(e) => { e.preventDefault(); setOverCol(col.id); }}
-                onDragLeave={() => setOverCol((c) => (c === col.id ? null : c))}
-                onDrop={() => onDrop(col.id)}
                 className={cn(
                   "w-[260px] shrink-0 flex flex-col rounded-xl border transition-colors",
-                  "bg-white/[0.015]",
-                  isOver ? "border-primary/60 bg-primary/5" : "border-border",
+                  "bg-white/[0.015] border-border",
                 )}
                 style={col.kind === "agent" ? {
                   background: `linear-gradient(180deg, color-mix(in oklab, ${agentVar} 10%, transparent), transparent 60%)`,
@@ -235,9 +269,9 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                       to="/intake"
                       className="block rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
                     >
-                      No work yet — add a ticket or connect Teamwork/Jira.
+                      No work yet — tickets arrive when your board sends them.
                       <span className="mt-1.5 inline-flex items-center gap-1 text-primary font-semibold">
-                        Add work →
+                        Open Work intake →
                       </span>
                     </Link>
                   )}
@@ -247,11 +281,13 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                       t={t}
                       col={col}
                       overnight={overnight}
-                      isRunning={!!running[t.id]}
+                      isRunning={t.state === "running"}
                       flagged={t.id === highlightTicketId}
-                      onDragStart={() => setDragId(t.id)}
-                      onDragEnd={() => setDragId(null)}
-                      onReject={() => col.prev && moveTicket(t.id, col.prev)}
+                      onReject={() => {
+                        if (!col.prev) return;
+                        setRejectReason("");
+                        setRejecting({ ticket: t, prev: col.prev });
+                      }}
                       mounted={mounted}
                     />
                   ))}
@@ -262,34 +298,62 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
         </div>
       </div>
 
-      {/* confirm dialog */}
-      {confirm && (
+      {/* reject dialog — a decision with a typed reason, never a freeform move */}
+      {rejecting && (
         <div
           className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm anim-in"
-          onClick={() => setConfirm(null)}
+          onClick={() => setRejecting(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="glass-panel p-6 max-w-sm w-full mx-4 border-primary/40"
+            className="glass-panel p-6 max-w-sm w-full mx-4 border-status-error/40"
           >
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">human gate</div>
-            <div className="text-lg font-semibold mt-1">Approve gate?</div>
+            <div className="text-lg font-semibold mt-1">Reject — send back?</div>
             <div className="text-sm text-muted-foreground mt-2">
-              Move <span className="font-mono text-foreground">{confirm.ticket.id}</span> · "{confirm.ticket.title}" into{" "}
-              <span className="font-semibold text-foreground">{COLS.find((c) => c.id === confirm.to)?.label}</span>?
+              <span className="font-mono text-foreground">{rejecting.ticket.id}</span> · "
+              {rejecting.ticket.title}" returns to{" "}
+              <span className="font-semibold text-foreground">
+                {COLS.find((c) => c.id === rejecting.prev)?.label}
+              </span>
+              .
             </div>
-            <div className="mt-5 flex gap-2 justify-end">
+            <textarea
+              autoFocus
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Why? Your note becomes the agent's added context on the rerun…"
+              className="mt-3 w-full h-20 rounded-md border border-border bg-white/5 p-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-status-error/60 resize-none"
+            />
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              A reason is required on reject and is written to the audit log.
+            </p>
+            <div className="mt-4 flex gap-2 justify-end">
               <button
-                onClick={() => setConfirm(null)}
+                onClick={() => setRejecting(null)}
                 className="h-9 px-3 rounded-md text-sm border border-border hover:bg-white/5 cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={() => { moveTicket(confirm.ticket.id, confirm.to); setConfirm(null); }}
-                className="h-9 px-4 rounded-md text-sm bg-primary text-primary-foreground hover:opacity-90 cursor-pointer"
+                disabled={rejectReason.trim().length < REJECT_REASON_MIN}
+                onClick={() => {
+                  const fromLabel = COLS.find((c) => c.id === rejecting.ticket.stage)?.label ?? rejecting.ticket.stage;
+                  const toLabel = COLS.find((c) => c.id === rejecting.prev)?.label ?? rejecting.prev;
+                  moveTicket(rejecting.ticket.id, rejecting.prev);
+                  appendAuditMock({
+                    action: "gate.rejected",
+                    target: rejecting.ticket.id,
+                    detail: `${fromLabel} → ${toLabel}: ${rejectReason.trim()}`,
+                  });
+                  toast.success(`${rejecting.ticket.id} sent back — reason recorded`, {
+                    description: "Your note becomes the agent's added context on the rerun.",
+                  });
+                  setRejecting(null);
+                }}
+                className="h-9 px-4 rounded-md text-sm bg-status-error/90 text-white hover:opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Approve
+                Reject — record reason
               </button>
             </div>
           </div>
@@ -300,7 +364,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
 }
 
 function TicketCard({
-  t, col, overnight, isRunning, flagged, onDragStart, onDragEnd, onReject, mounted,
+  t, col, overnight, isRunning, flagged, onReject, mounted,
 }: {
   t: Ticket;
   col: Col;
@@ -308,12 +372,11 @@ function TicketCard({
   isRunning: boolean;
   /** ?ticket=<id> deep link from Work Intake — draws the highlight ring. */
   flagged?: boolean;
-  onDragStart: () => void;
-  onDragEnd: () => void;
   onReject: () => void;
   mounted: boolean;
 }) {
   const highlight = overnight && col.id === "ready-dev" && t.overnightEligible;
+  const wb = writeBackFor(col.kind); // stage-derived write-back state (trigger.ts)
   const ageMin = mounted && t.updatedAt ? Math.max(0, Math.floor((Date.now() - t.updatedAt) / 60_000)) : null;
   const ageLabel = ageMin === null ? "—" : ageMin < 60 ? `${ageMin}m` : `${Math.floor(ageMin / 60)}h ${ageMin % 60}m`;
   const ageTone =
@@ -324,11 +387,8 @@ function TicketCard({
 
   return (
     <div
-      draggable
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
       className={cn(
-        "group relative rounded-md border bg-panel/60 p-2.5 cursor-grab active:cursor-grabbing hover-lift",
+        "group relative rounded-md border bg-panel/60 p-2.5 hover-lift",
         "border-border hover:border-primary/40",
         highlight && "border-primary/60 shadow-[0_0_24px_-6px_rgba(108,99,255,0.6)]",
         flagged && "border-primary/70 ring-1 ring-primary/50 shadow-[0_0_24px_-6px_var(--primary)]",
@@ -380,6 +440,13 @@ function TicketCard({
               <User2 className="size-3" />
               <span className="text-foreground/80">{t.approver}</span>
               <span className={cn("border rounded px-1 ml-1", ageTone)}>{ageLabel}</span>
+              {/* decisions happen on the canonical gate surface, not by dragging */}
+              <Link
+                to="/approvals"
+                className="ml-1 text-primary/90 hover:text-primary underline-offset-2 hover:underline whitespace-nowrap"
+              >
+                gate →
+              </Link>
             </>
           )}
           {col.kind === "agent" && isRunning && (
@@ -400,6 +467,27 @@ function TicketCard({
             <Repeat2 className="size-3" /> rerun {t.rerunCount}
           </span>
         ) : null}
+      </div>
+
+      {/* tracker line — the ticket lives in Teamwork; this card is its execution mirror */}
+      <div
+        title={WB_DETAIL}
+        className="mt-2 pt-1.5 border-t border-border/40 flex items-center justify-between gap-2 text-[9px] font-mono text-muted-foreground"
+      >
+        <span className="inline-flex items-center gap-1 min-w-0">
+          <Link2 className="size-2.5 shrink-0 opacity-60" />
+          <span className="truncate">{t.id} · teamwork</span>
+        </span>
+        <span
+          className={cn(
+            "shrink-0 border rounded px-1 whitespace-nowrap",
+            wb.pending
+              ? "border-dashed border-border/60 text-muted-foreground/60"
+              : "border-border/60 bg-white/[0.03] text-muted-foreground",
+          )}
+        >
+          {wb.label}
+        </span>
       </div>
 
       {/* rejection back-arrow */}

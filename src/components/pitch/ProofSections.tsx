@@ -18,8 +18,11 @@ export function MoatSection() {
             1 — The harness itself: modern SDLC pods under one roof.
           </strong>{" "}
           The moat is the operating model: human + AI pods running under the agency environment —
-          orchestrated agents, accountable humans, unified gates, one ledger — with first-class
-          AIOps under the hood (observability, incidents, recovery). Deployment answers the four
+          orchestrated agents, accountable humans, unified gates, one ledger — with first-class{" "}
+          <strong className="font-semibold text-slate-900">AgentOps under the hood</strong>: evals
+          before any agent version ships, run tracing, agent versioning with rollback, cost-aware
+          model routing, guardrails — plus observability, incidents, and recovery. We run the
+          fleet; the client sees the guarantees it produces. Deployment answers the four
           fears enterprise buyers actually have. <em>Data privacy and sensitivity:</em> dedicated
           per-client tenancy (isolated infra and DB; GDPR-ready by construction — EU residency, a
           signed DPA, per-class retention windows, full data export) and{" "}
@@ -41,16 +44,25 @@ export function MoatSection() {
           truth — legal constraints, tasks, decisions, conflicts, domain sources — and every agent
           and human in the pod draws on the same context. It is pod-wide by design (a peer, not a
           pipeline stage), what it knows is visible in the product, and removal is audited
-          ("Forget this" is on the record). It is operating today.
+          ("Forget this" is on the record). It is operating today. One concrete consequence for
+          delivery: the <strong className="font-semibold text-slate-900">SOW lives in the shared
+          context as the source of truth</strong> — produced work is checked against it and{" "}
+          <strong className="font-semibold text-slate-900">deviations are flagged</strong>, so the
+          eternal "bug or change request?" argument becomes a lookup, not a negotiation. Scope
+          confusion becomes a thing of the past.
         </p>
         <p className="break-inside-avoid text-[15px] leading-7 text-slate-700">
           <strong className="font-semibold text-slate-900">
             3 — Proactive agents, in the channels humans already live in.
           </strong>{" "}
-          Humans live in Slack, email, and Teamwork — so that is where the pod reaches them.
-          Agents ask clarifications, deliver gates, and escalate proactively in those channels;
-          the specialized dashboard is for when depth is needed, one deep link from the message to
-          the exact decision. Nobody babysits a dashboard.
+          Humans live in Slack, email, and Teamwork — so that is where the pod reaches them.{" "}
+          <strong className="font-semibold text-slate-900">Slack is the first-class channel</strong>{" "}
+          (Teams and others follow): agents ask clarifications, deliver gates, and escalate
+          proactively, and people answer the agent the same way they answer a colleague — in the
+          tool they already use to talk to other humans. Our agents reach out to them, not the
+          other way around. The dashboard is always there for anyone who wants or needs to go
+          deeper — one deep link from the message to the exact decision — but nobody babysits a
+          dashboard.
         </p>
         <p className="break-inside-avoid text-[15px] leading-7 text-slate-700">
           <strong className="font-semibold text-slate-900">

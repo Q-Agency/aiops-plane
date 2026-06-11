@@ -1,7 +1,7 @@
 /**
- * /intake (C10) — Work Intake: the client-board picker (scope-matched
- * checkbox table), the "Paste a ticket" composer, and per-ticket routing
- * previews. Pulled rows land at the top of the Pipeline Backlog.
+ * /intake (C10) — Work Intake: the confirmation surface of the single
+ * doorbell (vision §2). The board sends work; the operator confirms or
+ * declines each start. Tickets are created on the board, never here.
  * ?sim=error renders the tracker-unreachable demo state.
  */
 

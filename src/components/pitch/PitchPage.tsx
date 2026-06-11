@@ -110,7 +110,9 @@ function SummarySection() {
         way of work — and every such project doubles as a live reference. Client-managed teams
         follow as the product hardens. The floor is high: even if we never sell Agency OS as a
         product, it makes our own delivery more profitable and more optimal — and when a client
-        sees their project run on it, the trust bump wins the next deal.
+        sees their project run on it, the trust bump wins the next deal. The build also compounds
+        internally: it shares many elements with our IRI Estimation tool, so the overlapping work
+        and deliverables benefit both efforts.
       </P>
       <P>
         <strong className="font-semibold text-slate-900">What exists today:</strong> the live BA

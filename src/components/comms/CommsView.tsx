@@ -12,6 +12,7 @@ import {
 } from "@/mock/comms";
 import type { AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
+import { OutboundFeed } from "./OutboundFeed";
 
 const agentColor = (id: AgentId) => {
   const a = seedAgents.find((x) => x.id === id);
@@ -100,6 +101,9 @@ export function CommsView() {
           decide to reach out from nothing; the trigger is always shown.
         </p>
       </header>
+
+      {/* Proactive outbound — the demo beat: the pod talks first */}
+      <OutboundFeed />
 
       {/* Escalation tracker — top, most prominent */}
       <section className="glass-panel p-4">

@@ -8,8 +8,8 @@
  *
  * Guarantees:
  *  - IDEMPOTENT: re-firing a fired step is a no-op (a fumbled reset never
- *    double-seeds). The guard lives in the beat functions themselves, so the
- *    Post-Launch Landing binding (`seedInflow`) and the step list share it.
+ *    double-seeds). The guard lives in the beat functions themselves, so any
+ *    future direct binding of a beat (e.g. a landing CTA) shares it.
  *  - RESTORABLE: checkpoints restore by clear-and-reapply over the staged
  *    overlay ONLY — appended notifications are removed, flipped seed fields
  *    are put back from captured before-values; seeded data is never reshaped.
@@ -118,8 +118,12 @@ export function fireUpComplete(podId: string = DEMO_POD_ID): void {
 }
 
 /**
- * 0:30 — AM-142 arrives · BA picks it up. Also bound directly by the
- * Post-Launch Landing demo CTA (same idempotency guard as the step list).
+ * 0:30 — AM-142 dragged to Ready · pod starts (the tracker-boundary beat:
+ * the client's drag is the doorbell; the chain runs inside Agency OS).
+ * TRUTHFUL under the demo pod's confirm-first default: the drag SENT the
+ * ticket and the operator's confirmation started it — so the narration
+ * says "sent … start confirmed", and start provenance stays the default
+ * operator-confirmed ("drag-to-ready" is reserved for auto-start starts).
  */
 export function seedInflow(podId: string = DEMO_POD_ID): void {
   if (!markFired("inflow")) return;
@@ -128,8 +132,8 @@ export function seedInflow(podId: string = DEMO_POD_ID): void {
     recipientId: CURRENT_USER_ID,
     kind: "delivered",
     severity: "info",
-    title: "AM-142 arrived · BA picked it up",
-    body: `Vehicle search with filters — routed into ${podId}. BA run started (drafting spec.md).`,
+    title: "AM-142 dragged to Ready · pod starts",
+    body: `Vehicle search with filters — the drag on the client board sent it to ${podId}; start confirmed (confirm-first). BA picked it up (drafting spec.md).`,
     actorId: "ba",
     ticketId: "AM-142",
     deepLink: "/pipeline",
@@ -251,7 +255,7 @@ function sec(at: string): number {
 
 export const DEMO_STEPS: DemoStep[] = [
   { id: "fireup", at: "0:00", atSec: sec("0:00"), label: "FIRE UP complete · pod live", fire: () => fireUpComplete() },
-  { id: "inflow", at: "0:30", atSec: sec("0:30"), label: "AM-142 arrives · BA picks it up", fire: () => seedInflow() },
+  { id: "inflow", at: "0:30", atSec: sec("0:30"), label: "AM-142 dragged to Ready · pod starts", fire: () => seedInflow() },
   { id: "clarification", at: "0:45", atSec: sec("0:45"), label: "BA asks a clarification", fire: () => openClarification("AM-142") },
   { id: "escalation", at: "1:30", atSec: sec("1:30"), label: "design gate goes stale → escalation", fire: () => raiseEscalation("AM-138") },
   { id: "incident", at: "1:35", atSec: sec("1:35"), label: "incident opens", fire: () => openIncident("inc-1") },

@@ -73,9 +73,12 @@ export function DemoPill({ href, label }: { href: string; label: string }) {
       href={href}
       title={`${label} — ${href}`}
       aria-label={`See it live: ${label} (${href})`}
-      className="mx-1 inline-flex translate-y-[-1px] items-center gap-1 whitespace-nowrap rounded-full border border-slate-300 bg-white px-2 py-px font-mono text-[11px] font-medium text-slate-500 no-underline transition-colors hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800 print:hidden"
+      className="mx-1 inline-flex translate-y-[-1px] items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-300 bg-indigo-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-indigo-700 no-underline shadow-sm transition-all hover:border-indigo-500 hover:bg-indigo-100 hover:text-indigo-900 hover:shadow print:hidden"
     >
-      See it live <span aria-hidden>→</span>
+      See it live{" "}
+      <span aria-hidden className="pitch-pill-arrow inline-block">
+        →
+      </span>
     </a>
   );
 }

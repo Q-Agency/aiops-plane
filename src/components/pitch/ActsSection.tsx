@@ -6,6 +6,7 @@
 
 import type { ReactNode } from "react";
 import { ChainSvg } from "./ChainSvg";
+import { TicketJourneySvg } from "./TicketJourneySvg";
 import { Bullet, Bullets, DemoPill, PitchSection, ShortcutPill } from "./primitives";
 
 function ActCard({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
@@ -88,8 +89,25 @@ export function ActsSection() {
 
       <ActCard
         title="ACT II — RUN (operate it day-to-day)"
-        intro="Work flows in, agents produce, humans decide. Clarifications and approvals land in one queue; the top gates get a client-grade review surface inside the product, so a paying PM never gets dropped into internal tooling. When something fails, there is an incident with a recovery action — operable 24/7 by a non-engineer."
+        intro="Work flows in, agents produce, humans decide. Your tracker stays your tracker: dragging a ticket to Ready in Jira/Teamwork is the doorbell — the pod picks it up, runs the chain inside Agency OS, and writes plain status + links back to the ticket. Nobody works in two tools for the same job. The conversation is Slack-first: agents reach out to humans in the tools they already use with each other — clarifications, gates, and escalations arrive in Slack (Teams and others follow) — and the dashboard is there whenever someone wants to go deeper. When something fails, there is an incident with a recovery action — operable 24/7 by a non-engineer."
       >
+        <figure className="break-inside-avoid rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:shadow-none">
+          <div className="overflow-x-auto">
+            <TicketJourneySvg />
+          </div>
+          <figcaption className="mt-3 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-500">
+            One ticket's journey. <span className="font-medium text-slate-700">1 —</span> the drag
+            to Ready on <em>your board</em> is the doorbell: the pod picks the ticket up, nobody
+            opens a new tool. <span className="font-medium text-slate-700">2 —</span> the chain
+            runs <em>inside Agency OS</em>: each agent ships its <em>own</em> artifact (the BA's
+            SPEC.md, the SA's design, and so on down the chain), humans clear gates, everything
+            lands on the ledger. <span className="font-medium text-slate-700">3 —</span> questions
+            and approvals arrive in <em>your channels</em> and are answered there — and the pod is
+            proactive on its own schedule too: daily digests, daily preparations, weekly reports,
+            and escalations are pushed to Slack and email, while plain status + artifact links
+            flow back to the ticket. The dashboard stays optional depth.
+          </figcaption>
+        </figure>
         <Bullets>
           <Bullet>
             <strong className="font-semibold text-slate-900">Unified gates queue</strong> —
@@ -112,8 +130,16 @@ export function ActsSection() {
             <DemoPill href="/pipeline" label="Pipeline board" />
           </Bullet>
           <Bullet>
-            <strong className="font-semibold text-slate-900">Work intake</strong> — pick tickets
-            from Teamwork/Jira or paste one; routing previewed per ticket
+            <strong className="font-semibold text-slate-900">Work intake</strong> — what the board
+            sent, routing previewed per ticket.{" "}
+            <strong className="font-semibold text-slate-900">
+              Activation lives on the board — always:
+            </strong>{" "}
+            the drag to Ready is the only start signal. Per pod you choose the start policy:
+            confirm-first (each arrival waits for the operator's OK — the right start for new
+            pods) or auto-start (the drag starts the chain immediately). A wrong ticket is
+            declined with a typed reason and returned to the board, on the record. Agency OS
+            never originates work, and agent-to-agent activation stays inside it
             <DemoPill href="/intake" label="Work intake" />
           </Bullet>
           <Bullet>
