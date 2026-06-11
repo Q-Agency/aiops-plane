@@ -19,12 +19,17 @@ import {
   ChevronRight,
   Circle,
   Crosshair,
+  Figma,
   FolderOpen,
   GitBranch,
+  GitMerge,
   KanbanSquare,
+  ListTodo,
   Loader2,
   Mail,
   MessageSquare,
+  MessagesSquare,
+  NotebookText,
   ShieldCheck,
   SquareKanban,
   type LucideIcon,
@@ -37,12 +42,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePods, TENANCY_LINE } from "@/lib/pods/pod-store";
 import { scopedCount } from "@/mock/backlog";
 import { blueprintById } from "@/mock/blueprints";
-import {
-  CONNECTORS,
-  LIVE_CONNECTOR_IDS,
-  type Connector,
-  type ConnectorId,
-} from "@/mock/connectors";
+import { CONNECTORS, type Connector, type ConnectorId } from "@/mock/connectors";
 import { ConnectDialog } from "./ConnectDialog";
 import { StepScope } from "./StepScope";
 
@@ -53,15 +53,25 @@ const CONNECTOR_ICONS: Record<ConnectorId, LucideIcon> = {
   jira: SquareKanban,
   gdrive: FolderOpen,
   email: Mail,
+  teams: MessagesSquare,
+  linear: ListTodo,
+  gitlab: GitMerge,
+  figma: Figma,
+  notion: NotebookText,
 };
 
 const MOCK_LATENCY_MS: Record<ConnectorId, number> = {
   teamwork: 96,
   slack: 88,
   github: 142,
-  jira: 0,
-  gdrive: 0,
-  email: 0,
+  jira: 134,
+  gdrive: 118,
+  email: 64,
+  teams: 0, // roadmap — request-access only, never "connects"
+  linear: 92,
+  gitlab: 151,
+  figma: 127,
+  notion: 109,
 };
 
 function LiveRoadmapBadge({ availability }: { availability: Connector["availability"] }) {
@@ -230,8 +240,12 @@ export function StepConnect() {
   const [scopeOpen, setScopeOpen] = useState(false);
 
   const blueprint = blueprintById(draft?.blueprintId ?? null);
+  // No-blueprint fallback (direct ?step=connect deep-link): suggest only the
+  // production first wave — with nearly every connector now demo-connectable,
+  // falling back to ALL live ids would amber-flag the whole shelf.
+  const FIRST_WAVE: ConnectorId[] = ["teamwork", "slack", "github"];
   const suggestedIds: ConnectorId[] =
-    blueprint && blueprint.connectorIds.length > 0 ? blueprint.connectorIds : LIVE_CONNECTOR_IDS;
+    blueprint && blueprint.connectorIds.length > 0 ? blueprint.connectorIds : FIRST_WAVE;
   const optionalIds = new Set(blueprint?.optionalConnectorIds ?? []);
 
   const connectedIds = useMemo(

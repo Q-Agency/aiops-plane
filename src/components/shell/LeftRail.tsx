@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronDown, ChevronLeft } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronLeft, Presentation } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { isMock } from "@/lib/experience";
@@ -73,6 +73,33 @@ function RailLink({
   );
 }
 
+function PitchLink({ collapsed }: { collapsed: boolean }) {
+  const link = (
+    <a
+      href="/pitch"
+      target="_blank"
+      rel="noopener"
+      data-test="nav-pitch"
+      className="group flex items-center gap-3 px-2.5 py-2 rounded-md text-sm transition-colors text-muted-foreground hover:text-foreground hover:bg-white/5"
+    >
+      <Presentation className="size-4 shrink-0" />
+      {!collapsed && (
+        <>
+          <span className="truncate">Product brief</span>
+          <ArrowUpRight className="ml-auto size-3 shrink-0 opacity-50 group-hover:opacity-100" />
+        </>
+      )}
+    </a>
+  );
+  if (!collapsed) return link;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right">Product brief — opens in a new tab</TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function LeftRail({ user }: { user: AppUser }) {
   const [collapsed, setCollapsed] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -96,7 +123,11 @@ export function LeftRail({ user }: { user: AppUser }) {
       );
     }
     if (readOnlyView) return NAV.filter((g) => g.pillar === "MONITOR");
-    return NAV;
+    // Demo: drop live-only-by-design destinations (e.g. the Connections hub —
+    // the wizard owns tool-connecting in the demo story).
+    return NAV.map((g) => ({ ...g, items: g.items.filter((it) => !it.mockHidden) })).filter(
+      (g) => g.items.length > 0,
+    );
   }, [isReal, readOnlyView]);
 
   // ⌘B / Ctrl+B toggles the rail (client-only listener — SSR-safe).
@@ -211,6 +242,11 @@ export function LeftRail({ user }: { user: AppUser }) {
 
         <div className="p-2 pt-0 shrink-0">
           <Separator className="mb-2" />
+          {/* Product brief (/pitch) — the management buy-in pack that ships
+              WITH the demo. Demo experience only; a plain anchor in a new
+              tab (the brief is chrome-less/no-auth, and the presenter keeps
+              the demo running). */}
+          {!isReal && <PitchLink collapsed={collapsed} />}
           <RailLink
             item={SETTINGS_ITEM}
             collapsed={collapsed}

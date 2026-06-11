@@ -13,6 +13,11 @@ export type AppUser = {
    *              never surfaced in the UI as demo/mock).
    * "real"     → production account that WILL be backed by live agent data.
    *              (Not connected yet — currently still renders the same data.)
+   *
+   * EFFECTIVE mode: the account's own mode unless the per-browser experience
+   * switch (Settings → Experience) overrides it — see fetchUser.
    */
   dataMode: DataMode;
+  /** The account's own mode, before any experience-switch override. */
+  dataModeDefault?: DataMode;
 };

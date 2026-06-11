@@ -1,12 +1,31 @@
 /**
  * Connector catalog for FIRE UP step 3 (Connect Tools) and the
- * standalone /connections hub. Honesty rule (D6): teamwork/slack/github
- * are Live; jira/gdrive/email are Roadmap (request-access only).
+ * standalone /connections hub.
+ *
+ * Selectability (owner call 2026-06-12): in the demo EVERY connector is
+ * connectable via the simulated OAuth flow EXCEPT Microsoft Teams — the
+ * one deliberate "roadmap / request access" tile, because the comms canon
+ * is Slack-first (Teams follows). The PRODUCTION first wave remains
+ * Teamwork/Slack/GitHub — that truth lives in the pitch copy, not in the
+ * tile badges (the whole wizard is simulated; see the pitch parenthetical
+ * "OAuth is simulated in the demo; the real connector vault is build
+ * step 3").
  */
 
-export type ConnectorId = "teamwork" | "slack" | "github" | "jira" | "gdrive" | "email";
+export type ConnectorId =
+  | "teamwork"
+  | "slack"
+  | "github"
+  | "jira"
+  | "gdrive"
+  | "email"
+  | "teams"
+  | "linear"
+  | "gitlab"
+  | "figma"
+  | "notion";
 export type ConnectorAvailability = "live" | "roadmap";
-export type ConnectorCategory = "ticketing" | "comms" | "scm" | "storage" | "pm";
+export type ConnectorCategory = "ticketing" | "comms" | "scm" | "storage" | "pm" | "design";
 export type ConnectorDirection = "inbound" | "outbound" | "bidirectional";
 
 export interface ConnectorScope {
@@ -129,9 +148,9 @@ export const CONNECTORS: Connector[] = [
     name: "Jira",
     icon: "SquareKanban",
     category: "ticketing",
-    availability: "roadmap",
+    availability: "live",
     direction: "inbound",
-    description: "Jira board intake with status write-back — on our roadmap.",
+    description: "Jira board intake with status write-back — the second tracker doorbell.",
     scopes: [
       {
         id: "ji-read-issues",
@@ -158,9 +177,9 @@ export const CONNECTORS: Connector[] = [
     name: "Google Drive",
     icon: "FolderOpen",
     category: "storage",
-    availability: "roadmap",
+    availability: "live",
     direction: "inbound",
-    description: "Project docs as knowledge sources for the pod — on our roadmap.",
+    description: "Project docs as knowledge sources for the pod's shared context.",
     scopes: [
       {
         id: "gd-read-files",
@@ -187,9 +206,9 @@ export const CONNECTORS: Connector[] = [
     name: "Email",
     icon: "Mail",
     category: "comms",
-    availability: "roadmap",
+    availability: "live",
     direction: "outbound",
-    description: "Stakeholder digests and reports by email — on our roadmap.",
+    description: "Stakeholder digests, weekly reports and escalations by email.",
     scopes: [
       {
         id: "em-send-digest",
@@ -208,6 +227,154 @@ export const CONNECTORS: Connector[] = [
         label: "Manage recipient lists",
         access: "write",
         reason: "Keep sponsors on the right digests",
+      },
+    ],
+  },
+  {
+    id: "teams",
+    name: "Microsoft Teams",
+    icon: "MessagesSquare",
+    category: "comms",
+    availability: "roadmap",
+    direction: "outbound",
+    description:
+      "Gates, clarifications and digests in Teams channels — Slack is first; Teams follows on our roadmap.",
+    scopes: [
+      {
+        id: "mt-read-channels",
+        label: "Read team & channel list",
+        access: "read",
+        reason: "Let you pick routing channels per event",
+      },
+      {
+        id: "mt-post-messages",
+        label: "Post messages as AgencyOS",
+        access: "write",
+        reason: "Deliver gates, escalations and briefs",
+      },
+      {
+        id: "mt-interactive",
+        label: "Receive card actions",
+        access: "write",
+        reason: "Let approvers act on gates from Teams",
+      },
+    ],
+  },
+  {
+    id: "linear",
+    name: "Linear",
+    icon: "ListTodo",
+    category: "ticketing",
+    availability: "live",
+    direction: "inbound",
+    description: "Linear issue intake with status write-back.",
+    scopes: [
+      {
+        id: "li-read-issues",
+        label: "Read issues & cycles",
+        access: "read",
+        reason: "Find the issues inside the pod's scope",
+      },
+      {
+        id: "li-read-workflow",
+        label: "Read workflow states",
+        access: "read",
+        reason: "Map pod stages onto your states",
+      },
+      {
+        id: "li-write-updates",
+        label: "Update state & comment",
+        access: "write",
+        reason: "Write status back into your workflow",
+      },
+    ],
+  },
+  {
+    id: "gitlab",
+    name: "GitLab",
+    icon: "GitMerge",
+    category: "scm",
+    availability: "live",
+    direction: "bidirectional",
+    description: "Merge requests and CI pipelines for GitLab-hosted codebases.",
+    scopes: [
+      {
+        id: "gl-read-repo",
+        label: "Read repository contents",
+        access: "read",
+        reason: "Let agents read the codebase they work on",
+      },
+      {
+        id: "gl-write-mrs",
+        label: "Create branches & merge requests",
+        access: "write",
+        reason: "Ship each ticket as a reviewable MR",
+      },
+      {
+        id: "gl-read-ci",
+        label: "Read CI pipelines & statuses",
+        access: "read",
+        reason: "Gate handoffs on green pipelines",
+      },
+    ],
+  },
+  {
+    id: "figma",
+    name: "Figma",
+    icon: "Figma",
+    category: "design",
+    availability: "live",
+    direction: "inbound",
+    description:
+      "Design files and components as context for the UI/UX agent's uix-ui-spec.",
+    scopes: [
+      {
+        id: "fg-read-files",
+        label: "Read selected design files",
+        access: "read",
+        reason: "Ground the UI/UX spec in the real designs",
+      },
+      {
+        id: "fg-read-components",
+        label: "Read component libraries",
+        access: "read",
+        reason: "Keep specs aligned with your design system",
+      },
+      {
+        id: "fg-read-comments",
+        label: "Read file comments",
+        access: "read",
+        reason: "Capture decisions made on the canvas",
+      },
+    ],
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    icon: "NotebookText",
+    category: "storage",
+    availability: "live",
+    direction: "inbound",
+    description:
+      "Notion pages as knowledge sources for the pod's shared context.",
+    scopes: [
+      {
+        id: "no-read-pages",
+        label: "Read selected pages & databases",
+        access: "read",
+        reason: "Feed project docs into pod knowledge",
+      },
+      {
+        id: "no-read-meta",
+        label: "Read page metadata",
+        access: "read",
+        reason: "Track source freshness",
+      },
+      {
+        id: "no-read-comments",
+        label: "Read page comments",
+        access: "read",
+        reason: "Capture decisions made in docs",
       },
     ],
   },

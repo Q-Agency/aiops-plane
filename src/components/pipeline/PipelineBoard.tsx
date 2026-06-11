@@ -7,7 +7,7 @@ import type { Stage, Ticket, AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
 import { accountableFor } from "@/mock/humans";
 import { appendAuditMock } from "@/mock/audit-bridge";
-import { useDemoTick } from "@/mock/demo-bus";
+import { bumpDemo, useDemoTick } from "@/mock/demo-bus";
 import { TRIGGER_RULE, WRITE_BACK_MAPPING } from "@/mock/trigger";
 
 /** Reject canon (same floor as the gate surfaces): a typed reason is required. */
@@ -105,8 +105,12 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
   const [tickets, setTickets] = useState<Ticket[]>(() => [...liveTickets, ...extraTickets]);
   const [overnight, setOvernight] = useState(false);
   // Reject = a DECISION, not a drag (vision §2: no freeform stage moves) —
-  // the typed reason is required and lands on the session ledger.
-  const [rejecting, setRejecting] = useState<{ ticket: Ticket; prev: Stage } | null>(null);
+  // the typed reason is required and lands on the session ledger. `target`
+  // is the root-cause stage: rework follows the artifact chain, so the
+  // reject can aim at ANY upstream agent stage (QA finds a design flaw →
+  // send back to Design); everything downstream is invalidated by the
+  // consumes-graph and re-runs forward.
+  const [rejecting, setRejecting] = useState<{ ticket: Ticket; prev: Stage; target: Stage } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -135,8 +139,19 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
   // "no freeform stage moves"): the demo director + live ticker move cards as
   // agents finish; the reject dialog below moves them back with a typed
   // reason. There is deliberately NO drag-and-drop on this board.
-  const moveTicket = (id: string, to: Stage) => {
-    setTickets((ts) => ts.map((t) => (t.id === id ? { ...t, stage: to, updatedAt: Date.now() } : t)));
+  // Reject = the target agent re-runs (state "running") and the rerun is
+  // counted — the rerun chip on the card is the visible rework cost.
+  // Mutates IN PLACE (the state array holds the live seed objects — same
+  // idiom as the Demo Director's restage beats) so the decision survives
+  // navigating away and back; the demo-bus tick triggers the regroup.
+  const applyReject = (id: string, to: Stage) => {
+    const src = tickets.find((t) => t.id === id);
+    if (!src) return;
+    src.stage = to;
+    src.state = "running";
+    src.rerunCount = (src.rerunCount ?? 0) + 1;
+    src.updatedAt = Date.now();
+    bumpDemo();
   };
 
   const overnightCount = grouped["ready-dev"].filter((t) => t.overnightEligible).length;
@@ -286,7 +301,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                       onReject={() => {
                         if (!col.prev) return;
                         setRejectReason("");
-                        setRejecting({ ticket: t, prev: col.prev });
+                        setRejecting({ ticket: t, prev: col.prev, target: col.prev });
                       }}
                       mounted={mounted}
                     />
@@ -298,26 +313,60 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
         </div>
       </div>
 
-      {/* reject dialog — a decision with a typed reason, never a freeform move */}
-      {rejecting && (
+      {/* reject dialog — a decision with a typed reason, never a freeform move.
+          Rework follows the artifact chain: the reject targets the ROOT-CAUSE
+          stage (default: the gate's own agent); picking an earlier stage
+          invalidates everything downstream (consumes-graph) — it re-runs
+          forward. Repeated bounces escalate to the accountable human. */}
+      {rejecting && (() => {
+        const gateIdx = COLS.findIndex((c) => c.id === rejecting.ticket.stage);
+        const upstream = COLS.filter((c, i) => c.kind === "agent" && i < gateIdx);
+        const targetIdx = COLS.findIndex((c) => c.id === rejecting.target);
+        const stale = upstream.filter((c) => COLS.findIndex((x) => x.id === c.id) > targetIdx);
+        const targetCol = COLS.find((c) => c.id === rejecting.target);
+        const nextRerun = (rejecting.ticket.rerunCount ?? 0) + 1;
+        return (
         <div
           className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm anim-in"
           onClick={() => setRejecting(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="glass-panel p-6 max-w-sm w-full mx-4 border-status-error/40"
+            className="glass-panel p-6 max-w-md w-full mx-4 border-status-error/40"
           >
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">human gate</div>
-            <div className="text-lg font-semibold mt-1">Reject — send back?</div>
+            <div className="text-lg font-semibold mt-1">Reject — send back to the root cause</div>
             <div className="text-sm text-muted-foreground mt-2">
               <span className="font-mono text-foreground">{rejecting.ticket.id}</span> · "
-              {rejecting.ticket.title}" returns to{" "}
-              <span className="font-semibold text-foreground">
-                {COLS.find((c) => c.id === rejecting.prev)?.label}
-              </span>
-              .
+              {rejecting.ticket.title}" — which stage caused it? Rework follows the artifact
+              chain.
             </div>
+            <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Send back to">
+              {upstream.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  aria-pressed={rejecting.target === c.id}
+                  onClick={() => setRejecting({ ...rejecting, target: c.id })}
+                  className={cn(
+                    "px-2.5 py-1 rounded text-[11px] font-medium border transition-colors cursor-pointer",
+                    rejecting.target === c.id
+                      ? "border-status-error/60 bg-status-error/15 text-status-error"
+                      : "border-border text-muted-foreground hover:text-foreground hover:bg-white/5",
+                  )}
+                >
+                  {c.agentName} · {c.label}
+                  {c.id === rejecting.prev && <span className="opacity-60"> (this gate)</span>}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] font-mono text-muted-foreground">
+              {stale.length === 0
+                ? `${targetCol?.agentName} re-runs with your note as added context.`
+                : `${targetCol?.agentName} re-runs first — downstream ${stale
+                    .map((c) => c.agentName)
+                    .join(", ")} ${stale.length === 1 ? "is" : "are"} stale (the chain consumes upstream artifacts) and re-run${stale.length === 1 ? "s" : ""} forward.`}
+            </p>
             <textarea
               autoFocus
               value={rejectReason}
@@ -327,6 +376,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
             />
             <p className="mt-1.5 text-[11px] text-muted-foreground">
               A reason is required on reject and is written to the audit log.
+              {nextRerun >= 2 && " Rerun #" + nextRerun + " — the accountable human is notified (escalation)."}
             </p>
             <div className="mt-4 flex gap-2 justify-end">
               <button
@@ -339,16 +389,29 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                 disabled={rejectReason.trim().length < REJECT_REASON_MIN}
                 onClick={() => {
                   const fromLabel = COLS.find((c) => c.id === rejecting.ticket.stage)?.label ?? rejecting.ticket.stage;
-                  const toLabel = COLS.find((c) => c.id === rejecting.prev)?.label ?? rejecting.prev;
-                  moveTicket(rejecting.ticket.id, rejecting.prev);
+                  const toLabel = targetCol?.label ?? rejecting.target;
+                  applyReject(rejecting.ticket.id, rejecting.target);
                   appendAuditMock({
                     action: "gate.rejected",
                     target: rejecting.ticket.id,
-                    detail: `${fromLabel} → ${toLabel}: ${rejectReason.trim()}`,
+                    detail:
+                      `${fromLabel} → ${toLabel}: ${rejectReason.trim()}` +
+                      (stale.length
+                        ? ` · downstream re-runs forward (${stale.map((c) => c.agentName).join(", ")})`
+                        : ""),
                   });
-                  toast.success(`${rejecting.ticket.id} sent back — reason recorded`, {
-                    description: "Your note becomes the agent's added context on the rerun.",
-                  });
+                  toast.success(
+                    stale.length
+                      ? `${rejecting.ticket.id} sent back to ${targetCol?.agentName} — downstream re-runs forward`
+                      : `${rejecting.ticket.id} sent back — reason recorded`,
+                    {
+                      description:
+                        (stale.length
+                          ? `Root-cause rework: ${stale.map((c) => c.agentName).join(", ")} re-run on the corrected artifact. `
+                          : "Your note becomes the agent's added context on the rerun.") +
+                        (nextRerun >= 2 ? ` Rerun #${nextRerun} — accountable human notified.` : ""),
+                    },
+                  );
                   setRejecting(null);
                 }}
                 className="h-9 px-4 rounded-md text-sm bg-status-error/90 text-white hover:opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
@@ -358,7 +421,8 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

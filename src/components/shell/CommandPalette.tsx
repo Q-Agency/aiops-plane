@@ -21,6 +21,7 @@ import {
   MessageCircleQuestion,
   PauseCircle,
   PlugZap,
+  Presentation,
   Rocket,
   Siren,
   Ticket as TicketIcon,
@@ -209,6 +210,19 @@ export function CommandPalette() {
               <span>Pause pod</span>
               <span className="ml-auto text-[10px] font-mono text-muted-foreground">
                 {activePod?.name ?? ""}
+              </span>
+            </CommandItem>
+            <CommandItem
+              value="action open product brief pitch presentation"
+              onSelect={() => {
+                setOpen(false);
+                window.open("/pitch", "_blank", "noopener");
+              }}
+            >
+              <Presentation className="mr-2 size-4 text-muted-foreground" />
+              <span>Open product brief</span>
+              <span className="ml-auto text-[10px] font-mono text-muted-foreground">
+                /pitch ↗
               </span>
             </CommandItem>
           </CommandGroup>

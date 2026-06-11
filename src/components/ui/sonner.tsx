@@ -5,6 +5,10 @@ type ToasterProps = React.ComponentProps<typeof Sonner>;
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
+      // Top-right, clear of the TopBar: bottom-right covered the sticky
+      // footer CTAs (e.g. the New-Pod wizard's Continue/Launch button).
+      position="top-right"
+      offset={{ top: 72, right: 20, bottom: 20, left: 20 }}
       className="toaster group"
       toastOptions={{
         classNames: {

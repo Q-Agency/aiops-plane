@@ -32,8 +32,6 @@ import {
   ShieldCheck,
   Signal,
   Siren,
-  Store,
-  Users,
 } from "lucide-react";
 import { openGateCount } from "@/mock/approvals";
 import { INCIDENTS_OPEN_COUNT } from "@/mock/incidents";
@@ -80,6 +78,12 @@ export interface NavItem {
   badgeKey?: NavBadgeKey;
   /** Visible to real-mode (live-connected) accounts. Default: mock-only. */
   live?: boolean;
+  /**
+   * Hidden from the DEMO experience (live keeps it). Owner call 2026-06-12:
+   * in the demo, pod creation owns tool-connecting — a standalone
+   * Connections hub reads as a second place to do the same job.
+   */
+  mockHidden?: boolean;
   /** Tiny mono chip rendered after the label, e.g. "PILOT". */
   tag?: string;
 }
@@ -92,14 +96,17 @@ export interface NavGroup {
 }
 
 export const NAV: NavGroup[] = [
+  // FIRE UP is deliberately lean in the demo (owner call 2026-06-12): the
+  // wizard owns the whole launch ritual — Catalog content lives in its
+  // agent-team step (route /catalog stays for pitch deep-links), tool
+  // connections live in its Connect step (the standalone hub is live-only),
+  // and people/accountability has ONE home: MONITOR · Accountability (/pod).
   {
     pillar: "FIRE UP",
     label: "FIRE UP",
     items: [
       { to: "/pods/new", label: "New Pod", icon: Rocket },
-      { to: "/catalog", label: "Catalog", icon: Store },
-      { to: "/connections", label: "Connections", icon: PlugZap, live: true },
-      { to: "/pod", label: "People & Roles", icon: Users },
+      { to: "/connections", label: "Connections", icon: PlugZap, live: true, mockHidden: true },
     ],
   },
   {

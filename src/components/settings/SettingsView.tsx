@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AutonomyLadder } from "./AutonomyLadder";
 import { ConnectedToolsPanel } from "./ConnectedToolsPanel";
 import { DataRetentionPanel } from "./DataRetentionPanel";
+import { ExperiencePanel } from "./ExperiencePanel";
 import { GatePolicyTable } from "./GatePolicyTable";
 import { RolesAccessSummary } from "./RolesAccessSummary";
 import { TenancySecurityPanel } from "./TenancySecurityPanel";
@@ -39,12 +40,15 @@ export function SettingsView({ initial }: Props) {
     </div>
   );
 
-  // Real mode: EXACTLY the pre-wave-2 surface — header + audit panel,
-  // nothing else. All trust-surface tabs below are standard-mode only.
+  // Real mode: the pre-wave-2 surface (header + audit panel) PLUS the
+  // experience switch — the one owner-requested addition that must render
+  // in both modes (you have to be able to switch back). All trust-surface
+  // tabs below remain standard-mode only.
   if (!isMock(user)) {
     return (
       <div className="space-y-4 p-4 lg:p-6">
         {header}
+        <ExperiencePanel />
         <AuditDatabaseSection s={s} refetch={refetch} isFetching={isFetching} />
       </div>
     );
@@ -53,6 +57,7 @@ export function SettingsView({ initial }: Props) {
   return (
     <div className="space-y-4 p-4 lg:p-6">
       {header}
+      <ExperiencePanel />
       <MockSettingsPanels s={s} refetch={refetch} isFetching={isFetching} />
     </div>
   );

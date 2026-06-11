@@ -1,11 +1,15 @@
 /**
  * Experience gate (wave 2) — the single helper that walls the FULL mock
- * product off from real-mode accounts.
+ * product off from the live-only experience.
  *
- * EXPERIENCE RULE: user.dataMode === "standard" (qai@) sees the full mock
- * product; dataMode === "real" (zlatko) sees ONLY live-connected surfaces.
- * Wave-2 mock-only routes attach `beforeLoad: mockOnlyBeforeLoad` so a
- * real-mode user can never land on a seeded screen.
+ * EXPERIENCE RULE (since 2026-06-12): `user.dataMode` is the EFFECTIVE
+ * mode — the account's default ("standard" for qai@, "real" for zlatko)
+ * unless the per-browser switch (Settings → Experience) overrides it; the
+ * override is resolved server-side in fetchUser (auth.ts), so every
+ * consumer here sees one truth. "standard" = the full product on sample
+ * data; "real" = only live-connected surfaces. Mock-only routes attach
+ * `beforeLoad: mockOnlyBeforeLoad` so the live experience can never land
+ * on a seeded screen.
  *
  * Typing is intentionally structural/loose so any file route can use it
  * without generics pain.
