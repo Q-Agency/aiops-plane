@@ -1,5 +1,5 @@
 /**
- * RoiHeroRow — Row 0 of the Command Center (the wow-moment TEASER).
+ * RoiHeroRow — Row 0 of the Overview (RUN landing) (the wow-moment TEASER).
  * Compact rendering of the C2 canonical trio (human-hours freed ·
  * cost / merged ticket · cost / story point) with the tier badges and the
  * net-of-fees ROI multiple; the whole row deep-links to /economics

@@ -184,14 +184,14 @@ export function CommandPalette() {
           </CommandEmpty>
 
           <CommandGroup heading="Quick actions">
-            <CommandItem value="action new pod fire up" onSelect={() => go("/pods/new")}>
+            <CommandItem value="action new pod launch fire up" onSelect={() => go("/pods/new")}>
               <Rocket className="mr-2 size-4 text-muted-foreground" />
               <span>New pod</span>
               <span className="ml-auto text-[10px] font-mono text-muted-foreground">/pods/new</span>
             </CommandItem>
-            <CommandItem value="action go to command center home" onSelect={() => go("/")}>
+            <CommandItem value="action go to overview command center home" onSelect={() => go("/")}>
               <LayoutDashboard className="mr-2 size-4 text-muted-foreground" />
-              <span>Go to Command Center</span>
+              <span>Go to Overview</span>
               <span className="ml-auto text-[10px] font-mono text-muted-foreground">/</span>
             </CommandItem>
             <CommandItem value="action review gates approvals" onSelect={() => go("/approvals")}>

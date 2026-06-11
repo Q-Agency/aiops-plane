@@ -81,7 +81,7 @@ export function useViewRole(): { role: RoleId; setRole: (r: RoleId) => void } {
 /* ------------------------------------------------------------------ */
 
 /**
- * cockpit — the existing mock Command Center (Pod Admin; Eng Lead previews
+ * cockpit — the existing mock Overview (RUN landing) (Pod Admin; Eng Lead previews
  *           the same operator cockpit in this slice);
  * qa      — the scoped QA gate queue;
  * exec    — the read-only Exec Status Digest (sponsor + viewer, and the

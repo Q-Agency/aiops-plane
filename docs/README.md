@@ -13,8 +13,8 @@ Agency OS is the operating system for **agent–human SDLC pods**: a curated tea
 | Decision | Locked value |
 |---|---|
 | Catalog | Curated Q SDLC catalog (7 roles + Tasklist/Review intermediates). No third-party BYO agents. |
-| Tenancy | **Dedicated per client** (isolated infra/DB). Tenant stand-up is Q-operated; pod fire-up is fast in-tenant config. |
-| IA | Three pillars are the navigation: **FIRE UP / RUN / MONITOR** (+ demoted ADVANCED). |
+| Tenancy | **Dedicated per client** (isolated infra/DB). Tenant stand-up is Q-operated; pod launch is fast in-tenant config. |
+| IA | Three pillars are the navigation: **LAUNCH / RUN / MONITOR** (+ demoted ADVANCED). |
 | Quality moat | The **8 zero-LLM structural validators** (V1, V2, V4–V9 — V3 retired), visually walled from any LLM signal. |
 | HITL | Two gate kinds (`approval` / `clarification`), one queue; in-app client-grade review with **required reason on reject**. |
 | Chain | `spec → design → uix-ui-spec → tasks → code → review → test → release`; edges by `produces ∈ consumes`. |
@@ -39,7 +39,7 @@ This repo's **standard mode** (login `qai@q.agency` / `demo`; `bun install && bu
 
 **The experience is gated by login** (`src/lib/experience.ts`): the standard user gets the full mock product; the **real-mode** user (live BA federation) gets ONLY live-connected surfaces — every mock-only route redirects real-mode to `/`, and mock TopBar chrome (bell, ⌘K, copilot, spend/digest chips) unmounts. The mock cannot leak into the live cockpit, and live behavior is never altered by mock work.
 
-**What's built** (vision §7 build order): the pillar-grouped shell, multi-pod switcher + tenancy badge, the complete **FIRE UP wizard** (blueprints → agent catalog with the chain-closure pipeline preview → connector OAuth-style dialogs with status write-back → accountability matrix → Slack wiring → readiness/launch), the **ROI hero** + economics reframe, the **governance moat panel** (deterministic validators walled from LLM signals), the **client-grade gate review** (`/approvals/$gateId`), **Incidents & Recovery**, **notifications** (bell + inbox + prefs) and the **⌘K palette**, **SLA & client reports**, **roles & members**, **usage & billing**, and **work intake**. The original mock dashboard views (pipeline, comms, compliance, observability…) fill the rest.
+**What's built** (vision §7 build order): the pillar-grouped shell, multi-pod switcher + tenancy badge, the complete **LAUNCH wizard** (blueprints → agent catalog with the chain-closure pipeline preview → connector OAuth-style dialogs with status write-back → accountability matrix → Slack wiring → readiness/launch), the **ROI hero** + economics reframe, the **governance moat panel** (deterministic validators walled from LLM signals), the **client-grade gate review** (`/approvals/$gateId`), **Incidents & Recovery**, **notifications** (bell + inbox + prefs) and the **⌘K palette**, **SLA & client reports**, **roles & members**, **usage & billing**, and **work intake**. The original mock dashboard views (pipeline, comms, compliance, observability…) fill the rest.
 
 **Wave 2 (also built):** `/welcome` accountability handshake, `/memory` constitution & amendments (absorbs `/knowledge`, which now redirects), the **Pod Copilot** (⌘J — ask-with-receipts + confirm-first proposed actions, canned/no-LLM and badged as such), `/pilot` scorecard, `/org` portfolio rollup, `/artifacts` deliverables shelf (rejected-iteration diffs, snapshot-at-clearance stamp), `/status` platform status, and the chrome-less **`/share/$token`** client report viewer. All wave-2 mutations write to a **session audit overlay** (`src/mock/audit-bridge.ts`) that surfaces in Compliance under "this session" — the demo's actions provably land on the ledger UI.
 
@@ -54,7 +54,7 @@ This repo's **standard mode** (login `qai@q.agency` / `demo`; `bun install && bu
 | The chain (single source of truth) | `src/mock/chain.ts` — roles, artifact kinds, edge rule, gap/auto-fix helpers |
 | Pod state (drafts, launched pods, active pod) | `src/lib/pods/pod-store.tsx` (localStorage `aiops_pods_v1`) |
 | Navigation / pillars | `src/components/shell/nav.ts` |
-| FIRE UP wizard | `src/routes/pods.new.tsx` + `src/components/fireup/*` (WizardShell owns chrome; steps are body-only) |
+| LAUNCH wizard | `src/routes/pods.new.tsx` + `src/components/fireup/*` (WizardShell owns chrome; steps are body-only) |
 | Validators (the 8 real ids) | `src/mock/validators.ts` — ids match BA's `_STRUCTURAL_CHECK_IDS` verbatim |
 | Mock datasets | `src/mock/*` — **draft v0 of the control-plane data model** |
 | Design system | shadcn/ui (`src/components/ui/*`) + Tailwind v4 tokens in `src/styles.css` (glass/neon; `agent-*` colors; client-clean style only on sponsor-facing report) |
@@ -76,7 +76,7 @@ This repo's **standard mode** (login `qai@q.agency` / `demo`; `bun install && bu
 
 1. **Tenant shell + identity** — Supabase Auth, the role model (`src/mock/roles.ts` is the draft), audit `actor` stamping. *Identity is product-blocking, not a nicety.*
 2. **Control plane v1** — the data-model doc's durable entities (Pod, PodAgentConfig, Member, Connection, SlaDefinition…); the wizard writes real drafts.
-3. **FIRE UP real** — connector vault + real OAuth (Teamwork/Slack/GitHub first — they exist in BA today), pod provisioning as a Q-operated applier.
+3. **LAUNCH real** — connector vault + real OAuth (Teamwork/Slack/GitHub first — they exist in BA today), pod provisioning as a Q-operated applier.
 4. **Federate BA** — the real mode already does this; scope it per-pod (`Pod.projectIds`) and light up RUN with live data.
 5. **Gate resolve write-back** — contract v0.6's `POST /agency/gates/{id}/resolve` (CAS semantics); the in-app gate review goes live; decisions land in the ledger with actor + reason.
 6. **Incidents + notifications fanout** — derive incidents from federated health/run/gate signals; persist notification fanout control-plane-side (agent buses are ephemeral).

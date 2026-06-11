@@ -1,6 +1,6 @@
 /**
  * Pilot Scorecard (/pilot, wave 2, P1-C3) — targets-vs-actuals against the
- * criteria set in FIRE UP → Go live → Targets & budget, a week 1–6 strip,
+ * criteria set in LAUNCH → Go live → Targets & budget, a week 1–6 strip,
  * the human baseline ("your numbers, not ours"), and the conversion sheet.
  *
  * Honesty rules: early weeks carry real misses (same rule as the sponsor
@@ -20,7 +20,7 @@ export interface PilotPlan {
   endIso: string;
   criteria: { metric: string; target: number; unit: string }[];
   weekly: { week: 1 | 2 | 3 | 4 | 5 | 6; actuals: Record<string, number> }[];
-  baseline: { label: string; source: "client-provided" | "Q-default" };
+  baseline: { label: string; source: "client-agreed" | "industry-standard" };
   conversion: { pilotFeeUsd: number; creditedToYear1: true; planName: string };
 }
 
@@ -102,7 +102,7 @@ export const PILOT_PLAN: PilotPlan = {
     { week: 5, actuals: {} },
     { week: 6, actuals: {} },
   ],
-  baseline: { label: "Senior BA, 4h/spec", source: "client-provided" },
+  baseline: { label: "Senior BA, 4h/spec", source: "client-agreed" },
   conversion: {
     // 6 weeks ≈ 1.5 × the monthly plan fee already used by the net-of-fees
     // ROI math (economics.PRICE_PAID_USD) — pricing hypothesis, not a quote.

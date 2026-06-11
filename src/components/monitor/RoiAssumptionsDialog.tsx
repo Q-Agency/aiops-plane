@@ -1,10 +1,10 @@
 /**
  * RoiAssumptionsDialog — "Edit assumptions — your numbers, not ours" (C2).
  * Edits the blended hourly rate + baseline note behind every hours→$
- * conversion; saving flips provenance to "client-provided" and persists to
+ * conversion; saving flips provenance to "client-agreed" and persists to
  * localStorage ("aiops_roi_assumptions"); every ROI surface re-derives live
- * via the useRoiAssumptions sync event. "Reset to Q-default" drops the
- * override.
+ * via the useRoiAssumptions sync event. "Reset to industry standard" drops the
+ * override. The same editor lives in Settings → ROI baseline.
  */
 
 import { useEffect, useState } from "react";
@@ -55,14 +55,14 @@ export function RoiAssumptionsDialog({ open, onOpenChange }: RoiAssumptionsDialo
     }
     save({ blendedRateUsdPerHr: Math.round(parsed), baselineNote: baseline.trim() || assumptions.baselineNote });
     toast.success("Assumptions updated", {
-      description: `ROI now re-derives at $${Math.round(parsed)}/h — source: client-provided.`,
+      description: `ROI now re-derives at $${Math.round(parsed)}/h — source: client-agreed.`,
     });
     onOpenChange(false);
   };
 
   const handleReset = () => {
     reset();
-    toast("Reset to Q-default", {
+    toast("Reset to industry standard", {
       description: "Back to the Q baseline ($95/h) until you provide your own numbers.",
     });
     onOpenChange(false);
@@ -119,8 +119,8 @@ export function RoiAssumptionsDialog({ open, onOpenChange }: RoiAssumptionsDialo
             >
               {assumptions.source}
             </Badge>
-            {assumptions.source === "Q-default" && (
-              <span>— flips to client-provided when you save.</span>
+            {assumptions.source === "industry-standard" && (
+              <span>— industry-standard default; flips to client-agreed when you save.</span>
             )}
           </div>
 
@@ -136,7 +136,7 @@ export function RoiAssumptionsDialog({ open, onOpenChange }: RoiAssumptionsDialo
             className="text-muted-foreground"
           >
             <RotateCcw className="size-3.5 mr-1.5" />
-            Reset to Q-default
+            Reset to industry standard
           </Button>
           <Button type="button" onClick={handleSave}>
             Save assumptions

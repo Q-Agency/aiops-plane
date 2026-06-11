@@ -1,5 +1,5 @@
 /**
- * FIRE UP step 1 — Pod Blueprints (body only; chrome from WizardShell).
+ * LAUNCH step 1 — Pod Blueprints (body only; chrome from WizardShell).
  * Four radio-style selectable cards (3 blueprints + Start from scratch,
  * D7) with a "what's included" stack — agent chips, connector chips
  * (live-first, Roadmap trailing as "Optional · Roadmap"), SLA + roles
@@ -91,7 +91,7 @@ function ConnectorChip({ id, optional }: { id: ConnectorId; optional?: boolean }
       <TooltipContent side="top" className="max-w-56 text-[11px]">
         {optional
           ? `${connector.name} — Roadmap. Request access; the pod runs without it.`
-          : `${connector.name} — Live. Connect it during fire-up.`}
+          : `${connector.name} — Live. Connect it during launch.`}
       </TooltipContent>
     </Tooltip>
   );

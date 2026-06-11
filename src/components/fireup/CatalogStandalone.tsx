@@ -46,7 +46,7 @@ export function CatalogStandalone() {
           <h1 className="text-lg font-semibold">Your curated Q delivery team</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Browse the catalog — what each role produces and consumes, indicative cost and latency,
-            all swappable by contract. Toggles here are a sandbox; fire up a pod to make it real.
+            all swappable by contract. Toggles here are a sandbox; launch a pod to make it real.
           </p>
         </div>
         <Button onClick={openWizard} className="shrink-0">

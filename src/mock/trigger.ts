@@ -88,7 +88,7 @@ export function useTriggerMode(): TriggerMode {
 }
 
 /* ------------------------------------------------------------------ */
-/* Trigger rule — the doorbell (FIRE UP 3b grows this from the scope)   */
+/* Trigger rule — the doorbell (LAUNCH 3b grows this from the scope)   */
 /* ------------------------------------------------------------------ */
 
 export interface TriggerRule {

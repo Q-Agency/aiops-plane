@@ -121,14 +121,19 @@ export interface RoiAssumptions {
   blendedRateUsdPerHr: number;
   /** What the comparison assumes. */
   baselineNote: string;
-  /** Provenance — flips to "client-provided" when edited ("your numbers, not ours"). */
-  source: "Q-default" | "client-provided";
+  /**
+   * Provenance (owner call 2026-06-12): clients rarely share baselines, so
+   * the DEFAULT is an industry-standard figure — always labeled as such —
+   * and it flips to "client-agreed" the moment someone enters real numbers
+   * (Settings → ROI baseline, or the /economics dialog).
+   */
+  source: "industry-standard" | "client-agreed";
 }
 
 export const roiAssumptions: RoiAssumptions = {
-  blendedRateUsdPerHr: HUMAN_RATE_PER_HOUR, // 95
+  blendedRateUsdPerHr: HUMAN_RATE_PER_HOUR, // 95 — industry-standard blended senior rate
   baselineNote: "senior BA · 4h per spec — senior engineer · 6h per story point",
-  source: "Q-default",
+  source: "industry-standard",
 };
 
 /** localStorage key for the client-side "Edit assumptions" override (C2). */

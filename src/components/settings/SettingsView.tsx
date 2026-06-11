@@ -13,6 +13,7 @@ import { ConnectedToolsPanel } from "./ConnectedToolsPanel";
 import { DataRetentionPanel } from "./DataRetentionPanel";
 import { ExperiencePanel } from "./ExperiencePanel";
 import { GatePolicyTable } from "./GatePolicyTable";
+import { RoiBaselinePanel } from "./RoiBaselinePanel";
 import { RolesAccessSummary } from "./RolesAccessSummary";
 import { TenancySecurityPanel } from "./TenancySecurityPanel";
 
@@ -81,6 +82,8 @@ const TAB_FOR_HASH: Record<string, string> = {
   models: "tenancy",
   tools: "tools",
   gates: "gates",
+  roi: "roi",
+  baseline: "roi",
   roles: "roles",
   data: "data",
   export: "data",
@@ -115,6 +118,9 @@ function MockSettingsPanels(props: AuditSectionProps) {
         <TabsTrigger value="gates" className="text-xs">
           Gate policies &amp; autonomy
         </TabsTrigger>
+        <TabsTrigger value="roi" className="text-xs">
+          ROI baseline
+        </TabsTrigger>
         <TabsTrigger value="roles" className="text-xs">
           Roles &amp; Access
         </TabsTrigger>
@@ -138,6 +144,12 @@ function MockSettingsPanels(props: AuditSectionProps) {
         <section id="gates" className="space-y-4 scroll-mt-24">
           <GatePolicyTable />
           <AutonomyLadder />
+        </section>
+      </TabsContent>
+
+      <TabsContent value="roi" className="mt-0">
+        <section id="roi" className="scroll-mt-24">
+          <RoiBaselinePanel />
         </section>
       </TabsContent>
 

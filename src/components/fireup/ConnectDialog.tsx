@@ -1,5 +1,5 @@
 /**
- * ConnectDialog — OAuth-style mock consent for a connector (FIRE UP step 3
+ * ConnectDialog — OAuth-style mock consent for a connector (LAUNCH step 3
  * + the standalone /connections hub).
  *
  * Connect mode: "{name} is asking to:" scope checklist (write scopes get an

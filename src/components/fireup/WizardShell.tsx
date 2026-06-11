@@ -1,5 +1,5 @@
 /**
- * WizardShell — owns ALL chrome of the FIRE UP wizard (D1):
+ * WizardShell — owns ALL chrome of the LAUNCH wizard (D1):
  * header (step title + sub + pod name + autosave), stepper breadcrumb,
  * footer Back/Next. Step components render BODY ONLY via the registry.
  *
@@ -109,7 +109,7 @@ export function WizardShell({ step }: { step: WizardStepId }) {
 
   const handleSaveAndExit = () => {
     toast("Draft saved", {
-      description: "Your draft is saved — you can resume any time from FIRE UP → New Pod.",
+      description: "Your draft is saved — you can resume any time from LAUNCH → New Pod.",
     });
     void navigate({ to: "/" });
   };
@@ -124,7 +124,7 @@ export function WizardShell({ step }: { step: WizardStepId }) {
               <Rocket className="size-4" />
             </div>
             <div className="leading-tight min-w-0">
-              <div className="text-sm font-semibold truncate">Fire up a new pod</div>
+              <div className="text-sm font-semibold truncate">Launch a new pod</div>
               <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
                 Step {idx + 1} of {STEPS.length} · {active.label}
               </div>

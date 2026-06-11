@@ -3,7 +3,7 @@
  * Roles surface:
  *
  *  - member rows: humans.ts ⋈ roles.ts (role Select, remove w/ confirm)
- *  - pending invites: reuses the FIRE UP InviteDialog → ghost "Invited" rows
+ *  - pending invites: reuses the LAUNCH InviteDialog → ghost "Invited" rows
  *  - read-only "What each role sees" capability matrix card
  *
  * Honesty: RBAC is mocked — roles shape attribution/landing config only;
@@ -321,7 +321,7 @@ export function MembersRoles() {
         </div>
       </div>
 
-      {/* invite dialog — reused from FIRE UP */}
+      {/* invite dialog — reused from LAUNCH */}
       <InviteDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}

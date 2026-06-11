@@ -1,7 +1,8 @@
 /**
  * ValidatorPanel — the C3 walled deterministic-validator panel: the moat.
  *
- * Renders the 8 real BA validator checks (validators.ts) inside a visually
+ * Renders one artifact family's deterministic checks (validators.ts) —
+ * the BA's 8 spec checks or the SA's 7 design checks — inside a visually
  * WALLED section — solid emerald-tinted border, ShieldCheck iconography,
  * the "DETERMINISTIC — NO MODEL IN THE LOOP" badge — so it can never be
  * confused with LLM/advisory signals (those get a separate amber/dashed
@@ -19,8 +20,8 @@ import {
   STRUCTURAL_HONESTY_LINE,
   passedCount,
   validatorHeadline,
+  type AnyCheckId,
   type ValidatorCheck,
-  type ValidatorCheckId,
   type ValidatorStatus,
 } from "@/mock/validators";
 
@@ -37,16 +38,18 @@ export interface ValidatorRowMeta {
 }
 
 export interface ValidatorPanelProps {
-  /** The 8 structural checks for one artifact (validators.ts `validatorsFor`). */
+  /** One family's structural checks (validatorsFor / designValidatorsFor). */
   checks: ValidatorCheck[];
   /** Compact = right-rail density: no descriptors, tighter rows. */
   compact?: boolean;
   /** Per-check aggregate meta (governance wall). */
-  meta?: Partial<Record<ValidatorCheckId, ValidatorRowMeta>>;
+  meta?: Partial<Record<AnyCheckId, ValidatorRowMeta>>;
   /** Override the computed headline (e.g. "across 14 specs"). */
   headline?: string;
+  /** Family-true honesty line (defaults to the spec wording). */
+  honestyLine?: string;
   /** Row click — gate review scrolls to the offending block; governance expands failing specs. */
-  onCheckClick?: (id: ValidatorCheckId) => void;
+  onCheckClick?: (id: AnyCheckId) => void;
   className?: string;
 }
 
@@ -79,11 +82,12 @@ export function ValidatorPanel({
   compact = false,
   meta,
   headline,
+  honestyLine,
   onCheckClick,
   className,
 }: ValidatorPanelProps) {
   const allPass = passedCount(checks) === checks.length && checks.length > 0;
-  const [expandedId, setExpandedId] = useState<ValidatorCheckId | null>(null);
+  const [expandedId, setExpandedId] = useState<AnyCheckId | null>(null);
   // failing checks pinned to top (C4 has-failures state)
   const ordered = [...checks].sort((a, b) => {
     const rank = (s: ValidatorStatus) => (s === "fail" ? 0 : s === "warn" ? 1 : 2);
@@ -115,7 +119,9 @@ export function ValidatorPanel({
           {headline ?? validatorHeadline(checks)}
         </div>
         {!compact && (
-          <p className="mt-1 text-xs text-muted-foreground">{STRUCTURAL_HONESTY_LINE}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {honestyLine ?? STRUCTURAL_HONESTY_LINE}
+          </p>
         )}
       </header>
 

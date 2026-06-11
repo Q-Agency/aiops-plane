@@ -23,6 +23,7 @@ import {
   validatorsFor,
   validatorScore,
   type ValidatorCheck,
+  type AnyCheckId,
   type ValidatorCheckId,
 } from "./validators";
 
@@ -39,8 +40,8 @@ export interface AssessedSpec {
   checks: ValidatorCheck[];
   /** 0–100 — passed/total. */
   score: number;
-  failing: ValidatorCheckId[];
-  warning: ValidatorCheckId[];
+  failing: AnyCheckId[];
+  warning: AnyCheckId[];
   /** Open spec-review gate id (→ /approvals/$gateId) when one exists. */
   reviewGateId?: string;
 }

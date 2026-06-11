@@ -344,7 +344,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
                 setTriggerMode(next);
                 appendAuditMock({
                   action: "policy.changed",
-                  detail: `intake.startPolicy: ${START_POLICY_NAME[triggerMode]} → ${START_POLICY_NAME[next]} (set in FIRE UP · Scope of work)`,
+                  detail: `intake.startPolicy: ${START_POLICY_NAME[triggerMode]} → ${START_POLICY_NAME[next]} (set in LAUNCH · Scope of work)`,
                 });
               }}
               className="gap-2"

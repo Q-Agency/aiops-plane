@@ -1,6 +1,6 @@
 /**
  * PilotView — /pilot Pilot Scorecard (wave 2, P1-C3): the targets set in
- * FIRE UP → Go live → Targets & budget, measured by the same ledger that
+ * LAUNCH → Go live → Targets & budget, measured by the same ledger that
  * runs the pod.
  *
  *   1. Header — pilot window + days-remaining chip (+ window-closed banner).
@@ -103,7 +103,7 @@ function NotInPilot() {
         <Gauge className="size-6 mx-auto text-muted-foreground" />
         <div className="text-sm text-foreground">This pod isn&apos;t running a pilot.</div>
         <div className="text-xs text-muted-foreground leading-relaxed">
-          Pilot targets are set in FIRE UP → Go live → Targets &amp; budget. Once a pilot window
+          Pilot targets are set in LAUNCH → Go live → Targets &amp; budget. Once a pilot window
           opens, targets-vs-actuals land here — measured by the same ledger that runs the pod.
         </div>
         <Button asChild variant="outline" size="sm">

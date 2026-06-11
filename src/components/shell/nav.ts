@@ -1,5 +1,5 @@
 /**
- * Left-rail navigation config — the FIRE UP / RUN / MONITOR / ADVANCED pillar
+ * Left-rail navigation config — the LAUNCH / RUN / MONITOR / ADVANCED pillar
  * spine (product-vision §6, IA reorg build-order #1).
  *
  * Pure config + badge selectors; LeftRail.tsx renders from this.
@@ -36,7 +36,7 @@ import {
 import { openGateCount } from "@/mock/approvals";
 import { INCIDENTS_OPEN_COUNT } from "@/mock/incidents";
 
-export type NavPillar = "FIRE UP" | "RUN" | "MONITOR" | "ADVANCED";
+export type NavPillar = "LAUNCH" | "RUN" | "MONITOR" | "ADVANCED";
 
 export type NavBadgeKey = "gates" | "incidents";
 
@@ -96,14 +96,14 @@ export interface NavGroup {
 }
 
 export const NAV: NavGroup[] = [
-  // FIRE UP is deliberately lean in the demo (owner call 2026-06-12): the
+  // LAUNCH is deliberately lean in the demo (owner call 2026-06-12): the
   // wizard owns the whole launch ritual — Catalog content lives in its
   // agent-team step (route /catalog stays for pitch deep-links), tool
   // connections live in its Connect step (the standalone hub is live-only),
   // and people/accountability has ONE home: MONITOR · Accountability (/pod).
   {
-    pillar: "FIRE UP",
-    label: "FIRE UP",
+    pillar: "LAUNCH",
+    label: "LAUNCH",
     items: [
       { to: "/pods/new", label: "New Pod", icon: Rocket },
       { to: "/connections", label: "Connections", icon: PlugZap, live: true, mockHidden: true },
@@ -113,7 +113,7 @@ export const NAV: NavGroup[] = [
     pillar: "RUN",
     label: "RUN",
     items: [
-      { to: "/", label: "Command Center", icon: LayoutDashboard, live: true },
+      { to: "/", label: "Overview", icon: LayoutDashboard, live: true },
       { to: "/pipeline", label: "Pipeline", icon: KanbanSquare },
       { to: "/intake", label: "Work Intake", icon: Inbox },
       { to: "/approvals", label: "Gates", icon: CheckCircle2, badgeKey: "gates" },
@@ -125,7 +125,10 @@ export const NAV: NavGroup[] = [
     pillar: "MONITOR",
     label: "MONITOR",
     items: [
-      { to: "/economics", label: "Overview · ROI", icon: DollarSign, live: true },
+      // "ROI & Economics" (was "Overview · ROI") — renamed with the RUN
+      // landing's Command Center → Overview rename so the rail never shows
+      // two "Overview" entries (owner call, 2026-06-12).
+      { to: "/economics", label: "ROI & Economics", icon: DollarSign, live: true },
       { to: "/governance", label: "Governance", icon: Scale, live: true },
       { to: "/pod", label: "Accountability", icon: ShieldCheck },
       { to: "/reports", label: "SLA & Reports", icon: FileBarChart },

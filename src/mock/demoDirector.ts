@@ -96,19 +96,19 @@ function clearStaged(): void {
 /* Beats — each mutates the existing stores, then bumps the demo bus    */
 /* ------------------------------------------------------------------ */
 
-/** 0:00 — FIRE UP complete · pod live. */
+/** 0:00 — LAUNCH complete · pod live. */
 export function fireUpComplete(podId: string = DEMO_POD_ID): void {
   if (!markFired("fireup")) return;
   auditOncePerSession(`pod.launched:${podId}`, {
     action: "pod.launched",
     target: `pod ${podId}`,
-    detail: "FIRE UP complete — pod live (staged demo)",
+    detail: "LAUNCH complete — pod live (staged demo)",
   });
   stageNotification({
     recipientId: CURRENT_USER_ID,
     kind: "digest",
     severity: "info",
-    title: "Pod live · FIRE UP complete",
+    title: "Pod live · LAUNCH complete",
     body: "Agents healthy · constitution v1 active · gates armed.",
     actorId: null,
     deepLink: "/",
@@ -254,7 +254,7 @@ function sec(at: string): number {
 }
 
 export const DEMO_STEPS: DemoStep[] = [
-  { id: "fireup", at: "0:00", atSec: sec("0:00"), label: "FIRE UP complete · pod live", fire: () => fireUpComplete() },
+  { id: "fireup", at: "0:00", atSec: sec("0:00"), label: "LAUNCH complete · pod live", fire: () => fireUpComplete() },
   { id: "inflow", at: "0:30", atSec: sec("0:30"), label: "AM-142 dragged to Ready · pod starts", fire: () => seedInflow() },
   { id: "clarification", at: "0:45", atSec: sec("0:45"), label: "BA asks a clarification", fire: () => openClarification("AM-142") },
   { id: "escalation", at: "1:30", atSec: sec("1:30"), label: "design gate goes stale → escalation", fire: () => raiseEscalation("AM-138") },

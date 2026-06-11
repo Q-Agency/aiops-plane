@@ -1,5 +1,5 @@
 /**
- * Pod blueprints — FIRE UP step 1. A blueprint pre-fills the whole wizard.
+ * Pod blueprints — LAUNCH step 1. A blueprint pre-fills the whole wizard.
  * Connector honesty (load-bearing): `connectorIds` are Live, connect-now;
  * `optionalConnectorIds` are Roadmap, rendered as "Optional · Roadmap" —
  * a blueprint never leads with a connector the buyer can't connect today.

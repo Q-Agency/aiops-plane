@@ -1,5 +1,5 @@
 /**
- * Pod store — client-side state for the multi-pod shell + FIRE UP wizard.
+ * Pod store — client-side state for the multi-pod shell + LAUNCH wizard.
  * Mock/standard-mode only: persisted to localStorage ("aiops_pods_v1"),
  * SSR-safe (initialize with the sample pod, hydrate in useEffect).
  *

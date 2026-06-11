@@ -1,5 +1,5 @@
 /**
- * FIRE UP step 6 — Readiness & Launch (body only; chrome from WizardShell).
+ * LAUNCH step 6 — Readiness & Launch (body only; chrome from WizardShell).
  * THE single hard gate (D2): computeReadiness(draft) drives the checklist,
  * the gauge, and the Launch CTA. Required checks BLOCK; advisory checks
  * (Slack approver, Knowledge sources) warn and are overrideable via an
@@ -331,7 +331,7 @@ function LaunchOverlay({ podName, onComplete }: { podName: string; onComplete: (
               {finished ? "Pod is live." : `Launching ${podName} pod…`}
             </div>
             <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
-              {finished ? "Taking you to Command Center…" : "Standing up your dedicated pod"}
+              {finished ? "Taking you to your Overview…" : "Standing up your dedicated pod"}
             </div>
           </div>
         </div>

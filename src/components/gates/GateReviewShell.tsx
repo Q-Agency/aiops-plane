@@ -44,18 +44,29 @@ import { accountableFor } from "@/mock/humans";
 import { agents as allAgents } from "@/mock/agents";
 import { artifactGatePolicyFor, gatePolicyFor } from "@/mock/gate-policies";
 import { appendAuditMock } from "@/mock/audit-bridge";
+import { bumpDemo } from "@/mock/demo-bus";
+import { restageTicket } from "@/mock/tickets";
 import { useLive } from "@/hooks/useLiveTicker";
 import { ValidatorPanel } from "@/components/governance/ValidatorPanel";
+import { DESIGN_HONESTY_LINE, QA_HONESTY_LINE } from "@/mock/validators";
 import { GatePolicyChip } from "./GatePolicyChip";
 import { SpecDocument, splitSections } from "./SpecDocument";
 import { EarsCriteriaList, EARS_BLOCK_ID } from "./EarsCriteriaList";
+import { DesignTraceMap, DESIGN_TRACE_BLOCK_ID } from "./DesignTraceMap";
+import { DecisionRecordsList, DESIGN_ADR_BLOCK_ID } from "./DecisionRecordsList";
+import { QaCoverageMap, QA_COVERAGE_BLOCK_ID } from "./QaCoverageMap";
+import { DefectsList, QA_DEFECTS_BLOCK_ID } from "./DefectsList";
 import { DecisionPanel } from "./DecisionPanel";
 import {
   artifactKindForGate,
   NEXT_STAGE_AFTER_APPROVAL,
+  NEXT_STAGE_ID_AFTER_APPROVAL,
   REJECT_REASON_MIN_CHARS,
+  REJECT_TARGETS,
   REVIEW_MODE_LABEL,
   SAMPLED_HINT,
+  stageForSuspected,
+  type RejectTarget,
 } from "./gate-config";
 import {
   AlertDialog,
@@ -141,6 +152,42 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   const agent = allAgents.find((a) => a.id === detail.agentId);
   const agentName = agent?.name ?? detail.agentId.toUpperCase();
   const isClarification = detail.kind === "clarification";
+  // Design gates carry the spec→design coverage map + decision records and
+  // swap the validator wall to the SA's check family; QA gates carry the
+  // spec→test coverage map + defects/verdict and the report's own family
+  // (gate-detail.ts).
+  const isDesign = Boolean(detail.designTrace);
+  const isQa = Boolean(detail.qaCoverage);
+
+  // Root-cause reject targeting (vision §2 "rework follows the artifact
+  // chain"): targets in chain order; default = the gate's own agent —
+  // unless the QA report's defects propose an upstream root cause
+  // (highest severity wins; the human can override).
+  const proposal = useMemo(() => {
+    const targets = detail.kind === "approval" ? (REJECT_TARGETS[detail.gateLabel] ?? []) : [];
+    if (targets.length === 0)
+      return { targets, target: null as RejectTarget | null, note: null as string | null };
+    const own = targets[targets.length - 1];
+    const sev = { critical: 0, medium: 1, low: 2 } as const;
+    const top = [...(detail.defects ?? [])].sort((a, b) => sev[a.severity] - sev[b.severity])[0];
+    const stage = top ? stageForSuspected(top.suspectedStage) : null;
+    const target = targets.find((x) => x.stage === stage);
+    if (top && target && target.stage !== own.stage) {
+      return {
+        targets,
+        target,
+        note: `proposed from ${top.id}'s root-cause trace — override if you disagree`,
+      };
+    }
+    return { targets, target: own, note: null };
+  }, [detail]);
+  const [rejectTarget, setRejectTarget] = useState<RejectTarget | null>(proposal.target);
+  // Stages between the target and this gate — stale by the consumes-graph.
+  const cascadeNames = useMemo(() => {
+    if (!rejectTarget) return [];
+    const i = proposal.targets.findIndex((x) => x.stage === rejectTarget.stage);
+    return proposal.targets.slice(i + 1).map((x) => x.agentName);
+  }, [rejectTarget, proposal.targets]);
   const failingCount = detail.validators.filter((v) => v.status === "fail").length;
   const passingCount = detail.validators.filter((v) => v.status === "pass").length;
   const nextStage = NEXT_STAGE_AFTER_APPROVAL[detail.gateLabel] ?? "the next stage";
@@ -164,7 +211,9 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   }
 
   function flashEars() {
-    scrollTo(EARS_BLOCK_ID);
+    // Validator-row click lands on the block the check verifies: the EARS
+    // list on spec gates, the coverage map on design/QA gates.
+    scrollTo(isDesign ? DESIGN_TRACE_BLOCK_ID : isQa ? QA_COVERAGE_BLOCK_ID : EARS_BLOCK_ID);
     setEarsFlash(true);
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setEarsFlash(false), 1600);
@@ -183,6 +232,27 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
         reason: reason.trim(),
         actor: null, // when-only until auth
       });
+      // The decision MOVES the ticket (vision §2: stages change only as
+      // consequences of audited decisions) — visible on the Pipeline board.
+      if (decision === "rejected" && rejectTarget) {
+        restageTicket(detail.ticketId, {
+          stage: rejectTarget.stage,
+          state: "running",
+          updatedAt: Date.now(),
+          rerunCount: detail.rerunCount + 1,
+        });
+        bumpDemo();
+      } else if (decision === "approved") {
+        const nextStageId = NEXT_STAGE_ID_AFTER_APPROVAL[detail.gateLabel];
+        if (nextStageId) {
+          restageTicket(detail.ticketId, {
+            stage: nextStageId,
+            state: nextStageId === "done" ? "approved" : "running",
+            updatedAt: Date.now(),
+          });
+          bumpDemo();
+        }
+      }
       // session audit ledger — vocabulary: gate.approved|rejected|override, clarification.answered
       appendAuditMock({
         action:
@@ -194,17 +264,32 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                 ? "gate.override"
                 : "gate.approved",
         target: detail.gateId,
-        detail: reason.trim(),
+        detail:
+          decision === "rejected" && rejectTarget
+            ? `${detail.gateLabel} → ${rejectTarget.stageLabel}: ${reason.trim()}` +
+              (cascadeNames.length
+                ? ` · downstream re-runs forward (${cascadeNames.join(", ")})`
+                : "")
+            : reason.trim(),
       });
       setResolvedDecision(entry);
       emit("human", detail.ticketId);
       const msg =
         decision === "approved"
-          ? `${detail.ticketId} approved — advancing to ${nextStage}. Recorded in the audit log.`
+          ? `${detail.ticketId} approved — moved to ${nextStage}. Recorded in the audit log.`
           : decision === "rejected"
-            ? `${detail.ticketId} returned to ${agentName} — rerunning with your note as added context.`
+            ? `${detail.ticketId} sent back to ${rejectTarget?.agentName ?? agentName}` +
+              (cascadeNames.length
+                ? ` — downstream ${cascadeNames.join(", ")} re-run forward.`
+                : " — rerunning with your note as added context.")
             : `Answer sent to ${agentName} — rerunning.`;
-      toast.success(msg);
+      toast.success(msg, {
+        action: {
+          label: "View on board",
+          onClick: () =>
+            navigate({ to: "/pipeline", search: { ticket: detail.ticketId } as never }),
+        },
+      });
       navigate({ to: "/approvals" });
     }, 450);
   }
@@ -352,6 +437,50 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                       </button>
                     </li>
                   )}
+                  {detail.designTrace && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => scrollTo(DESIGN_TRACE_BLOCK_ID)}
+                        className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-1.5 py-1 rounded hover:bg-white/[0.03] transition-colors"
+                      >
+                        Spec → design coverage
+                      </button>
+                    </li>
+                  )}
+                  {detail.decisionRecords && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => scrollTo(DESIGN_ADR_BLOCK_ID)}
+                        className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-1.5 py-1 rounded hover:bg-white/[0.03] transition-colors"
+                      >
+                        Decision records
+                      </button>
+                    </li>
+                  )}
+                  {detail.qaCoverage && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => scrollTo(QA_COVERAGE_BLOCK_ID)}
+                        className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-1.5 py-1 rounded hover:bg-white/[0.03] transition-colors"
+                      >
+                        Spec → test coverage
+                      </button>
+                    </li>
+                  )}
+                  {detail.defects && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => scrollTo(QA_DEFECTS_BLOCK_ID)}
+                        className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-1.5 py-1 rounded hover:bg-white/[0.03] transition-colors"
+                      >
+                        Defects & verdict
+                      </button>
+                    </li>
+                  )}
                   {detail.validators.length > 0 && (
                     <li>
                       <button
@@ -391,6 +520,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                   </div>
                   <div className="mt-1 text-[10px] font-mono text-muted-foreground">
                     deterministic · zero-LLM
+                    {detail.validatorFamily ? ` · ${detail.validatorFamily}` : ""}
                   </div>
                 </div>
               )}
@@ -439,6 +569,21 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
               <>
                 <SpecDocument markdown={detail.specMarkdown} />
                 <EarsCriteriaList criteria={detail.earsCriteria} highlight={earsFlash} />
+                {detail.designTrace && (
+                  <DesignTraceMap rows={detail.designTrace} highlight={earsFlash} />
+                )}
+                {detail.decisionRecords && (
+                  <DecisionRecordsList records={detail.decisionRecords} />
+                )}
+                {detail.qaCoverage && (
+                  <QaCoverageMap rows={detail.qaCoverage} highlight={earsFlash} />
+                )}
+                {detail.defects && (
+                  <DefectsList
+                    defects={detail.defects}
+                    recommendation={detail.releaseRecommendation}
+                  />
+                )}
               </>
             )}
           </div>
@@ -468,6 +613,9 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                   <ValidatorPanel
                     checks={detail.validators}
                     compact
+                    honestyLine={
+                      isDesign ? DESIGN_HONESTY_LINE : isQa ? QA_HONESTY_LINE : undefined
+                    }
                     onCheckClick={() => flashEars()}
                   />
                 </div>
@@ -486,6 +634,15 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
               onApproveRequest={requestApprove}
               onReject={requestReject}
               onAnswer={() => decide("answered")}
+              rejectTargets={proposal.targets}
+              rejectTarget={rejectTarget}
+              onRejectTargetChange={setRejectTarget}
+              rejectProposalNote={
+                rejectTarget && rejectTarget.stage === proposal.target?.stage
+                  ? proposal.note
+                  : null
+              }
+              rejectCascadeNames={cascadeNames}
             />
           </div>
         </div>

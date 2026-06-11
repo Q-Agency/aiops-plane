@@ -16,7 +16,7 @@ export interface RoleCapabilities {
   read: boolean; //      view all pod surfaces
   act: boolean; //       answer clarifications, trigger recovery
   approve: boolean; //   approve/reject gates
-  configure: boolean; // FIRE UP, connections, members, budget caps
+  configure: boolean; // LAUNCH, connections, members, budget caps
   export: boolean; //    reports, statements, audit ledger
 }
 
@@ -49,7 +49,7 @@ export const roles: Role[] = [
     readOnly: false,
     capabilities: { read: true, act: true, approve: true, configure: true, export: true },
     sees: [
-      "Everything — full FIRE UP / RUN / MONITOR rail",
+      "Everything — full LAUNCH / RUN / MONITOR rail",
       "Approves any gate; answers clarifications",
       "Configures connections, members, budget caps",
       "Exports reports, statements, the audit ledger",

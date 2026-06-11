@@ -165,31 +165,67 @@ Users browsing AutoMarket need to ${title.toLowerCase()} with predictable perfor
 }
 
 export function designMd(t: Ticket): { md: string; endpoints: Array<{ method: string; path: string; auth: string; notes: string }>; table: Array<{ column: string; type: string; notes: string }> } {
+  const version = (t.rerunCount ?? 0) + 1;
+  // The full design document the SA gate review renders (C4 — design twin
+  // of the BA spec review). Sections are `## ` so the outline + scroll-nav
+  // derive automatically; endpoint/column data is mirrored as bullets so a
+  // simple markdown renderer shows it faithfully.
+  const endpoints = [
+    { method: "GET",  path: `/api/v1/listings/search`,             auth: "session+anon", notes: "primary search endpoint" },
+    { method: "GET",  path: `/api/v1/listings/{listing_id}`,       auth: "session+anon", notes: "detail view (304-able)" },
+    { method: "POST", path: `/api/v1/listings/{listing_id}/save`,  auth: "session",      notes: "save to user shortlist" },
+    { method: "GET",  path: `/api/v1/listings/facets`,             auth: "anon",         notes: "filter values + counts" },
+  ];
+  const table = [
+    { column: "listing_id",   type: "uuid PK",       notes: "indexed" },
+    { column: "seller_id",    type: "uuid FK",       notes: "→ users(user_id)" },
+    { column: "vin",          type: "char(17)",      notes: "unique partial idx" },
+    { column: "price_cents",  type: "bigint",        notes: "stored in cents" },
+    { column: "search_vector",type: "tsvector",      notes: "GIN index" },
+    { column: "created_at",   type: "timestamptz",   notes: "default now()" },
+  ];
   return {
-    md: `# Design · ${t.id}
+    md: `# Design · ${t.id} · ${t.title}
+
+> design.md@v${version} · produced by SA Agent · consumes spec.md@v2 · contract v0.5
 
 ## Approach
-Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC.
+Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC. The design covers every acceptance criterion of the approved spec — the coverage map below is checked deterministically (D1).
+
+## Architecture & components
+- \`search-api\` (FastAPI router) — entry point; consumes the typed contract.
+- \`query-builder\` — translates filter params onto \`listings_search_idx\`; consumed by search-api.
+- \`pagination-util\` (shared) — cursor encode/decode; consumed by search-api and the web hook.
+- \`web/useListingSearch\` (React Query) — consumes search-api; renders results + filters.
+- \`mobile/ListingsBloc\` (Dio) — consumes search-api; same contract, no fork.
+
+## API contract
+${endpoints.map((e) => `- \`${e.method} ${e.path}\` — auth: ${e.auth} — ${e.notes}`).join("\n")}
+
+All four endpoints declare request/response schemas in the typed contract; error envelopes follow the platform standard (D2).
+
+## Data model
+${table.map((c) => `- \`${c.column}\` · ${c.type} — ${c.notes}`).join("\n")}
+
+One foreign key (\`seller_id → users.user_id\`); no dangling references (D3).
+
+## NFR budgets
+Spec bound: p95 < 200ms under 50 RPS (AC-1). Decomposition: edge 15ms + API 25ms + query 110ms + serialize 30ms = **180ms budget** — 20ms headroom (D6).
+
+## Failure modes & fallbacks
+- Postgres search: 250ms statement timeout → cached facet fallback + degraded-results banner.
+- Redis rate-limiter: 50ms timeout → fail-open with per-pod alarm (never blocks reads).
 
 ## Constraints
 - Re-use \`listings_search_idx\` (GIN on tsvector + btree on price, year).
 - Honour the cursor pagination contract from \`spec.md\`.
 - Rate limited at 30 req/min per session (Redis token-bucket).
+
+## Decisions
+Three decision records accompany this design — chosen option, alternatives and rationale render in the review's Decision-records block; one is marked Low-confidence and is surfaced for human attention.
 `,
-    endpoints: [
-      { method: "GET",  path: `/api/v1/listings/search`,             auth: "session+anon", notes: "primary search endpoint" },
-      { method: "GET",  path: `/api/v1/listings/{listing_id}`,       auth: "session+anon", notes: "detail view (304-able)" },
-      { method: "POST", path: `/api/v1/listings/{listing_id}/save`,  auth: "session",      notes: "save to user shortlist" },
-      { method: "GET",  path: `/api/v1/listings/facets`,             auth: "anon",         notes: "filter values + counts" },
-    ],
-    table: [
-      { column: "listing_id",   type: "uuid PK",       notes: "indexed" },
-      { column: "seller_id",    type: "uuid FK",       notes: "→ users(user_id)" },
-      { column: "vin",          type: "char(17)",      notes: "unique partial idx" },
-      { column: "price_cents",  type: "bigint",        notes: "stored in cents" },
-      { column: "search_vector",type: "tsvector",      notes: "GIN index" },
-      { column: "created_at",   type: "timestamptz",   notes: "default now()" },
-    ],
+    endpoints,
+    table,
   };
 }
 
@@ -249,6 +285,45 @@ export function reviewReport(t: Ticket) {
     { severity: "minor"   as const, file: "mobile/lib/features/listings/listings_bloc.dart", line: 67, msg: "Equatable props missing `cursor`; will mis-trigger BlocBuilder rebuilds." },
     { severity: "info"    as const, file: "backend/app/listings/schemas.py",    line: 22,  msg: `Consider extracting Filter model — reused by ${t.id} and AM-147.` },
   ];
+}
+
+/**
+ * The full qa-report document the QA gate review renders (C4 — QA twin of
+ * the spec/design reviews). Built FROM qaReport(t)'s data so the review,
+ * Traceability and the artifact shelf stay one source of truth.
+ */
+export function qaReportMd(t: Ticket): string {
+  const r = qaReport(t);
+  const failed = r.tests.filter((x) => x.state === "fail");
+  const healed = r.tests.filter((x) => x.note?.includes("Healer"));
+  return `# QA report · ${t.id} · ${t.title}
+
+> qa-report@v1 · produced by QA Agent · verifies PR #421 against spec.md@v2 · suite \`${r.suite}\`
+
+## Summary
+${r.passed}/${r.total} tests pass in ${Math.round(r.durationMs / 1000)}s. ${failed.length} failures — both filed as defects below. Recommendation: **HOLD** until QA-1 is fixed; QA-2 can ride the next train.
+
+## Scope & environments
+- Suites: web (Playwright) · mobile (Patrol) · api (pytest) — all three executed.
+- Environment matrix: chrome + safari × iOS + Android — 4/4 cells run.
+
+## Results by suite
+${r.tests.map((x) => `- ${x.state === "pass" ? "✓" : "✗"} ${x.name} · ${x.ms}ms${x.note ? ` — ${x.note}` : ""}`).join("\n")}
+
+## Performance vs budget
+AC-1 bound: p95 < 200ms under 50 RPS. Measured: k6 soak, 50 RPS × 10min — **p95 174ms** (26ms headroom). Evidence attached to the run.
+
+## Flaky & quarantined
+${healed.length} selector drift auto-repaired by the Healer (recorded, not skipped). 0 tests quarantined.
+
+## Defects
+${r.bugsFiled.map((b) => `- ${b}`).join("\n")}
+
+Each defect carries a suspected root-cause stage in the Defects block of this review — a reject from this gate can target that stage directly.
+
+## Recommendation
+**HOLD** — ship after QA-1 (missing Retry-After header) is fixed and re-verified. The failing contract behaviour traces upstream; see the defect's root-cause line.
+`;
 }
 
 export function qaReport(t: Ticket) {

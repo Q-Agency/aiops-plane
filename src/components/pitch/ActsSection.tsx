@@ -1,5 +1,5 @@
 /**
- * ActsSection (/pitch §4) — THE PRODUCT IN THREE ACTS: FIRE UP / RUN /
+ * ActsSection (/pitch §4) — THE PRODUCT IN THREE ACTS: LAUNCH / RUN /
  * MONITOR, each act a bordered card with its [DEMO] pills, plus the
  * artifact-chain SVG figure. Copy is verbatim from the brief.
  */
@@ -38,8 +38,8 @@ export function ActsSection() {
       </figure>
 
       <ActCard
-        title="ACT I — FIRE UP (launch a pod in minutes)"
-        intro="A PM — client-side or Q-side — assembles a working pod without an engineer: pick a blueprint, adjust the agent team, connect tools, assign accountable people, launch. Tenant infrastructure is a one-time Q-operated event; what the operator experiences is fast in-tenant configuration. Everything below is built and walkable in the demo."
+        title="ACT I — LAUNCH (a pod in minutes)"
+        intro="A PM — client-side or Q-side — assembles a working pod without an engineer: pick a blueprint, adjust the agent team, connect tools, assign accountable people, launch. Tenant infrastructure is a one-time Q-operated event; what the operator experiences is fast in-tenant configuration. Why we say Launch and not Deploy: deploying is what engineers do to software — and what the DevOps agent does at release time. Launching is what a PM does to a team. The word keeps the promise honest — a pod is launched in minutes, by the person who will run it, no engineer in the loop. Everything below is built and walkable in the demo."
       >
         <Bullets>
           <Bullet>
@@ -136,6 +136,29 @@ export function ActsSection() {
             <DemoPill href="/approvals/appr-AM-142" label="Spec review" />
           </Bullet>
           <Bullet>
+            <strong className="font-semibold text-slate-900">
+              Client-grade design review
+            </strong>{" "}
+            — the same decision surface for the SA's design.md: a{" "}
+            <strong className="font-semibold text-slate-900">spec → design coverage map</strong>{" "}
+            (every acceptance criterion shown landing in a design section — the artifact chain
+            made reviewable), the architecture decision records with alternatives and a marked
+            low-confidence call, and the design's own deterministic check family — never the
+            spec's checks borrowed
+            <DemoPill href="/approvals/appr-AM-138" label="Design review" />
+          </Bullet>
+          <Bullet>
+            <strong className="font-semibold text-slate-900">Client-grade QA review</strong> —
+            the chain closes where it started: a{" "}
+            <strong className="font-semibold text-slate-900">spec → test coverage map</strong>{" "}
+            (every acceptance criterion verified by a named test), defects that each name their
+            suspected root-cause stage (a reject can target it directly), and the QA agent's own
+            ship/hold verdict. The honesty beat: the report's structural checks can all pass
+            while the verdict is HOLD — the checks prove the report is complete, not that the
+            product works
+            <DemoPill href="/approvals/appr-AM-144" label="QA review" />
+          </Bullet>
+          <Bullet>
             <strong className="font-semibold text-slate-900">Decision canon</strong> — typed reason
             required on reject and override; optional quick-reason chips on approve; every decision
             lands on the ledger.{" "}
@@ -195,7 +218,10 @@ export function ActsSection() {
             <strong className="font-semibold text-slate-900">ROI hero</strong> — human-hours freed,
             cost per shipped ticket, cost per story point, with projected run-rate and a budget
             cap. The assumptions behind the math (hourly rate, baseline) are editable in the open
-            — a CFO can challenge the inputs instead of distrusting the output
+            — a CFO can challenge the inputs instead of distrusting the output. And because
+            clients rarely share their baselines, industry-standard defaults apply until they do
+            — every figure carries its label (industry standard vs client-agreed), so a number is
+            never presented as client-proven when it isn't
             <DemoPill href="/economics" label="ROI" />
           </Bullet>
           <Bullet>

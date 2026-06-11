@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { GateDetail } from "@/mock/gate-detail";
 import type { GateDecision } from "@/mock/approvals";
-import { REJECT_REASON_MIN_CHARS } from "./gate-config";
+import { REJECT_REASON_MIN_CHARS, type RejectTarget } from "./gate-config";
 
 /** Optional structured quick-reasons (C4) — one click fills the note. */
 export const APPROVE_QUICK_REASONS = [
@@ -59,6 +59,14 @@ export interface DecisionPanelProps {
   onApproveRequest: () => void;
   onReject: () => void;
   onAnswer: () => void;
+  /** Root-cause reject targets in chain order (vision §2) — picker shown when >1. */
+  rejectTargets?: RejectTarget[];
+  rejectTarget?: RejectTarget | null;
+  onRejectTargetChange?: (t: RejectTarget) => void;
+  /** "proposed from AM-144-QA-1's root-cause trace…" — when the report proposed it. */
+  rejectProposalNote?: string | null;
+  /** Agents downstream of the selected target — stale, re-run forward. */
+  rejectCascadeNames?: string[];
 }
 
 export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>(
@@ -74,6 +82,11 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
       onApproveRequest,
       onReject,
       onAnswer,
+      rejectTargets = [],
+      rejectTarget = null,
+      onRejectTargetChange,
+      rejectProposalNote = null,
+      rejectCascadeNames = [],
     },
     textareaRef,
   ) {
@@ -138,6 +151,41 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
               {failingCount} structural {failingCount === 1 ? "check is" : "checks are"} failing —
               approving overrides {failingCount === 1 ? "it" : "them"}; your note is required.
             </p>
+          </div>
+        )}
+
+        {!isClarification && rejectTargets.length > 1 && (
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+              Reject sends back to — the root cause
+            </div>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Reject target">
+              {rejectTargets.map((t) => (
+                <button
+                  key={t.stage}
+                  type="button"
+                  aria-pressed={rejectTarget?.stage === t.stage}
+                  onClick={() => onRejectTargetChange?.(t)}
+                  className={cn(
+                    "text-[10px] font-mono px-1.5 py-1 rounded border transition-colors",
+                    rejectTarget?.stage === t.stage
+                      ? "border-status-error/60 bg-status-error/10 text-status-error"
+                      : "border-border bg-white/5 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t.agentName}
+                </button>
+              ))}
+            </div>
+            {rejectProposalNote && (
+              <p className="text-[10px] font-mono text-status-waiting">{rejectProposalNote}</p>
+            )}
+            {rejectCascadeNames.length > 0 && (
+              <p className="text-[10px] font-mono text-muted-foreground">
+                {rejectTarget?.agentName} re-runs first — downstream{" "}
+                {rejectCascadeNames.join(", ")} are stale and re-run forward.
+              </p>
+            )}
           </div>
         )}
 
@@ -216,7 +264,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
               className="h-9 rounded-md border border-status-error/50 bg-status-error/15 text-status-error text-xs font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-status-error/25 transition-colors inline-flex items-center justify-center gap-1.5"
             >
               {submitting ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />}{" "}
-              Reject &amp; return to {agentName}
+              Reject &amp; return to {rejectTarget?.agentName ?? agentName}
             </button>
           </div>
         )}

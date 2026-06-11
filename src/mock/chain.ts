@@ -1,7 +1,7 @@
 /**
  * THE CHAIN — single source of truth for the SDLC pipeline contract.
  *
- * Every FIRE UP surface (catalog grid, pipeline preview, blueprints,
+ * Every LAUNCH surface (catalog grid, pipeline preview, blueprints,
  * readiness) derives from this module. No other file re-declares the
  * produces/consumes graph.
  *
@@ -39,7 +39,7 @@ export interface ChainRole {
   consumes: ArtifactKind[];
   availability: RoleAvailability;
   conformance: ContractConformance;
-  /** Indicative — display only; raw COGS never shown inside FIRE UP. */
+  /** Indicative — display only; raw COGS never shown inside LAUNCH. */
   costPerTicketUsd: number;
   latencyP50Min: number;
   /** false = pod-wide peer (knowledge): never a pipeline node, no edges. */

@@ -1,5 +1,5 @@
 /**
- * Connector catalog for FIRE UP step 3 (Connect Tools) and the
+ * Connector catalog for LAUNCH step 3 (Connect Tools) and the
  * standalone /connections hub.
  *
  * Selectability (owner call 2026-06-12): in the demo EVERY connector is

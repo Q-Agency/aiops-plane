@@ -13,9 +13,15 @@
 import type { AgentId, Approval, Ticket } from "./types";
 import { approvals, clarificationGates, type ClarificationGate } from "./approvals";
 import { tickets } from "./tickets";
-import { buildLineage, designMd, specMd } from "./trace";
+import { buildLineage, designMd, qaReportMd, specMd } from "./trace";
 import { accountableFor } from "./humans";
-import { validatorsFor, validatorScore, type ValidatorCheck } from "./validators";
+import {
+  designValidatorsFor,
+  qaValidatorsFor,
+  validatorsFor,
+  validatorScore,
+  type ValidatorCheck,
+} from "./validators";
 
 export type GateKind = "approval" | "clarification";
 
@@ -49,6 +55,51 @@ export interface PriorDecision {
   feedback?: string[];
 }
 
+/**
+ * One row of the spec → design coverage map (design gates): where each
+ * acceptance criterion of the CONSUMED spec landed in the design. The
+ * consumes-graph made reviewable — and exactly what check D1 verifies.
+ */
+export interface DesignTraceRow {
+  acId: string; //          "AC-1"
+  summary: string; //       short criterion summary for the row
+  sections: string[]; //    design section titles that address it
+  covered: boolean;
+}
+
+/** One architecture decision record (design gates). */
+export interface DecisionRecord {
+  id: string; //            "ADR-1"
+  title: string;
+  choice: string;
+  alternatives: string[];
+  rationale: string;
+  confidence: "high" | "low";
+}
+
+/** One row of the spec → test coverage map (QA gates). */
+export interface QaCoverageRow {
+  acId: string;
+  summary: string;
+  tests: { name: string; status: "pass" | "fail" }[];
+}
+
+/** One filed defect with its suspected root-cause stage (QA gates). */
+export interface QaDefect {
+  id: string; //            "AM-144-QA-1"
+  title: string;
+  severity: "critical" | "medium" | "low";
+  /** Where the failure was born — the reject target the rework canon uses. */
+  suspectedStage: string; // "Design (SA)" | "Implementation (Dev)"
+  evidence: string;
+}
+
+/** The QA agent's verdict — content, not a structural check. */
+export interface ReleaseRecommendation {
+  verdict: "ship" | "hold";
+  note: string;
+}
+
 export interface GateDetail {
   gateId: string; //              "appr-AM-142" | "clar-AM-142"
   kind: GateKind;
@@ -68,10 +119,26 @@ export interface GateDetail {
   specMarkdown: string;
   /** EARS acceptance criteria (spec gates; empty list otherwise). */
   earsCriteria: EarsCriterion[];
-  /** The 8 deterministic structural checks for this artifact. */
+  /**
+   * The deterministic structural checks for this artifact — the BA's 8
+   * (spec gates) or the SA's 7 (design gates). Empty for gate kinds whose
+   * check family isn't built yet (never borrow another artifact's checks).
+   */
   validators: ValidatorCheck[];
   /** 0–100 — passed/total. */
   validatorScore: number;
+  /** Family tag for the validator wall, e.g. "ba-spec@1.4.2" / "sa-design@2.1.0". */
+  validatorFamily?: string;
+  /** Spec → design coverage map (design gates only). */
+  designTrace?: DesignTraceRow[];
+  /** Architecture decision records (design gates only). */
+  decisionRecords?: DecisionRecord[];
+  /** Spec → test coverage map (QA gates only). */
+  qaCoverage?: QaCoverageRow[];
+  /** Filed defects with suspected root-cause stages (QA gates only). */
+  defects?: QaDefect[];
+  /** The QA agent's ship/hold verdict (QA gates only). */
+  releaseRecommendation?: ReleaseRecommendation;
   /** Present only when kind === "clarification". */
   clarification?: {
     question: string;
@@ -181,6 +248,112 @@ export function earsCriteriaFor(t: Ticket): EarsCriterion[] {
 }
 
 /* ------------------------------------------------------------------ */
+/* Design-gate blocks — coverage map + decision records                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Where each spec AC landed in the design (mirrors the design.md sections
+ * trace.ts renders). AM-140 — the returned-twice design — leaves AC-2 and
+ * AC-5 uncovered, exactly what its failing D1 check reports.
+ */
+export function designTraceFor(t: Ticket): DesignTraceRow[] {
+  const uncovered = t.id === "AM-140" ? new Set(["AC-2", "AC-5"]) : new Set<string>();
+  const rows: Array<[string, string, string[]]> = [
+    ["AC-1", "p95 < 200ms under 50 RPS", ["NFR budgets"]],
+    ["AC-2", "zero-results empty state", ["API contract", "Architecture & components"]],
+    ["AC-3", "cursor pagination, never offset", ["API contract", "Constraints"]],
+    ["AC-4", "identical schema for web + mobile", ["API contract", "Architecture & components"]],
+    ["AC-5", "telemetry event on invocation", ["Failure modes & fallbacks"]],
+  ];
+  return rows.map(([acId, summary, sections]) => ({
+    acId,
+    summary,
+    sections: uncovered.has(acId) ? [] : sections,
+    covered: !uncovered.has(acId),
+  }));
+}
+
+/** The design's decision records — one deliberately marked Low-confidence. */
+export function decisionRecordsFor(t: Ticket): DecisionRecord[] {
+  return [
+    {
+      id: "ADR-1",
+      title: "Read path",
+      choice: "Cursor pagination over the existing GIN-indexed tsvector",
+      alternatives: ["Offset pagination", "Dedicated search cluster"],
+      rationale:
+        "Reuses listings_search_idx and the ops surface the team already runs; revisit a dedicated cluster only past ~2M active listings.",
+      confidence: "high",
+    },
+    {
+      id: "ADR-2",
+      title: "Client data layer",
+      choice: "React Query (web) + generated Dio client in a BLoC (mobile), one shared contract",
+      alternatives: ["Hand-rolled fetch per client", "GraphQL gateway"],
+      rationale:
+        "One typed contract consumed twice keeps web and mobile schema-identical (AC-4) with no gateway to operate.",
+      confidence: "high",
+    },
+    {
+      id: "ADR-3",
+      title: `Rollout of ${t.title.toLowerCase()}`,
+      choice: "Feature-flagged 10% canary behind the existing flag service",
+      alternatives: ["Big-bang release"],
+      rationale:
+        "Load shape under real filters is uncertain — canary bounds the blast radius while NFR budgets are confirmed.",
+      confidence: "low",
+    },
+  ];
+}
+
+/* ------------------------------------------------------------------ */
+/* QA-gate blocks — spec → test coverage + defects + verdict            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Where each spec AC is verified by tests (mirrors qaReport's suite —
+ * AC-5's telemetry test fails, which is defect QA-2). Q1 checks parity.
+ */
+export function qaCoverageFor(_t: Ticket): QaCoverageRow[] {
+  return [
+    { acId: "AC-1", summary: "p95 < 200ms under 50 RPS", tests: [{ name: "k6 soak 50 RPS × 10min — p95 174ms", status: "pass" }] },
+    { acId: "AC-2", summary: "zero-results empty state", tests: [{ name: "shows empty state when filters yield zero results", status: "pass" }] },
+    { acId: "AC-3", summary: "cursor pagination, never offset", tests: [{ name: "honours cursor pagination across 5 pages", status: "pass" }] },
+    { acId: "AC-4", summary: "identical schema for web + mobile", tests: [{ name: "mobile: BLoC emits Loading → Success", status: "pass" }] },
+    { acId: "AC-5", summary: "telemetry event on invocation", tests: [{ name: "telemetry event fires once per query", status: "fail" }] },
+  ];
+}
+
+/** The filed defects — each with its suspected ROOT-CAUSE stage (rework canon). */
+export function defectsFor(t: Ticket): QaDefect[] {
+  return [
+    {
+      id: `${t.id}-QA-1`,
+      title: "429 response missing Retry-After header",
+      severity: "medium",
+      suspectedStage: "Design (SA)",
+      evidence:
+        "design.md's failure-mode section omits Retry-After in the 429 contract — Dev implemented to design. Fixing the design re-runs Dev and QA forward.",
+    },
+    {
+      id: `${t.id}-QA-2`,
+      title: "Duplicate telemetry event under StrictMode",
+      severity: "low",
+      suspectedStage: "Implementation (Dev · web)",
+      evidence:
+        "Double-fire guard missing in useListingSearch effect — AC-5's test fails; isolated to the web client.",
+    },
+  ];
+}
+
+export function releaseRecommendationFor(_t: Ticket): ReleaseRecommendation {
+  return {
+    verdict: "hold",
+    note: "Ship after QA-1 is fixed and re-verified — its root cause sits in the design, so the reject should target Design (SA), not just Dev. QA-2 can ride the next train.",
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* Detail assembly                                                      */
 /* ------------------------------------------------------------------ */
 
@@ -208,6 +381,8 @@ function artifactBody(gate: Approval["gate"], t: Ticket): string {
       return specMd(t);
     case "Design Review":
       return designMd(t).md;
+    case "QA Review":
+      return qaReportMd(t);
     default:
       return `# ${t.id} · ${t.title}\n\n> ${gate} artifact — rendered preview lands with the ${gate} facet renderer.\n\nOpen the artifact in Traceability for the full body.`;
   }
@@ -217,8 +392,19 @@ function detailFromApproval(a: Approval): GateDetail | undefined {
   const t = ticketFor(a.ticketId);
   if (!t) return undefined;
   const agentId = GATE_AGENT[a.gate];
-  const checks = validatorsFor(t.id);
   const isSpec = a.gate === "Spec Review";
+  const isDesign = a.gate === "Design Review";
+  const isQa = a.gate === "QA Review";
+  // Each gate renders ITS OWN check family — spec gets the BA's 8, design
+  // the SA's 7, QA the report's 7; gates whose family isn't built yet get
+  // none (never borrow another artifact's checks — that was a truth bug).
+  const checks = isSpec
+    ? validatorsFor(t.id)
+    : isDesign
+      ? designValidatorsFor(t.id)
+      : isQa
+        ? qaValidatorsFor(t.id)
+        : [];
   return {
     gateId: a.id,
     kind: "approval",
@@ -234,6 +420,18 @@ function detailFromApproval(a: Approval): GateDetail | undefined {
     earsCriteria: isSpec ? earsCriteriaFor(t) : [],
     validators: checks,
     validatorScore: validatorScore(checks),
+    validatorFamily: isSpec
+      ? "ba-spec@1.4.2"
+      : isDesign
+        ? "sa-design@2.1.0"
+        : isQa
+          ? "qa-report@1.0.7"
+          : undefined,
+    designTrace: isDesign ? designTraceFor(t) : undefined,
+    decisionRecords: isDesign ? decisionRecordsFor(t) : undefined,
+    qaCoverage: isQa ? qaCoverageFor(t) : undefined,
+    defects: isQa ? defectsFor(t) : undefined,
+    releaseRecommendation: isQa ? releaseRecommendationFor(t) : undefined,
     rerunCount: t.rerunCount ?? 0,
     priorDecisions: priorDecisionsFor(t),
     flowObserverHref: `https://q-ba-dashboard.ngrok.app/flow/${t.id.toLowerCase()}`,

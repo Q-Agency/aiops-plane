@@ -1,6 +1,6 @@
 /**
  * ExpansionHintCard (/org, P1-C2) — the expansion engine's home: a backlog
- * shape matched against the blueprint catalog, one click from FIRE UP.
+ * shape matched against the blueprint catalog, one click from LAUNCH.
  * CTA lands on /pods/new?step=blueprint (the wizard's blueprint step).
  */
 
@@ -17,7 +17,7 @@ export function ExpansionHintCard() {
       <div className="flex-1 min-w-56">
         <div className="text-sm text-foreground">
           Backlog <span className="font-mono">{"'Listr'"}</span> fits the{" "}
-          <span className="font-medium">Web App Delivery</span> blueprint — fire up a second pod →
+          <span className="font-medium">Web App Delivery</span> blueprint — launch a second pod →
         </div>
         <div className="mt-0.5 text-[11px] text-muted-foreground">
           Expansion engine · backlog shape matched against the blueprint catalog.
@@ -26,7 +26,7 @@ export function ExpansionHintCard() {
       <Button asChild size="sm">
         <Link to="/pods/new" search={{ step: "blueprint" }}>
           <Rocket className="size-3.5 mr-1.5" />
-          Fire up a second pod
+          Launch a second pod
         </Link>
       </Button>
     </section>

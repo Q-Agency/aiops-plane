@@ -20,7 +20,7 @@ export interface RoiHeroTileProps {
   label: string;
   /** Pre-formatted display value, e.g. "1,284 h" / "$31.40". */
   value: string;
-  /** One-liner under the value, e.g. "= $121,980 at your blended rate ($95/h · Q-default)". */
+  /** One-liner under the value, e.g. "= $121,980 at your blended rate ($95/h · industry standard)". */
   subcaption?: string;
   tier?: RoiTier;
   /** Visually dominant variant for the hero band. */

@@ -1,5 +1,5 @@
 /**
- * FIRE UP step 5 — Wire Slack (body only; chrome from WizardShell).
+ * LAUNCH step 5 — Wire Slack (body only; chrome from WizardShell).
  * Routes pod events (clarification gates / approvals / escalations / daily
  * brief) to Slack channels + picks the approver channel. Wiring persists on
  * the draft: usePods().draft.slackWiring + draft.approverChannelId.
@@ -260,7 +260,7 @@ function SlackMessagePreview({
                       ))}
                     </div>
                   ))}
-                  <SlackActionChips actions={["Open Command Center"]} />
+                  <SlackActionChips actions={["Open Overview"]} />
                 </div>
               ) : msg ? (
                 <div className="mt-1">

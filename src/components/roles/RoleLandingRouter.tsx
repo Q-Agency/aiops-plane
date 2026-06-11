@@ -1,7 +1,7 @@
 /**
  * RoleLandingRouter — the role-scoped "/" switch (My Workspace, mock mode).
  *
- * Mounted at the TOP of the standard-mode Command Center (it wraps Row 0,
+ * Mounted at the TOP of the standard-mode Overview (RUN landing) (it wraps Row 0,
  * the RoiHeroRow slot — index.tsx itself is frozen this slice):
  *   pod_admin / eng_lead → the existing PM cockpit, untouched, plus a small
  *                          ghost "Switch view" row (a PM demo affordance);

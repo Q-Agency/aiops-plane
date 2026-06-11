@@ -18,11 +18,11 @@ export function PilotSection() {
       <P>A 6-week pilot, instrumented from minute one.</P>
       <Bullets>
         <Bullet>
-          <B>Targets are set at FIRE UP</B>, with the client: TTFAA under 24h, approved artifacts
+          <B>Targets are set at LAUNCH</B>, with the client: TTFAA under 24h, approved artifacts
           per pod-week, gate-clearance p50, validator pass-rate, and a hard spend cap.
         </Bullet>
         <Bullet>
-          <B>Week 1:</B> fire up the pod against a slice of the client's real backlog; the TTFAA
+          <B>Week 1:</B> launch the pod against a slice of the client's real backlog; the TTFAA
           clock starts at launch.
         </Bullet>
         <Bullet>
@@ -79,7 +79,7 @@ const ROADMAP_ROWS: { n: string; deliverable: React.ReactNode; unlocks: string; 
     n: "3",
     deliverable: (
       <>
-        <B>FIRE UP real</B> — connector vault + real OAuth (Teamwork/Slack/GitHub first),
+        <B>LAUNCH real</B> — connector vault + real OAuth (Teamwork/Slack/GitHub first),
         Q-operated provisioning
       </>
     ),

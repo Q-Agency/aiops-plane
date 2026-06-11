@@ -1,6 +1,6 @@
 /**
  * FirstRunRibbon — the dismissible "your pod is live" banner shown on the
- * Command Center right after launch (closes the FIRE UP → RUN loop).
+ * Overview (RUN landing) right after launch (closes the LAUNCH → RUN loop).
  * Shows while the active pod launched < 10 minutes ago; dismissal persists
  * per pod id (localStorage, SSR-safe: read in useEffect, render null until).
  */

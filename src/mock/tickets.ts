@@ -77,6 +77,8 @@ export interface TicketRestagePatch {
   stage?: Ticket["stage"];
   state?: Ticket["state"];
   updatedAt?: number;
+  /** Gate rejects bump this — the card's visible rework cost. */
+  rerunCount?: number;
 }
 
 /**
@@ -102,6 +104,10 @@ export function restageTicket(id: string, patch: TicketRestagePatch): TicketRest
   if (patch.updatedAt !== undefined) {
     prev.updatedAt = t.updatedAt;
     t.updatedAt = patch.updatedAt;
+  }
+  if (patch.rerunCount !== undefined) {
+    prev.rerunCount = t.rerunCount ?? 0;
+    t.rerunCount = patch.rerunCount;
   }
   return prev;
 }

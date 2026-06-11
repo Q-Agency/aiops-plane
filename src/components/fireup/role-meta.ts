@@ -1,5 +1,5 @@
 /**
- * Tiny display helpers shared by the FIRE UP catalog surfaces
+ * Tiny display helpers shared by the LAUNCH catalog surfaces
  * (StepBlueprint, StepAgents, PipelinePreview, AgentDetailDialog).
  * Chain facts stay in src/mock/chain.ts — this is presentation only.
  */

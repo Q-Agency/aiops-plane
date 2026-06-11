@@ -1,5 +1,5 @@
 /**
- * FIRE UP step 2 — Agent Catalog (body only; chrome from WizardShell).
+ * LAUNCH step 2 — Agent Catalog (body only; chrome from WizardShell).
  *
  * Exports:
  *   StepAgents       — draft-backed wizard step (selection = draft.agentIds).

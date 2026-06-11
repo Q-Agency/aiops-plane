@@ -224,7 +224,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
           <span>
             Tickets are created where they live — on the board. The pod starts when a scoped
             ticket is dragged into the agreed column; without a tracker there is nothing to
-            listen to (the FIRE UP readiness check flags this before launch).
+            listen to (the LAUNCH readiness check flags this before launch).
           </span>
           <Button asChild size="sm" variant="outline" className="mt-2 w-fit">
             <Link to="/connections">Connect a tracker</Link>

@@ -49,7 +49,7 @@ const freshTone: Record<Freshness, { dot: string; label: string }> = {
   failed: { dot: "bg-status-error glow-pulse", label: "failed" },
 };
 
-/** Read-only ingestion scopes per source (FIRE UP Connect-tile language). */
+/** Read-only ingestion scopes per source (LAUNCH Connect-tile language). */
 const SOURCE_SCOPES: Record<SourceId, { label: string; reason: string }[]> = {
   slack: [
     { label: "Read #automarket-* channels & threads", reason: "Decision context behind every spec" },
@@ -197,7 +197,7 @@ export function KnowledgeSourcesPanel() {
   if (sources.length === 0) {
     return (
       <div className="glass-panel p-6 text-center text-sm text-muted-foreground">
-        No sources connected yet — connect tools in FIRE UP and the pod starts learning from
+        No sources connected yet — connect tools in LAUNCH and the pod starts learning from
         them here.
       </div>
     );

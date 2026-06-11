@@ -4,7 +4,7 @@
  * Ownership-changing / destructive actions (reassign-human, restart-agent,
  * pause-agent, escalate-to-q) REQUIRE a typed reason for the audit ledger;
  * retry/resume confirm with one click. reauth-tool renders the connector's
- * scope list (FIRE UP Connect-tile language) and a mock OAuth "Reconnect"
+ * scope list (LAUNCH Connect-tile language) and a mock OAuth "Reconnect"
  * step. Reassign picks a new accountable human from humans.ts.
  */
 
@@ -209,7 +209,7 @@ export function RecoveryConfirmDialog({
           {incident.id} · {incident.title}
         </div>
 
-        {/* reauth: the connector's scopes, FIRE UP Connect-tile language */}
+        {/* reauth: the connector's scopes, LAUNCH Connect-tile language */}
         {connector && (
           <div className="space-y-2">
             <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">

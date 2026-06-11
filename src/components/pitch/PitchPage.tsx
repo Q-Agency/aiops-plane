@@ -49,7 +49,7 @@ function Hero() {
       </h1>
       <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
         Mission control for governed agent–human software delivery.{" "}
-        <em className="font-medium text-slate-800">Fire up a pod. Run it. Prove it.</em>
+        <em className="font-medium text-slate-800">Launch a pod. Run it. Prove it.</em>
       </p>
       <p className="mt-5 max-w-3xl text-[15px] leading-7 text-slate-700">
         Agency OS is the operating system for agent–human delivery pods: a curated team of AI
@@ -136,7 +136,7 @@ function SummarySection() {
 function WedgeSection() {
   return (
     <PitchSection id="wedge" kicker="03" title="Why now / the wedge">
-      <P>The 2026 field sells one of three things. We are deliberately the third.</P>
+      <P>The 2026 field sells one of four things. We are deliberately the fourth.</P>
 
       <div className={tbl.wrap}>
         <table className={`${tbl.table} min-w-[640px]`}>
@@ -176,6 +176,21 @@ function WedgeSection() {
             </tr>
             <tr>
               <td className={tbl.td}>
+                <strong className="font-semibold text-slate-900">
+                  Frontier-lab enterprise deals
+                </strong>{" "}
+                — model + agentic-tooling agreements with large enterprises
+              </td>
+              <td className={tbl.td}>
+                Capability and tools for the client's own engineering organization
+              </td>
+              <td className={tbl.td}>
+                The buyer still runs it, governs it, staffs it, and answers for it — built for
+                orgs with a big in-house engineering team, not for buyers who need delivery
+              </td>
+            </tr>
+            <tr>
+              <td className={tbl.td}>
                 <strong className="font-semibold text-slate-900">Agency OS</strong>
               </td>
               <td className={tbl.td}>
@@ -193,6 +208,24 @@ function WedgeSection() {
       <P>
         The suites chart their own agents. We govern the pod across all of their tools and keep the
         evidence — the system of record for AI delivery governance.
+      </P>
+
+      <P>
+        <strong className="font-semibold text-slate-900">
+          The frontier labs are our suppliers, not our competitors.
+        </strong>{" "}
+        Agency OS is model-agnostic by design — agents swappable by contract, per-agent
+        model-plane disclosure, local models in-tenant — so every frontier-model improvement makes
+        our pods better and cheaper, and we never fund the capability race. The headline
+        lab-enterprise SDLC deals are our market validation, not our threat: the giants are
+        teaching buyers that agent-driven delivery is real — for organizations with large
+        in-house engineering teams. The agency-served mid-market, where Q lives, needs the same
+        thing <strong className="font-semibold text-slate-900">delivered, not licensed</strong>:
+        with named accountable humans, a vendor who signs the SOW, EU data posture, and proof.
+        The labs sell the engine — we show up with the car, the driver, and the insurance, and we
+        buy engines from whoever makes the best one. The real race is between agencies: the labs
+        are commoditizing the agent, and the harness, governance, and evidence layer is what will
+        separate the agency that wins from the ones that don't.
       </P>
 
       <P>

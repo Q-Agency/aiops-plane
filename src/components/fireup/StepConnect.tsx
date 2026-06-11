@@ -1,5 +1,5 @@
 /**
- * FIRE UP step 3 — Connect Tools (body only; chrome from WizardShell).
+ * LAUNCH step 3 — Connect Tools (body only; chrome from WizardShell).
  *
  * Connect-tile grid from src/mock/connectors.ts: blueprint-suggested live
  * tiles first ("Suggested" chip + readiness chip "{n}/{t} suggested

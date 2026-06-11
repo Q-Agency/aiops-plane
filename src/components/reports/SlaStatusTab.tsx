@@ -92,7 +92,7 @@ export function SlaStatusTab() {
         <Gauge className="size-6 mx-auto text-muted-foreground" />
         <div className="text-sm text-foreground">No SLAs defined for this pod yet.</div>
         <div className="text-xs text-muted-foreground">
-          SLAs are set per stage when you fire up a pod.
+          SLAs are set per stage when you launch a pod.
         </div>
         <Button
           variant="outline"

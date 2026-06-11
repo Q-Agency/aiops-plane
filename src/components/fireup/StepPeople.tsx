@@ -1,5 +1,5 @@
 /**
- * FIRE UP step 4 — Accountable People (body only; chrome from WizardShell).
+ * LAUNCH step 4 — Accountable People (body only; chrome from WizardShell).
  *
  * LEFT (~30%): roster rail — org humans (src/mock/humans.ts) + invited
  * people as draggable cards, "Invite by email" pinned on top. Each card

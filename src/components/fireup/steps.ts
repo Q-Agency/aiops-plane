@@ -1,5 +1,5 @@
 /**
- * Step registry for the FIRE UP wizard. WizardShell renders chrome
+ * Step registry for the LAUNCH wizard. WizardShell renders chrome
  * (header, stepper, footer); each step Component renders BODY ONLY
  * and reads/writes the draft via usePods().
  */
