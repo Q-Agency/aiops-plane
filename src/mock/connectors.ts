@@ -23,9 +23,10 @@ export type ConnectorId =
   | "linear"
   | "gitlab"
   | "figma"
-  | "notion";
+  | "notion"
+  | "playwright";
 export type ConnectorAvailability = "live" | "roadmap";
-export type ConnectorCategory = "ticketing" | "comms" | "scm" | "storage" | "pm" | "design";
+export type ConnectorCategory = "ticketing" | "comms" | "scm" | "storage" | "pm" | "design" | "testing";
 export type ConnectorDirection = "inbound" | "outbound" | "bidirectional";
 
 export interface ConnectorScope {
@@ -378,7 +379,45 @@ export const CONNECTORS: Connector[] = [
       },
     ],
   },
+  {
+    id: "playwright",
+    name: "Playwright",
+    icon: "FlaskConical",
+    category: "testing",
+    availability: "live",
+    direction: "bidirectional",
+    description:
+      "Runs the QA agent's end-to-end suites (web + mobile web) — results, traces and screenshots land in the qa-report. The QA gate can't verify without it.",
+    scopes: [
+      {
+        id: "pw-run-suites",
+        label: "Execute test suites",
+        access: "write",
+        reason: "Run the per-ticket e2e suite the QA agent maintains",
+      },
+      {
+        id: "pw-read-results",
+        label: "Read results, traces & screenshots",
+        access: "read",
+        reason: "Evidence for the qa-report and the spec → test coverage map",
+      },
+      {
+        id: "pw-manage-config",
+        label: "Manage suite config & projects",
+        access: "write",
+        reason: "Keep the environment matrix in sync with the test plan",
+      },
+    ],
+  },
 ];
+
+/**
+ * Mandatory connectors (owner call, 2026-06-12): the QA agent cannot verify
+ * a ticket without its test runner, so Playwright ships in every blueprint
+ * and is always on the suggested shelf — flagged, never skippable into a
+ * "ready" pod (gating stays amber-flag, never hard-block, per D2).
+ */
+export const MANDATORY_CONNECTOR_IDS = new Set<ConnectorId>(["playwright"]);
 
 export function connectorById(id: ConnectorId): Connector {
   const c = CONNECTORS.find((x) => x.id === id);
@@ -386,9 +425,6 @@ export function connectorById(id: ConnectorId): Connector {
   return c;
 }
 
-export const LIVE_CONNECTOR_IDS: ConnectorId[] = CONNECTORS.filter(
-  (c) => c.availability === "live",
-).map((c) => c.id);
 
 /* ------------------------------------------------------------------ */
 /* Status write-back mapping (ticketing connectors — ConnectDialog)    */

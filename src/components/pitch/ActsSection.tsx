@@ -44,9 +44,18 @@ export function ActsSection() {
         <Bullets>
           <Bullet>
             <strong className="font-semibold text-slate-900">Pod blueprints</strong> — Web App
-            Delivery, Mobile, Maintenance; pick one, adjust, go. Each blueprint pre-selects the
-            agent team, gate defaults and suggested tools, so you adjust a working setup instead
-            of assembling one from zero
+            Delivery, Mobile, <strong className="font-semibold text-slate-900">Full-Stack
+            Product</strong> (web, mobile and backend in one pod — one spec, three codebases, one
+            ledger), <strong className="font-semibold text-slate-900">AI Agentic
+            Development</strong> (build agentic systems — agents, tools, MCP integrations, with
+            evals as the quality gate), Maintenance; pick one, adjust, go. Each blueprint
+            pre-selects the agent team, gate defaults and suggested tools, so you adjust a
+            working setup instead of assembling one from zero. And every pod ships with the{" "}
+            <strong className="font-semibold text-slate-900">
+              Knowledge Base agent — mandatory, not optional
+            </strong>
+            : the shared context is the cornerstone, so the wizard simply won't assemble a pod
+            without it
             <DemoPill href="/pods/new?step=blueprint" label="New-Pod wizard" />
           </Bullet>
           <Bullet>
@@ -66,7 +75,9 @@ export function ActsSection() {
           <Bullet>
             <strong className="font-semibold text-slate-900">Connect tiles</strong> — OAuth-style
             tool connections across the stack: Teamwork, Jira and Linear (trackers), Slack and
-            email (channels), GitHub and GitLab (code), Drive, Notion and Figma (context). All
+            email (channels), GitHub and GitLab (code), Drive, Notion and Figma (context), and
+            Playwright (test runs — on every pod's shelf, because the QA gate can't verify
+            without its runner). All
             connectable in the demo's simulated OAuth — the real connector vault is build step 3,
             with Teamwork/Slack/GitHub as the production first wave; Microsoft Teams deliberately
             sits behind "request access" (Slack is first-class, Teams follows). Every tile lists

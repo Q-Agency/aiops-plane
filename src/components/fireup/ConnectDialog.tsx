@@ -63,6 +63,7 @@ const CATEGORY_NOUN: Record<Connector["category"], string> = {
   storage: "files",
   pm: "plans",
   design: "designs",
+  testing: "test runs",
 };
 
 function directionLine(c: Connector): string {

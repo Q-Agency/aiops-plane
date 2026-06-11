@@ -105,6 +105,9 @@ export const CHECK_DESCRIPTORS: Record<ValidatorCheckId, string> = {
   V9_duplicate_ids: "No duplicate IDs within an owning section",
 };
 
+/** Family tag rendered beside BA spec-check results (matches model provenance). */
+export const BA_VALIDATOR_FAMILY = "ba-spec@1.4.2";
+
 /** Exact badge copy — reuse verbatim wherever the moat is rendered. */
 export const DETERMINISTIC_BADGE = "DETERMINISTIC — NO MODEL IN THE LOOP";
 export const LLM_ADVISORY_BADGE = "LLM-ADVISORY";

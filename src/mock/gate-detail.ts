@@ -16,6 +16,9 @@ import { tickets } from "./tickets";
 import { buildLineage, designMd, qaReportMd, specMd } from "./trace";
 import { accountableFor } from "./humans";
 import {
+  BA_VALIDATOR_FAMILY,
+  DESIGN_VALIDATOR_FAMILY,
+  QA_VALIDATOR_FAMILY,
   designValidatorsFor,
   qaValidatorsFor,
   validatorsFor,
@@ -421,11 +424,11 @@ function detailFromApproval(a: Approval): GateDetail | undefined {
     validators: checks,
     validatorScore: validatorScore(checks),
     validatorFamily: isSpec
-      ? "ba-spec@1.4.2"
+      ? BA_VALIDATOR_FAMILY
       : isDesign
-        ? "sa-design@2.1.0"
+        ? DESIGN_VALIDATOR_FAMILY
         : isQa
-          ? "qa-report@1.0.7"
+          ? QA_VALIDATOR_FAMILY
           : undefined,
     designTrace: isDesign ? designTraceFor(t) : undefined,
     decisionRecords: isDesign ? decisionRecordsFor(t) : undefined,

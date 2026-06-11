@@ -133,7 +133,11 @@ export const CHAIN_ROLES: Record<ChainRoleId, ChainRole> = {
     id: "knowledge",
     produces: "knowledge",
     consumes: [],
-    availability: "roadmap",
+    // Fleet truth: the Knowledge Base agent is OPERATING today (the pitch's
+    // "BA + Knowledge Base — operating" chips; dashboard federation is the
+    // next step) — and since 2026-06-12 it is MANDATORY in every pod
+    // (catalog.MANDATORY_ROLE_IDS), so it cannot read "Roadmap".
+    availability: "live",
     conformance: "partial",
     costPerTicketUsd: 0.3,
     latencyP50Min: 2,

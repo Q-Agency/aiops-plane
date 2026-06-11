@@ -46,7 +46,7 @@ import {
   type TriggerMode,
 } from "@/mock/trigger";
 
-/** Segmented-control labels — short variants of trigger.ts TRIGGER_MODE_LABEL. */
+/** Segmented-control labels (short); ledger names come from START_POLICY_NAME. */
 const MODE_BUTTON_LABEL: Record<TriggerMode, string> = {
   operator: "Confirm-first — you approve each arrival",
   tracker: "Auto-start — the drag starts the chain",

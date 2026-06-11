@@ -7,22 +7,16 @@ import type { Stage } from "@/mock/types";
 /** Reject requires a typed reason of at least this length (C4). */
 export const REJECT_REASON_MIN_CHARS = 10;
 
-/** Where an approval sends the ticket next — confirm-dialog copy. */
-export const NEXT_STAGE_AFTER_APPROVAL: Record<string, string> = {
-  "Spec approval": "Ready for Design",
-  "Design approval": "Ready for Tasks",
-  "Tasks approval": "Ready for Dev",
-  "Code approval": "Ready for QA",
-  "QA approval": "Done",
-};
-
-/** Stage ids behind the labels above — an approval ACTUALLY advances the ticket. */
-export const NEXT_STAGE_ID_AFTER_APPROVAL: Record<string, Stage> = {
-  "Spec approval": "ready-design",
-  "Design approval": "ready-tasks",
-  "Tasks approval": "ready-dev",
-  "Code approval": "ready-qa",
-  "QA approval": "done",
+/**
+ * Where an approval sends the ticket next — ONE record for both the copy
+ * (label) and the actual move (stage id), so they can never drift.
+ */
+export const APPROVAL_ADVANCE: Record<string, { label: string; stage: Stage }> = {
+  "Spec approval": { label: "Ready for Design", stage: "ready-design" },
+  "Design approval": { label: "Ready for Tasks", stage: "ready-tasks" },
+  "Tasks approval": { label: "Ready for Dev", stage: "ready-dev" },
+  "Code approval": { label: "Ready for QA", stage: "ready-qa" },
+  "QA approval": { label: "Done", stage: "done" },
 };
 
 /**

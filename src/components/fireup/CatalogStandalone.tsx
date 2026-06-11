@@ -11,13 +11,16 @@ import { useNavigate } from "@tanstack/react-router";
 import { Rocket, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ChainRoleId } from "@/mock/chain";
+import { MANDATORY_ROLE_IDS } from "@/mock/catalog";
 import { usePods } from "@/lib/pods/pod-store";
 import { AgentCatalogBody } from "./StepAgents";
 
 export function CatalogStandalone() {
   const navigate = useNavigate();
   const { draft, hydrated, createDraft, updateDraft } = usePods();
-  const [selectedIds, setSelectedIds] = useState<ChainRoleId[]>([]);
+  // Even the sandbox tells the truth: every pod ships with the mandatory
+  // roles (the Knowledge Base agent), so they start selected and locked.
+  const [selectedIds, setSelectedIds] = useState<ChainRoleId[]>([...MANDATORY_ROLE_IDS]);
 
   const toggle = (id: ChainRoleId, next: boolean) => {
     setSelectedIds((ids) =>

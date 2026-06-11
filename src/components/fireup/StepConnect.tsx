@@ -20,6 +20,7 @@ import {
   Circle,
   Crosshair,
   Figma,
+  FlaskConical,
   FolderOpen,
   GitBranch,
   GitMerge,
@@ -42,7 +43,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePods, TENANCY_LINE } from "@/lib/pods/pod-store";
 import { scopedCount } from "@/mock/backlog";
 import { blueprintById } from "@/mock/blueprints";
-import { CONNECTORS, type Connector, type ConnectorId } from "@/mock/connectors";
+import {
+  CONNECTORS,
+  MANDATORY_CONNECTOR_IDS,
+  type Connector,
+  type ConnectorId,
+} from "@/mock/connectors";
 import { ConnectDialog } from "./ConnectDialog";
 import { StepScope } from "./StepScope";
 
@@ -58,6 +64,7 @@ const CONNECTOR_ICONS: Record<ConnectorId, LucideIcon> = {
   gitlab: GitMerge,
   figma: Figma,
   notion: NotebookText,
+  playwright: FlaskConical,
 };
 
 const MOCK_LATENCY_MS: Record<ConnectorId, number> = {
@@ -72,6 +79,7 @@ const MOCK_LATENCY_MS: Record<ConnectorId, number> = {
   gitlab: 151,
   figma: 127,
   notion: 109,
+  playwright: 81,
 };
 
 function LiveRoadmapBadge({ availability }: { availability: Connector["availability"] }) {
@@ -244,8 +252,14 @@ export function StepConnect() {
   // production first wave — with nearly every connector now demo-connectable,
   // falling back to ALL live ids would amber-flag the whole shelf.
   const FIRST_WAVE: ConnectorId[] = ["teamwork", "slack", "github"];
-  const suggestedIds: ConnectorId[] =
-    blueprint && blueprint.connectorIds.length > 0 ? blueprint.connectorIds : FIRST_WAVE;
+  // Mandatory connectors (Playwright — the QA agent's test runner) are on
+  // the suggested shelf of EVERY pod, blueprint or not.
+  const suggestedIds: ConnectorId[] = [
+    ...new Set([
+      ...(blueprint && blueprint.connectorIds.length > 0 ? blueprint.connectorIds : FIRST_WAVE),
+      ...MANDATORY_CONNECTOR_IDS,
+    ]),
+  ];
   const optionalIds = new Set(blueprint?.optionalConnectorIds ?? []);
 
   const connectedIds = useMemo(

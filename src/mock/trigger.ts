@@ -46,11 +46,6 @@ export type TriggerMode = "operator" | "tracker";
  *  signal in BOTH modes — the policy decides whether the pod starts immediately
  *  (auto-start) or waits for the operator's confirmation (confirm-first).
  *  Agency OS never originates activation. */
-export const TRIGGER_MODE_LABEL: Record<TriggerMode, string> = {
-  operator: "Confirm-first — the board starts it, the operator confirms",
-  tracker: "Auto-start — the drag starts the chain immediately",
-};
-
 /** Display name of the start policy (ids stay "operator"/"tracker" internally). */
 export const START_POLICY_NAME: Record<TriggerMode, string> = {
   operator: "confirm-first",
@@ -156,22 +151,6 @@ export function provenanceOf(id: string): TicketProvenance {
  */
 export function recordStart(id: string, provenance: TicketProvenance): void {
   provenanceById.set(id, provenance);
-}
-
-/**
- * Demo-Director seam in the restage* idiom (tickets.ts/approvals.ts): set a
- * ticket's provenance and return the BEFORE value so checkpoint restore can
- * put it back — `null` means "unset" (provenanceOf falls back to
- * "manual-pull"); passing `null` deletes the override again.
- */
-export function restageProvenance(
-  id: string,
-  provenance: TicketProvenance | null,
-): TicketProvenance | null {
-  const prev = provenanceById.get(id) ?? null;
-  if (provenance === null) provenanceById.delete(id);
-  else provenanceById.set(id, provenance);
-  return prev;
 }
 
 /* ------------------------------------------------------------------ */

@@ -140,6 +140,7 @@
 ---
 
 ### Step 1 — Pod Blueprints — `/pods/new?step=blueprint` (NEW)
+- **Blueprint catalog expanded + Knowledge Base mandatory (owner ask, 2026-06-12) — AS-BUILT:** the grid now offers SIX cards — Web App Delivery · Mobile · **Full-Stack Product Pod** ("Web, mobile and backend in ONE pod — one spec, three codebases, one ledger"; Layers icon; adds Figma to the suggested connectors) · **AI Agentic Development Pod** ("Build agentic systems — agents, tools and MCP integrations, with evals as the quality gate"; Bot icon; adds Notion; SLA line carries a weekly eval report — the AgentOps tie-in) · Maintenance · Start from scratch. And the **Knowledge Base agent is MANDATORY in every pod**: `catalog.MANDATORY_ROLE_IDS` — every blueprint's `agentIds` includes `knowledge`, the agent-step card renders a locked "Mandatory" chip instead of a switch (tooltip: the shared context every agent and human draws on), the shared toggle choke-point refuses removal with an explanatory toast (covers /catalog sandbox too), and a wizard normalization effect re-adds it to scratch/legacy drafts.
 - **Purpose:** The 60-second start: pick a delivery-pod blueprint (Web App / Mobile / Maintenance) that pre-fills the entire wizard, or "Start from scratch" as the escape hatch.
 - **Persona & entry:** Pod Admin / PM, landing as the first body of the wizard shell (above). It is the default active step.
 - **Layout:** Inside the wizard step body. Single column:

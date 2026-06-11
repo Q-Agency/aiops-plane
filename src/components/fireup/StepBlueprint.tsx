@@ -10,9 +10,11 @@
 
 import { useState } from "react";
 import {
+  Bot,
   Check,
   Clock,
   Globe,
+  Layers,
   PencilRuler,
   Smartphone,
   Users,
@@ -43,6 +45,8 @@ import { ROLE_SHORT, mix } from "./role-meta";
 const BLUEPRINT_ICONS: Record<string, LucideIcon> = {
   Globe,
   Smartphone,
+  Layers,
+  Bot,
   Wrench,
   PencilRuler,
 };

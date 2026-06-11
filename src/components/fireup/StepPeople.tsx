@@ -287,8 +287,11 @@ export function StepPeople() {
               Accountability matrix · {agentIds.length} agents
             </span>
           </div>
-          <div className="overflow-x-auto scrollbar-thin">
-            <div className="flex min-w-max">
+          {/* Wrapping card grid — NEVER a horizontal scroller: with 8 agents
+              (knowledge now mandatory) a fixed-column row forced sideways
+              scrolling to reach the far agents (owner UX call, 2026-06-12). */}
+          <div className="p-2">
+            <div className="grid gap-2 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
               {agentIds.map((agentId) => {
                 const entry = catalogEntry(agentId);
                 const color = `var(--${entry.color})`;
@@ -299,7 +302,7 @@ export function StepPeople() {
                   <div
                     key={agentId}
                     className={cn(
-                      "w-[164px] shrink-0 border-r border-border last:border-r-0 flex flex-col",
+                      "rounded-md border border-border overflow-hidden flex flex-col min-w-0",
                       uncovered && "bg-status-error/[0.07]",
                     )}
                   >

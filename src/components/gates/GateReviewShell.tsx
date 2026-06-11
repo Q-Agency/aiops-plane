@@ -59,8 +59,7 @@ import { DefectsList, QA_DEFECTS_BLOCK_ID } from "./DefectsList";
 import { DecisionPanel } from "./DecisionPanel";
 import {
   artifactKindForGate,
-  NEXT_STAGE_AFTER_APPROVAL,
-  NEXT_STAGE_ID_AFTER_APPROVAL,
+  APPROVAL_ADVANCE,
   REJECT_REASON_MIN_CHARS,
   REJECT_TARGETS,
   REVIEW_MODE_LABEL,
@@ -190,7 +189,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   }, [rejectTarget, proposal.targets]);
   const failingCount = detail.validators.filter((v) => v.status === "fail").length;
   const passingCount = detail.validators.filter((v) => v.status === "pass").length;
-  const nextStage = NEXT_STAGE_AFTER_APPROVAL[detail.gateLabel] ?? "the next stage";
+  const nextStage = APPROVAL_ADVANCE[detail.gateLabel]?.label ?? "the next stage";
   // P1-G1 — the policy regime behind this gate (artifact row where mapped)
   const gatePolicy = gatePolicyFor(detail.agentId);
   const artifactKind = isClarification ? null : artifactKindForGate(detail.gateLabel);
@@ -243,7 +242,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
         });
         bumpDemo();
       } else if (decision === "approved") {
-        const nextStageId = NEXT_STAGE_ID_AFTER_APPROVAL[detail.gateLabel];
+        const nextStageId = APPROVAL_ADVANCE[detail.gateLabel]?.stage;
         if (nextStageId) {
           restageTicket(detail.ticketId, {
             stage: nextStageId,
@@ -357,6 +356,23 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           >
             <Clock className="size-3" /> {detail.sla.label}
           </span>
+          {/* The QA agent's verdict is the most decision-relevant signal —
+              surface it in the header (the full block sits below the fold). */}
+          {detail.releaseRecommendation && (
+            <button
+              type="button"
+              onClick={() => scrollTo(QA_DEFECTS_BLOCK_ID)}
+              className={cn(
+                "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border cursor-pointer transition-colors",
+                detail.releaseRecommendation.verdict === "hold"
+                  ? "border-status-waiting/50 bg-status-waiting/10 text-status-waiting hover:bg-status-waiting/20"
+                  : "border-status-done/40 bg-status-done/10 text-status-done hover:bg-status-done/20",
+              )}
+              title="Jump to Defects & verdict"
+            >
+              QA recommends: {detail.releaseRecommendation.verdict === "hold" ? "HOLD" : "SHIP"} ↓
+            </button>
+          )}
           <span className="text-[10px] font-mono text-muted-foreground">
             {detail.artifactLabel}
           </span>

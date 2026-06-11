@@ -12,8 +12,8 @@
  * on both the consumer's card and the preview rail.
  */
 
-import { useMemo, useState } from "react";
-import { Plus, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Lock, Plus, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +29,13 @@ import {
   type ChainGap,
   type ChainRoleId,
 } from "@/mock/chain";
-import { ALWAYS_ON, CATALOG, catalogEntry, type CatalogEntry } from "@/mock/catalog";
+import {
+  ALWAYS_ON,
+  CATALOG,
+  MANDATORY_ROLE_IDS,
+  catalogEntry,
+  type CatalogEntry,
+} from "@/mock/catalog";
 import { blueprintById } from "@/mock/blueprints";
 import { usePods } from "@/lib/pods/pod-store";
 import { AgentDetailDialog } from "./AgentDetailDialog";
@@ -56,6 +62,9 @@ function CatalogCard({
   const color = `var(--${entry.color})`;
   const agent = entry.agentId ? agents.find((a) => a.id === entry.agentId) : undefined;
   const certified = entry.conformance === "certified";
+  // Mandatory roles (knowledge): the toggle locks — every pod ships with
+  // the shared context (catalog MANDATORY_ROLE_IDS).
+  const mandatory = MANDATORY_ROLE_IDS.has(entry.id);
 
   return (
     <div
@@ -102,19 +111,36 @@ function CatalogCard({
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          <span
-            className={cn(
-              "text-[9px] uppercase tracking-wider font-mono",
-              selected ? "text-status-done" : "text-muted-foreground",
-            )}
-          >
-            {selected ? "Added" : "Add"}
-          </span>
-          <Switch
-            checked={selected}
-            onCheckedChange={(next) => onToggle(entry.id, next)}
-            aria-label={selected ? `Remove ${entry.name}` : `Add ${entry.name}`}
-          />
+          {mandatory && selected ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary cursor-default">
+                  <Lock className="size-2.5" />
+                  Mandatory
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-60 text-[11px]">
+                Every pod ships with the Knowledge Base agent — it holds the shared context
+                (SOW, decisions, domain truth) every other agent and human draws on.
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <>
+              <span
+                className={cn(
+                  "text-[9px] uppercase tracking-wider font-mono",
+                  selected ? "text-status-done" : "text-muted-foreground",
+                )}
+              >
+                {selected ? "Added" : "Add"}
+              </span>
+              <Switch
+                checked={selected}
+                onCheckedChange={(next) => onToggle(entry.id, next)}
+                aria-label={selected ? `Remove ${entry.name}` : `Add ${entry.name}`}
+              />
+            </>
+          )}
         </span>
       </div>
 
@@ -292,6 +318,15 @@ export function AgentCatalogBody({
 
   const handleToggle = (id: ChainRoleId, next: boolean) => {
     if (next === selectedIds.includes(id)) return;
+    // The single choke point both the wizard and /catalog funnel through —
+    // mandatory roles (knowledge) cannot be removed from any pod.
+    if (!next && MANDATORY_ROLE_IDS.has(id)) {
+      toast.info("The Knowledge Base agent is mandatory", {
+        description:
+          "Every pod ships with its shared context — the SOW, decisions and domain truth every other agent draws on.",
+      });
+      return;
+    }
     onToggle(id, next);
     const name = catalogEntry(id).name;
     if (next) toast.success(`${name} added to pod`);
@@ -397,6 +432,14 @@ export function AgentCatalogBody({
 export function StepAgents() {
   const { draft, hydrated, updateDraft } = usePods();
   const selectedIds = draft?.agentIds ?? [];
+
+  // Normalization: every pod ships with the mandatory roles (knowledge) —
+  // covers "start from scratch" drafts and any pre-rule persisted draft.
+  useEffect(() => {
+    if (!hydrated || !draft) return;
+    const missing = [...MANDATORY_ROLE_IDS].filter((id) => !draft.agentIds.includes(id));
+    if (missing.length > 0) updateDraft({ agentIds: [...draft.agentIds, ...missing] });
+  }, [hydrated, draft, updateDraft]);
 
   const toggle = (id: ChainRoleId, next: boolean) => {
     if (!draft) return;

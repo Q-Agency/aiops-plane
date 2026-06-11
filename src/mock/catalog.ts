@@ -225,6 +225,15 @@ export function catalogEntry(id: ChainRoleId): CatalogEntry {
 /** The togglable set: 8 pipeline stages + Knowledge. PM is never togglable. */
 export const TOGGLABLE_IDS: ChainRoleId[] = [...PIPELINE_ORDER, "knowledge"];
 
+/**
+ * Mandatory in EVERY pod (owner call, 2026-06-12): the Knowledge Base
+ * agent holds the pod's shared context — the moat's cornerstone (SOW as
+ * source of truth, every agent and human drawing on the same context).
+ * Its toggle renders locked, every blueprint includes it, and the wizard
+ * re-adds it if a draft ever loses it.
+ */
+export const MANDATORY_ROLE_IDS = new Set<ChainRoleId>(["knowledge"]);
+
 /** PM Supervisor — always-on, non-togglable; rendered in its own "Always-on" subsection. */
 export const ALWAYS_ON = (() => {
   const pm = agentById("pm");
