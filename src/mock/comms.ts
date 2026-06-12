@@ -325,7 +325,3 @@ export function minutesUntilUtc(hhmm: string): number | null {
   return Math.round((next.getTime() - now.getTime()) / 60000);
 }
 
-export function nextDailyDigest(): { name: string; minutes: number | null; iso: string } {
-  const d = SCHEDULED.find((s) => s.id === "s1")!;
-  return { name: d.name, minutes: minutesUntilUtc(d.nextRunIso), iso: d.nextRunIso };
-}

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import {
   Mail,
   Lock,
@@ -11,6 +11,7 @@ import {
   Activity,
   ShieldCheck,
   GitBranch,
+  MonitorPlay,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,6 +31,25 @@ const HIGHLIGHTS = [
   { icon: ShieldCheck, title: "Human-in-the-loop gates", desc: "Approve specs, designs, and releases." },
   { icon: GitBranch, title: "End-to-end traceability", desc: "From spec to shipped — fully audited." },
 ];
+
+// The brand panel is an intentional dark showcase in BOTH themes (dark navy
+// gradient + glow + grid). Lock its theme tokens to the dark-mode values so
+// its theme-aware text (text-foreground / text-muted-foreground) stays light
+// even when the app runs in light mode — otherwise the foreground flips dark
+// and disappears against the dark background.
+const DARK_PANEL_VARS = {
+  "--foreground": "#e6e8ef",
+  "--muted-foreground": "#9aa0b4",
+  "--primary": "#6c63ff",
+} as CSSProperties;
+
+// One-click demo entry (for pitches / drive-by prospects): sign straight into
+// the sample-data account so nobody has to type credentials in front of an
+// audience. These ARE the public demo creds (users.server.ts) — the demo
+// account is "standard" (sample pods only), and Settings → Experience can
+// still flip the browser to Live afterwards. Not a secret; the login form
+// already accepts the same email+password by hand.
+const DEMO_CREDENTIALS = { email: "qai@q.agency", password: "demo" } as const;
 
 function BrandMark({ className }: { className?: string }) {
   return (
@@ -52,10 +72,12 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const busy = submitting || demoLoading;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (submitting) return;
+    if (busy) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -73,10 +95,33 @@ function LoginPage() {
     }
   }
 
+  async function enterDemo() {
+    if (busy) return;
+    setDemoLoading(true);
+    setError(null);
+    try {
+      const res = await loginFn({ data: { ...DEMO_CREDENTIALS } });
+      if (!res.ok) {
+        // Should never happen (creds are hardcoded-correct) — surface it anyway.
+        setError(res.error);
+        setDemoLoading(false);
+        return;
+      }
+      await router.invalidate();
+      await navigate({ to: "/" });
+    } catch {
+      setError("Couldn't start the demo. Please try again.");
+      setDemoLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen w-full lg:grid lg:grid-cols-[1.1fr_1fr]">
       {/* ── Brand panel (desktop only) ──────────────────────────────── */}
-      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#141a35] via-[#0e1020] to-[#0a0a12] lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
+      <aside
+        style={DARK_PANEL_VARS}
+        className="relative hidden overflow-hidden bg-gradient-to-br from-[#141a35] via-[#0e1020] to-[#0a0a12] text-foreground lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16"
+      >
         <div className="pointer-events-none absolute -left-24 -top-24 size-96 rounded-full bg-primary/20 blur-[120px]" />
         <div className="pointer-events-none absolute -bottom-32 right-0 size-96 rounded-full bg-[#3b82f6]/10 blur-[120px]" />
         <div
@@ -223,7 +268,7 @@ function LoginPage() {
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={submitting}>
+              <Button type="submit" className="w-full" disabled={busy}>
                 {submitting ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
@@ -237,6 +282,38 @@ function LoginPage() {
                 )}
               </Button>
             </form>
+
+            {/* Demo entry — no credentials needed, drops straight into the
+                sample-data workspace. Secondary by design so it never competes
+                with a real sign-in. */}
+            <div className="my-5 flex items-center gap-3" aria-hidden="true">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">or</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={enterDemo}
+              disabled={busy}
+            >
+              {demoLoading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Starting demo…
+                </>
+              ) : (
+                <>
+                  <MonitorPlay className="size-4" />
+                  Explore the demo
+                </>
+              )}
+            </Button>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              No account needed · sample-data workspace
+            </p>
           </div>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">

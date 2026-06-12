@@ -131,6 +131,16 @@ export function overallState(): ComponentState {
   return "operational";
 }
 
+/**
+ * Components NOT currently operational (degraded or down) — the rail's
+ * Platform-status badge ("problems"). 0 in the seeded happy state (the
+ * degraded stretches are historical, in the 90-day bars), so no chip
+ * renders until a component actually degrades.
+ */
+export function problemCount(): number {
+  return STATUS_COMPONENTS.filter((c) => c.state !== "operational").length;
+}
+
 export const OVERALL_PILL_COPY: Record<ComponentState, string> = {
   operational: "All systems operational",
   degraded: "Degraded — your agents are unaffected",

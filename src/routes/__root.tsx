@@ -138,9 +138,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // suppressHydrationWarning on <html>: the anti-flash <head> script
+  // intentionally sets <html class="light"> before hydration, so the server
+  // (no class) and client (class) differ on this element by design.
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Anti-flash: apply the saved theme BEFORE first paint. The SSR HTML
+            is dark by default (no `light` class), so a light-mode user would
+            otherwise see a dark flash until useTheme's post-hydration effect
+            runs. This blocking script sets the class during head parse.
+            KEY/class must match src/hooks/useTheme.tsx ("am.theme" → "light"). */}
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{if(localStorage.getItem("am.theme")==="light")document.documentElement.classList.add("light")}catch(e){}',
+          }}
+        />
         <HeadContent />
       </head>
       <body>

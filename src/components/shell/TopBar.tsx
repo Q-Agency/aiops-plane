@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { MoonStar, Moon, Sun, AlertTriangle, Clock, LogOut, Search, Sparkles } from "lucide-react";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { MoonStar, Sun, LogOut, Search, Sparkles } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import { useTheme } from "@/hooks/useTheme";
-import { unackedOpen, nextDailyDigest } from "@/mock/comms";
 import { cn } from "@/lib/utils";
-import { AssistantTriggerButton } from "@/components/assistant/SectionAssistant";
 import { logoutFn } from "@/lib/auth/auth";
 import type { AppUser } from "@/lib/auth/types";
 import { ProjectSwitcher } from "./ProjectSwitcher";
@@ -14,25 +11,10 @@ import { TenancyBadge } from "./TenancyBadge";
 import { NotificationBell } from "./NotificationBell";
 import { openCommandPalette } from "./CommandPalette";
 
-function useUtcClock() {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  if (!now) return "--:--:-- UTC";
-  const hh = String(now.getUTCHours()).padStart(2, "0");
-  const mm = String(now.getUTCMinutes()).padStart(2, "0");
-  const ss = String(now.getUTCSeconds()).padStart(2, "0");
-  return `${hh}:${mm}:${ss} UTC`;
-}
-
 export function TopBar({ user }: { user: AppUser }) {
-  const clock = useUtcClock();
   const router = useRouter();
   const navigate = useNavigate();
-  const { health, overnight, tokenSpend } = useLive();
+  const { health, tokenSpend } = useLive();
   const { theme, toggle, mounted } = useTheme();
 
   async function handleLogout() {
@@ -49,15 +31,6 @@ export function TopBar({ user }: { user: AppUser }) {
         ? "bg-status-waiting"
         : "bg-status-error";
 
-  const openEsc = unackedOpen().length;
-  const digest = nextDailyDigest();
-  const digestLabel =
-    mounted && digest.minutes !== null
-      ? digest.minutes < 60
-        ? `${digest.minutes}m`
-        : `${Math.floor(digest.minutes / 60)}h ${digest.minutes % 60}m`
-      : digest.iso;
-
   return (
     <header className="h-14 border-b border-border bg-panel/40 backdrop-blur-md flex items-center px-4 gap-4">
       {isReal ? (
@@ -71,10 +44,9 @@ export function TopBar({ user }: { user: AppUser }) {
 
       <div className="flex-1" />
 
-      {/* ----- Mock-fed chrome (Spend·24h ticker, comms digest/escalations,
-             system health, overnight loop, bell, ⌘K, section assistant,
-             Pod Copilot) — standard experience ONLY. Real mode renders none
-             of it until each surface is live-connected. ----- */}
+      {/* ----- Mock-fed chrome (⌘K search, system health, Spend·24h ticker,
+             notification bell, Pod Copilot) — standard experience ONLY. Real
+             mode renders none of it until each surface is live-connected. ----- */}
       {!isReal && (
         <>
           <button
@@ -98,47 +70,6 @@ export function TopBar({ user }: { user: AppUser }) {
             </span>
           </div>
 
-          <div
-            className={cn(
-              "flex items-center gap-2 px-2.5 h-8 rounded-md border text-xs font-medium",
-              overnight
-                ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border bg-white/5 text-muted-foreground",
-            )}
-            title={overnight ? "Overnight autonomous run active" : "Daytime mode"}
-          >
-            {overnight ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
-            {overnight ? "OVERNIGHT" : "DAY"}
-          </div>
-
-          <Link
-            to="/comms"
-            title={openEsc > 0 ? `${openEsc} unacknowledged escalation(s)` : "No open escalations"}
-            className={cn(
-              "hidden sm:flex items-center gap-1.5 px-2.5 h-8 rounded-md border text-xs font-medium transition-colors",
-              openEsc > 0
-                ? "border-status-error/50 bg-status-error/10 text-status-error animate-pulse"
-                : "border-border bg-white/5 text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <AlertTriangle className="size-3.5" />
-            <span className="font-mono tabular-nums">{openEsc}</span>
-            <span className="text-[10px] uppercase tracking-wider">ESC</span>
-          </Link>
-
-          <Link
-            to="/comms"
-            title="Next scheduled digest"
-            className="hidden md:flex items-center gap-1.5 px-2.5 h-8 rounded-md border border-border bg-white/5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            suppressHydrationWarning
-          >
-            <Clock className="size-3.5" />
-            <span className="text-[10px] uppercase tracking-wider">Next digest</span>
-            <span className="font-mono text-foreground tabular-nums" suppressHydrationWarning>
-              {digestLabel}
-            </span>
-          </Link>
-
           <div className="hidden sm:flex items-center gap-2 px-2.5 h-8 rounded-md border border-border bg-white/5">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
               Spend·24h
@@ -147,8 +78,6 @@ export function TopBar({ user }: { user: AppUser }) {
           </div>
 
           <NotificationBell />
-
-          <AssistantTriggerButton />
 
           <button
             type="button"
@@ -174,10 +103,6 @@ export function TopBar({ user }: { user: AppUser }) {
           <MoonStar className="size-3.5" />
         )}
       </button>
-
-      <div className="px-3 h-8 rounded-md border border-border bg-white/5 flex items-center font-mono text-xs text-muted-foreground">
-        {clock}
-      </div>
 
       <div className="mx-1 h-6 w-px bg-border" />
 

@@ -138,6 +138,17 @@ export function inScopeCount(): number {
   return intakeBacklog().filter((t) => t.inScope).length;
 }
 
+/**
+ * Board-sent arrivals still awaiting the operator's confirm/decline
+ * (confirm-first) — `arrived` and not yet pulled into the pod. The SAME
+ * derivation TicketPickerTable shows as "{n} in Ready awaiting you", reused
+ * by the rail's Work Intake badge so the two never disagree. Demo-reactive:
+ * confirming, declining, or simulating a drag changes it on the next tick.
+ */
+export function awaitingConfirmationCount(): number {
+  return intakeBacklog().filter((t) => t.arrived && !t.pulled).length;
+}
+
 /** "… stay with your team" count (the full client board minus scope). */
 export function outOfScopeCount(): number {
   return 220 - inScopeCount(); // BACKLOG_TOTAL mirrors backlog.ts

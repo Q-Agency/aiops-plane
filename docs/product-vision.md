@@ -148,7 +148,7 @@ The front door, and the single most load-bearing missing surface. Today `/connec
 
 **Compliance & Audit.** **[REUSE `src/routes/compliance.tsx`, dashboard-owned Supabase audit ledger]** Append-only `audit_log` of state-changing actions (reset/approve) that **outlives agent data** (BA's reset deletes the spec). The upgrade: **human-decision audit** — when a human clears/rejects a gate, capture *actor + timestamp + decision + reason* (typed reason on reject/override; structured quick-reason chips on approve), render it on the artifact and in the trail. This depends on real identity, so the **null `actor`** is honestly shown as *"when-only"* until auth v2 (§8); the record shape is designed now.
 
-**Advanced / Platform drawer.** **[REUSE, demoted]** Observability (`/observability`, health + log tail + infra telemetry), Orchestration (`/orchestration`, topology DAG + queue), Flow Analytics (`/flow`), Traceability (`/traceability`). These are credibility for a technical buyer but over-built for the PM persona — **demote, don't delete**, behind an Advanced section for technical users.
+**Advanced / Platform drawer.** **[REUSE, demoted]** Observability (`/observability`, health + log tail + infra telemetry), Orchestration (`/orchestration`, topology DAG + queue), Platform status (`/status`). These are credibility for a technical buyer but over-built for the PM persona — **demote, don't delete**, behind an Advanced section for technical users. **IA correction (owner call, 2026-06-12):** three surfaces originally swept into this drawer are NOT platform-engineer views and were re-placed — **Agents (`/agents`) → RUN** (the agent roster is the product's central object; "how's my team doing" is a daily operating check, not a technical deep-dive), and **Flow (`/flow`) + Traceability (`/traceability`) → MONITOR** (Flow as-built is human-bottleneck analytics for a delivery lead, not SRE telemetry; Traceability is the client-facing "end-to-end traceability" selling point). What remains in the drawer is genuinely tech-level-3.
 
 ---
 
@@ -174,27 +174,25 @@ Today: 16 flat left-rail items — *a tour, not a product*, reading as an intern
 ```
 TopBar:  [Pod switcher ▼]   [Tenancy: Dedicated · EU-West · isolated DB 🛡]   [⌘K search]   [🔔 notifications]   [user/role]
 
-Left rail (pillar-grouped):
-  ── LAUNCH
-       New Pod (wizard)              [NEW]
-       Catalog                        [NEW]
-       Connections                    [REFRAME /connections]
-       People & Roles                 [REFRAME /pod + new roles]
+Left rail (pillar-grouped) — as-built, reflecting the 2026-06-12 placement reorg:
+  ── LAUNCH                                   (lean in the demo — the wizard owns Catalog/Connect/People)
+       New Pod (wizard)               [/pods/new]
+       Connections                    [/connections — live-only; hidden in demo]
   ── RUN
-       Overview                 [/index]
+       Overview                       [/index]
+       Agents                         [/agents — PROMOTED from ADVANCED: the roster is the product's central object]
        Pipeline                       [/pipeline]
+       Work Intake                    [/intake]
        Gates (Approvals + Clarif.)    [/approvals]
        Comms & Escalations            [/comms]
-       Incidents & Recovery           [NEW]
-  ── MONITOR
-       ROI & Economics                 [REFRAME /economics hero]
-       Governance                     [/governance]
-       Accountability                 [REFRAME /pod]
-       SLA & Reports                  [NEW]
-       Compliance & Audit             [/compliance]
-       Usage & Billing                [NEW]
-  ── ADVANCED (technical users)
-       Observability · Orchestration · Flow · Traceability · Agents (/agents)   [demoted]
+       Incidents & Recovery           [/incidents]
+  ── MONITOR                                  (clustered by sub-theme so 12 items stay scannable)
+       · prove-ROI        ROI & Economics [/economics] · Usage & Billing [/billing] · Pilot [/pilot] · Portfolio [/org]
+       · govern           Governance [/governance] · Memory & Rules [/memory]
+       · delivery-health  Accountability [/pod] · SLA & Reports [/reports] · Flow [/flow ← demoted from ADVANCED]
+       · audit & output   Compliance & Audit [/compliance] · Deliverables [/artifacts] · Traceability [/traceability ← from ADVANCED]
+  ── ADVANCED (technical users — a pure platform/SRE drawer)
+       Observability [/observability] · Orchestration [/orchestration] · Platform status [/status]
   ── Settings (incl. tenancy/security posture, data export & retention)
 ```
 
