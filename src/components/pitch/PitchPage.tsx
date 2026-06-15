@@ -9,7 +9,7 @@
  */
 
 import { ActsSection } from "./ActsSection";
-import { AskSection, PilotSection, PitchFooter, RoadmapSection } from "./PlanSections";
+import { AskSection, PitchFooter, RoadmapSection, TeamSection } from "./PlanSections";
 import { PitchTopBar } from "./PitchTopBar";
 import { MoatSection, RealTodaySection } from "./ProofSections";
 import { P, PitchSection, StatChip, tbl } from "./primitives";
@@ -25,8 +25,8 @@ export function PitchPage() {
         <ActsSection />
         <MoatSection />
         <RealTodaySection />
-        <PilotSection />
         <RoadmapSection />
+        <TeamSection />
         <AskSection />
         <PitchFooter />
       </article>
@@ -121,9 +121,9 @@ function SummarySection() {
         this brief is walkable in the demo behind it.
       </P>
       <P>
-        <strong className="font-semibold text-slate-900">The ask:</strong> green-light a
-        productization track, nominate the first pilot client, and fund the scoping workshop that
-        turns the build sequence into a costed plan.
+        <strong className="font-semibold text-slate-900">The ask:</strong> green-light the
+        productization track and resource the seven-person core team to build the SDLC product over
+        ~3 months — kicking off with the architecture &amp; infrastructure step.
       </P>
     </PitchSection>
   );

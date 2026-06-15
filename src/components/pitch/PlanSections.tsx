@@ -1,9 +1,10 @@
 /**
- * PlanSections (/pitch §7–§10) — PILOT PLAN, ROADMAP & INITIAL DELIVERABLES,
- * THE ASK, and the footer. Copy is verbatim. The former Economics & pricing
- * hypothesis section was pulled to the backlog by the product owner
- * (2026-06-10) — the pricing hypothesis itself lives on in the vision §9.5;
- * the ROI story stays in Act III where the screens carry it.
+ * PlanSections (/pitch §7–§9) — ROADMAP (high-level build plan), TEAM & EFFORT,
+ * THE ASK, and the footer. The former Pilot-plan section and the detailed
+ * 7-deliverable table were removed by the product owner (2026-06-13): the
+ * brief is now an internal productization plan — a four-step build over ~3
+ * months, no launch/client/pilot program. The ROI story still lives in Act III
+ * where the screens carry it.
  */
 
 import { Bullet, Bullets, P, PitchSection, tbl } from "./primitives";
@@ -12,187 +13,237 @@ function B({ children }: { children: React.ReactNode }) {
   return <strong className="font-semibold text-slate-900">{children}</strong>;
 }
 
-export function PilotSection() {
-  return (
-    <PitchSection id="pilot" kicker="07" title="Pilot plan">
-      <P>A 6-week pilot, instrumented from minute one.</P>
-      <Bullets>
-        <Bullet>
-          <B>Targets are set at LAUNCH</B>, with the client: TTFAA under 24h, approved artifacts
-          per pod-week, gate-clearance p50, validator pass-rate, and a hard spend cap.
-        </Bullet>
-        <Bullet>
-          <B>Week 1:</B> launch the pod against a slice of the client's real backlog; the TTFAA
-          clock starts at launch.
-        </Bullet>
-        <Bullet>
-          <B>Weeks 2–5:</B> operate. Gates, incidents, weekly sponsor reports — target-vs-actual
-          every week, misses shown, not smoothed.
-        </Bullet>
-        <Bullet>
-          <B>Week 6:</B> conversion review. The scorecard is the deciding artifact.
-        </Bullet>
-        <Bullet>
-          <B>Measured on /pilot, from the pod's own ledger</B> — the same append-only record the
-          client can audit. We do not grade our own pilot; the ledger does.
-        </Bullet>
-        <Bullet>
-          The <B>conversion sheet is pre-filled</B> from pilot actuals, and the pilot fee is
-          credited to year one on conversion <em>(pricing hypothesis)</em>.
-        </Bullet>
-      </Bullets>
+/* ------------------------------------------------------------------ */
+/* §7 ROADMAP — the high-level build plan                              */
+/* ------------------------------------------------------------------ */
 
-      <P>
-        <B>What we measure ourselves on.</B> North star: <B>approved artifacts per pod-week</B>.
-        Activation: <B>time-to-first-approved-artifact under 24 hours</B>, surfaced as a timer on
-        the post-launch screen. Supporting: gate-clearance latency, pods per client,
-        pilot-to-annual conversion. Commercial packaging and pricing are deliberately out of this
-        brief — parked to the backlog until pilot data exists to price against.
-      </P>
-    </PitchSection>
-  );
-}
-
-const ROADMAP_ROWS: { n: string; deliverable: React.ReactNode; unlocks: string; deps: string }[] = [
+const PLAN_STEPS: { n: string; phase: React.ReactNode; what: React.ReactNode; done?: boolean }[] = [
   {
-    n: "1",
-    deliverable: (
+    n: "0",
+    phase: <B>Mocked stage</B>,
+    what: (
       <>
-        <B>Tenant shell + identity</B> — auth, the role model, audit actor stamping
+        The walkable mock — 43 build-ready screens, the validated UX spec the build is measured
+        against.
       </>
     ),
-    unlocks:
-      "Attributed decisions on the ledger; multi-stakeholder pods. Identity is product-blocking, not a nicety",
-    deps: "Green-light",
+    done: true,
+  },
+  {
+    n: "1",
+    phase: <B>Architecture &amp; infrastructure design</B>,
+    what: (
+      <>
+        The technical blueprint and the infra it runs on — dedicated tenancy, EU residency,
+        self-hosted inference, the control plane.
+      </>
+    ),
   },
   {
     n: "2",
-    deliverable: (
+    phase: <B>SDLC-focused version</B>,
+    what: (
       <>
-        <B>Control plane v1</B> — durable entities (Pod, Connection, SLA, Member…)
+        Build the working product on that foundation: the SDLC agent fleet plus the control plane
+        that governs it, end to end.
       </>
     ),
-    unlocks: "The wizard writes real pod drafts; state survives restarts",
-    deps: "1",
   },
   {
     n: "3",
-    deliverable: (
-      <>
-        <B>LAUNCH real</B> — connector vault + real OAuth (Teamwork/Slack/GitHub first),
-        Q-operated provisioning
-      </>
-    ),
-    unlocks: "Real client onboarding; no production connection without a vault",
-    deps: "2",
-  },
-  {
-    n: "4",
-    deliverable: (
-      <>
-        <B>Federate BA per-pod</B> — scope the live agent to each pod's backlog slice
-      </>
-    ),
-    unlocks: "The RUN pillar on live data; the pilot's working core",
-    deps: "2",
-  },
-  {
-    n: "5",
-    deliverable: (
-      <>
-        <B>Gate resolve write-back</B> — contract v0.6 control ops
-      </>
-    ),
-    unlocks: "In-app approvals go live; decisions land with actor + typed reason",
-    deps: "1, 4",
-  },
-  {
-    n: "6",
-    deliverable: (
-      <>
-        <B>Incidents + notifications fanout</B> — derived from federated signals, persisted
-        control-plane-side
-      </>
-    ),
-    unlocks: "24/7 operability; gates reliably reach humans",
-    deps: "2, 4",
-  },
-  {
-    n: "7",
-    deliverable: (
-      <>
-        <B>MONITOR money</B> — real economics from federated runs, SLA engine, reports, billing
-      </>
-    ),
-    unlocks: "The CFO surface on real data; metered pricing",
-    deps: "4–6 + pricing decision",
+    phase: <B>Adopt on projects</B>,
+    what: <>Put it to work on real projects and harden it from real use.</>,
   },
 ];
 
 export function RoadmapSection() {
   return (
-    <PitchSection id="roadmap" kicker="08" title="Roadmap & initial deliverables">
+    <PitchSection id="roadmap" kicker="07" title="Roadmap">
       <P>
-        <B>The mock is deliverable #0 — already shipped.</B> It is the validated UX spec: 43
-        build-ready screen specs, walkable end-to-end, the acceptance spec the real build is
-        measured against. The sequence below builds the product underneath it. No dates and no cost
-        figures here — that is the scoping workshop's job.
+        <B>Four steps, ~three months for the build.</B> Step 0 — the mock — is already shipped as
+        the validated UX spec; steps 1–3 build the product underneath it. Two bigger questions sit
+        deliberately <em>beyond</em> the build, taken up once it has proven out.
       </P>
 
       <div className={tbl.wrap}>
-        <table className={`${tbl.table} min-w-[680px]`}>
+        <table className={`${tbl.table} min-w-[640px]`}>
           <thead>
             <tr>
               <th scope="col" className={tbl.th}>
-                #
+                Step
               </th>
               <th scope="col" className={tbl.th}>
-                Deliverable
+                Phase
               </th>
               <th scope="col" className={tbl.th}>
-                What it unlocks
-              </th>
-              <th scope="col" className={tbl.th}>
-                Depends on
+                What it means
               </th>
             </tr>
           </thead>
           <tbody>
-            {ROADMAP_ROWS.map((row) => (
-              <tr key={row.n}>
-                <td className={`${tbl.td} font-mono text-xs text-slate-500`}>{row.n}</td>
-                <td className={tbl.td}>{row.deliverable}</td>
-                <td className={tbl.td}>{row.unlocks}</td>
-                <td className={`${tbl.td} whitespace-nowrap`}>{row.deps}</td>
+            {PLAN_STEPS.map((s) => (
+              <tr key={s.n}>
+                <td className={`${tbl.td} whitespace-nowrap font-mono text-xs text-slate-500`}>
+                  {s.n}
+                  {s.done && (
+                    <span className="ml-2 rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                      shipped
+                    </span>
+                  )}
+                </td>
+                <td className={`${tbl.td} whitespace-nowrap`}>{s.phase}</td>
+                <td className={tbl.td}>{s.what}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <p className="text-[15px] font-semibold leading-7 text-slate-900">
-        First scheduled deliverable on green-light: a scoping workshop that turns this sequence
-        into a costed plan.
+      <p className="mt-2 text-[13px] font-semibold uppercase tracking-wide text-slate-500">
+        Beyond the build
       </p>
+      <Bullets>
+        <Bullet>
+          <B>Support for general agents</B> — open the same governed harness to any agent by its
+          contract, beyond the SDLC (the registry surface is already mocked for it).
+        </Bullet>
+        <Bullet>
+          <B>Decide whether — and how — to sell it</B> — taking Agency OS to clients as a product is
+          a deliberate decision made once it has proven out internally, not an assumption baked in
+          now.
+        </Bullet>
+      </Bullets>
     </PitchSection>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* §8 TEAM & EFFORT                                                     */
+/* ------------------------------------------------------------------ */
+
+const TEAM_ROWS: { role: React.ReactNode; load: string; mandate: React.ReactNode }[] = [
+  {
+    role: <B>Project / Product Lead (PM)</B>,
+    load: "Full-time",
+    mandate: (
+      <>
+        Leads the build end-to-end; designs and validates the <B>PM (orchestrator) agent</B> — the
+        role its human owner knows best
+      </>
+    ),
+  },
+  {
+    role: <B>AI Engineering ×2</B>,
+    load: "Full-time",
+    mandate: (
+      <>
+        The agent fleet on the shared contract — harness, prompts, <B>eval suites</B> before any
+        version ships, cost-aware model routing
+      </>
+    ),
+  },
+  {
+    role: <B>DevOps / Platform</B>,
+    load: "Full-time",
+    mandate: (
+      <>
+        Sets up the infrastructure; co-authors the <B>technical blueprint</B>; designs and validates
+        the DevOps / Release agent
+      </>
+    ),
+  },
+  {
+    role: <B>Backend Engineer</B>,
+    load: "Full-time",
+    mandate: (
+      <>
+        Builds the <B>control plane</B> and the services under the dashboard — entities, federation,
+        gate write-back, integrations
+      </>
+    ),
+  },
+  {
+    role: <B>QA Engineer</B>,
+    load: "Full-time",
+    mandate: (
+      <>
+        QA across the build; designs and validates the <B>QA agent</B> as part of the fleet
+      </>
+    ),
+  },
+  {
+    role: <B>Product Designer</B>,
+    load: "Full-time",
+    mandate: <>UX of the control plane and every product surface</>,
+  },
+];
+
+export function TeamSection() {
+  return (
+    <PitchSection id="team" kicker="08" title="Team &amp; effort">
+      <P>
+        <B>The team is the thesis, staffed.</B> Agency OS sells one accountable human per agent — so
+        we build it the same way: every agent is designed and validated by the person who does that
+        job today. The PM who runs delivery shapes the orchestrator; the DevOps lead owns the
+        DevOps agent; the QA engineer owns the QA agent. The platform dogfoods its own
+        accountability model before it ever leaves the building.
+      </P>
+
+      <div className={tbl.wrap}>
+        <table className={`${tbl.table} min-w-[640px]`}>
+          <thead>
+            <tr>
+              <th scope="col" className={tbl.th}>
+                Role
+              </th>
+              <th scope="col" className={tbl.th}>
+                Load
+              </th>
+              <th scope="col" className={tbl.th}>
+                Mandate
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {TEAM_ROWS.map((row, i) => (
+              <tr key={i}>
+                <td className={`${tbl.td} whitespace-nowrap`}>{row.role}</td>
+                <td className={`${tbl.td} whitespace-nowrap`}>{row.load}</td>
+                <td className={tbl.td}>{row.mandate}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <P>
+        <B>Effort — a seven-person core, full-time, over ~3 months.</B> Step 0 (the mock) is shipped;
+        the three months cover steps 1–3. The two hardest tracks run in parallel without
+        contention: the <B>control plane has a dedicated backend owner</B> and the agent fleet its
+        own engineering pair.
+      </P>
+    </PitchSection>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* §9 THE ASK                                                          */
+/* ------------------------------------------------------------------ */
 
 export function AskSection() {
   return (
     <PitchSection id="ask" kicker="09" title="The ask">
       <Bullets>
         <Bullet>
-          <B>Approve the productization track</B> — Agency OS as a sellable platform, built along
-          the sequence above.
+          <B>Approve the productization track</B> — Agency OS built as a product along the four-step
+          plan above.
         </Bullet>
         <Bullet>
-          <B>Nominate the first pilot client and an internal sponsor</B> — one pod, one backlog
-          slice, six weeks, measured on the ledger.
+          <B>Resource the seven-person core team</B> — full-time for the ~3-month build.
         </Bullet>
         <Bullet>
-          <B>Fund the scoping workshop</B> — the team that turns deliverables 1–7 into a costed,
-          scheduled plan.
+          <B>Kick off step 1 now</B> — the architecture &amp; infrastructure design — so the build
+          starts against a spec that already exists.
         </Bullet>
       </Bullets>
 
@@ -218,7 +269,7 @@ export function AskSection() {
   );
 }
 
-/** §11 — provenance footer: stays visible in print (the approval pack). */
+/** §10 — provenance footer: stays visible in print (the approval pack). */
 export function PitchFooter() {
   return (
     <footer

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agency OS — Pitch Run-of-Show</title>
+<style>
+  :root{
+    --ink:#0f172a; --soft:#475569; --faint:#94a3b8; --line:#e2e8f0;
+    --indigo:#4338ca; --indigo-bg:#eef2ff; --indigo-line:#c7d2fe;
+    --green:#047857; --green-bg:#ecfdf5; --amber:#b45309; --amber-bg:#fffbeb;
+    --red:#b91c1c; --red-bg:#fef2f2; --red-line:#fecaca;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:#f8fafc; line-height:1.35; font-size:11px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .sheet{max-width:1100px; margin:14px auto; background:#fff; padding:18px 20px;
+    box-shadow:0 1px 4px rgba(0,0,0,.08); border:1px solid var(--line); border-radius:8px;}
+  mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .route{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:var(--indigo-bg); color:var(--indigo); border:1px solid var(--indigo-line);
+    border-radius:4px; padding:0 4px; font-size:10px; white-space:nowrap; font-weight:700;}
+  .kbd{font-family:ui-monospace,monospace; background:#f1f5f9; border:1px solid var(--line);
+    border-bottom-width:2px; border-radius:4px; padding:0 4px; font-size:10px; font-weight:700;}
+
+  header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+    border-bottom:2px solid var(--ink); padding-bottom:8px; margin-bottom:10px;}
+  h1{font-size:17px; margin:0; letter-spacing:-.2px}
+  h1 .sub{font-weight:500; color:var(--soft); font-size:12px}
+  .tag{font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); font-weight:700}
+  .preflight{font-size:9.5px; color:var(--soft); text-align:right; max-width:360px}
+  .preflight b{color:var(--ink)}
+
+  .open{background:var(--ink); color:#fff; border-radius:6px; padding:9px 12px; margin-bottom:12px;}
+  .open .tag{color:#a5b4fc}
+  .open p{margin:3px 0 0; font-size:11.5px; line-height:1.45}
+  .open em{color:#c7d2fe; font-style:normal; font-weight:700}
+
+  .cols{display:grid; grid-template-columns:1fr 300px; gap:14px; align-items:start}
+
+  table{width:100%; border-collapse:collapse}
+  th{font-size:8.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--faint);
+    text-align:left; padding:0 6px 4px; font-weight:700}
+  td{vertical-align:top; padding:6px; border-top:1px solid var(--line); font-size:10.5px}
+  tr.beat td{background:#fff}
+  .t{font-family:ui-monospace,monospace; font-weight:700; color:var(--indigo); white-space:nowrap; font-size:10px}
+  .beatname{font-weight:800; font-size:9px; text-transform:uppercase; letter-spacing:.04em; color:var(--soft); display:block; margin-top:2px}
+  .say{color:var(--ink)}
+  .say b{color:#000}
+  .proof{color:var(--green); font-size:9.5px; display:block; margin-top:3px}
+  .proof::before{content:"✓ on screen: "; color:var(--green); font-weight:700}
+
+  aside section{border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin-bottom:10px}
+  aside h2{font-size:10px; text-transform:uppercase; letter-spacing:.06em; margin:0 0 5px; color:var(--ink)}
+  aside p,aside li{font-size:10px; margin:3px 0; color:var(--soft)}
+  aside .q{color:var(--ink); font-weight:700}
+  aside ul{margin:2px 0; padding-left:14px}
+
+  .detour{background:var(--indigo-bg); border-color:var(--indigo-line)}
+  .ask{background:var(--green-bg); border-color:#a7f3d0}
+  .ask h2{color:var(--green)}
+  .ask ol{margin:2px 0; padding-left:16px} .ask li{color:#065f46; font-weight:600}
+  .panic{background:var(--red-bg); border-color:var(--red-line)}
+  .panic h2{color:var(--red)}
+  .panic li{color:#7f1d1d}
+  .panic b{color:var(--red)}
+
+  footer{margin-top:10px; border-top:1px solid var(--line); padding-top:6px;
+    font-size:9.5px; color:var(--soft); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  footer b{color:var(--ink)}
+
+  @media print{
+    body{background:#fff; font-size:10px}
+    .sheet{box-shadow:none; border:none; margin:0; max-width:none; padding:0}
+    @page{size:A4 landscape; margin:10mm}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <div>
+      <div class="tag">Live demo · run-of-show · hold this, project the app</div>
+      <h1>Agency OS <span class="sub">— 3-minute governed-delivery walkthrough</span></h1>
+    </div>
+    <div class="preflight">
+      <div class="tag">Pre-flight (90 sec)</div>
+      <b>1.</b> Incognito → <span class="route">/login</span> → “Explore the demo” (<b>qai@q.agency / demo</b>)<br>
+      <b>2.</b> Confirm <b>Demo</b> mode · Settings → Experience<br>
+      <b>3.</b> Go to <span class="route">/</span> · press <span class="kbd">⌘⇧D</span> · set <b>“On my cue”</b><br>
+      <b>4.</b> Open <span class="route">/pitch</span> in a 2nd tab for jumps
+    </div>
+  </header>
+
+  <div class="open">
+    <div class="tag">Cold open — say this before you touch the app</div>
+    <p>“Everyone on your team is already coding with AI — different tools, different models, pasting whatever into whatever.
+    You can’t see it, can’t enforce it, can’t prove a standard was met, can’t keep code in the building. A copilot inside
+    someone’s IDE is <em>ungovernable by design</em>. The only way to control it is to take implementation <em>headless</em> —
+    into a harness that runs only approved tools and models, with a human accountable at every gate. Let me show you. Live. Three minutes.”</p>
+  </div>
+
+  <div class="cols">
+    <!-- MAIN: the 7-beat scripted spine -->
+    <div>
+      <table>
+        <thead><tr><th style="width:48px">Cue</th><th>Say this &amp; click here</th></tr></thead>
+        <tbody>
+          <tr class="beat"><td class="t">0:00<span class="beatname">Launch</span></td>
+            <td class="say">“A pod is live — eight agents, a constitution, a ledger. Stood up by a <b>non-engineer in minutes</b>, not a platform team in months.”
+              <span class="proof">notification bell on <span class="route">/</span> — “Pod live · LAUNCH complete · constitution v1 active”</span></td></tr>
+
+          <tr class="beat"><td class="t">0:30<span class="beatname">Intake · single doorbell</span></td>
+            <td class="say"><span class="kbd">Step →</span> “Work comes from the client’s own board. <b>Nothing starts unless the operator confirms it</b> — one doorbell. Here’s AM-142 arriving.”
+              <span class="proof"><span class="route">/intake</span> — AM-142 in Ready · “BA picked it up (drafting spec.md)”</span></td></tr>
+
+          <tr class="beat"><td class="t">0:45<span class="beatname">Clarification gate</span></td>
+            <td class="say"><span class="kbd">Step →</span> “The agent <b>doesn’t guess — it asks</b>, in Slack where people already work, and waits. A human answers; the answer’s on the record.”
+              <span class="proof"><span class="route">/approvals/clar-AM-142</span> — “saved filter chips — per account or per device?” + Answer</span></td></tr>
+
+          <tr class="beat"><td class="t">1:30<span class="beatname">Escalation</span></td>
+            <td class="say"><span class="kbd">Step →</span> “Stale gate → it escalates to the accountable human on its own. <b>(Heads-up: different ticket, AM-138 — I’m showing the escalation path.)</b>”
+              <span class="proof"><span class="route">/comms</span> — “design gate stale 26h · routed to Marin”</span></td></tr>
+
+          <tr class="beat"><td class="t">1:35<span class="beatname">Incident</span></td>
+            <td class="say"><span class="kbd">Step →</span> “If an agent goes unhealthy it’s an <b>incident with a recovery path</b> — not a silent failure.”
+              <span class="proof"><span class="route">/incidents</span> — “QA Agent down · liveness lost just now” + Recover</span></td></tr>
+
+          <tr class="beat"><td class="t">1:50<span class="beatname">Spec approval gate</span></td>
+            <td class="say"><span class="kbd">Step →</span> “Spec’s done — and it <b>stops at a human gate</b>. Eight deterministic checks passed, but a person still signs. Nothing ships unaccountably.”
+              <span class="proof"><span class="route">/approvals/appr-AM-142</span> — “8/8 structural checks pass. Awaiting your sign-off.”</span></td></tr>
+
+          <tr class="beat"><td class="t">2:45<span class="beatname">The moat · validator floor</span></td>
+            <td class="say"><span class="kbd">Step →</span> “Here’s the floor: <b>eight zero-LLM validators</b>, quality checked in code. No model grades its own homework — and the screen says so.”
+              <span class="proof"><span class="route">/governance</span> — the 8 deterministic validators wall</span></td></tr>
+
+          <tr class="beat" style="background:var(--green-bg)"><td class="t" style="color:var(--green)">PROVE<span class="beatname" style="color:var(--green)">Close the loop</span></td>
+            <td class="say"><b>Ledger →</b> <span class="route">/compliance</span> “Every decision — who, what, why — on an <b>append-only ledger that outlives any agent reset</b>.”<br>
+              <b>ROI →</b> <span class="route">/economics</span> “And here’s what it costs and what it saves.” <i>(point at the hero ROI number)</i></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ASIDE -->
+    <aside>
+      <section class="detour">
+        <h2>If they push back — detour live</h2>
+        <p class="q">“Is this just for software?”</p>
+        <p>→ <span class="route">/registry</span> — “Anything that speaks the contract registers by its card — yours, ours, a vendor’s — into the same gates &amp; ledger. Watch me add one.”</p>
+        <p class="q">“Can we control the model / keep data in-house?”</p>
+        <p>→ <span class="route">/agents/ba</span> — “Per agent: switch the engine — incl. a <b>self-hosted in-tenant</b> model — scope its tools, set who answers. I’ll switch it live.”</p>
+        <p class="q">“Who’s responsible when it’s wrong?”</p>
+        <p>→ “One <b>named human per agent</b>, accepted via an audited handshake.” (point at the owner)</p>
+      </section>
+
+      <section class="ask">
+        <h2>The close — the ask</h2>
+        <p style="margin-top:0">Jump to <span class="route">/pitch#ask</span> or just say it:</p>
+        <ol>
+          <li>Green-light productization</li>
+          <li>Nominate a pilot client</li>
+          <li>Fund the scoping workshop</li>
+        </ol>
+        <p style="color:#065f46">“In six weeks: first accountable artifact in under 24 hours.”</p>
+      </section>
+
+      <section class="panic">
+        <h2>⚠ If it breaks — don’t panic</h2>
+        <ul>
+          <li><b>Never refresh mid-demo</b> — state is in-memory.</li>
+          <li>Stuck / weird → Demo Director ▸ <b>Checkpoint ▸ Start</b>.</li>
+          <li>Cleared by accident → reopen <span class="kbd">⌘⇧D</span>, Checkpoint ▸ Start, or <b>fresh incognito</b>.</li>
+          <li>Screens look empty/odd → you’re in <b>Live</b> mode: Settings → Experience → Demo (only between runs).</li>
+          <li>Manual not advancing → press <span class="kbd">Step →</span> (Run is disabled in “On my cue”).</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <footer>
+    <span><b>Engine:</b> Demo Director — <span class="kbd">⌘⇧D</span> · auto-advance <i>or</i> “On my cue” (<span class="kbd">Step →</span>) · Checkpoints: Start / Post-inflow / Pre-monitor</span>
+    <span><b>Login:</b> qai@q.agency / demo · <b>Project the app, read from this sheet.</b> The <span class="route">/pitch</span> doc is the email-after leave-behind.</span>
+  </footer>
+
+</div>
+</body>
+</html>

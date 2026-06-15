@@ -11,8 +11,8 @@ const NAV: { id: string; label: string }[] = [
   { id: "acts", label: "The product in three acts" },
   { id: "moat", label: "The moat" },
   { id: "real-today", label: "What is real today" },
-  { id: "pilot", label: "Pilot plan" },
-  { id: "roadmap", label: "Roadmap & deliverables" },
+  { id: "roadmap", label: "Roadmap" },
+  { id: "team", label: "Team & effort" },
   { id: "ask", label: "The ask" },
   { id: "footer", label: "Sources" },
 ];
