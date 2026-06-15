@@ -5,9 +5,9 @@
  *
  * Labels mirror src/mock/chain.ts (CHAIN_ROLES[*].produces) but are
  * hard-coded: this is a document, not an app. Light-theme colors only.
- * Per-stage tones carry the fleet status truth (2026-06-10): spec (BA) and
- * knowledge operating today; design (SA) + code (Dev) under construction;
- * uix-ui-spec (UI/UX) + test (QA) in preparation; the rest staged/planned.
+ * Per-stage tones carry the fleet status truth (2026-06-15): spec (BA) and
+ * knowledge (Curator) are DONE and operating today; every other stage is
+ * under construction.
  */
 
 type StageTone = "live" | "build" | "prep" | "neutral";
@@ -15,12 +15,12 @@ type StageTone = "live" | "build" | "prep" | "neutral";
 const STAGES: { label: string; tone: StageTone }[] = [
   { label: "spec", tone: "live" },
   { label: "design", tone: "build" },
-  { label: "uix-ui-spec", tone: "prep" },
-  { label: "tasks", tone: "neutral" },
+  { label: "uix-ui-spec", tone: "build" },
+  { label: "tasks", tone: "build" },
   { label: "code", tone: "build" },
-  { label: "review", tone: "neutral" },
-  { label: "test", tone: "prep" },
-  { label: "release", tone: "neutral" },
+  { label: "review", tone: "build" },
+  { label: "test", tone: "build" },
+  { label: "release", tone: "build" },
 ];
 
 const TONE: Record<StageTone, { fill: string; stroke: string; text: string; dash?: string }> = {
@@ -38,10 +38,8 @@ const Y = 30;
 const RAIL_W = 8 * NODE_W + 7 * GAP;
 
 const LEGEND: { tone: StageTone; label: string }[] = [
-  { tone: "live", label: "operating today" },
-  { tone: "build", label: "under construction" },
-  { tone: "prep", label: "in preparation" },
-  { tone: "neutral", label: "staged in the demo" },
+  { tone: "live", label: "done · operating today" },
+  { tone: "build", label: "under construction · staged in the demo" },
 ];
 
 export function ChainSvg() {
@@ -50,7 +48,7 @@ export function ChainSvg() {
       viewBox="0 0 860 178"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="The artifact chain: spec, design, uix-ui-spec, tasks, code, review, test, release - with knowledge as a pod-wide peer. Spec and knowledge operate today; design and code are under construction; uix-ui-spec and test are in preparation."
+      aria-label="The artifact chain: spec, design, uix-ui-spec, tasks, code, review, test, release - with knowledge as a pod-wide peer. Spec (BA) and knowledge (Curator) are done and operating today; every other stage is under construction."
       className="h-auto w-full min-w-[640px]"
     >
       {/* "live today" tag over the spec node */}
