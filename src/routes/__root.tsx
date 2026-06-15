@@ -144,16 +144,16 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Anti-flash: apply the saved theme BEFORE first paint. The SSR HTML
-            is dark by default (no `light` class), so a light-mode user would
-            otherwise see a dark flash until useTheme's post-hydration effect
-            runs. This blocking script sets the class during head parse.
-            KEY/class must match src/hooks/useTheme.tsx ("am.theme" → "light"). */}
+        {/* Anti-flash: apply the theme BEFORE first paint. The app defaults to
+            LIGHT — the SSR HTML ships dark (no `light` class), so this blocking
+            script adds `light` during head parse UNLESS the user explicitly
+            saved "dark", avoiding a flash on first load.
+            KEY/class/default must match src/hooks/useTheme.tsx ("am.theme"). */}
         <script
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html:
-              'try{if(localStorage.getItem("am.theme")==="light")document.documentElement.classList.add("light")}catch(e){}',
+              'try{if(localStorage.getItem("am.theme")!=="dark")document.documentElement.classList.add("light")}catch(e){}',
           }}
         />
         <HeadContent />

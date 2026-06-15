@@ -9,12 +9,13 @@ function applyTheme(t: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  // Default LIGHT on first visit; an explicit "dark" choice is still honored.
+  const [theme, setThemeState] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const saved =
-      (typeof window !== "undefined" && (localStorage.getItem(KEY) as Theme | null)) || "dark";
+      (typeof window !== "undefined" && (localStorage.getItem(KEY) as Theme | null)) || "light";
     setThemeState(saved);
     applyTheme(saved);
     setMounted(true);
