@@ -44,7 +44,7 @@ The deck's *Project Background* (slide 5) names four problems. Each one is the d
 
 ### 2.2 "Limited Technical Oversight - late identification of architectural debt, inconsistent implementation practices"
 
-- **Architecture is gated before a line of code exists**: Gate 2 - Tech Lead approves `DESIGN.md` - blocks task breakdown and implementation. Architectural debt is caught at the design gate, not in month three. (`/design`, step-02.)
+- **Architecture is gated before a line of code exists**: Gate 2 - Tech Lead approves `ARCHITECTURE.md` - blocks task breakdown and implementation. Architectural debt is caught at the architecture gate, not in month three. (`/design`, step-02.)
 - **Implementation practice is enforced, not advised**: TDD iron law (RED→GREEN→REFACTOR per task, "code before test → delete it"), per-task verification commands, a blocking 6-point verification checklist (tests green, lint clean, coverage met, scope integrity), and a code review that is **forbidden from approving without reading the code and running the tests** (code-review skill "Iron Law", Phases 0-3, max-3 auto-fix attempts).
 - **AI PodOps adds fleet-level oversight**: root-cause reject (a gate failure is attributed to the *causing* stage and re-runs forward), rerun-count economics per stage, incidents with recovery controls, and the `/governance` validator panel.
 
@@ -52,7 +52,7 @@ The deck's *Project Background* (slide 5) names four problems. Each one is the d
 
 This sentence describes, almost verbatim, the two problems our stack was built to kill:
 
-- **"No assurance artefacts are produced" → artifacts are structurally mandatory.** In Spec-First you *cannot reach* implementation without `SPEC.md`, `DESIGN.md`, `TASKS.md` all `APPROVED`; you cannot finish without `IMPLEMENTATION-SUMMARY.md` and `REVIEW.md`. `/validate` audits framework + artifact integrity in one command. Assurance stops being a person checking - it's the workflow refusing to proceed.
+- **"No assurance artefacts are produced" → artifacts are structurally mandatory.** In Spec-First you *cannot reach* implementation without `SPEC.md`, `ARCHITECTURE.md`, `TASKS.md` all `APPROVED`; you cannot finish without `IMPLEMENTATION-SUMMARY.md` and `REVIEW.md`. `/validate` audits framework + artifact integrity in one command. Assurance stops being a person checking - it's the workflow refusing to proceed.
 - **"COE has limited capacity" → the deterministic validator floor + autonomy ladder is the scaling answer.** Zero-LLM checks run on every artifact at zero marginal human cost; humans review where the ladder says review (L0 review-all → L3 auto-clear), and **promotion up the ladder is earned by deterministic validator streaks, granted by an accountable human, written to the ledger** (product-vision §1, "earned autonomy"). COE presence becomes policy, not headcount.
 - **Evidence for governance**: every gate decision (approve / reject / override, with typed reason on reject/override) lands in the **append-only audit ledger** the dashboard owns (Supabase `audit_log`, survives agent resets) - `/compliance`, [architecture.md](architecture.md). This is also our EU AI Act Article 26 deployer story.
 

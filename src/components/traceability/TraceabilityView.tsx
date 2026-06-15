@@ -17,7 +17,7 @@ const agentColor = (id: AgentId) => `var(--${seedAgents.find((a) => a.id === id)
 const agentName  = (id: AgentId) => seedAgents.find((a) => a.id === id)!.name;
 
 const KIND_LABEL: Record<ArtifactKind, string> = {
-  context: "Curated context", spec: "Business spec", design: "Solution design",
+  context: "Curated context", spec: "Business spec", design: "Solution architecture",
   tasks: "Task breakdown", code: "Code + PR", review: "Code review", qa: "QA report",
 };
 

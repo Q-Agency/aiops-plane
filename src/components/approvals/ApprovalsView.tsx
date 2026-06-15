@@ -6,7 +6,7 @@
  *   - kind switch (All · Approvals · Clarifications) + kind glyph per row
  *   - clarification rows interleaved by openedAt, answerable inline
  *   - approval rows click through to the client-grade review surface
- *     (/approvals/$gateId) - primary CTA for Spec/Design gates
+ *     (/approvals/$gateId) - primary CTA for Spec/Architecture gates
  *   - inline decisions REQUIRE a typed reason (both approve and reject)
  *     and write the mock decision log (recordGateDecision)
  *   - rows decided on the review surface render as resolved stamps
@@ -56,11 +56,11 @@ import type { AgentId } from "@/mock/types";
 
 type Gate = Approval["gate"];
 
-const GATES: Gate[] = ["Spec Review", "Design Review", "Tasks Review", "Dev Review", "QA Review"];
+const GATES: Gate[] = ["Spec Review", "Architecture Review", "Tasks Review", "Dev Review", "QA Review"];
 
 const GATE_AGENT_ID: Record<Gate, AgentId> = {
   "Spec Review":   "ba",
-  "Design Review": "sa",
+  "Architecture Review": "sa",
   "Tasks Review":  "tasklist",
   "Dev Review":    "dev",
   "QA Review":     "qa",
@@ -68,7 +68,7 @@ const GATE_AGENT_ID: Record<Gate, AgentId> = {
 
 const GATE_AGENT: Record<Gate, { name: string; color: string }> = {
   "Spec Review":   { name: "BA Agent",       color: "var(--agent-ba)" },
-  "Design Review": { name: "SA Agent",       color: "var(--agent-sa)" },
+  "Architecture Review": { name: "SA Agent",       color: "var(--agent-sa)" },
   "Tasks Review":  { name: "Tasklist Agent", color: "var(--agent-tasklist)" },
   "Dev Review":    { name: "Dev Agent",      color: "var(--agent-dev)" },
   "QA Review":     { name: "QA Agent",       color: "var(--agent-qa)" },
@@ -76,14 +76,14 @@ const GATE_AGENT: Record<Gate, { name: string; color: string }> = {
 
 const GATE_ICON: Record<Gate, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   "Spec Review":   FileText,
-  "Design Review": FileCode2,
+  "Architecture Review": FileCode2,
   "Tasks Review":  ListChecks,
   "Dev Review":    GitPullRequest,
   "QA Review":     TestTube2,
 };
 
-/** Spec & Design reviews route to the full client-grade review surface first. */
-const FULL_REVIEW_PRIMARY: Set<Gate> = new Set(["Spec Review", "Design Review"]);
+/** Spec & Architecture reviews route to the full client-grade review surface first. */
+const FULL_REVIEW_PRIMARY: Set<Gate> = new Set(["Spec Review", "Architecture Review"]);
 
 const ME = "Zlatko";
 const ME_HUMAN_ID = "zlatko";
@@ -753,7 +753,7 @@ export function ApprovalRow({
           <div className="space-y-3">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">decision</div>
 
-            {/* the client-grade review surface - primary for Spec/Design */}
+            {/* the client-grade review surface - primary for Spec/Architecture */}
             <Link
               to="/approvals/$gateId"
               params={{ gateId: approval.id }}
@@ -964,7 +964,7 @@ export function ClarificationRow({
 function ArtifactPreview({ gate, ticket }: { gate: Gate; ticket: Ticket }) {
   switch (gate) {
     case "Spec Review":   return <SpecPreview   ticket={ticket} />;
-    case "Design Review": return <DesignPreview ticket={ticket} />;
+    case "Architecture Review": return <DesignPreview ticket={ticket} />;
     case "Tasks Review":  return <TasksPreview  ticket={ticket} />;
     case "Dev Review":    return <CodePreview   ticket={ticket} />;
     case "QA Review":     return <QaPreview     ticket={ticket} />;

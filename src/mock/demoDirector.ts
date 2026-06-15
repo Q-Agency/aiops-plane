@@ -164,15 +164,15 @@ export function openClarification(ticketId: string = "AM-142"): void {
   bumpDemo();
 }
 
-/** 1:30 - design gate goes stale → escalation (esc1 is seeded in comms.ts; the staged beat is the routed alert). */
+/** 1:30 - architecture gate goes stale → escalation (esc1 is seeded in comms.ts; the staged beat is the routed alert). */
 export function raiseEscalation(ticketId: string = "AM-138"): void {
   if (!markFired("escalation")) return;
   stageNotification({
     recipientId: CURRENT_USER_ID,
     kind: "escalation",
     severity: "critical",
-    title: "Escalation · design gate stale 26h",
-    body: `${ticketId} design.md v2 over SLA - 2 downstream tickets blocked. Routed to Marin.`,
+    title: "Escalation · architecture gate stale 26h",
+    body: `${ticketId} architecture.md v2 over SLA - 2 downstream tickets blocked. Routed to Marin.`,
     actorId: "sa",
     ticketId,
     entityId: "esc1",
@@ -257,7 +257,7 @@ export const DEMO_STEPS: DemoStep[] = [
   { id: "fireup", at: "0:00", atSec: sec("0:00"), label: "LAUNCH complete · pod live", fire: () => fireUpComplete() },
   { id: "inflow", at: "0:30", atSec: sec("0:30"), label: "AM-142 dragged to Ready · pod starts", fire: () => seedInflow() },
   { id: "clarification", at: "0:45", atSec: sec("0:45"), label: "BA asks a clarification", fire: () => openClarification("AM-142") },
-  { id: "escalation", at: "1:30", atSec: sec("1:30"), label: "design gate goes stale → escalation", fire: () => raiseEscalation("AM-138") },
+  { id: "escalation", at: "1:30", atSec: sec("1:30"), label: "architecture gate goes stale → escalation", fire: () => raiseEscalation("AM-138") },
   { id: "incident", at: "1:35", atSec: sec("1:35"), label: "incident opens", fire: () => openIncident("inc-1") },
   { id: "ba-run-complete", at: "1:50", atSec: sec("1:50"), label: "BA run completes · spec → review", fire: () => completeBaRun("AM-142") },
   { id: "moat", at: "2:45", atSec: sec("2:45"), label: "validator panel: the moat close", fire: () => moatClose() },

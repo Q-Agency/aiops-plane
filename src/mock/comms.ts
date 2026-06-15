@@ -71,10 +71,10 @@ export const COMMS: CommEntry[] = [
   },
   {
     id: "c3", agentId: "sa", channel: "dm", channelLabel: "DM → Marin",
-    trigger: "threshold", triggerReason: "design gate stale > 24h",
+    trigger: "threshold", triggerReason: "architecture gate stale > 24h",
     recipients: ["Marin"], ticketId: "AM-138", tsOffsetMin: 26,
-    preview: "Design gate on AM-138 stale 26h - needs review",
-    body: "AM-138 (Buyer-seller messaging) design.md v2 has been waiting in Design Review for 26h. SLA is 24h. Blocking 2 downstream tickets. Please review or reassign.",
+    preview: "Architecture gate on AM-138 stale 26h - needs review",
+    body: "AM-138 (Buyer-seller messaging) architecture.md v2 has been waiting in Architecture Review for 26h. SLA is 24h. Blocking 2 downstream tickets. Please review or reassign.",
     status: "no-response",
   },
   {
@@ -151,10 +151,10 @@ export const COMMS: CommEntry[] = [
   },
   {
     id: "c13", agentId: "sa", channel: "slack", channelLabel: "#automarket-dev",
-    trigger: "threshold", triggerReason: "design.md handoff",
+    trigger: "threshold", triggerReason: "architecture.md handoff",
     recipients: ["#automarket-dev"], ticketId: "AM-141", tsOffsetMin: 150,
-    preview: "design.md v1 ready · price suggestion model",
-    body: "SA Agent produced design.md v1 for AM-141. 4 endpoints · 2 tables · choice of PostGIS vs Elasticsearch flagged as open question.",
+    preview: "architecture.md v1 ready · price suggestion model",
+    body: "SA Agent produced architecture.md v1 for AM-141. 4 endpoints · 2 tables · choice of PostGIS vs Elasticsearch flagged as open question.",
     status: "acknowledged",
   },
   {
@@ -217,10 +217,10 @@ export const COMMS: CommEntry[] = [
 
 export const ESCALATIONS: Escalation[] = [
   {
-    id: "esc1", ticketId: "AM-138", trigger: "Design gate stale > 24h",
+    id: "esc1", ticketId: "AM-138", trigger: "Architecture gate stale > 24h",
     raisedBy: "sa", severity: "high", routedTo: "marin",
     status: "open", openedMinAgo: 26 * 60,
-    summary: "design.md v2 awaiting review · 2 downstream tickets blocked",
+    summary: "architecture.md v2 awaiting review · 2 downstream tickets blocked",
   },
   {
     id: "esc2", ticketId: "AM-149", trigger: "Quality gate failing 3x · sql-injection blocker",
@@ -251,7 +251,7 @@ export const SCHEDULED: ScheduledComm[] = [
       title: "Daily digest · " + new Date().toISOString().slice(0, 10),
       sections: [
         { heading: "Shipped last 24h", lines: ["AM-136 · Listing detail page", "AM-133 · Payment intent callback (PR merged)"] },
-        { heading: "At gates", lines: ["Spec Review · AM-142 (8m), AM-128 (110m)", "Design Review · AM-138 (26h ⚠), AM-140 (55m)", "QA Review · AM-144 (18m)"] },
+        { heading: "At gates", lines: ["Spec Review · AM-142 (8m), AM-128 (110m)", "Architecture Review · AM-138 (26h ⚠), AM-140 (55m)", "QA Review · AM-144 (18m)"] },
         { heading: "Blockers", lines: ["AM-138 design stale 26h → Marin", "AM-149 sql-injection blocker → Ivan"] },
         { heading: "Escalations raised", lines: ["2 open · 1 acknowledged · 1 resolved"] },
         { heading: "Overnight run", lines: ["3 PRs opened · all CI green · 28k tokens · $1.84"] },
@@ -269,7 +269,7 @@ export const SCHEDULED: ScheduledComm[] = [
         { heading: "Cycle time", lines: ["Avg 3.4d (-6%) · p95 6.8d"] },
         { heading: "Cost", lines: ["$1,247 (-4%) · $54/ticket avg"] },
         { heading: "Escape rate", lines: ["1.8% · 2 bugs found post-merge"] },
-        { heading: "Bottleneck", lines: ["Design Review queued Tue-Wed afternoons"] },
+        { heading: "Bottleneck", lines: ["Architecture Review queued Tue-Wed afternoons"] },
       ],
     },
   },

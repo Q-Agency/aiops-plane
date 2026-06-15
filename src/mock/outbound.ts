@@ -63,7 +63,7 @@ export const OUTBOUND_FEED: OutboundItem[] = [
     channels: ["slack"],
     target: "#automarket-pod",
     summaryMd:
-      "**Today's preparation** - AM-150 (VIN decoder) dev in flight · design gate on AM-138 due 14:00 · AM-139 spec drafting begins after standup.",
+      "**Today's preparation** - AM-150 (VIN decoder) dev in flight · architecture gate on AM-138 due 14:00 · AM-139 spec drafting begins after standup.",
     cadence: "every morning",
   },
   {
@@ -104,7 +104,7 @@ export const OUTBOUND_FEED: OutboundItem[] = [
     channels: ["slack"],
     target: "Marin (DM) · #automarket-pod",
     summaryMd:
-      "**Escalation** - design gate on AM-138 stale 26h, over SLA · 2 downstream tickets blocked → escalated to Marin with the review deep link.",
+      "**Escalation** - architecture gate on AM-138 stale 26h, over SLA · 2 downstream tickets blocked → escalated to Marin with the review deep link.",
     cadence: "as it happens",
     deepLink: { to: "/approvals", label: "open the gate →" },
   },

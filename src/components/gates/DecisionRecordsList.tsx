@@ -1,5 +1,5 @@
 /**
- * DecisionRecordsList - the design's architecture decision records on the
+ * DecisionRecordsList - the architecture's decision records on the
  * SA gate review: chosen option vs alternatives, the rationale, and an
  * honest confidence badge - Low-confidence decisions are marked and
  * surfaced for human attention (same honesty discipline as the spec's
@@ -26,7 +26,7 @@ export function DecisionRecordsList({ records }: { records: DecisionRecord[] }) 
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        The judgment calls inside this design - what was chosen, what was not, and why.
+        The judgment calls inside this architecture - what was chosen, what was not, and why.
         Low-confidence decisions are marked: they are where your review earns its keep.
       </p>
       <div className="mt-3 space-y-3">

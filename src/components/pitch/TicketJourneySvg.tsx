@@ -129,7 +129,7 @@ export function TicketJourneySvg() {
       <Lane y={148} h={96} label="AI PODOPS" sub="the pod - agents, gates, ledger · each agent ships its own artifact" fill="#eef2ff" stroke="#c7d2fe" />
       <Node x={170} y={186} w={92} label="BA agent" tone="live" artifact="SPEC.md" />
       <Node x={294} y={186} w={108} label="gate ✓ Ana" tone="gate" />
-      <Node x={434} y={186} w={92} label="SA agent" tone="neutral" artifact="DESIGN.md" />
+      <Node x={434} y={186} w={92} label="SA agent" tone="neutral" artifact="ARCHITECTURE.md" />
       <Node x={558} y={186} w={56} label="⋯" tone="neutral" artifact="own artifact each" />
       <Node x={646} y={186} w={130} label="ledger #4812" tone="ledger" />
       <Flow d="M 264 200 L 290 200" color="#94a3b8" />

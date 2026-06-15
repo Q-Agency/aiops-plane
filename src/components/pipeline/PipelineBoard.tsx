@@ -27,8 +27,8 @@ const COLS: Col[] = [
   { id: "backlog",       label: "Backlog",          kind: "queue" },
   { id: "ready-spec",    label: "Ready for Spec",   kind: "agent",  agent: "ba",       agentName: "BA" },
   { id: "spec-review",   label: "Spec Review",      kind: "review", prev: "ready-spec" },
-  { id: "ready-design",  label: "Ready for Design", kind: "agent",  agent: "sa",       agentName: "SA" },
-  { id: "design-review", label: "Design Review",    kind: "review", prev: "ready-design" },
+  { id: "ready-design",  label: "Ready for Architecture", kind: "agent",  agent: "sa",       agentName: "SA" },
+  { id: "design-review", label: "Architecture Review",    kind: "review", prev: "ready-design" },
   { id: "ready-tasks",   label: "Ready for Tasks",  kind: "agent",  agent: "tasklist", agentName: "Tasklist" },
   { id: "tasks-review",  label: "Tasks Review",     kind: "review", prev: "ready-tasks" },
   { id: "ready-dev",     label: "Ready for Dev",    kind: "agent",  agent: "dev",      agentName: "Dev" },
@@ -107,8 +107,8 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
   // Reject = a DECISION, not a drag (vision §2: no freeform stage moves) -
   // the typed reason is required and lands on the session ledger. `target`
   // is the root-cause stage: rework follows the artifact chain, so the
-  // reject can aim at ANY upstream agent stage (QA finds a design flaw →
-  // send back to Design); everything downstream is invalidated by the
+  // reject can aim at ANY upstream agent stage (QA finds an architecture flaw →
+  // send back to Architecture); everything downstream is invalidated by the
   // consumes-graph and re-runs forward.
   const [rejecting, setRejecting] = useState<{ ticket: Ticket; prev: Stage; target: Stage } | null>(null);
   const [rejectReason, setRejectReason] = useState("");

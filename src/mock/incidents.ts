@@ -135,9 +135,9 @@ export const INCIDENTS: Incident[] = [
     type: "gate-overdue",
     severity: "high",
     status: "open",
-    title: "Design gate AM-138 stale 26h · SLA 24h",
+    title: "Architecture gate AM-138 stale 26h · SLA 24h",
     summary:
-      "design.md v2 has waited in Design Review for 26h against a 24h SLA. Two downstream tickets are blocked. Accountable: Marin.",
+      "architecture.md v2 has waited in Architecture Review for 26h against a 24h SLA. Two downstream tickets are blocked. Accountable: Marin.",
     agentId: "sa",
     ticketId: "AM-138",
     accountableHumanId: "marin",
@@ -149,7 +149,7 @@ export const INCIDENTS: Incident[] = [
     linkedEscalationId: "esc1",
     linkedCommId: "c3",
     timeline: [
-      { id: "inc-3-e1", tsOffsetMin: 120, kind: "detected", label: "Detected by gate SLA timer - Design Review > 24h", actor: null },
+      { id: "inc-3-e1", tsOffsetMin: 120, kind: "detected", label: "Detected by gate SLA timer - Architecture Review > 24h", actor: null },
       { id: "inc-3-e2", tsOffsetMin: 118, kind: "notified", label: "DM sent to Marin · escalation esc1 raised", actor: null },
       { id: "inc-3-e3", tsOffsetMin: 60, kind: "notified", label: "Reminder notified - no response yet", actor: null },
     ],

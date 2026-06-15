@@ -104,13 +104,13 @@ export const CATALOG: CatalogEntry[] = [
     engine: sa.engine,
     agentId: "sa",
     capabilities: [
-      "design.md from approved specs",
+      "architecture.md from approved specs",
       "Architecture decision records",
       "Codebase-constitution aware",
       "Contract-validated structure",
     ],
     summary:
-      "Reads the approved spec and writes design.md - architecture, data flows and decision records that respect each codebase's constitution.",
+      "Reads the approved spec and writes architecture.md - architecture, data flows and decision records that respect each codebase's constitution.",
   }),
   entry("uiux", {
     name: "UI/UX Designer",

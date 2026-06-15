@@ -15,7 +15,7 @@ import { GatePolicyChip } from "@/components/gates/GatePolicyChip";
 /** What each chain agent produces - the charter's "it produces …" clause. */
 const PRODUCES: Record<string, string> = {
   ba: "SPEC.md",
-  sa: "DESIGN.md",
+  sa: "ARCHITECTURE.md",
   uiux: "the UI/UX spec",
   tasklist: "tasks.json",
   dev: "the PR + diff",

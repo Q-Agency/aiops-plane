@@ -1,6 +1,6 @@
 /**
  * ChainSvg (/pitch) - the artifact chain as one static inline SVG:
- * spec → design → uix-ui-spec → tasks → code → review → test → release,
+ * spec → architecture → uix-ui-spec → tasks → code → review → test → release,
  * with knowledge as a pod-wide peer below the rail (no pipeline edges).
  *
  * Labels mirror src/mock/chain.ts (CHAIN_ROLES[*].produces) but are
@@ -14,7 +14,7 @@ type StageTone = "live" | "build" | "prep" | "neutral";
 
 const STAGES: { label: string; tone: StageTone }[] = [
   { label: "spec", tone: "live" },
-  { label: "design", tone: "build" },
+  { label: "architecture", tone: "build" },
   { label: "uix-ui-spec", tone: "build" },
   { label: "tasks", tone: "build" },
   { label: "code", tone: "build" },
@@ -48,7 +48,7 @@ export function ChainSvg() {
       viewBox="0 0 860 178"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="The artifact chain: spec, design, uix-ui-spec, tasks, code, review, test, release - with knowledge as a pod-wide peer. Spec (BA) and knowledge (Curator) are done and operating today; every other stage is under construction."
+      aria-label="The artifact chain: spec, architecture, uix-ui-spec, tasks, code, review, test, release - with knowledge as a pod-wide peer. Spec (BA) and knowledge (Curator) are done and operating today; every other stage is under construction."
       className="h-auto w-full min-w-[640px]"
     >
       {/* "live today" tag over the spec node */}

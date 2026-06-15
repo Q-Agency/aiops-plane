@@ -1,7 +1,7 @@
 /**
- * DesignTraceMap - the spec → design coverage map on the SA gate review
- * (design twin of the EARS block): one row per acceptance criterion of the
- * CONSUMED spec, showing which design sections address it. This is the
+ * DesignTraceMap - the spec → architecture coverage map on the SA gate review
+ * (architecture twin of the EARS block): one row per acceptance criterion of the
+ * CONSUMED spec, showing which architecture sections address it. This is the
  * consumes-graph made reviewable - and exactly what deterministic check D1
  * verifies, so a failing D1 click lands here with the uncovered rows red.
  */
@@ -29,7 +29,7 @@ export function DesignTraceMap({
       )}
     >
       <div className="flex items-center gap-2 flex-wrap">
-        <h3 className="text-sm font-semibold">Spec → design coverage</h3>
+        <h3 className="text-sm font-semibold">Spec → architecture coverage</h3>
         <span
           className={cn(
             "text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border",
@@ -42,8 +42,8 @@ export function DesignTraceMap({
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        This design consumes <span className="font-mono">spec.md@v2</span> - every acceptance
-        criterion must land in a design section. Checked deterministically (D1), not by a model.
+        This architecture consumes <span className="font-mono">spec.md@v2</span> - every acceptance
+        criterion must land in an architecture section. Checked deterministically (D1), not by a model.
       </p>
       <ul className="mt-3 divide-y divide-border/60">
         {rows.map((r) => (

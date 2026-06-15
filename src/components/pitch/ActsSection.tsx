@@ -33,7 +33,7 @@ export function ActsSection() {
           live BA agent and <span className="font-medium text-emerald-700">knowledge</span>{" "}
           - the pod-wide shared-context peer, never a pipeline node - by the Curator agent:{" "}
           <strong className="font-medium text-emerald-700">BA and Curator are done and operating
-          today</strong>. Every other stage (design, uix-ui-spec, tasks, code, review, test,
+          today</strong>. Every other stage (architecture, uix-ui-spec, tasks, code, review, test,
           release) is <strong className="font-medium text-slate-700">under construction</strong>,
           rendering staged data in the demo until its agent goes live.
         </figcaption>
@@ -139,7 +139,7 @@ export function ActsSection() {
             to Ready on <em>your board</em> is the doorbell: the pod picks the ticket up, nobody
             opens a new tool. <span className="font-medium text-slate-700">2 -</span> the chain
             runs <em>inside AI PodOps</em>: each agent ships its <em>own</em> artifact (the BA's
-            SPEC.md, the SA's design, and so on down the chain), humans clear gates, everything
+            SPEC.md, the SA's architecture, and so on down the chain), humans clear gates, everything
             lands on the ledger. <span className="font-medium text-slate-700">3 -</span> questions
             and approvals arrive in <em>your channels</em> and are answered there - and the pod is
             proactive on its own schedule too: daily digests, daily preparations, weekly reports,
@@ -164,15 +164,15 @@ export function ActsSection() {
           </Bullet>
           <Bullet>
             <strong className="font-semibold text-slate-900">
-              Client-grade design review
+              Client-grade architecture review
             </strong>{" "}
-            - the same decision surface for the SA's design.md: a{" "}
-            <strong className="font-semibold text-slate-900">spec → design coverage map</strong>{" "}
-            (every acceptance criterion shown landing in a design section - the artifact chain
+            - the same decision surface for the SA's architecture.md: a{" "}
+            <strong className="font-semibold text-slate-900">spec → architecture coverage map</strong>{" "}
+            (every acceptance criterion shown landing in an architecture section - the artifact chain
             made reviewable), the architecture decision records with alternatives and a marked
-            low-confidence call, and the design's own deterministic check family - never the
+            low-confidence call, and the architecture's own deterministic check family - never the
             spec's checks borrowed
-            <DemoPill href="/approvals/appr-AM-138" label="Design review" />
+            <DemoPill href="/approvals/appr-AM-138" label="Architecture review" />
           </Bullet>
           <Bullet>
             <strong className="font-semibold text-slate-900">Client-grade QA review</strong> -
@@ -192,7 +192,7 @@ export function ActsSection() {
             <strong className="font-semibold text-slate-900">
               Rework follows the artifact chain:
             </strong>{" "}
-            a reject targets the root-cause stage (QA finds a design flaw → it goes back to the
+            a reject targets the root-cause stage (QA finds an architecture flaw → it goes back to the
             SA, not just one step), everything downstream is invalidated automatically and re-runs
             forward, and repeated bounces escalate to the accountable human - rework is visible
             and costed, never a silent loop

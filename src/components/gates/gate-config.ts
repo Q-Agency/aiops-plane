@@ -12,8 +12,8 @@ export const REJECT_REASON_MIN_CHARS = 10;
  * (label) and the actual move (stage id), so they can never drift.
  */
 export const APPROVAL_ADVANCE: Record<string, { label: string; stage: Stage }> = {
-  "Spec approval": { label: "Ready for Design", stage: "ready-design" },
-  "Design approval": { label: "Ready for Tasks", stage: "ready-tasks" },
+  "Spec approval": { label: "Ready for Architecture", stage: "ready-design" },
+  "Architecture approval": { label: "Ready for Tasks", stage: "ready-tasks" },
   "Tasks approval": { label: "Ready for Dev", stage: "ready-dev" },
   "Code approval": { label: "Ready for QA", stage: "ready-qa" },
   "QA approval": { label: "Done", stage: "done" },
@@ -22,7 +22,7 @@ export const APPROVAL_ADVANCE: Record<string, { label: string; stage: Stage }> =
 /**
  * Root-cause reject targets per gate (vision §2 "rework follows the
  * artifact chain"): a reject can aim at ANY upstream agent stage - the
- * gate's own agent is the default, but a QA failure born in the design
+ * gate's own agent is the default, but a QA failure born in the architecture
  * goes back to the SA, and everything downstream re-runs forward.
  */
 export interface RejectTarget {
@@ -32,7 +32,7 @@ export interface RejectTarget {
 }
 
 const BA: RejectTarget = { stage: "ready-spec", agentName: "BA", stageLabel: "Ready for Spec" };
-const SA: RejectTarget = { stage: "ready-design", agentName: "SA", stageLabel: "Ready for Design" };
+const SA: RejectTarget = { stage: "ready-design", agentName: "SA", stageLabel: "Ready for Architecture" };
 const TASKS: RejectTarget = { stage: "ready-tasks", agentName: "Tasklist", stageLabel: "Ready for Tasks" };
 const DEV: RejectTarget = { stage: "ready-dev", agentName: "Dev", stageLabel: "Ready for Dev" };
 const QA: RejectTarget = { stage: "ready-qa", agentName: "QA", stageLabel: "Ready for QA" };
@@ -40,7 +40,7 @@ const QA: RejectTarget = { stage: "ready-qa", agentName: "QA", stageLabel: "Read
 /** Chain order, up to and including the gate's own agent (the default = last). */
 export const REJECT_TARGETS: Record<string, RejectTarget[]> = {
   "Spec approval": [BA],
-  "Design approval": [BA, SA],
+  "Architecture approval": [BA, SA],
   "Tasks approval": [BA, SA, TASKS],
   "Code approval": [BA, SA, TASKS, DEV],
   "QA approval": [BA, SA, TASKS, DEV, QA],
@@ -48,7 +48,7 @@ export const REJECT_TARGETS: Record<string, RejectTarget[]> = {
 
 /** Map a defect's suspected root-cause stage line to a reject target stage. */
 export function stageForSuspected(suspected: string): Stage | null {
-  if (/design|\bsa\b/i.test(suspected)) return "ready-design";
+  if (/architecture|design|\bsa\b/i.test(suspected)) return "ready-design";
   if (/implementation|\bdev\b/i.test(suspected)) return "ready-dev";
   if (/spec|\bba\b/i.test(suspected)) return "ready-spec";
   if (/task/i.test(suspected)) return "ready-tasks";
@@ -64,8 +64,8 @@ export function stageForSuspected(suspected: string): Stage | null {
 const GATE_ARTIFACT_KIND: Record<string, ArtifactKind> = {
   "Spec Review": "spec",
   "Spec approval": "spec",
-  "Design Review": "design",
-  "Design approval": "design",
+  "Architecture Review": "design",
+  "Architecture approval": "design",
   "Tasks Review": "tasks",
   "Tasks approval": "tasks",
   "Dev Review": "code",

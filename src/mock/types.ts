@@ -79,7 +79,7 @@ export interface Approval {
   ticketId: string;
   gate:
     | "Spec Review"
-    | "Design Review"
+    | "Architecture Review"
     | "Tasks Review"
     | "Dev Review"
     | "QA Review";

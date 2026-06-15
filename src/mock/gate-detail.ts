@@ -59,8 +59,8 @@ export interface PriorDecision {
 }
 
 /**
- * One row of the spec → design coverage map (design gates): where each
- * acceptance criterion of the CONSUMED spec landed in the design. The
+ * One row of the spec → architecture coverage map (architecture gates): where each
+ * acceptance criterion of the CONSUMED spec landed in the architecture. The
  * consumes-graph made reviewable - and exactly what check D1 verifies.
  */
 export interface DesignTraceRow {
@@ -70,7 +70,7 @@ export interface DesignTraceRow {
   covered: boolean;
 }
 
-/** One architecture decision record (design gates). */
+/** One architecture decision record (architecture gates). */
 export interface DecisionRecord {
   id: string; //            "ADR-1"
   title: string;
@@ -93,7 +93,7 @@ export interface QaDefect {
   title: string;
   severity: "critical" | "medium" | "low";
   /** Where the failure was born - the reject target the rework canon uses. */
-  suspectedStage: string; // "Design (SA)" | "Implementation (Dev)"
+  suspectedStage: string; // "Architecture (SA)" | "Implementation (Dev)"
   evidence: string;
 }
 
@@ -124,7 +124,7 @@ export interface GateDetail {
   earsCriteria: EarsCriterion[];
   /**
    * The deterministic structural checks for this artifact - the BA's 8
-   * (spec gates) or the SA's 7 (design gates). Empty for gate kinds whose
+   * (spec gates) or the SA's 7 (architecture gates). Empty for gate kinds whose
    * check family isn't built yet (never borrow another artifact's checks).
    */
   validators: ValidatorCheck[];
@@ -132,9 +132,9 @@ export interface GateDetail {
   validatorScore: number;
   /** Family tag for the validator wall, e.g. "ba-spec@1.4.2" / "sa-design@2.1.0". */
   validatorFamily?: string;
-  /** Spec → design coverage map (design gates only). */
+  /** Spec → architecture coverage map (architecture gates only). */
   designTrace?: DesignTraceRow[];
-  /** Architecture decision records (design gates only). */
+  /** Architecture decision records (architecture gates only). */
   decisionRecords?: DecisionRecord[];
   /** Spec → test coverage map (QA gates only). */
   qaCoverage?: QaCoverageRow[];
@@ -163,7 +163,7 @@ export const CLARIFICATION_SLA_TARGET_MIN = 120;
 
 const GATE_AGENT: Record<Approval["gate"], AgentId> = {
   "Spec Review": "ba",
-  "Design Review": "sa",
+  "Architecture Review": "sa",
   "Tasks Review": "tasklist",
   "Dev Review": "dev",
   "QA Review": "qa",
@@ -171,7 +171,7 @@ const GATE_AGENT: Record<Approval["gate"], AgentId> = {
 
 const GATE_BADGE: Record<Approval["gate"], string> = {
   "Spec Review": "Spec approval",
-  "Design Review": "Design approval",
+  "Architecture Review": "Architecture approval",
   "Tasks Review": "Tasks approval",
   "Dev Review": "Code approval",
   "QA Review": "QA approval",
@@ -255,7 +255,7 @@ export function earsCriteriaFor(t: Ticket): EarsCriterion[] {
 /* ------------------------------------------------------------------ */
 
 /**
- * Where each spec AC landed in the design (mirrors the design.md sections
+ * Where each spec AC landed in the design (mirrors the architecture.md sections
  * trace.ts renders). AM-140 - the returned-twice design - leaves AC-2 and
  * AC-5 uncovered, exactly what its failing D1 check reports.
  */
@@ -334,9 +334,9 @@ export function defectsFor(t: Ticket): QaDefect[] {
       id: `${t.id}-QA-1`,
       title: "429 response missing Retry-After header",
       severity: "medium",
-      suspectedStage: "Design (SA)",
+      suspectedStage: "Architecture (SA)",
       evidence:
-        "design.md's failure-mode section omits Retry-After in the 429 contract - Dev implemented to design. Fixing the design re-runs Dev and QA forward.",
+        "architecture.md's failure-mode section omits Retry-After in the 429 contract - Dev implemented to architecture. Fixing the architecture re-runs Dev and QA forward.",
     },
     {
       id: `${t.id}-QA-2`,
@@ -352,7 +352,7 @@ export function defectsFor(t: Ticket): QaDefect[] {
 export function releaseRecommendationFor(_t: Ticket): ReleaseRecommendation {
   return {
     verdict: "hold",
-    note: "Ship after QA-1 is fixed and re-verified - its root cause sits in the design, so the reject should target Design (SA), not just Dev. QA-2 can ride the next train.",
+    note: "Ship after QA-1 is fixed and re-verified - its root cause sits in the architecture, so the reject should target Architecture (SA), not just Dev. QA-2 can ride the next train.",
   };
 }
 
@@ -382,7 +382,7 @@ function artifactBody(gate: Approval["gate"], t: Ticket): string {
   switch (gate) {
     case "Spec Review":
       return specMd(t);
-    case "Design Review":
+    case "Architecture Review":
       return designMd(t).md;
     case "QA Review":
       return qaReportMd(t);
@@ -396,7 +396,7 @@ function detailFromApproval(a: Approval): GateDetail | undefined {
   if (!t) return undefined;
   const agentId = GATE_AGENT[a.gate];
   const isSpec = a.gate === "Spec Review";
-  const isDesign = a.gate === "Design Review";
+  const isDesign = a.gate === "Architecture Review";
   const isQa = a.gate === "QA Review";
   // Each gate renders ITS OWN check family - spec gets the BA's 8, design
   // the SA's 7, QA the report's 7; gates whose family isn't built yet get

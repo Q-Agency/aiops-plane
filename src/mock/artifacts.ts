@@ -84,11 +84,11 @@ export const ARTIFACT_SNAPSHOTS: ArtifactSnapshot[] = [
     id: "art-am136-design",
     kind: "design",
     ticketId: "AM-136",
-    title: "Listing detail page - design.md",
+    title: "Listing detail page - architecture.md",
     version: 1,
     approvedByGateId: "appr-AM-136",
     approvedAt: now - 4 * DAY - 12 * HOUR,
-    contentRef: "AM-136/design.md@v1",
+    contentRef: "AM-136/architecture.md@v1",
     snapshotAt: now - 4 * DAY - 12 * HOUR,
   },
   {
@@ -129,11 +129,11 @@ export const ARTIFACT_SNAPSHOTS: ArtifactSnapshot[] = [
     id: "art-am138-design",
     kind: "design",
     ticketId: "AM-138",
-    title: "Buyer-seller messaging - design.md",
+    title: "Buyer-seller messaging - architecture.md",
     version: 2,
     approvedByGateId: "appr-AM-138",
     approvedAt: now - 36 * HOUR,
-    contentRef: "AM-138/design.md@v2",
+    contentRef: "AM-138/architecture.md@v2",
     snapshotAt: now - 36 * HOUR,
   },
   {
@@ -203,7 +203,7 @@ const AM142_SPEC_V2 = `# AM-142 · Vehicle search with filters - SPEC.md (v2)
 ## Saved filters
 Saved filter chips persist **per account** (constitution rule cr-3 - never per device).`;
 
-const AM138_DESIGN_V1 = `# AM-138 · Buyer-seller messaging - design.md (v1)
+const AM138_DESIGN_V1 = `# AM-138 · Buyer-seller messaging - architecture.md (v1)
 
 ## Data model
 \`conversations\` (id, listing_id, buyer_id, seller_id) → \`messages\` (id, conversation_id, body, sent_at).
@@ -211,7 +211,7 @@ const AM138_DESIGN_V1 = `# AM-138 · Buyer-seller messaging - design.md (v1)
 ## Delivery
 Messages fan out via a single worker consuming the outbox table.`;
 
-const AM138_DESIGN_V2 = `# AM-138 · Buyer-seller messaging - design.md (v2)
+const AM138_DESIGN_V2 = `# AM-138 · Buyer-seller messaging - architecture.md (v2)
 
 ## Data model
 \`conversations\` (id, listing_id, buyer_id, seller_id) → \`messages\` (id, conversation_id, **thread_id**, body, sent_at).

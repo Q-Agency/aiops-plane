@@ -2,7 +2,7 @@
  * ValidatorPanel - the C3 walled deterministic-validator panel: the moat.
  *
  * Renders one artifact family's deterministic checks (validators.ts) -
- * the BA's 8 spec checks or the SA's 7 design checks - inside a visually
+ * the BA's 8 spec checks or the SA's 7 architecture checks - inside a visually
  * WALLED section - solid emerald-tinted border, ShieldCheck iconography,
  * the "DETERMINISTIC - NO MODEL IN THE LOOP" badge - so it can never be
  * confused with LLM/advisory signals (those get a separate amber/dashed

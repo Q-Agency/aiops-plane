@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="786" viewBox="0 0 1280 786" role="img">
 <title>Agentifying the SDLC workflow</title>
-<desc>The spec-first SDLC workflow is a fixed sequence of steps and artifacts. Each step is normally run as a skill inside the Cursor or Claude Code IDE. One by one, each step's skill is replaced by an autonomous agent - the BA agent already runs the spec step, the SA agent the design step, the Dev agent implementation - until every step is agent-filled, implementation and code review run on headless Claude Code, and no work happens in the IDE.</desc>
+<desc>The spec-first SDLC workflow is a fixed sequence of steps and artifacts. Each step is normally run as a skill inside the Cursor or Claude Code IDE. One by one, each step's skill is replaced by an autonomous agent - the BA agent already runs the spec step, the SA agent the architecture step, the Dev agent implementation - until every step is agent-filled, implementation and code review run on headless Claude Code, and no work happens in the IDE.</desc>
 <style>
 text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
 .title{font-size:27px;font-weight:700;fill:#1c2230;}
@@ -52,8 +52,8 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <text class="tag" x="293" y="260" text-anchor="middle" fill="#3f8a76">live</text>
 
 <rect x="388" y="158" width="150" height="120" rx="10" fill="#ffffff" stroke="#dde2ec" stroke-width="0.75"/>
-<text class="step" x="463" y="182" text-anchor="middle">design</text>
-<text class="art" x="463" y="202" text-anchor="middle">DESIGN.md</text>
+<text class="step" x="463" y="182" text-anchor="middle">architecture</text>
+<text class="art" x="463" y="202" text-anchor="middle">ARCHITECTURE.md</text>
 <line x1="400" y1="214" x2="526" y2="214" stroke="#eef1f6" stroke-width="1"/>
 <rect x="398" y="222" width="130" height="48" rx="7" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.75"/>
 <text class="exec" x="463" y="243" text-anchor="middle" fill="#185fa5">SA agent</text>
@@ -124,7 +124,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <text class="tag" x="857" y="474" text-anchor="middle" fill="#8a93a6">back in the repo</text>
 
 <rect x="914" y="404" width="300" height="108" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.9"/>
-<text class="step" x="932" y="430" fill="#185fa5">design step</text>
+<text class="step" x="932" y="430" fill="#185fa5">architecture step</text>
 <text class="tag" x="932" y="451" fill="#3f6fa8">SA agent picks it up</text>
 <text class="tag" x="932" y="472" fill="#8a93a6">then tasks → … → release</text>
 <text class="cap" x="932" y="495" fill="#8a93a6">same pattern, step by step</text>
@@ -136,7 +136,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <rect x="48" y="628" width="540" height="122" rx="10" fill="#ffffff" stroke="#dde2ec" stroke-width="0.75"/>
 <text class="step" x="66" y="654">today</text>
 <text class="cap" x="66" y="682">Several steps still run as skills, by hand in the IDE.</text>
-<text class="cap" x="66" y="706">Spec, design and implementation already delegated to agents.</text>
+<text class="cap" x="66" y="706">Spec, architecture and implementation already delegated to agents.</text>
 
 <line x1="600" y1="689" x2="694" y2="689" stroke="#1c2230" stroke-width="2" marker-end="url(#arrow)"/>
 <text class="tag" x="647" y="678" text-anchor="middle" fill="#5a6376">agentify each step</text>

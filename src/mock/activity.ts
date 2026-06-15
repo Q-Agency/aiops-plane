@@ -7,10 +7,10 @@ const nid = () => `ev-${++_id}-${Math.random().toString(36).slice(2, 7)}`;
 
 const seedTpl: Array<Omit<ActivityEvent, "id" | "ts">> = [
   { agentId: "ba",     ticketId: "AM-142", kind: "handoff",  message: "generated spec.md v3 → Spec Review" },
-  { agentId: "human",  ticketId: "AM-138", kind: "approval", message: "Marin approved design.md → Ready for Tasks" },
+  { agentId: "human",  ticketId: "AM-138", kind: "approval", message: "Marin approved architecture.md → Ready for Tasks" },
   { agentId: "qa",     ticketId: "AM-131", kind: "qa",       message: "2 tests failed · Healer repaired selector drift · re-running" },
   { agentId: "dev",    ticketId: "AM-150", kind: "overnight",message: "Ralph Wiggum loop opened PR #441 (Backend)" },
-  { agentId: "sa",     ticketId: "AM-140", kind: "reject",   message: "Zlatko rejected design.md → returned with feedback" },
+  { agentId: "sa",     ticketId: "AM-140", kind: "reject",   message: "Zlatko rejected architecture.md → returned with feedback" },
   { agentId: "tasklist", ticketId: "AM-147", kind: "handoff",message: "produced tasks.json v1 (18 sub-tasks)" },
   { agentId: "review", ticketId: "AM-149", kind: "handoff",  message: "review.md: 3 minor · 1 blocker (sql injection risk)" },
   { agentId: "dev",    ticketId: "AM-133", kind: "handoff",  message: "committed 14 files · +482 / -67 · branch ready" },
@@ -21,7 +21,7 @@ const seedTpl: Array<Omit<ActivityEvent, "id" | "ts">> = [
   { agentId: "ba",     ticketId: "AM-128", kind: "handoff",  message: "spec.md v2 ready for review" },
   { agentId: "dev",    ticketId: "AM-131", kind: "error",    message: "build failed · TS2345 on ListingCard.tsx · retrying" },
   { agentId: "qa",     ticketId: "AM-130", kind: "handoff",  message: "test plan drafted (12 scenarios)" },
-  { agentId: "sa",     ticketId: "AM-141", kind: "handoff",  message: "design.md v1: 4 endpoints · 2 tables" },
+  { agentId: "sa",     ticketId: "AM-141", kind: "handoff",  message: "architecture.md v1: 4 endpoints · 2 tables" },
   { agentId: "dev",    ticketId: "AM-149", kind: "overnight",message: "overnight: pushed fix commit + green CI" },
   { agentId: "human",  ticketId: "AM-145", kind: "approval", message: "Marin approved tasks.json → Ready for Dev" },
   { agentId: "review", ticketId: "AM-133", kind: "handoff",  message: "review.md: 5 minor · LGTM" },
@@ -33,7 +33,7 @@ const seedTpl: Array<Omit<ActivityEvent, "id" | "ts">> = [
   { agentId: "curator",kind: "handoff",   message: "indexed 2 new ADRs into the project knowledge base" },
   { agentId: "tasklist", ticketId: "AM-145", kind: "handoff",message: "tasks.json v2: dependencies graph updated" },
   { agentId: "dev",    ticketId: "AM-133", kind: "handoff",  message: "added retry/backoff on Stripe payment-intent callback" },
-  { agentId: "sa",     ticketId: "AM-138", kind: "handoff",  message: "design.md v2 ready for review" },
+  { agentId: "sa",     ticketId: "AM-138", kind: "handoff",  message: "architecture.md v2 ready for review" },
   { agentId: "qa",     ticketId: "AM-144", kind: "handoff",  message: "captured 7 screenshots · attached to report" },
   { agentId: "ba",     ticketId: "AM-142", kind: "handoff",  message: "added 4 acceptance criteria from PM feedback" },
 ];
@@ -46,7 +46,7 @@ type Tpl = Omit<ActivityEvent, "id" | "ts" | "agentId">;
 const TPLS: Record<AgentId, Tpl[]> = {
   curator: [{ kind: "handoff", message: "refreshed context bundle" }],
   ba:      [{ kind: "handoff", message: "drafted spec.md update" }, { kind: "handoff", message: "added acceptance criteria" }],
-  sa:      [{ kind: "handoff", message: "produced design.md revision" }],
+  sa:      [{ kind: "handoff", message: "produced architecture.md revision" }],
   tasklist:[{ kind: "handoff", message: "tasks.json regenerated" }],
   dev:     [{ kind: "handoff", message: "pushed commit · CI running" }, { kind: "overnight", message: "overnight loop opened PR" }],
   review:  [{ kind: "handoff", message: "review.md produced · 2 minor" }],

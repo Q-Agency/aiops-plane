@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 
 export const KIND_LABEL: Record<ArtifactKind, string> = {
   spec: "Business spec",
-  design: "Solution design",
+  design: "Solution architecture",
   "uix-ui-spec": "UI/UX spec",
   tasks: "Task breakdown",
   code: "Code + PR",

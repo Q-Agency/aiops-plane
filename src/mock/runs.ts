@@ -39,10 +39,10 @@ const tplTrace: Record<AgentId, (ticket: string) => RunStep[]> = {
     { id: "s1", name: "load spec.md + ADRs",      tool: "fs.read",      durationMs: 110, tokens: 0 },
     { id: "s2", name: "explore data model",       tool: "pg.introspect",durationMs: 640, tokens: 0,    output: "12 tables touched" },
     { id: "s3", name: "draft endpoint contract",  durationMs: 5800, tokens: 5200, output: "4 endpoints · cursor pagination" },
-    { id: "s4", name: "render design.md",         tool: "fs.write",     durationMs: 80,  tokens: 0,    output: `wrote design/${t}.md` },
+    { id: "s4", name: "render architecture.md",         tool: "fs.write",     durationMs: 80,  tokens: 0,    output: `wrote architecture/${t}.md` },
   ],
   tasklist: (t) => [
-    { id: "s1", name: "parse design.md",          durationMs: 220, tokens: 600 },
+    { id: "s1", name: "parse architecture.md",          durationMs: 220, tokens: 600 },
     { id: "s2", name: "split into sub-tasks",     durationMs: 2400, tokens: 2200, output: `${t}-T1 … ${t}-T8` },
     { id: "s3", name: "infer dependencies",       durationMs: 480, tokens: 700 },
     { id: "s4", name: "emit tasks.json",          tool: "fs.write",     durationMs: 60,  tokens: 0 },

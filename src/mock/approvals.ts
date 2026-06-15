@@ -3,7 +3,7 @@ import { tickets } from "./tickets";
 
 const gateMap: Partial<Record<Stage, Approval["gate"]>> = {
   "spec-review": "Spec Review",
-  "design-review": "Design Review",
+  "design-review": "Architecture Review",
   "tasks-review": "Tasks Review",
   "dev-review": "Dev Review",
   "qa-review": "QA Review",
@@ -11,7 +11,7 @@ const gateMap: Partial<Record<Stage, Approval["gate"]>> = {
 
 const artifactFor: Record<Approval["gate"], string> = {
   "Spec Review": "spec.md",
-  "Design Review": "design.md",
+  "Architecture Review": "architecture.md",
   "Tasks Review": "tasks.json",
   "Dev Review": "PR + diff",
   "QA Review": "qa.report",

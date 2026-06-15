@@ -44,7 +44,7 @@ const pickApprover = (i: number) => APPROVERS[i % APPROVERS.length];
 const KIND_META: Record<ArtifactKind, { agent: AgentId; label: string; file: string }> = {
   context: { agent: "curator",  label: "Curated context",  file: "context.bundle" },
   spec:    { agent: "ba",       label: "Business spec",     file: "spec.md" },
-  design:  { agent: "sa",       label: "Solution design",   file: "design.md" },
+  design:  { agent: "sa",       label: "Solution architecture",   file: "architecture.md" },
   tasks:   { agent: "tasklist", label: "Task breakdown",    file: "tasks.json" },
   code:    { agent: "dev",      label: "Code + PR",         file: "PR" },
   review:  { agent: "review",   label: "Code review",       file: "review.md" },
@@ -187,7 +187,7 @@ export function designMd(t: Ticket): { md: string; endpoints: Array<{ method: st
   return {
     md: `# Design · ${t.id} · ${t.title}
 
-> design.md@v${version} · produced by SA Agent · consumes spec.md@v2 · contract v0.5
+> architecture.md@v${version} · produced by SA Agent · consumes spec.md@v2 · contract v0.5
 
 ## Approach
 Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC. The design covers every acceptance criterion of the approved spec - the coverage map below is checked deterministically (D1).
@@ -280,7 +280,7 @@ export function prCard(t: Ticket) {
 export function reviewReport(t: Ticket) {
   return [
     { severity: "blocker" as const, file: "backend/app/listings/repository.py", line: 84,  msg: "Raw string concatenation in dynamic order_by - SQL injection risk via ?sort param." },
-    { severity: "major"   as const, file: "backend/app/listings/router.py",     line: 31,  msg: "Missing rate-limit decorator - design.md requires 30 req/min." },
+    { severity: "major"   as const, file: "backend/app/listings/router.py",     line: 31,  msg: "Missing rate-limit decorator - architecture.md requires 30 req/min." },
     { severity: "minor"   as const, file: "web/src/features/listings/FilterBar.tsx", line: 142, msg: "Debounce hook recreated every render; memoise input handler." },
     { severity: "minor"   as const, file: "mobile/lib/features/listings/listings_bloc.dart", line: 67, msg: "Equatable props missing `cursor`; will mis-trigger BlocBuilder rebuilds." },
     { severity: "info"    as const, file: "backend/app/listings/schemas.py",    line: 22,  msg: `Consider extracting Filter model - reused by ${t.id} and AM-147.` },

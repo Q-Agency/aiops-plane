@@ -60,9 +60,9 @@ const rawAudit: Omit<AuditEntry, "hash" | "prevHash">[] = [
   { id: "ae-001", ts: now - 48 * h, actor: { kind: "agent", id: "curator" }, action: "ingest.completed", rationale: "Slack #automarket-product synced (412 docs)", artifactRef: "src:slack-automarket" },
   { id: "ae-002", ts: now - 47 * h, actor: { kind: "agent", id: "ba" }, action: "artifact.created", ticketId: "AM-142", rationale: "spec.md v1 drafted from synthesized sources", artifactRef: "AM-142/spec.md@v1" },
   { id: "ae-003", ts: now - 46 * h, actor: { kind: "human", id: "zlatko" }, action: "gate.approved", ticketId: "AM-142", rationale: "Spec scope matches SOW §3.2", artifactRef: "AM-142/spec.md@v1" },
-  { id: "ae-004", ts: now - 40 * h, actor: { kind: "agent", id: "sa" }, action: "artifact.created", ticketId: "AM-138", rationale: "design.md v1 produced", artifactRef: "AM-138/design.md@v1" },
-  { id: "ae-005", ts: now - 39 * h, actor: { kind: "human", id: "marin" }, action: "gate.rejected", ticketId: "AM-138", rationale: "Threading model incomplete - reroute to SA", artifactRef: "AM-138/design.md@v1" },
-  { id: "ae-006", ts: now - 36 * h, actor: { kind: "agent", id: "sa" }, action: "artifact.versioned", ticketId: "AM-138", rationale: "design.md v2 with threaded model", artifactRef: "AM-138/design.md@v2" },
+  { id: "ae-004", ts: now - 40 * h, actor: { kind: "agent", id: "sa" }, action: "artifact.created", ticketId: "AM-138", rationale: "architecture.md v1 produced", artifactRef: "AM-138/architecture.md@v1" },
+  { id: "ae-005", ts: now - 39 * h, actor: { kind: "human", id: "marin" }, action: "gate.rejected", ticketId: "AM-138", rationale: "Threading model incomplete - reroute to SA", artifactRef: "AM-138/architecture.md@v1" },
+  { id: "ae-006", ts: now - 36 * h, actor: { kind: "agent", id: "sa" }, action: "artifact.versioned", ticketId: "AM-138", rationale: "architecture.md v2 with threaded model", artifactRef: "AM-138/architecture.md@v2" },
   { id: "ae-007", ts: now - 30 * h, actor: { kind: "agent", id: "dev" }, action: "model.invoked", ticketId: "AM-131", rationale: "local qwen2.5-coder-32b @ on-prem H200", artifactRef: "model:qwen2.5-coder-32b" },
   { id: "ae-008", ts: now - 26 * h, actor: { kind: "human", id: "ivan" }, action: "gate.approved", ticketId: "AM-133", rationale: "Callback signature verified", artifactRef: "AM-133/pr#412" },
   { id: "ae-009", ts: now - 22 * h, actor: { kind: "agent", id: "qa" }, action: "artifact.created", ticketId: "AM-131", rationale: "qa-report.md generated", artifactRef: "AM-131/qa.md@v1" },
@@ -135,7 +135,7 @@ export interface ModelProvenance {
 
 export const PROVENANCE: ModelProvenance[] = [
   { artifactRef: "AM-142/spec.md@v1", ticketId: "AM-142", agent: "ba", model: "gpt-5-mini", modelVersion: "2026-04-12", promptVersion: "ba-spec@1.4.2", residency: "cloud-eu" },
-  { artifactRef: "AM-138/design.md@v2", ticketId: "AM-138", agent: "sa", model: "claude-sonnet-4.5", modelVersion: "2026-03-08", promptVersion: "sa-design@2.1.0", residency: "cloud-eu" },
+  { artifactRef: "AM-138/architecture.md@v2", ticketId: "AM-138", agent: "sa", model: "claude-sonnet-4.5", modelVersion: "2026-03-08", promptVersion: "sa-design@2.1.0", residency: "cloud-eu" },
   { artifactRef: "AM-131/qa.md@v1", ticketId: "AM-131", agent: "qa", model: "qwen2.5-72b", modelVersion: "local-2025-12", promptVersion: "qa-report@1.0.7", residency: "on-prem" },
   { artifactRef: "AM-150/pr#421", ticketId: "AM-150", agent: "dev", model: "qwen2.5-coder-32b", modelVersion: "local-2025-12", promptVersion: "dev-impl@3.0.1", residency: "on-prem" },
   { artifactRef: "AM-149/review.md@v1", ticketId: "AM-149", agent: "review", model: "claude-sonnet-4.5", modelVersion: "2026-03-08", promptVersion: "review@1.2.0", residency: "cloud-eu" },

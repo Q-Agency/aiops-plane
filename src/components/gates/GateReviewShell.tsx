@@ -151,7 +151,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   const agent = allAgents.find((a) => a.id === detail.agentId);
   const agentName = agent?.name ?? detail.agentId.toUpperCase();
   const isClarification = detail.kind === "clarification";
-  // Design gates carry the spec→design coverage map + decision records and
+  // Architecture gates carry the spec→architecture coverage map + decision records and
   // swap the validator wall to the SA's check family; QA gates carry the
   // spec→test coverage map + defects/verdict and the report's own family
   // (gate-detail.ts).
@@ -211,7 +211,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
 
   function flashEars() {
     // Validator-row click lands on the block the check verifies: the EARS
-    // list on spec gates, the coverage map on design/QA gates.
+    // list on spec gates, the coverage map on architecture/QA gates.
     scrollTo(isDesign ? DESIGN_TRACE_BLOCK_ID : isQa ? QA_COVERAGE_BLOCK_ID : EARS_BLOCK_ID);
     setEarsFlash(true);
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
@@ -460,7 +460,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                         onClick={() => scrollTo(DESIGN_TRACE_BLOCK_ID)}
                         className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-1.5 py-1 rounded hover:bg-white/[0.03] transition-colors"
                       >
-                        Spec → design coverage
+                        Spec → architecture coverage
                       </button>
                     </li>
                   )}

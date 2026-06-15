@@ -33,7 +33,7 @@ import { ApprovalRow, ClarificationRow } from "@/components/approvals/ApprovalsV
 
 const GATE_AGENT_ID: Record<Approval["gate"], AgentId> = {
   "Spec Review": "ba",
-  "Design Review": "sa",
+  "Architecture Review": "sa",
   "Tasks Review": "tasklist",
   "Dev Review": "dev",
   "QA Review": "qa",
