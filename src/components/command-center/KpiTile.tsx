@@ -24,6 +24,11 @@ export function KpiTile({ label, value, format, delta, sparkline, accent = "prim
   const up = (delta ?? 0) >= 0;
   const data = sparkline.map((v) => ({ v }));
   const color = `var(--${accent})`;
+  // Gradient id must be bare-alphanumeric: labels carry spaces/·/$/() which make
+  // the SVG `url(#…)` paint reference fail to resolve - the area then falls back
+  // to a black fill (the "dark gray" harshness). Sanitizing restores the intended
+  // soft accent fade.
+  const gradId = `spark-${accent}-${label.replace(/[^a-z0-9]/gi, "")}`;
 
   const body = (
     <div className={cn("glass-panel p-3 hover-lift relative overflow-hidden", to && "transition-colors hover:border-primary/40")}>
@@ -48,12 +53,12 @@ export function KpiTile({ label, value, format, delta, sparkline, accent = "prim
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
-              <linearGradient id={`g-${label}`} x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor={color} stopOpacity={0.4} />
+              <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.28} />
                 <stop offset="100%" stopColor={color} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#g-${label})`} isAnimationActive={false} />
+            <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#${gradId})`} fillOpacity={1} isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
