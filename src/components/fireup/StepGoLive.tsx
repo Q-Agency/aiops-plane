@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { catalogEntry } from "@/mock/catalog";
+import { llmTierDef } from "@/mock/agent-config";
 import { estCost, estLatency, formatLatency } from "@/mock/chain";
 import { blueprintById } from "@/mock/blueprints";
 import { connectorById } from "@/mock/connectors";
@@ -71,6 +72,7 @@ interface GoLiveRow {
 const FIX_LABELS: Record<string, string> = {
   agents: "Fix in Catalog",
   accountability: "Assign owner",
+  llm: "Set LLM tier",
   tools: "Connect tool",
   slack: "Wire Slack",
   knowledge: "Add Knowledge",
@@ -100,6 +102,14 @@ function buildRows(draft: PodDraft): GoLiveRow[] {
         label: catalogEntry(id).name,
         ok: Boolean(draft.accountability[id]),
         meta: humanName(draft.accountability[id]),
+      }));
+    }
+    if (c.id === "llm" && !zeroAgents) {
+      const tiers = draft.agentTiers ?? {};
+      row.items = draft.agentIds.map((id) => ({
+        label: catalogEntry(id).name,
+        ok: Boolean(tiers[id]),
+        meta: tiers[id] ? llmTierDef(tiers[id]!).label : "No tier",
       }));
     }
     if (c.id === "tools") {

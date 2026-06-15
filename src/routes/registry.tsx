@@ -35,7 +35,8 @@ import {
   type AgentDomain,
 } from "@/mock/registry";
 import { CONNECTORS, type ConnectorId } from "@/mock/connectors";
-import { MODEL_OPTIONS, modelShort } from "@/mock/agent-config";
+import { llmTierDef, modelShort, type LlmTier } from "@/mock/agent-config";
+import { LlmTierMenu } from "@/components/agents/LlmTierMenu";
 import { humans } from "@/mock/humans";
 import { appendAuditMock } from "@/mock/audit-bridge";
 import { Button } from "@/components/ui/button";
@@ -397,10 +398,9 @@ function CardPreview({
   const [tools, setTools] = useState<Set<ConnectorId>>(
     () => new Set(DOMAIN_SUGGESTED_TOOLS[card.domain]),
   );
-  const [inferenceMode, setInferenceMode] = useState<"agent-managed" | "plane">("agent-managed");
-  const [planeModel, setPlaneModel] = useState(
-    "qwen2.5-coder-32b-instruct", // in-tenant default — the privacy-first pick for externals
-  );
+  // Inference is a MANDATORY choice: a Q model-plane tier OR the agent's own
+  // engine (agent-managed). null = nothing picked yet → Register is disabled.
+  const [inference, setInference] = useState<LlmTier | "agent-managed" | null>(null);
   const [ownerId, setOwnerId] = useState("zlatko");
 
   function toggleTool(id: ConnectorId) {
@@ -413,10 +413,11 @@ function CardPreview({
   }
 
   function submit() {
+    if (inference === null) return; // mandatory
     onRegister({
       tools: [...tools],
       ownerId,
-      inference: inferenceMode === "agent-managed" ? "agent-managed" : planeModel,
+      inference: inference === "agent-managed" ? "agent-managed" : llmTierDef(inference).modelId,
     });
   }
 
@@ -501,71 +502,62 @@ function CardPreview({
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div>
-            <div className="text-[10px] font-mono text-muted-foreground mb-1.5">inference</div>
-            <div className="flex gap-1.5">
-              {(
-                [
-                  ["agent-managed", "Agent-managed"],
-                  ["plane", "Q model plane"],
-                ] as const
-              ).map(([mode, label]) => (
-                <button
-                  key={mode}
-                  onClick={() => setInferenceMode(mode)}
-                  data-test={`reg-inference-${mode}`}
-                  className={cn(
-                    "rounded border px-2.5 py-1.5 text-[11px] transition-colors",
-                    inferenceMode === mode
-                      ? "border-primary/50 bg-primary/[0.08] text-foreground"
-                      : "border-border text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            {inferenceMode === "agent-managed" ? (
-              <div className="text-[10px] text-muted-foreground/80 mt-1">
-                Runs its own engine — we govern its actions, not its weights.
-              </div>
-            ) : (
-              <select
-                value={planeModel}
-                onChange={(e) => setPlaneModel(e.target.value)}
-                data-test="reg-plane-model"
-                className="mt-1.5 w-full rounded-md border border-border bg-white/[0.02] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary/50"
-              >
-                {MODEL_OPTIONS.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-panel text-foreground">
-                    {m.label} — ${m.costPerRunUsd.toFixed(2)}/run ·{" "}
-                    {m.hosting === "in-tenant" ? "in-tenant" : m.provider}
-                  </option>
-                ))}
-              </select>
-            )}
+        {/* inference — MANDATORY: a Q model-plane tier OR the agent's own engine */}
+        <div>
+          <div className="text-[10px] font-mono text-muted-foreground mb-1.5">
+            inference <span className="text-status-waiting">· required</span>
           </div>
+          <LlmTierMenu
+            value={inference === "agent-managed" ? null : inference}
+            onChange={(t) => setInference(t)}
+            size="sm"
+          />
+          <button
+            type="button"
+            onClick={() => setInference("agent-managed")}
+            data-test="reg-inference-agent-managed"
+            className={cn(
+              "mt-1.5 w-full text-left rounded-lg border px-3 py-2 transition-colors",
+              inference === "agent-managed"
+                ? "border-primary/50 bg-primary/[0.07]"
+                : "border-border bg-white/[0.02] hover:border-white/20",
+            )}
+          >
+            <div className="flex items-center gap-2 text-[13px] font-semibold">
+              <span
+                className="grid size-4 place-items-center rounded-full border"
+                style={{
+                  borderColor: inference === "agent-managed" ? "var(--primary)" : "var(--border)",
+                  background: inference === "agent-managed" ? "var(--primary)" : "transparent",
+                }}
+              >
+                {inference === "agent-managed" && <Check className="size-2.5 text-black/85" />}
+              </span>
+              Agent-managed
+              <span className="ml-auto font-mono text-[10px] text-muted-foreground">external</span>
+            </div>
+            <div className="mt-1 pl-6 text-[11px] text-muted-foreground">
+              Runs its own engine — we govern its actions, not its weights.
+            </div>
+          </button>
+        </div>
 
-          <div>
-            <div className="text-[10px] font-mono text-muted-foreground mb-1.5">
-              accountable owner
-            </div>
-            <select
-              value={ownerId}
-              onChange={(e) => setOwnerId(e.target.value)}
-              data-test="reg-owner"
-              className="w-full rounded-md border border-border bg-white/[0.02] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary/50"
-            >
-              {humans.map((h) => (
-                <option key={h.id} value={h.id} className="bg-panel text-foreground">
-                  {h.name} — {h.role}
-                </option>
-              ))}
-            </select>
-            <div className="text-[10px] text-muted-foreground/80 mt-1">
-              Signs its gates — someone answers for it from minute one.
-            </div>
+        <div>
+          <div className="text-[10px] font-mono text-muted-foreground mb-1.5">accountable owner</div>
+          <select
+            value={ownerId}
+            onChange={(e) => setOwnerId(e.target.value)}
+            data-test="reg-owner"
+            className="w-full rounded-md border border-border bg-white/[0.02] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary/50"
+          >
+            {humans.map((h) => (
+              <option key={h.id} value={h.id} className="bg-panel text-foreground">
+                {h.name} — {h.role}
+              </option>
+            ))}
+          </select>
+          <div className="text-[10px] text-muted-foreground/80 mt-1">
+            Signs its gates — someone answers for it from minute one.
           </div>
         </div>
 
@@ -574,8 +566,15 @@ function CardPreview({
             <ShieldCheck className="size-3 text-primary" /> starts at L0 · review all — autonomy is
             earned on validator streaks, never granted at the door
           </span>
-          <Button size="sm" onClick={submit} data-test="reg-submit" className="shrink-0">
-            <Plus className="size-3.5" /> Register into fleet
+          <Button
+            size="sm"
+            onClick={submit}
+            disabled={inference === null}
+            data-test="reg-submit"
+            className="shrink-0"
+          >
+            <Plus className="size-3.5" />
+            {inference === null ? "Pick an LLM to register" : "Register into fleet"}
           </Button>
         </div>
       </div>

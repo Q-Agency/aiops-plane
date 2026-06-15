@@ -19,6 +19,7 @@ import {
 import type { ChainRoleId } from "@/mock/chain";
 import type { ConnectorId } from "@/mock/connectors";
 import { blueprintById, type BlueprintId } from "@/mock/blueprints";
+import type { LlmTier } from "@/mock/agent-config";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                                */
@@ -58,6 +59,8 @@ export interface PodDraft {
   scopeRule?: ScopeRule;
   /** agentId → humanId (null = uncovered). */
   accountability: Partial<Record<ChainRoleId, string | null>>;
+  /** agentId → chosen LLM tier — mandatory for every agent before launch. */
+  agentTiers?: Partial<Record<ChainRoleId, LlmTier>>;
   slackWiring: SlackWiringRow[];
   approverChannelId: string | null;
   launched: boolean;
@@ -123,8 +126,14 @@ export function uncoveredAgents(draft: PodDraft | null): ChainRoleId[] {
   return draft.agentIds.filter((id) => !draft.accountability[id]);
 }
 
+/** Selected agents that still need an LLM tier chosen (mandatory). */
+export function agentsNeedingTier(draft: PodDraft | null): ChainRoleId[] {
+  const tiers = draft?.agentTiers ?? {};
+  return (draft?.agentIds ?? []).filter((id) => !tiers[id]);
+}
+
 export interface ReadinessCheck {
-  id: "agents" | "accountability" | "tools" | "slack";
+  id: "agents" | "accountability" | "llm" | "tools" | "slack";
   label: string;
   severity: "required" | "advisory";
   status: "pass" | "blocked" | "warn";
@@ -144,6 +153,7 @@ export interface DraftReadiness {
 
 export function computeReadiness(draft: PodDraft | null): DraftReadiness {
   const uncovered = uncoveredAgents(draft);
+  const needingTier = agentsNeedingTier(draft);
   const hasAgents = (draft?.agentIds.length ?? 0) > 0;
 
   const requiredConnectors = blueprintById(draft?.blueprintId ?? null)?.connectorIds ?? [];
@@ -173,6 +183,17 @@ export function computeReadiness(draft: PodDraft | null): DraftReadiness {
           ? "Every agent has an accountable human."
           : `${uncovered.length} uncovered — assign one human per agent.`,
       fixStep: "people",
+    },
+    {
+      id: "llm",
+      label: "Every agent has an LLM tier",
+      severity: "required",
+      status: !hasAgents ? "blocked" : needingTier.length === 0 ? "pass" : "blocked",
+      detail:
+        hasAgents && needingTier.length === 0
+          ? "Every agent has a model tier set."
+          : `${needingTier.length} agent${needingTier.length === 1 ? "" : "s"} need an LLM tier — pick one per agent.`,
+      fixStep: "agents",
     },
     {
       id: "tools",
@@ -301,6 +322,7 @@ export function PodProvider({ children }: { children: ReactNode }) {
       agentIds: blueprint ? [...blueprint.agentIds] : [],
       connections: [],
       accountability: {},
+      agentTiers: {},
       slackWiring: DEFAULT_SLACK_WIRING.map((r) => ({ ...r })),
       approverChannelId: null,
       launched: false,

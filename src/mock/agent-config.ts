@@ -116,6 +116,88 @@ export function modelShort(id: string): string {
   return modelOptionById(id).label;
 }
 
+/* ------------------------------------------------------------------ */
+/* LLM tiers — the mandatory "pick a model policy" menu                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Tier presets layered over MODEL_OPTIONS. Choosing an agent's LLM is a
+ * POLICY decision (capability vs cost vs data-residency), so the product
+ * makes you pick a TIER — not hunt a model id — whenever an agent is added
+ * to a pod or modified. Each tier resolves to one default model; the exact
+ * model stays overridable on the agent profile (advanced).
+ */
+export type LlmTier = "max" | "balanced" | "budget" | "local";
+
+export interface LlmTierDef {
+  id: LlmTier;
+  label: string;
+  /** One-line "when to pick this". */
+  blurb: string;
+  /** Default model id this tier resolves to. */
+  modelId: string;
+  /** CSS var for the accent. */
+  accent: string;
+  /** Local/in-tenant tier — data never leaves the tenant. */
+  inTenant?: boolean;
+}
+
+export const LLM_TIERS: LlmTierDef[] = [
+  {
+    id: "max",
+    label: "Max capability",
+    blurb: "Frontier reasoning — the hardest specs, architecture and gnarly refactors. Premium cost.",
+    modelId: "claude-opus-4-1-20250805",
+    accent: "--status-waiting",
+  },
+  {
+    id: "balanced",
+    label: "Balanced",
+    blurb: "The recommended default — strong quality at a moderate price.",
+    modelId: "claude-sonnet-4-5-20250929",
+    accent: "--primary",
+  },
+  {
+    id: "budget",
+    label: "Budget",
+    blurb: "Fast and cheap — routing, summaries, light edits and high-volume work.",
+    modelId: "claude-haiku-4-5-20251001",
+    accent: "--status-done",
+  },
+  {
+    id: "local",
+    label: "Local only",
+    blurb: "Runs on Q's managed H200 rig — data never leaves your tenant.",
+    modelId: "qwen2.5-coder-32b-instruct",
+    accent: "--agent-curator",
+    inTenant: true,
+  },
+];
+
+export function llmTierDef(tier: LlmTier): LlmTierDef {
+  return LLM_TIERS.find((t) => t.id === tier) ?? LLM_TIERS[1];
+}
+
+/** Which tier a model id belongs to (frontier/in-tenant classified). */
+export function tierForModel(modelId: string): LlmTier {
+  const exact = LLM_TIERS.find((t) => t.modelId === modelId);
+  if (exact) return exact.id;
+  const m = modelOptionById(modelId);
+  if (m.hosting === "in-tenant") return "local";
+  if (m.id === "gpt-5.1") return "max"; // cross-vendor frontier
+  return "balanced";
+}
+
+/** The tier an agent currently runs at (derived from its model). */
+export function agentTier(agentId: string): LlmTier {
+  return tierForModel(agentModel(agentId).id);
+}
+
+/** Set an agent's LLM by tier — resolves to the tier's model (audited). */
+export function setAgentTier(agentId: string, agentName: string, tier: LlmTier): void {
+  setAgentModel(agentId, agentName, llmTierDef(tier).modelId);
+}
+
 /**
  * Default model per agent — the modelPlane.ts pin when the agent has a
  * row there (ids differ: agents.ts says curator/pm, the plane says

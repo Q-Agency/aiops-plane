@@ -68,17 +68,23 @@ import {
   agentAutonomy,
   agentModel,
   agentOwner,
+  agentTier,
   agentTools,
   agentVersions,
+  llmTierDef,
+  modelOptionById,
   requiredToolsFor,
   rollbackAgentVersion,
   setAgentAutonomy,
   setAgentModel,
   setAgentOwner,
+  setAgentTier,
   toggleAgentTool,
   useAgentConfigTick,
   type AutonomyLevel,
+  type LlmTier,
 } from "@/mock/agent-config";
+import { LlmTierMenu } from "@/components/agents/LlmTierMenu";
 import { AUTONOMY_LEVELS, autonomyPreviewStat, autonomyStatusFor } from "@/mock/gate-policies";
 import { CONNECTORS } from "@/mock/connectors";
 import { humans } from "@/mock/humans";
@@ -456,8 +462,18 @@ function PanelShell({
 }
 
 function ModelPanel({ agent }: { agent: Agent }) {
-  const [picking, setPicking] = useState(false);
+  const [advanced, setAdvanced] = useState(false);
   const model = agentModel(agent.id);
+  const tier = agentTier(agent.id);
+
+  function pickTier(t: LlmTier) {
+    if (t !== tier) {
+      setAgentTier(agent.id, agent.name, t);
+      toast.success(`${agent.name} → ${llmTierDef(t).label}`, {
+        description: `Now runs on ${modelOptionById(llmTierDef(t).modelId).label} — policy.changed on the ledger.`,
+      });
+    }
+  }
 
   function pick(id: string) {
     if (id !== model.id) {
@@ -467,11 +483,15 @@ function ModelPanel({ agent }: { agent: Agent }) {
         description: "policy.changed written to the ledger — next run uses the new engine.",
       });
     }
-    setPicking(false);
+    setAdvanced(false);
   }
 
   return (
-    <PanelShell icon={Cpu} title="Model & routing" sub="the engine is a policy, not a constant">
+    <PanelShell
+      icon={Cpu}
+      title="Model & routing"
+      sub="pick a tier — the engine is a policy, not a constant"
+    >
       <div className="rounded-md border border-border bg-white/[0.02] p-3">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
@@ -503,15 +523,23 @@ function ModelPanel({ agent }: { agent: Agent }) {
         </div>
       </div>
 
+      {/* Tier menu — the mandatory, primary control */}
+      <div data-test="llm-tier-menu">
+        <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1.5">
+          LLM tier
+        </div>
+        <LlmTierMenu value={tier} onChange={pickTier} size="sm" />
+      </div>
+
       <button
-        onClick={() => setPicking((p) => !p)}
+        onClick={() => setAdvanced((p) => !p)}
         className="text-[11px] font-mono rounded border border-border px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors text-left inline-flex items-center gap-1.5"
         data-test="change-model"
       >
-        <Sparkles className="size-3" /> {picking ? "Cancel" : "Change model"}
+        <Sparkles className="size-3" /> {advanced ? "Hide exact models" : "Advanced — exact model"}
       </button>
 
-      {picking && (
+      {advanced && (
         <div className="space-y-1.5" data-test="model-options">
           {MODEL_OPTIONS.map((m) => {
             const active = m.id === model.id;

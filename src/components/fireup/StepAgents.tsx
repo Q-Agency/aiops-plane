@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Lock, Plus, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { Cpu, Lock, Plus, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +37,7 @@ import {
   type CatalogEntry,
 } from "@/mock/catalog";
 import { blueprintById } from "@/mock/blueprints";
+import { llmTierDef, type LlmTier } from "@/mock/agent-config";
 import { usePods } from "@/lib/pods/pod-store";
 import { AgentDetailDialog } from "./AgentDetailDialog";
 import { PipelinePreview } from "./PipelinePreview";
@@ -52,12 +53,18 @@ function CatalogCard({
   gaps,
   onToggle,
   onOpen,
+  tier,
+  showTier = false,
 }: {
   entry: CatalogEntry;
   selected: boolean;
   gaps: ChainGap[];
   onToggle: (id: ChainRoleId, next: boolean) => void;
   onOpen: (id: ChainRoleId) => void;
+  /** Chosen LLM tier (wizard). */
+  tier?: LlmTier;
+  /** Render the mandatory LLM-tier chip (wizard only). */
+  showTier?: boolean;
 }) {
   const color = `var(--${entry.color})`;
   const agent = entry.agentId ? agents.find((a) => a.id === entry.agentId) : undefined;
@@ -227,6 +234,35 @@ function CatalogCard({
         </div>
       )}
 
+      {/* Mandatory LLM tier (wizard) — chip when chosen, amber CTA when not */}
+      {selected && showTier && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+          className="flex items-center gap-1.5"
+        >
+          {tier ? (
+            <span
+              className="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border"
+              style={{
+                borderColor: `color-mix(in oklab, var(${llmTierDef(tier).accent}) 50%, transparent)`,
+                color: `var(${llmTierDef(tier).accent})`,
+              }}
+            >
+              <Cpu className="size-2.5" /> {llmTierDef(tier).label}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpen(entry.id)}
+              className="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-waiting/60 bg-status-waiting/10 text-status-waiting hover:bg-status-waiting/20 transition-colors animate-pulse"
+            >
+              <Cpu className="size-2.5" /> Choose LLM
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Indicative stats */}
       <div className="mt-auto pt-2 border-t border-border flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
         <span>~${entry.costPerTicketUsd.toFixed(2)}/ticket</span>
@@ -286,6 +322,9 @@ export interface AgentCatalogBodyProps {
   selectedIds: ChainRoleId[];
   /** Pure state mutation — toasts are handled here in the body. */
   onToggle: (id: ChainRoleId, next: boolean) => void;
+  /** Wizard only — per-agent LLM tier map + setter (enables the mandatory tier UI). */
+  tiers?: Partial<Record<ChainRoleId, LlmTier>>;
+  onSetTier?: (id: ChainRoleId, tier: LlmTier) => void;
   /** Optional "Reset to blueprint" ghost link in the summary bar. */
   reset?: { label: string; onReset: () => void } | null;
   /** Render skeletons (pre-hydration fidelity state). */
@@ -297,6 +336,8 @@ export interface AgentCatalogBodyProps {
 export function AgentCatalogBody({
   selectedIds,
   onToggle,
+  tiers,
+  onSetTier,
   reset = null,
   loading = false,
   wide = false,
@@ -398,6 +439,8 @@ export function AgentCatalogBody({
                 gaps={gapsByRole.get(entry.id) ?? []}
                 onToggle={handleToggle}
                 onOpen={openDetail}
+                tier={tiers?.[entry.id]}
+                showTier={!!onSetTier}
               />
             ))}
           </div>
@@ -420,6 +463,8 @@ export function AgentCatalogBody({
         onOpenChange={setDetailOpen}
         selectedIds={selectedIds}
         onToggle={handleToggle}
+        tier={detailId ? tiers?.[detailId] : undefined}
+        onSetTier={onSetTier}
       />
     </TooltipProvider>
   );
@@ -448,6 +493,11 @@ export function StepAgents() {
     else if (!next && has) updateDraft({ agentIds: draft.agentIds.filter((x) => x !== id) });
   };
 
+  const setTier = (id: ChainRoleId, tier: LlmTier) => {
+    if (!draft) return;
+    updateDraft({ agentTiers: { ...(draft.agentTiers ?? {}), [id]: tier } });
+  };
+
   const blueprint = blueprintById(draft?.blueprintId ?? null);
   const reset =
     blueprint && blueprint.id !== "scratch"
@@ -464,6 +514,8 @@ export function StepAgents() {
     <AgentCatalogBody
       selectedIds={selectedIds}
       onToggle={toggle}
+      tiers={draft?.agentTiers ?? {}}
+      onSetTier={setTier}
       reset={reset}
       loading={!hydrated}
     />

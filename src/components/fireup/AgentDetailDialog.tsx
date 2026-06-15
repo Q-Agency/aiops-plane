@@ -6,7 +6,7 @@
  * primary Add/Remove footer. Gap context renders the inline one-click fix.
  */
 
-import { ArrowRight, Bot, Check, Minus, Plus } from "lucide-react";
+import { ArrowRight, Bot, Check, Cpu, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { agents } from "@/mock/agents";
 import { CHAIN_ROLES, formatLatency, missingInputsFor, type ChainRoleId } from "@/mock/chain";
 import { CATALOG } from "@/mock/catalog";
+import { LlmTierMenu } from "@/components/agents/LlmTierMenu";
+import type { LlmTier } from "@/mock/agent-config";
 import { ROLE_SHORT, mix } from "./role-meta";
 
 export interface AgentDetailDialogProps {
@@ -34,6 +36,10 @@ export interface AgentDetailDialogProps {
   selectedIds: ChainRoleId[];
   /** Add/remove (parent owns state + toasts). */
   onToggle: (id: ChainRoleId, next: boolean) => void;
+  /** Chosen LLM tier for this agent (wizard). */
+  tier?: LlmTier;
+  /** Setter — when provided, the mandatory LLM-tier menu renders (wizard). */
+  onSetTier?: (id: ChainRoleId, tier: LlmTier) => void;
 }
 
 function Sparkline({ data, color }: { data: number[]; color: string }) {
@@ -102,6 +108,8 @@ export function AgentDetailDialog({
   onOpenChange,
   selectedIds,
   onToggle,
+  tier,
+  onSetTier,
 }: AgentDetailDialogProps) {
   const entry = roleId ? (CATALOG.find((c) => c.id === roleId) ?? null) : null;
 
@@ -293,6 +301,36 @@ export function AgentDetailDialog({
 
           <Separator />
           <p className="text-xs text-muted-foreground leading-relaxed">{entry.summary}</p>
+
+          {/* Mandatory LLM tier — appears once the agent is in the pod (wizard) */}
+          {onSetTier && added && (
+            <div className="rounded-md border border-border bg-panel/40 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Cpu className="size-3.5 text-muted-foreground" />
+                <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+                  LLM tier
+                </span>
+                {tier ? (
+                  <span className="ml-auto text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-done/50 bg-status-done/10 text-status-done">
+                    Set
+                  </span>
+                ) : (
+                  <span className="ml-auto text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-waiting/50 bg-status-waiting/10 text-status-waiting">
+                    Required — choose one
+                  </span>
+                )}
+              </div>
+              <LlmTierMenu
+                value={tier ?? null}
+                onChange={(t) => onSetTier(entry.id, t)}
+                size="sm"
+              />
+              <p className="mt-2 text-[10px] text-muted-foreground/80">
+                Cost vs capability vs data-residency — set per agent. Change it any time on the
+                agent's profile; the exact model is overridable there.
+              </p>
+            </div>
+          )}
 
           <DialogFooter className="gap-2 sm:gap-2">
             {added ? (
