@@ -1,11 +1,11 @@
 /**
- * Model plane — per-agent model disclosure for Settings "Models &
+ * Model plane - per-agent model disclosure for Settings "Models &
  * subprocessors" (#models): who actually processes the client's content,
- * one LLM call deep — provider, pinned model id, processing region, and
+ * one LLM call deep - provider, pinned model id, processing region, and
  * retention terms.
  *
  * Honesty rules: `euInference` is the EU-REGION-inference flag ("roadmap"
- * renders the Roadmap badge — hosted inference is US today); self-hosted
+ * renders the Roadmap badge - hosted inference is US today); self-hosted
  * rows run in-tenant (EU-West) so EU inference is live for them. The
  * agent-level Live/Roadmap badge still comes from chain.ts availability.
  */
@@ -14,7 +14,7 @@ export interface ModelPlaneRow {
   agentId: string;
   agentLabel: string;
   provider: string;
-  /** Pinned model id string — never "latest". */
+  /** Pinned model id string - never "latest". */
   pinnedModel: string;
   processingRegion: string;
   /** EU-region inference availability for this row. */
@@ -114,9 +114,9 @@ export function modelPlaneFor(agentId: string): ModelPlaneRow | undefined {
   return MODEL_PLANE.find((r) => r.agentId === agentId);
 }
 
-/** Footer line under the Models table — every party that touches content. */
+/** Footer line under the Models table - every party that touches content. */
 export const SUBPROCESSORS: string[] = [
-  "Anthropic — LLM inference (zero-data-retention API terms)",
-  "Supabase — isolated Postgres + append-only audit ledger (EU-West)",
-  "Hetzner — dedicated compute & self-hosted inference (EU)",
+  "Anthropic - LLM inference (zero-data-retention API terms)",
+  "Supabase - isolated Postgres + append-only audit ledger (EU-West)",
+  "Hetzner - dedicated compute & self-hosted inference (EU)",
 ];

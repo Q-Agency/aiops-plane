@@ -1,8 +1,8 @@
 /**
- * CharterCard (/welcome stage 1) — the role charter for ONE covered agent:
+ * CharterCard (/welcome stage 1) - the role charter for ONE covered agent:
  * what it produces, the gate-clearance SLA + policy chip (gate-policies.ts),
  * and what rejecting does ("your note becomes the agent's added context").
- * Deputy variant renders the covers-not-owns charter — accountability
+ * Deputy variant renders the covers-not-owns charter - accountability
  * stays with the named owner.
  */
 
@@ -12,7 +12,7 @@ import { agents as allAgents } from "@/mock/agents";
 import { gatePolicyFor } from "@/mock/gate-policies";
 import { GatePolicyChip } from "@/components/gates/GatePolicyChip";
 
-/** What each chain agent produces — the charter's "it produces …" clause. */
+/** What each chain agent produces - the charter's "it produces …" clause. */
 const PRODUCES: Record<string, string> = {
   ba: "SPEC.md",
   sa: "DESIGN.md",
@@ -75,14 +75,14 @@ export function CharterCard({ agentId, deputyOf, className }: CharterCardProps) 
       <p className="text-sm text-foreground leading-relaxed">
         {deputyOf ? (
           <>
-            You <strong>cover</strong> the <strong style={{ color }}>{name}</strong> — it produces{" "}
+            You <strong>cover</strong> the <strong style={{ color }}>{name}</strong> - it produces{" "}
             <span className="font-mono text-[13px]">{produces}</span>; while covering, you clear its
             gates within <span className="font-mono text-[13px]">{sla}</span>; rejecting returns
             work with your note as the agent&apos;s added context.
           </>
         ) : (
           <>
-            You&apos;re accountable for the <strong style={{ color }}>{name}</strong> — it produces{" "}
+            You&apos;re accountable for the <strong style={{ color }}>{name}</strong> - it produces{" "}
             <span className="font-mono text-[13px]">{produces}</span>; you clear its gates within{" "}
             <span className="font-mono text-[13px]">{sla}</span>; rejecting returns work with your
             note as the agent&apos;s added context.
@@ -90,10 +90,10 @@ export function CharterCard({ agentId, deputyOf, className }: CharterCardProps) 
         )}
       </p>
 
-      {/* deputy wall — covers, not owns */}
+      {/* deputy wall - covers, not owns */}
       {deputyOf && (
         <div className="rounded-md border border-status-waiting/40 bg-status-waiting/10 px-3 py-2 text-xs text-status-waiting">
-          Deputy coverage — you cover when {deputyOf} is OOO; accountability stays with {deputyOf}.
+          Deputy coverage - you cover when {deputyOf} is OOO; accountability stays with {deputyOf}.
         </div>
       )}
 
@@ -101,7 +101,7 @@ export function CharterCard({ agentId, deputyOf, className }: CharterCardProps) 
       <div className="flex items-start gap-2 pt-2 border-t border-border/60 text-[11px] text-muted-foreground">
         <CornerDownLeft className="size-3.5 shrink-0 mt-px text-muted-foreground/70" />
         <span>
-          Rejecting is not a dead end — the artifact returns to the agent and{" "}
+          Rejecting is not a dead end - the artifact returns to the agent and{" "}
           <span className="text-foreground">your note becomes the agent&apos;s added context</span>{" "}
           on the rerun. A typed reason is required on every reject.
         </span>

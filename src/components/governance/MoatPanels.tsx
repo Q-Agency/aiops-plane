@@ -1,17 +1,17 @@
 /**
- * MoatPanels — the /governance moat surfaces that surround the shared
+ * MoatPanels - the /governance moat surfaces that surround the shared
  * walled ValidatorPanel (C3):
  *
- *   - TrustBanner            — full-width deterministic badge strip +
+ *   - TrustBanner            - full-width deterministic badge strip +
  *                              structural-readiness rollup.
- *   - LlmJudgePanel          — the OTHER wall: amber, dashed, gavel-marked,
- *                              "LLM-ADVISORY" — advisory signals only,
+ *   - LlmJudgePanel          - the OTHER wall: amber, dashed, gavel-marked,
+ *                              "LLM-ADVISORY" - advisory signals only,
  *                              never a gate.
- *   - StructuralVsSemanticNote — the honest disclaimer alert.
+ *   - StructuralVsSemanticNote - the honest disclaimer alert.
  *
  * The wall between deterministic and LLM-assisted is the load-bearing
  * design decision: solid emerald + ShieldCheck vs dashed amber + Gavel.
- * Spatial split, never tabs — a tab would let a skeptic ignore it.
+ * Spatial split, never tabs - a tab would let a skeptic ignore it.
  */
 
 import { Gavel, Info, ShieldCheck } from "lucide-react";
@@ -87,7 +87,7 @@ export function TrustBanner({ readiness }: { readiness: StructuralReadiness }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* LLM-assisted wall — advisory, never a gate                           */
+/* LLM-assisted wall - advisory, never a gate                           */
 /* ------------------------------------------------------------------ */
 
 function SignalBar({ signal }: { signal: LlmSignal }) {
@@ -116,7 +116,7 @@ export function LlmJudgePanel({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        // the OTHER wall: dashed, amber — never solid, never emerald
+        // the OTHER wall: dashed, amber - never solid, never emerald
         "rounded-md border-2 border-dashed border-status-waiting/40 bg-panel/40 backdrop-blur-md",
         className,
       )}
@@ -131,7 +131,7 @@ export function LlmJudgePanel({ className }: { className?: string }) {
         </div>
         <div className="mt-2 text-sm font-semibold text-foreground">LLM-assisted signals</div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Advisory only — does not block readiness.
+          Advisory only - does not block readiness.
         </p>
       </header>
 
@@ -143,13 +143,13 @@ export function LlmJudgePanel({ className }: { className?: string }) {
 
       <div className="mx-4 mb-3 rounded border border-status-waiting/30 bg-status-waiting/[0.06] px-2.5 py-2 text-[11px] text-muted-foreground">
         <span className="text-status-waiting font-medium">
-          Advisory disagreement — does not block.
+          Advisory disagreement - does not block.
         </span>{" "}
         {advisoryDisagreement.line}
       </div>
 
       <footer className="border-t border-dashed border-status-waiting/30 p-3 text-[10px] text-muted-foreground font-mono">
-        Model-graded — treat as advisory. LLM-assisted signal · advisory, not a gate.
+        Model-graded - treat as advisory. LLM-assisted signal · advisory, not a gate.
       </footer>
     </section>
   );

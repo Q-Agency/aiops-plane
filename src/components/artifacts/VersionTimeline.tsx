@@ -1,5 +1,5 @@
 /**
- * VersionTimeline — right Sheet over one deliverable: every iteration
+ * VersionTimeline - right Sheet over one deliverable: every iteration
  * v1→vN from artifactVersions(), rejected iterations struck-through with
  * the typed reject reason inline and a line-level diff against the next
  * version (toggleable per iteration), the gate that decided each one
@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { KIND_ICON, KIND_LABEL, KIND_TONE, LineDiff } from "./artifact-ui";
 
 export interface VersionTimelineProps {
-  /** The clicked shelf row — null closes the sheet. */
+  /** The clicked shelf row - null closes the sheet. */
   snapshot: ArtifactSnapshot | null;
   onClose: () => void;
 }
@@ -164,7 +164,7 @@ function IterationCard({
         </Link>
       </div>
 
-      {/* typed reject reason — required on reject (product canon) */}
+      {/* typed reject reason - required on reject (product canon) */}
       {rejected && it.rejectReason && (
         <div className="border-l-2 border-status-error/60 bg-status-error/10 rounded-r px-2.5 py-2">
           <div className="text-[9px] font-mono uppercase tracking-wider text-status-error/80">
@@ -233,7 +233,7 @@ function ToggleChip({
 
 /**
  * The load-bearing footer: snapshotted into the control plane at
- * gate-clearance — survives agent resets. The pending variant covers the
+ * gate-clearance - survives agent resets. The pending variant covers the
  * ledger-sync-gap edge (a future-dated snapshotAt = backfill pending; no
  * current seed exercises it, the state is wired for honesty).
  */
@@ -248,7 +248,7 @@ export function SnapshotStamp({ snapshot }: { snapshot: ArtifactSnapshot }) {
             Snapshot pending · backfills on reconnect
           </div>
           <div className="text-[10px] text-muted-foreground mt-0.5">
-            Approved during a ledger sync gap — the snapshot lands when the ledger reconnects,
+            Approved during a ledger sync gap - the snapshot lands when the ledger reconnects,
             and the gap is marked honestly in Compliance.
           </div>
         </div>

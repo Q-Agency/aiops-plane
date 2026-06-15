@@ -1,5 +1,5 @@
 /**
- * UptimeBars — 90 tiny day-cells for one platform component (oldest →
+ * UptimeBars - 90 tiny day-cells for one platform component (oldest →
  * newest, from the deterministic uptimeDays seed). Green = 100%, amber =
  * minor dip, red = the degraded stretch; hover carries the day + pct.
  * Empty history (new tenant) accrues from launch.

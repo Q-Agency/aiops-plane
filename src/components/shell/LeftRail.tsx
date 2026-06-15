@@ -20,7 +20,7 @@ function RailLink({
   item: NavItem;
   collapsed: boolean;
   pathname: string;
-  /** Real-mode: badge counts are fed by mock data — never render them. */
+  /** Real-mode: badge counts are fed by mock data - never render them. */
   hideBadge?: boolean;
 }) {
   const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
@@ -95,7 +95,7 @@ function PitchLink({ collapsed }: { collapsed: boolean }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">Product brief — opens in a new tab</TooltipContent>
+      <TooltipContent side="right">Product brief - opens in a new tab</TooltipContent>
     </Tooltip>
   );
 }
@@ -105,7 +105,7 @@ export function LeftRail({ user }: { user: AppUser }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // EXPERIENCE GATE: real-mode accounts see ONLY live-connected destinations —
+  // EXPERIENCE GATE: real-mode accounts see ONLY live-connected destinations -
   // mock-fed items (and any group left empty) disappear; badges are mock-fed
   // so they are suppressed wholesale.
   const isReal = !isMock(user);
@@ -123,14 +123,14 @@ export function LeftRail({ user }: { user: AppUser }) {
       );
     }
     if (readOnlyView) return NAV.filter((g) => g.pillar === "MONITOR");
-    // Demo: drop live-only-by-design destinations (e.g. the Connections hub —
+    // Demo: drop live-only-by-design destinations (e.g. the Connections hub -
     // the wizard owns tool-connecting in the demo story).
     return NAV.map((g) => ({ ...g, items: g.items.filter((it) => !it.mockHidden) })).filter(
       (g) => g.items.length > 0,
     );
   }, [isReal, readOnlyView]);
 
-  // ⌘B / Ctrl+B toggles the rail (client-only listener — SSR-safe).
+  // ⌘B / Ctrl+B toggles the rail (client-only listener - SSR-safe).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
@@ -162,7 +162,7 @@ export function LeftRail({ user }: { user: AppUser }) {
           )}
         </div>
 
-        {/* read-only persona chip — under the brand (view-as sponsor/viewer) */}
+        {/* read-only persona chip - under the brand (view-as sponsor/viewer) */}
         {readOnlyView && (
           <div className={cn("pt-2 shrink-0", collapsed ? "grid place-items-center" : "px-3")}>
             <span className="text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-border bg-white/5 text-muted-foreground">
@@ -242,7 +242,7 @@ export function LeftRail({ user }: { user: AppUser }) {
 
         <div className="p-2 pt-0 shrink-0">
           <Separator className="mb-2" />
-          {/* Product brief (/pitch) — the management buy-in pack that ships
+          {/* Product brief (/pitch) - the management buy-in pack that ships
               WITH the demo. Demo experience only; a plain anchor in a new
               tab (the brief is chrome-less/no-auth, and the presenter keeps
               the demo running). */}

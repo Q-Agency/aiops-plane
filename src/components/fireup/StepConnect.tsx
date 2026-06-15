@@ -1,12 +1,12 @@
 /**
- * LAUNCH step 3 — Connect Tools (body only; chrome from WizardShell).
+ * LAUNCH step 3 - Connect Tools (body only; chrome from WizardShell).
  *
  * Connect-tile grid from src/mock/connectors.ts: blueprint-suggested live
  * tiles first ("Suggested" chip + readiness chip "{n}/{t} suggested
  * connected"), roadmap tiles in "More connectors" (Request-access only,
  * optional ones marked Optional). Clicking a live tile opens ConnectDialog
  * (mock OAuth + status write-back for ticketing). Gating per D2: an
- * unconnected suggested LIVE connector flags amber — never blocks.
+ * unconnected suggested LIVE connector flags amber - never blocks.
  *
  * Once a ticketing connector is connected, the "Scope the work" expander
  * (sub-screen 3b, StepScope) appears below the grids.
@@ -74,7 +74,7 @@ const MOCK_LATENCY_MS: Record<ConnectorId, number> = {
   jira: 134,
   gdrive: 118,
   email: 64,
-  teams: 0, // roadmap — request-access only, never "connects"
+  teams: 0, // roadmap - request-access only, never "connects"
   linear: 92,
   gitlab: 151,
   figma: 127,
@@ -194,7 +194,7 @@ function ConnectorTile({
           </>
         ) : roadmap ? (
           <span className="text-muted-foreground/70">
-            On our roadmap — request access to be notified.
+            On our roadmap - request access to be notified.
           </span>
         ) : (
           <>
@@ -211,7 +211,7 @@ function ConnectorTile({
             size="sm"
             className="flex-1 text-muted-foreground"
             onClick={() =>
-              toast(`Logged — we'll notify you when ${connector.name} is live`, {
+              toast(`Logged - we'll notify you when ${connector.name} is live`, {
                 description: "No credentials requested for roadmap connectors.",
               })
             }
@@ -249,10 +249,10 @@ export function StepConnect() {
 
   const blueprint = blueprintById(draft?.blueprintId ?? null);
   // No-blueprint fallback (direct ?step=connect deep-link): suggest only the
-  // production first wave — with nearly every connector now demo-connectable,
+  // production first wave - with nearly every connector now demo-connectable,
   // falling back to ALL live ids would amber-flag the whole shelf.
   const FIRST_WAVE: ConnectorId[] = ["teamwork", "slack", "github"];
-  // Mandatory connectors (Playwright — the QA agent's test runner) are on
+  // Mandatory connectors (Playwright - the QA agent's test runner) are on
   // the suggested shelf of EVERY pod, blueprint or not.
   const suggestedIds: ConnectorId[] = [
     ...new Set([
@@ -340,7 +340,7 @@ export function StepConnect() {
         {allSuggestedConnected && (
           <div className="flex items-center gap-1.5 text-xs text-status-done">
             <CheckCircle2 className="size-3.5" />
-            All suggested tools connected — the board can send work in and the pod can post back.
+            All suggested tools connected - the board can send work in and the pod can post back.
           </div>
         )}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -364,7 +364,7 @@ export function StepConnect() {
         </div>
       </section>
 
-      {/* Scope of work (3b) — appears once a ticketing connector is connected */}
+      {/* Scope of work (3b) - appears once a ticketing connector is connected */}
       {ticketingConnected && (
         <section className="rounded-md border border-border bg-panel/20 backdrop-blur-md">
           <button

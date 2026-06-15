@@ -1,11 +1,11 @@
 /**
- * BudgetPanel — the /economics "Run-rate vs. budget" row (C2): binds the
+ * BudgetPanel - the /economics "Run-rate vs. budget" row (C2): binds the
  * unbounded-cost fear right under the ROI hero. Left: a linear run-rate
  * gauge (projected month-end vs. the cap, green/amber/red zones). Right:
  * the month-to-date burn bar with a projected-EOM ghost segment and a cap
  * marker. Over-cap renders the inline alert deep-linking to Usage & Billing.
  *
- * Canonical `budget` lives in @/mock/billing (single source — /billing
+ * Canonical `budget` lives in @/mock/billing (single source - /billing
  * renders the same numbers as client consumption).
  */
 
@@ -66,7 +66,7 @@ export function BudgetPanel({ className }: { className?: string }) {
 
       {!hasCap ? (
         <p className="text-xs text-muted-foreground">
-          No budget cap set — set one in Usage &amp; Billing to bound the monthly run-rate.
+          No budget cap set - set one in Usage &amp; Billing to bound the monthly run-rate.
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -101,7 +101,7 @@ export function BudgetPanel({ className }: { className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Run-rate gauge — projected month-end vs. cap, zoned scale            */
+/* Run-rate gauge - projected month-end vs. cap, zoned scale            */
 /* ------------------------------------------------------------------ */
 
 function RunRateGauge({
@@ -172,7 +172,7 @@ function RunRateGauge({
 }
 
 /* ------------------------------------------------------------------ */
-/* MTD burn bar — actual + projected-EOM ghost segment                  */
+/* MTD burn bar - actual + projected-EOM ghost segment                  */
 /* ------------------------------------------------------------------ */
 
 function BurnBar({

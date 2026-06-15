@@ -1,8 +1,8 @@
 /**
- * Gate detail — everything the client-grade gate review surface
+ * Gate detail - everything the client-grade gate review surface
  * (/approvals/$gateId, C4) renders for ONE gate: artifact header data,
  * rendered SPEC.md, the EARS acceptance-criteria list, the 8-validator
- * results (validators.ts), SLA chip data, and — for clarification gates —
+ * results (validators.ts), SLA chip data, and - for clarification gates -
  * the question + suggested answer.
  *
  * Built per-gate from the existing seeds: approvals.ts (both gate kinds),
@@ -61,7 +61,7 @@ export interface PriorDecision {
 /**
  * One row of the spec → design coverage map (design gates): where each
  * acceptance criterion of the CONSUMED spec landed in the design. The
- * consumes-graph made reviewable — and exactly what check D1 verifies.
+ * consumes-graph made reviewable - and exactly what check D1 verifies.
  */
 export interface DesignTraceRow {
   acId: string; //          "AC-1"
@@ -92,12 +92,12 @@ export interface QaDefect {
   id: string; //            "AM-144-QA-1"
   title: string;
   severity: "critical" | "medium" | "low";
-  /** Where the failure was born — the reject target the rework canon uses. */
+  /** Where the failure was born - the reject target the rework canon uses. */
   suspectedStage: string; // "Design (SA)" | "Implementation (Dev)"
   evidence: string;
 }
 
-/** The QA agent's verdict — content, not a structural check. */
+/** The QA agent's verdict - content, not a structural check. */
 export interface ReleaseRecommendation {
   verdict: "ship" | "hold";
   note: string;
@@ -112,7 +112,7 @@ export interface GateDetail {
   gateLabel: string;
   /** Producing (approval) or asking (clarification) agent. */
   agentId: AgentId;
-  /** Human id from humans.ts — accountable for this gate. */
+  /** Human id from humans.ts - accountable for this gate. */
   accountableHumanId: string;
   /** "spec.md · AM-142" */
   artifactLabel: string;
@@ -123,12 +123,12 @@ export interface GateDetail {
   /** EARS acceptance criteria (spec gates; empty list otherwise). */
   earsCriteria: EarsCriterion[];
   /**
-   * The deterministic structural checks for this artifact — the BA's 8
+   * The deterministic structural checks for this artifact - the BA's 8
    * (spec gates) or the SA's 7 (design gates). Empty for gate kinds whose
    * check family isn't built yet (never borrow another artifact's checks).
    */
   validators: ValidatorCheck[];
-  /** 0–100 — passed/total. */
+  /** 0-100 - passed/total. */
   validatorScore: number;
   /** Family tag for the validator wall, e.g. "ba-spec@1.4.2" / "sa-design@2.1.0". */
   validatorFamily?: string;
@@ -149,9 +149,9 @@ export interface GateDetail {
     suggestedAnswer?: string;
   };
   rerunCount: number;
-  /** Rejection-loop history ("this spec was returned once — v2"). */
+  /** Rejection-loop history ("this spec was returned once - v2"). */
   priorDecisions: PriorDecision[];
-  /** Quiet secondary fallback — the agent's own tool (mock href). */
+  /** Quiet secondary fallback - the agent's own tool (mock href). */
   flowObserverHref: string;
 }
 
@@ -225,7 +225,7 @@ export function earsCriteriaFor(t: Ticket): EarsCriterion[] {
     },
     {
       id: "AC-3",
-      text: "WHEN results exceed one page, THE SYSTEM SHALL paginate by cursor (?after=…) — never offset.",
+      text: "WHEN results exceed one page, THE SYSTEM SHALL paginate by cursor (?after=…) - never offset.",
       trigger: "WHEN results exceed one page",
       response: "THE SYSTEM SHALL paginate by cursor (?after=…), never offset",
       measurable: false,
@@ -251,12 +251,12 @@ export function earsCriteriaFor(t: Ticket): EarsCriterion[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Design-gate blocks — coverage map + decision records                 */
+/* Design-gate blocks - coverage map + decision records                 */
 /* ------------------------------------------------------------------ */
 
 /**
  * Where each spec AC landed in the design (mirrors the design.md sections
- * trace.ts renders). AM-140 — the returned-twice design — leaves AC-2 and
+ * trace.ts renders). AM-140 - the returned-twice design - leaves AC-2 and
  * AC-5 uncovered, exactly what its failing D1 check reports.
  */
 export function designTraceFor(t: Ticket): DesignTraceRow[] {
@@ -276,7 +276,7 @@ export function designTraceFor(t: Ticket): DesignTraceRow[] {
   }));
 }
 
-/** The design's decision records — one deliberately marked Low-confidence. */
+/** The design's decision records - one deliberately marked Low-confidence. */
 export function decisionRecordsFor(t: Ticket): DecisionRecord[] {
   return [
     {
@@ -303,23 +303,23 @@ export function decisionRecordsFor(t: Ticket): DecisionRecord[] {
       choice: "Feature-flagged 10% canary behind the existing flag service",
       alternatives: ["Big-bang release"],
       rationale:
-        "Load shape under real filters is uncertain — canary bounds the blast radius while NFR budgets are confirmed.",
+        "Load shape under real filters is uncertain - canary bounds the blast radius while NFR budgets are confirmed.",
       confidence: "low",
     },
   ];
 }
 
 /* ------------------------------------------------------------------ */
-/* QA-gate blocks — spec → test coverage + defects + verdict            */
+/* QA-gate blocks - spec → test coverage + defects + verdict            */
 /* ------------------------------------------------------------------ */
 
 /**
- * Where each spec AC is verified by tests (mirrors qaReport's suite —
+ * Where each spec AC is verified by tests (mirrors qaReport's suite -
  * AC-5's telemetry test fails, which is defect QA-2). Q1 checks parity.
  */
 export function qaCoverageFor(_t: Ticket): QaCoverageRow[] {
   return [
-    { acId: "AC-1", summary: "p95 < 200ms under 50 RPS", tests: [{ name: "k6 soak 50 RPS × 10min — p95 174ms", status: "pass" }] },
+    { acId: "AC-1", summary: "p95 < 200ms under 50 RPS", tests: [{ name: "k6 soak 50 RPS × 10min - p95 174ms", status: "pass" }] },
     { acId: "AC-2", summary: "zero-results empty state", tests: [{ name: "shows empty state when filters yield zero results", status: "pass" }] },
     { acId: "AC-3", summary: "cursor pagination, never offset", tests: [{ name: "honours cursor pagination across 5 pages", status: "pass" }] },
     { acId: "AC-4", summary: "identical schema for web + mobile", tests: [{ name: "mobile: BLoC emits Loading → Success", status: "pass" }] },
@@ -327,7 +327,7 @@ export function qaCoverageFor(_t: Ticket): QaCoverageRow[] {
   ];
 }
 
-/** The filed defects — each with its suspected ROOT-CAUSE stage (rework canon). */
+/** The filed defects - each with its suspected ROOT-CAUSE stage (rework canon). */
 export function defectsFor(t: Ticket): QaDefect[] {
   return [
     {
@@ -336,7 +336,7 @@ export function defectsFor(t: Ticket): QaDefect[] {
       severity: "medium",
       suspectedStage: "Design (SA)",
       evidence:
-        "design.md's failure-mode section omits Retry-After in the 429 contract — Dev implemented to design. Fixing the design re-runs Dev and QA forward.",
+        "design.md's failure-mode section omits Retry-After in the 429 contract - Dev implemented to design. Fixing the design re-runs Dev and QA forward.",
     },
     {
       id: `${t.id}-QA-2`,
@@ -344,7 +344,7 @@ export function defectsFor(t: Ticket): QaDefect[] {
       severity: "low",
       suspectedStage: "Implementation (Dev · web)",
       evidence:
-        "Double-fire guard missing in useListingSearch effect — AC-5's test fails; isolated to the web client.",
+        "Double-fire guard missing in useListingSearch effect - AC-5's test fails; isolated to the web client.",
     },
   ];
 }
@@ -352,7 +352,7 @@ export function defectsFor(t: Ticket): QaDefect[] {
 export function releaseRecommendationFor(_t: Ticket): ReleaseRecommendation {
   return {
     verdict: "hold",
-    note: "Ship after QA-1 is fixed and re-verified — its root cause sits in the design, so the reject should target Design (SA), not just Dev. QA-2 can ride the next train.",
+    note: "Ship after QA-1 is fixed and re-verified - its root cause sits in the design, so the reject should target Design (SA), not just Dev. QA-2 can ride the next train.",
   };
 }
 
@@ -387,7 +387,7 @@ function artifactBody(gate: Approval["gate"], t: Ticket): string {
     case "QA Review":
       return qaReportMd(t);
     default:
-      return `# ${t.id} · ${t.title}\n\n> ${gate} artifact — rendered preview lands with the ${gate} facet renderer.\n\nOpen the artifact in Traceability for the full body.`;
+      return `# ${t.id} · ${t.title}\n\n> ${gate} artifact - rendered preview lands with the ${gate} facet renderer.\n\nOpen the artifact in Traceability for the full body.`;
   }
 }
 
@@ -398,9 +398,9 @@ function detailFromApproval(a: Approval): GateDetail | undefined {
   const isSpec = a.gate === "Spec Review";
   const isDesign = a.gate === "Design Review";
   const isQa = a.gate === "QA Review";
-  // Each gate renders ITS OWN check family — spec gets the BA's 8, design
+  // Each gate renders ITS OWN check family - spec gets the BA's 8, design
   // the SA's 7, QA the report's 7; gates whose family isn't built yet get
-  // none (never borrow another artifact's checks — that was a truth bug).
+  // none (never borrow another artifact's checks - that was a truth bug).
   const checks = isSpec
     ? validatorsFor(t.id)
     : isDesign
@@ -479,7 +479,7 @@ export function gateDetailFor(gateId: string): GateDetail | undefined {
   return undefined;
 }
 
-/** All open gates as details — approvals + clarifications, newest first. */
+/** All open gates as details - approvals + clarifications, newest first. */
 export function allGateDetails(): GateDetail[] {
   const fromApprovals = approvals
     .map(detailFromApproval)

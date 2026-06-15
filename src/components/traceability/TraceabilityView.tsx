@@ -40,7 +40,7 @@ const STATUS_LABEL: Record<TraceStatus, string> = {
 };
 
 function ago(min: number) {
-  if (min <= 0) return "—";
+  if (min <= 0) return "-";
   if (min < 60) return `${min}m ago`;
   const h = Math.floor(min / 60);
   return `${h}h ${min % 60}m ago`;
@@ -73,7 +73,7 @@ export function TraceabilityView() {
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">artifact lineage</div>
           <h1 className="text-xl font-semibold tracking-tight">Traceability</h1>
           <div className="text-xs text-muted-foreground mt-0.5">
-            Every artifact, every approver, every rejection loop — end-to-end for one ticket.
+            Every artifact, every approver, every rejection loop - end-to-end for one ticket.
           </div>
         </div>
         <TicketPicker
@@ -224,7 +224,7 @@ function Timeline({
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate flex items-center gap-2">
                       {KIND_LABEL[n.kind]}
-                      <span className="font-mono text-[11px] text-muted-foreground">{n.artifact} {n.version !== "—" && <span className="text-foreground/70">{n.version}</span>}</span>
+                      <span className="font-mono text-[11px] text-muted-foreground">{n.artifact} {n.version !== "-" && <span className="text-foreground/70">{n.version}</span>}</span>
                     </div>
                     <div className="text-[11px] text-muted-foreground font-mono">
                       <span style={{ color }}>{agentName(n.agent)}</span>

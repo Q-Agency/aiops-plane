@@ -1,5 +1,5 @@
 /**
- * NotificationRow — the shared notification row (C6), reused by the TopBar
+ * NotificationRow - the shared notification row (C6), reused by the TopBar
  * bell popover (compact) and the /notifications inbox (dense, selectable).
  *
  * kind icon · title · body preview · relative time · unread accent ·

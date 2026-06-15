@@ -2,15 +2,15 @@
  * Trigger-mode surfaces for Work Intake (vision §2 "The tracker boundary"):
  * the board is the doorbell, Agency OS is the house.
  *
- *  - TriggerModeControl — segmented operator-driven / tracker-driven switch
+ *  - TriggerModeControl - segmented operator-driven / tracker-driven switch
  *    (per-pod policy). Switching confirms via alert-dialog ("Recorded in the
  *    ledger") → `policy.changed` on the session ledger + toast. Honesty line
  *    underneath: activation between agents is never configurable here.
- *  - TriggerListeningBanner — tracker-driven only: the pod is listening to
+ *  - TriggerListeningBanner - tracker-driven only: the pod is listening to
  *    the agreed board column (TRIGGER_RULE), plus the demo affordance that
  *    retells the client's drag (simulateDragArrival → provenance chip).
- *  - WriteBackStrip — the write-back mapping one-liner + echo-loop honesty
- *    note ("our own write-backs are tagged — the listener ignores them").
+ *  - WriteBackStrip - the write-back mapping one-liner + echo-loop honesty
+ *    note ("our own write-backs are tagged - the listener ignores them").
  *
  * Standard (mock) experience only; state is session-scoped (trigger.ts).
  */
@@ -48,8 +48,8 @@ import {
 
 /** Segmented-control labels (short); ledger names come from START_POLICY_NAME. */
 const MODE_BUTTON_LABEL: Record<TriggerMode, string> = {
-  operator: "Confirm-first — you approve each arrival",
-  tracker: "Auto-start — the drag starts the chain",
+  operator: "Confirm-first - you approve each arrival",
+  tracker: "Auto-start - the drag starts the chain",
 };
 
 /* ------------------------------------------------------------------ */
@@ -71,11 +71,11 @@ export function TriggerModeControl({ className }: { className?: string }) {
       action: "policy.changed",
       detail: `intake.startPolicy: ${START_POLICY_NAME[mode]} → ${START_POLICY_NAME[next]}`,
     });
-    toast.success(`Intake start policy: ${START_POLICY_NAME[next]} — recorded in the ledger`, {
+    toast.success(`Intake start policy: ${START_POLICY_NAME[next]} - recorded in the ledger`, {
       description:
         next === "tracker"
           ? `A scoped ticket dragged into '${TRIGGER_RULE.column}' on '${TRIGGER_RULE.board}' now starts the chain immediately.`
-          : "The board still starts everything — each arrival now waits for your confirmation in Work Intake.",
+          : "The board still starts everything - each arrival now waits for your confirmation in Work Intake.",
     });
     setPending(null);
   };
@@ -116,12 +116,12 @@ export function TriggerModeControl({ className }: { className?: string }) {
               <div className="space-y-3">
                 <div className="font-mono text-xs rounded border border-border bg-white/[0.03] px-2.5 py-2 text-foreground">
                   {pending === "tracker"
-                    ? `'${TRIGGER_RULE.board}' · a scoped ticket entering '${TRIGGER_RULE.column}' starts the chain immediately — no confirmation step.`
-                    : "The board remains the only start signal — each arrival waits for your confirmation in Work Intake. The safe default while trust is earned."}
+                    ? `'${TRIGGER_RULE.board}' · a scoped ticket entering '${TRIGGER_RULE.column}' starts the chain immediately - no confirmation step.`
+                    : "The board remains the only start signal - each arrival waits for your confirmation in Work Intake. The safe default while trust is earned."}
                 </div>
                 <p className="text-[11px]">
                   Recorded in the ledger as{" "}
-                  <code className="font-mono rounded bg-white/10 px-1">policy.changed</code> —
+                  <code className="font-mono rounded bg-white/10 px-1">policy.changed</code> -
                   revocable at any time.
                 </p>
               </div>
@@ -130,7 +130,7 @@ export function TriggerModeControl({ className }: { className?: string }) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmSwitch}>
-              Switch — record in ledger
+              Switch - record in ledger
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -140,7 +140,7 @@ export function TriggerModeControl({ className }: { className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Listening banner — tracker-driven only                               */
+/* Listening banner - tracker-driven only                               */
 /* ------------------------------------------------------------------ */
 
 export function TriggerListeningBanner() {
@@ -149,7 +149,7 @@ export function TriggerListeningBanner() {
   const trackerConnected = (activePod?.connections ?? []).some(
     (c) => (c.connectorId === "teamwork" || c.connectorId === "jira") && c.status === "connected",
   );
-  // The pod ALWAYS listens to the board — the single doorbell. The policy only
+  // The pod ALWAYS listens to the board - the single doorbell. The policy only
   // decides whether an arrival starts immediately or waits for confirmation.
   if (!trackerConnected) return null;
 
@@ -160,21 +160,21 @@ export function TriggerListeningBanner() {
     const arrival = simulateDragArrival();
     if (already) {
       toast.info(`${arrival.ticketId} is already in the intake list`, {
-        description: "The doorbell is idempotent — one drag, one arrival.",
+        description: "The doorbell is idempotent - one drag, one arrival.",
       });
       return;
     }
     if (mode === "tracker") {
-      // Auto-start means exactly that: the drag IS the start — the ticket
+      // Auto-start means exactly that: the drag IS the start - the ticket
       // enters the pod immediately, no confirmation step. Provenance records
       // the mechanism: the drag itself started it.
       pullTickets([arrival.ticketId], "drag-to-ready");
-      toast.success(`${arrival.ticketId} arrived via drag-to-Ready — started automatically`, {
-        description: `'${arrival.title}' entered through the '${TRIGGER_RULE.column}' column and is in the pod (auto-start) — BA picks it up; the chain runs inside Agency OS.`,
+      toast.success(`${arrival.ticketId} arrived via drag-to-Ready - started automatically`, {
+        description: `'${arrival.title}' entered through the '${TRIGGER_RULE.column}' column and is in the pod (auto-start) - BA picks it up; the chain runs inside Agency OS.`,
       });
     } else {
-      toast.success(`${arrival.ticketId} arrived via drag-to-Ready — waiting for your confirmation`, {
-        description: `'${arrival.title}' sits in '${TRIGGER_RULE.column}' — confirm-first policy: you approve the start in Work Intake.`,
+      toast.success(`${arrival.ticketId} arrived via drag-to-Ready - waiting for your confirmation`, {
+        description: `'${arrival.title}' sits in '${TRIGGER_RULE.column}' - confirm-first policy: you approve the start in Work Intake.`,
       });
     }
   };
@@ -197,7 +197,7 @@ export function TriggerListeningBanner() {
         variant="outline"
         className="h-7 text-xs"
         onClick={simulate}
-        title="Demo affordance — retells the client's drag on the board"
+        title="Demo affordance - retells the client's drag on the board"
       >
         <MousePointerClick className="size-3.5" />
         Simulate a drag on the board
@@ -207,7 +207,7 @@ export function TriggerListeningBanner() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Write-back strip — never ask twice, never echo                       */
+/* Write-back strip - never ask twice, never echo                       */
 /* ------------------------------------------------------------------ */
 
 /** "writes back: In Progress → In Review (gate open) → Done + artifact links" */
@@ -225,7 +225,7 @@ export function WriteBackStrip({ className }: { className?: string }) {
     >
       <span className="text-[11px] font-mono text-foreground/90">{WRITE_BACK_LINE}</span>
       <span className="text-[10px] text-muted-foreground">
-        our own write-backs are tagged — the listener ignores them
+        our own write-backs are tagged - the listener ignores them
       </span>
     </div>
   );

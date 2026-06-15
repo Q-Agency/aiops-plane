@@ -1,7 +1,7 @@
 /**
- * ClientCleanTheme (/share/$token) — the client-clean wall: a light-first,
+ * ClientCleanTheme (/share/$token) - the client-clean wall: a light-first,
  * chrome-less full-page wrapper for account-less viewers. No neon, no glow,
- * no scanlines — explicit light colors only (vision §6 client-clean mode),
+ * no scanlines - explicit light colors only (vision §6 client-clean mode),
  * even though the app shell around every other route is dark. The page
  * styles live under `.share-clean` in styles.css so nothing leaks either way.
  *

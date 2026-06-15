@@ -1,8 +1,8 @@
 /**
- * useDemoScript (wave-2 COMPLETION) — timer + dispatcher for the Demo
+ * useDemoScript (wave-2 COMPLETION) - timer + dispatcher for the Demo
  * Director overlay. Auto mode fires steps on the script's timestamps;
  * manual ("On my cue") pauses the timer and `stepNext()` advances one beat
- * per click. All mutation/idempotency lives in demoDirector.ts — this hook
+ * per click. All mutation/idempotency lives in demoDirector.ts - this hook
  * only owns the clock and re-renders on the demo bus tick.
  *
  * The hook is mounted once (inside DemoDirectorOverlay, which AppShell
@@ -40,7 +40,7 @@ export interface DemoScript {
   setMode: (mode: DemoAdvanceMode) => void;
   run: () => void;
   pause: () => void;
-  /** Manual advance — fires the next pending beat and jumps the clock to it. */
+  /** Manual advance - fires the next pending beat and jumps the clock to it. */
   stepNext: () => void;
   /** Restore a checkpoint + rewind the step list (toasts "Demo reset to '…'"). */
   resetTo: (checkpointId: string) => void;
@@ -62,7 +62,7 @@ export function useDemoScript(): DemoScript {
     setElapsed(sec);
   }, []);
 
-  // The script clock — interval only while running in auto mode (manual
+  // The script clock - interval only while running in auto mode (manual
   // mode pauses the timer per spec; Step → is the advance affordance).
   useEffect(() => {
     if (!running || mode !== "auto") return;

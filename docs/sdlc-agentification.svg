@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="786" viewBox="0 0 1280 786" role="img">
 <title>Agentifying the SDLC workflow</title>
-<desc>The spec-first SDLC workflow is a fixed sequence of steps and artifacts. Each step is normally run as a skill inside the Cursor or Claude Code IDE. One by one, each step's skill is replaced by an autonomous agent — the BA agent already runs the spec step, the SA agent the design step, the Dev agent implementation — until every step is agent-filled, implementation and code review run on headless Claude Code, and no work happens in the IDE.</desc>
+<desc>The spec-first SDLC workflow is a fixed sequence of steps and artifacts. Each step is normally run as a skill inside the Cursor or Claude Code IDE. One by one, each step's skill is replaced by an autonomous agent - the BA agent already runs the spec step, the SA agent the design step, the Dev agent implementation - until every step is agent-filled, implementation and code review run on headless Claude Code, and no work happens in the IDE.</desc>
 <style>
 text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
 .title{font-size:27px;font-weight:700;fill:#1c2230;}
@@ -17,7 +17,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
 
 <text class="title" x="48" y="58">Agentifying the SDLC workflow</text>
-<text class="sub" x="48" y="86">Each step's skill becomes an autonomous agent — until no work happens in the IDE</text>
+<text class="sub" x="48" y="86">Each step's skill becomes an autonomous agent - until no work happens in the IDE</text>
 
 <rect x="1000" y="43" width="12" height="12" rx="3" fill="#e6f3ee" stroke="#0c6b58" stroke-width="0.75"/>
 <text class="tag" x="1018" y="53" fill="#5a6376">agent · live</text>
@@ -26,7 +26,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <rect x="1000" y="83" width="12" height="12" rx="3" fill="#f1efe8" stroke="#c9c7bd" stroke-width="0.75"/>
 <text class="tag" x="1018" y="93" fill="#5a6376">skill in IDE → to agentify</text>
 
-<text class="band" x="48" y="140">the workflow — a fixed sequence of steps + artifacts; each step's executor migrates skill → agent</text>
+<text class="band" x="48" y="140">the workflow - a fixed sequence of steps + artifacts; each step's executor migrates skill → agent</text>
 
 <line x1="199" y1="200" x2="216" y2="200" stroke="#aab2c0" stroke-width="1.2" marker-end="url(#arrow)"/>
 <line x1="369" y1="200" x2="386" y2="200" stroke="#aab2c0" stroke-width="1.2" marker-end="url(#arrow)"/>
@@ -94,7 +94,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <path d="M898 292 L898 300 L1218 300 L1218 292" fill="none" stroke="#aab2c0" stroke-width="0.75" stroke-dasharray="4 3"/>
 <text class="tag" x="1058" y="316" text-anchor="middle" fill="#5a6376">implementation &amp; code review → headless Claude Code (no IDE)</text>
 
-<text class="band" x="48" y="350">how a step gets agentified — the spec step, today</text>
+<text class="band" x="48" y="350">how a step gets agentified - the spec step, today</text>
 <rect x="48" y="362" width="1184" height="194" rx="12" fill="none" stroke="#c3cbd9" stroke-width="0.75" stroke-dasharray="4 4"/>
 
 <rect x="78" y="384" width="300" height="148" rx="10" fill="#fbfcfe" stroke="#aab2c0" stroke-width="0.75" stroke-dasharray="4 4"/>
@@ -109,7 +109,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 
 <rect x="470" y="392" width="330" height="138" rx="10" fill="#e6f3ee" stroke="#0c6b58" stroke-width="0.9"/>
 <text class="step" x="488" y="418" fill="#0c6b58">BA autonomous agent</text>
-<text class="tag" x="488" y="437" fill="#2f7a64">broader than the artifact —</text>
+<text class="tag" x="488" y="437" fill="#2f7a64">broader than the artifact -</text>
 <text class="tag" x="488" y="453" fill="#2f7a64">clarifies, governs, holds shared context</text>
 <text class="tag" x="488" y="478" fill="#8a93a6">reaches outside the IDE with its own tools:</text>
 <rect x="488" y="488" width="82" height="24" rx="6" fill="#ffffff" stroke="#7bb6a4" stroke-width="0.75"/>
@@ -129,9 +129,9 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 <text class="tag" x="932" y="472" fill="#8a93a6">then tasks → … → release</text>
 <text class="cap" x="932" y="495" fill="#8a93a6">same pattern, step by step</text>
 
-<text class="cap" x="48" y="578">The spec skill's job leaves the editor — clarifications in Slack, the gate in the dashboard — and the finished SPEC.md returns to the repo so the next agent picks up.</text>
+<text class="cap" x="48" y="578">The spec skill's job leaves the editor - clarifications in Slack, the gate in the dashboard - and the finished SPEC.md returns to the repo so the next agent picks up.</text>
 
-<text class="band" x="48" y="612">the trajectory — work leaves the IDE</text>
+<text class="band" x="48" y="612">the trajectory - work leaves the IDE</text>
 
 <rect x="48" y="628" width="540" height="122" rx="10" fill="#ffffff" stroke="#dde2ec" stroke-width="0.75"/>
 <text class="step" x="66" y="654">today</text>
@@ -143,10 +143,10 @@ text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 
 <rect x="700" y="628" width="532" height="122" rx="10" fill="#e6f3ee" stroke="#0c6b58" stroke-width="0.9"/>
 <text class="step" x="718" y="654" fill="#0c6b58">end-state</text>
-<text class="cap" x="718" y="680" fill="#0a5546">Every step agent-filled — nothing runs in the IDE.</text>
+<text class="cap" x="718" y="680" fill="#0a5546">Every step agent-filled - nothing runs in the IDE.</text>
 <text class="cap" x="718" y="702" fill="#0a5546">Implementation &amp; code review on headless Claude Code.</text>
-<text class="cap" x="718" y="724" fill="#0a5546">Humans act only at gates — via dashboard &amp; Slack.</text>
+<text class="cap" x="718" y="724" fill="#0a5546">Humans act only at gates - via dashboard &amp; Slack.</text>
 
 <text class="tag" x="48" y="772" fill="#8a93a6">Skills and steps stay the standard; autonomous agents fill the steps one at a time.</text>
-<text class="tag" x="1232" y="772" text-anchor="end" fill="#8a93a6">Q — AI Resilience → AIOps</text>
+<text class="tag" x="1232" y="772" text-anchor="end" fill="#8a93a6">Q - AI Resilience → AIOps</text>
 </svg>

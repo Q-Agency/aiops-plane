@@ -38,12 +38,12 @@ export const constitutions: Constitution[] = [
     lastModified: now - 2 * day,
     compliance: 86,
     rules: [
-      { id: "be.repo",  rule: "All DB access via repositories — no raw SQL in services",       rationale: "Testability, swap engine" },
+      { id: "be.repo",  rule: "All DB access via repositories - no raw SQL in services",       rationale: "Testability, swap engine" },
       { id: "be.types", rule: "No `Any` without inline justification comment",                  rationale: "Static guarantees" },
       { id: "be.cov",   rule: "pytest coverage ≥ 80% (unit + integration)",                    rationale: "Regression safety" },
       { id: "be.fat",   rule: "Endpoint handler ≤ 20 lines; delegate to service",              rationale: "Thin transport layer" },
       { id: "be.model", rule: "No business logic in SQLAlchemy models",                        rationale: "Anemic models on purpose" },
-      { id: "be.sec",   rule: "No hardcoded secrets — `Settings` via pydantic-settings only",  rationale: "12-factor / rotation" },
+      { id: "be.sec",   rule: "No hardcoded secrets - `Settings` via pydantic-settings only",  rationale: "12-factor / rotation" },
       { id: "be.async", rule: "All IO must be async (async SQLAlchemy, httpx)",                rationale: "Throughput on FastAPI" },
     ],
     history: [
@@ -70,16 +70,16 @@ export const constitutions: Constitution[] = [
     compliance: 72,
     rules: [
       { id: "we.case",  rule: "PascalCase components · kebab-case routes",                  rationale: "Convention" },
-      { id: "we.app",   rule: "App Router only — no pages/ directory",                       rationale: "Server-first" },
+      { id: "we.app",   rule: "App Router only - no pages/ directory",                       rationale: "Server-first" },
       { id: "we.act",   rule: "Mutations via Server Actions; never client fetch + POST",     rationale: "Type-safe, progressive" },
       { id: "we.zod",   rule: "All inputs validated with zod at the boundary",               rationale: "Runtime safety" },
-      { id: "we.tok",   rule: "Use Tailwind tokens — no raw hex / arbitrary colors",         rationale: "Design system" },
+      { id: "we.tok",   rule: "Use Tailwind tokens - no raw hex / arbitrary colors",         rationale: "Design system" },
       { id: "we.cov",   rule: "vitest coverage ≥ 70%",                                       rationale: "Regression safety" },
       { id: "we.l10n",  rule: "All user-facing strings via next-intl",                       rationale: "Multi-market" },
     ],
     history: [
       { version: "v0.9.1", ts: now - 18*3600_000, by: "BA Agent", byKind: "agent", summary: "Forbid raw hex; require tokens.", diff: [
-        { kind: "+", line: "Use Tailwind tokens — no raw hex / arbitrary colors" },
+        { kind: "+", line: "Use Tailwind tokens - no raw hex / arbitrary colors" },
       ]},
       { version: "v0.9.0", ts: now - 6*day, by: "Ana Kovač", byKind: "human", summary: "Initial Web constitution draft.", diff: [
         { kind: "+", line: "App Router only" }, { kind: "+", line: "Mutations via Server Actions" },
@@ -96,11 +96,11 @@ export const constitutions: Constitution[] = [
     lastModified: now - 4 * day,
     compliance: 91,
     rules: [
-      { id: "mo.bloc",  rule: "BLoC for state — no setState in feature widgets",        rationale: "Testable state" },
+      { id: "mo.bloc",  rule: "BLoC for state - no setState in feature widgets",        rationale: "Testable state" },
       { id: "mo.route", rule: "Routing via go_router only",                              rationale: "Deep-link parity" },
       { id: "mo.feat",  rule: "Feature-first folder layout (feature/{x}/data|domain|ui)", rationale: "Modularity" },
       { id: "mo.gold",  rule: "Golden tests for every screen",                          rationale: "Visual regression" },
-      { id: "mo.print", rule: "No `print()` in committed code — use logger",            rationale: "Prod hygiene" },
+      { id: "mo.print", rule: "No `print()` in committed code - use logger",            rationale: "Prod hygiene" },
       { id: "mo.cov",   rule: "dart test coverage ≥ 75%",                                rationale: "Regression safety" },
     ],
     history: [
@@ -134,12 +134,12 @@ export interface Violation {
 export const violations: Violation[] = [
   { id: "v-001", ruleId: "be.repo",  rule: "Raw SQL in VinDecoderService (should go through VinRepository)",       severity: "high",    cb: "backend", ticketId: "AM-150", agent: "dev",    artifact: "services/vin_decoder.py", status: "open",   detectedAt: now - 2*3600_000 },
   { id: "v-002", ruleId: "be.cov",   rule: "Coverage 74% < 80% threshold (offer/escrow flow)",                     severity: "blocker", cb: "backend", ticketId: "AM-149", agent: "qa",     artifact: "tests/test_escrow.py",     status: "open",   detectedAt: now - 70*60_000 },
-  { id: "v-003", ruleId: "be.fat",   rule: "Endpoint POST /messages is 34 lines (>20) — extract to service",        severity: "medium",  cb: "backend", ticketId: "AM-138", agent: "dev",    artifact: "api/messages.py",          status: "open",   detectedAt: now - 40*60_000 },
+  { id: "v-003", ruleId: "be.fat",   rule: "Endpoint POST /messages is 34 lines (>20) - extract to service",        severity: "medium",  cb: "backend", ticketId: "AM-138", agent: "dev",    artifact: "api/messages.py",          status: "open",   detectedAt: now - 40*60_000 },
   { id: "v-004", ruleId: "be.types", rule: "Untyped `Any` in fraud_signals.score() with no justification",          severity: "medium",  cb: "backend", ticketId: "AM-140", agent: "sa",     artifact: "design.md §3",             status: "waived", note: "Score is open-schema until v2", detectedAt: now - 6*3600_000 },
-  { id: "v-005", ruleId: "be.model", rule: "Listing model contains pricing logic — move to PricingService",         severity: "high",    cb: "backend", ticketId: "AM-141", agent: "sa",     artifact: "models/listing.py",        status: "open",   detectedAt: now - 90*60_000 },
+  { id: "v-005", ruleId: "be.model", rule: "Listing model contains pricing logic - move to PricingService",         severity: "high",    cb: "backend", ticketId: "AM-141", agent: "sa",     artifact: "models/listing.py",        status: "open",   detectedAt: now - 90*60_000 },
   { id: "v-006", ruleId: "be.sec",   rule: "Hardcoded SENDGRID_API_KEY literal in notifications module",            severity: "blocker", cb: "backend", ticketId: "AM-145", agent: "dev",    artifact: "notify/email.py",          status: "fixed",  detectedAt: now - 26*3600_000 },
-  { id: "v-007", ruleId: "we.tok",   rule: "Raw hex #1f1f1f in ListingCard — use `bg-surface` token",               severity: "low",     cb: "web",     ticketId: "AM-136", agent: "dev",    artifact: "components/ListingCard.tsx", status: "fixed", detectedAt: now - 18*3600_000 },
-  { id: "v-008", ruleId: "we.act",   rule: "Client-side fetch POST in SavedSearches — convert to server action",    severity: "high",    cb: "web",     ticketId: "AM-147", agent: "dev",    artifact: "app/(app)/searches/page.tsx", status: "open", detectedAt: now - 25*60_000 },
+  { id: "v-007", ruleId: "we.tok",   rule: "Raw hex #1f1f1f in ListingCard - use `bg-surface` token",               severity: "low",     cb: "web",     ticketId: "AM-136", agent: "dev",    artifact: "components/ListingCard.tsx", status: "fixed", detectedAt: now - 18*3600_000 },
+  { id: "v-008", ruleId: "we.act",   rule: "Client-side fetch POST in SavedSearches - convert to server action",    severity: "high",    cb: "web",     ticketId: "AM-147", agent: "dev",    artifact: "app/(app)/searches/page.tsx", status: "open", detectedAt: now - 25*60_000 },
   { id: "v-009", ruleId: "we.l10n",  rule: "Hardcoded English string 'Save changes' in SearchBar (not in l10n)",    severity: "medium",  cb: "web",     ticketId: "AM-128", agent: "dev",    artifact: "components/SearchBar.tsx", status: "open",   detectedAt: now - 22*60_000 },
   { id: "v-010", ruleId: "we.cov",   rule: "vitest coverage 64% < 70% (saved-searches feature)",                    severity: "high",    cb: "web",     ticketId: "AM-147", agent: "qa",     artifact: "tests/searches.test.ts",   status: "open",   detectedAt: now - 50*60_000 },
   { id: "v-011", ruleId: "mo.print", rule: "`print()` left in onboarding_bloc.dart line 184",                       severity: "medium",  cb: "mobile",  ticketId: "AM-130", agent: "dev",    artifact: "features/onboarding/onboarding_bloc.dart", status: "open", detectedAt: now - 110*60_000 },

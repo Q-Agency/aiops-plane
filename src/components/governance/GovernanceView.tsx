@@ -86,10 +86,10 @@ export function GovernanceView() {
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
             governance
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">Spec quality — the moat</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Spec quality - the moat</h1>
           <div className="text-xs text-muted-foreground mt-0.5 max-w-2xl">
             Structural quality, checked deterministically. This measures whether the spec is
-            well-formed and complete in structure — not whether it is semantically correct.
+            well-formed and complete in structure - not whether it is semantically correct.
           </div>
         </div>
         <div className="text-[11px] font-mono text-muted-foreground glass-panel px-3 py-1.5">
@@ -101,10 +101,10 @@ export function GovernanceView() {
         </div>
       </div>
 
-      {/* (2) Trust banner — the badge */}
+      {/* (2) Trust banner - the badge */}
       <TrustBanner readiness={readiness} />
 
-      {/* (3) The two walls — deterministic vs LLM-assisted. Spatial split, never tabs. */}
+      {/* (3) The two walls - deterministic vs LLM-assisted. Spatial split, never tabs. */}
       <div className="grid gap-4 xl:grid-cols-[3fr_2fr] items-start">
         <ValidatorPanel
           checks={aggregateChecks}
@@ -212,7 +212,7 @@ export function GovernanceView() {
         </div>
       </section>
 
-      {/* (4) Facet completeness — counted, not graded */}
+      {/* (4) Facet completeness - counted, not graded */}
       <section className="space-y-2">
         <SectionHead
           icon={BarChart3}
@@ -253,7 +253,7 @@ export function GovernanceView() {
           constitution compliance
         </div>
         <div className="text-xs text-muted-foreground">
-          The ruleset every agent runs inside — constitutions, violations, merge gates and open architectural decisions.
+          The ruleset every agent runs inside - constitutions, violations, merge gates and open architectural decisions.
         </div>
       </div>
 
@@ -345,7 +345,7 @@ export function GovernanceView() {
 
       {/* PR gates */}
       <section className="space-y-2">
-        <SectionHead icon={GitPullRequest} title="Quality-gate status per PR" sub="Merge checklist from each constitution — red = blocking" />
+        <SectionHead icon={GitPullRequest} title="Quality-gate status per PR" sub="Merge checklist from each constitution - red = blocking" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {prGates.map((pr) => {
             const failing = pr.checks.filter((c) => c.status === "fail").length;

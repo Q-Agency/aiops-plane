@@ -1,6 +1,6 @@
 /**
- * ProvenanceBadge — where a constitution rule came from (P1-A2).
- * "Blueprint default" / "Client-provided" / "Ratified {date} — from
+ * ProvenanceBadge - where a constitution rule came from (P1-A2).
+ * "Blueprint default" / "Client-provided" / "Ratified {date} - from
  * rejection cluster": the third tone is the compounding-moat proof that
  * the rule was earned through a gate, on the record.
  */
@@ -34,7 +34,7 @@ export function ProvenanceBadge({
   const Icon = ICON[provenance];
   const label =
     provenance === "ratified-amendment"
-      ? `Ratified ${fmtShortDate(ratifiedAt)} — from rejection cluster`
+      ? `Ratified ${fmtShortDate(ratifiedAt)} - from rejection cluster`
       : PROVENANCE_LABELS[provenance];
   return (
     <span

@@ -1,10 +1,10 @@
 /**
- * CoverageStrip (/pod, P1-O1) — the 24h coverage timeline under the
+ * CoverageStrip (/pod, P1-O1) - the 24h coverage timeline under the
  * Accountability matrix:
  *
  *  - one band per accountable human: working-hours block in their agent
  *    color, tz-labeled; the seeded OOO human (Marin) renders dashed amber
- *    with the deputy takeover note — accountability STAYS with the owner
+ *    with the deputy takeover note - accountability STAYS with the owner
  *  - saturation flag: a near-capacity human gets the amber "9/10 gates
  *    today" chip; tooltip names the throttle policy (intake pauses at cap)
  *  - merged "pod coverage" band: time windows with NO accountable human
@@ -31,9 +31,9 @@ function agentColor(id: AgentId): string {
 
 const pct = (min: number) => `${((min / 1440) * 100).toFixed(2)}%`;
 
-/** "13 Jun" from an epoch — date part of fmtDateTime (fixed display tz). */
+/** "13 Jun" from an epoch - date part of fmtDateTime (fixed display tz). */
 function fmtDay(at?: number): string {
-  return at ? fmtDateTime(at).split(" · ")[0] : "—";
+  return at ? fmtDateTime(at).split(" · ")[0] : "-";
 }
 
 const UNCOVERED_STRIPES =
@@ -97,7 +97,7 @@ export function CoverageStrip() {
                 Pod coverage
               </div>
               <div className="text-[9px] font-mono text-muted-foreground">
-                staffed {win.start}–{win.end} {win.tz}
+                staffed {win.start}-{win.end} {win.tz}
               </div>
             </div>
             <div className="relative h-6 flex-1 rounded bg-white/[0.03] overflow-hidden">
@@ -107,7 +107,7 @@ export function CoverageStrip() {
                   key={`c-${c.startMin}`}
                   className="absolute inset-y-0.5 rounded-sm border border-status-done/40 bg-status-done/15"
                   style={{ left: pct(c.startMin), width: pct(c.endMin - c.startMin) }}
-                  title={`Covered ${win.tz} — at least one accountable human inside working hours`}
+                  title={`Covered ${win.tz} - at least one accountable human inside working hours`}
                 />
               ))}
               {segs.map((g) => (
@@ -119,7 +119,7 @@ export function CoverageStrip() {
                     width: pct(g.endMin - g.startMin),
                     background: UNCOVERED_STRIPES,
                   }}
-                  title={`Uncovered ${g.label} — no accountable human inside working hours (same risk treatment as an uncovered matrix column)`}
+                  title={`Uncovered ${g.label} - no accountable human inside working hours (same risk treatment as an uncovered matrix column)`}
                 >
                   {g.endMin - g.startMin >= 170 && (
                     <span className="text-[9px] font-mono text-status-error truncate px-1">
@@ -136,7 +136,7 @@ export function CoverageStrip() {
       <div className="text-[11px] text-muted-foreground font-mono space-y-0.5">
         {wrapLabel && (
           <div>
-            ⚠ Uncovered {wrapLabel} — gate SLAs on a coverage clock pause here instead of fake-breaching overnight.
+            ⚠ Uncovered {wrapLabel} - gate SLAs on a coverage clock pause here instead of fake-breaching overnight.
           </div>
         )}
         {ooo && oooDeputy && (
@@ -188,14 +188,14 @@ function HumanBand({ human: h }: { human: Human }) {
             </span>
           ) : cap?.near ? (
             <span
-              title={`${h.name} near capacity — ${cap.used}/${cap.cap} gates today. ${THROTTLE_POLICY_LINE}`}
+              title={`${h.name} near capacity - ${cap.used}/${cap.cap} gates today. ${THROTTLE_POLICY_LINE}`}
               className="inline-block max-w-full truncate text-[9px] font-mono px-1 py-px rounded border border-status-waiting/50 bg-status-waiting/10 text-status-waiting"
             >
               near capacity · {cap.used}/{cap.cap} gates today
             </span>
           ) : (
             <div className="text-[9px] font-mono text-muted-foreground truncate leading-tight">
-              {wh.start}–{wh.end} · {wh.days}
+              {wh.start}-{wh.end} · {wh.days}
             </div>
           )}
         </div>
@@ -224,7 +224,7 @@ function HumanBand({ human: h }: { human: Human }) {
               borderColor: `color-mix(in oklab, ${color} 45%, transparent)`,
               background: `color-mix(in oklab, ${color} 18%, transparent)`,
             }}
-            title={`${h.name} · ${wh.start}–${wh.end} ${wh.tz} · ${wh.days}`}
+            title={`${h.name} · ${wh.start}-${wh.end} ${wh.tz} · ${wh.days}`}
           />
         )}
       </div>

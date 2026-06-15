@@ -108,10 +108,10 @@ export const ticketRerunPenalty = (t: TicketEconomics) => {
 
 // ROI staging (slice 2, C2) ----------------------------------------------
 //
-// CANONICAL METRIC TRIO — every ROI surface renders exactly:
+// CANONICAL METRIC TRIO - every ROI surface renders exactly:
 //   humanHoursDisplaced · costPerMerged · costPerStoryPoint.
 // Display label for humanHoursDisplaced is "human-hours freed" (never
-// "displaced" in client-facing copy — the data key stays).
+// "displaced" in client-facing copy - the data key stays).
 // Tier badges: cost-per-approved-spec + time-to-approved-spec = "LIVE";
 // costPerMerged / costPerStoryPoint = "as agents ship".
 // All ROI is computed NET of plan fees (pricePaidUsd).
@@ -123,7 +123,7 @@ export interface RoiAssumptions {
   baselineNote: string;
   /**
    * Provenance (owner call 2026-06-12): clients rarely share baselines, so
-   * the DEFAULT is an industry-standard figure — always labeled as such —
+   * the DEFAULT is an industry-standard figure - always labeled as such -
    * and it flips to "client-agreed" the moment someone enters real numbers
    * (Settings → ROI baseline, or the /economics dialog).
    */
@@ -131,8 +131,8 @@ export interface RoiAssumptions {
 }
 
 export const roiAssumptions: RoiAssumptions = {
-  blendedRateUsdPerHr: HUMAN_RATE_PER_HOUR, // 95 — industry-standard blended senior rate
-  baselineNote: "senior BA · 4h per spec — senior engineer · 6h per story point",
+  blendedRateUsdPerHr: HUMAN_RATE_PER_HOUR, // 95 - industry-standard blended senior rate
+  baselineNote: "senior BA · 4h per spec - senior engineer · 6h per story point",
   source: "industry-standard",
 };
 
@@ -140,7 +140,7 @@ export const roiAssumptions: RoiAssumptions = {
 export const ROI_ASSUMPTIONS_STORAGE_KEY = "aiops_roi_assumptions";
 
 /**
- * Plan fees this billing period. Internal to the net-of-fees ROI math —
+ * Plan fees this billing period. Internal to the net-of-fees ROI math -
  * NEVER rendered as a quoted price (C9: pilot pricing is TBD framing).
  */
 export const PRICE_PAID_USD = 1500;
@@ -181,7 +181,7 @@ export const aggregates = (() => {
     humanReviewMin: reviewMin,
     offloadSavings: +offloadSavings.toFixed(2),
     batchSavings: +batchSavings.toFixed(2),
-    /** Plan fees this period — ROI derives net of this (C2). */
+    /** Plan fees this period - ROI derives net of this (C2). */
     pricePaidUsd: PRICE_PAID_USD,
     /** NET of plan fees: value ÷ (compute + plan fees). */
     roiMultiple: +(
@@ -191,7 +191,7 @@ export const aggregates = (() => {
   };
 })();
 
-// live-tier metrics (C2) — badged "LIVE": real today via the BA agent ------
+// live-tier metrics (C2) - badged "LIVE": real today via the BA agent ------
 
 export const liveTier = (() => {
   // tickets whose spec has been approved (past spec-review in the lifecycle)
@@ -205,11 +205,11 @@ export const liveTier = (() => {
   return {
     /** Count of specs a human approved this period. */
     approvedSpecCount: approvedSpecs,
-    /** "Cost / approved spec" — badge LIVE. */
+    /** "Cost / approved spec" - badge LIVE. */
     costPerApprovedSpecUsd: approvedSpecs
       ? +(baSpendUsd / approvedSpecs).toFixed(2)
       : 0,
-    /** "Time to approved spec" (request → human sign-off), minutes — badge LIVE. */
+    /** "Time to approved spec" (request → human sign-off), minutes - badge LIVE. */
     timeToApprovedSpecMin: 38,
   };
 })();

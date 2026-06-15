@@ -1,10 +1,10 @@
 /**
- * ReportsView (/reports, C8) — SLA & Client Reports, two tabs:
+ * ReportsView (/reports, C8) - SLA & Client Reports, two tabs:
  *
  *  - "SLA status" (DEFAULT): SlaDefinition rows with target-vs-actual bars
  *    + breach history drawer. The PM's breach-spotting surface.
  *  - "Client report": the weekly sponsor-facing report in a CLIENT-CLEAN
- *    style (light paper card — deliberately NOT glass/neon) with
+ *    style (light paper card - deliberately NOT glass/neon) with
  *    Copy share link / Export PDF / Mark as sent (all mock).
  *
  * The TopBar pod switcher is canonical; the header chip mirrors the
@@ -33,7 +33,7 @@ export function ReportsView() {
           </div>
         </div>
         <div className="text-[11px] font-mono text-muted-foreground glass-panel px-3 py-1.5" suppressHydrationWarning>
-          <span className="text-foreground">{activePod?.name ?? "—"}</span>
+          <span className="text-foreground">{activePod?.name ?? "-"}</span>
           <span className="mx-1.5">·</span>
           this period
         </div>

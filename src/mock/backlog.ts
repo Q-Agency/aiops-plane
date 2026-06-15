@@ -1,5 +1,5 @@
 /**
- * Client backlog — drives the Scope of Work sub-screen (Connect 3b).
+ * Client backlog - drives the Scope of Work sub-screen (Connect 3b).
  *
  * The visible list = the 16 pod tickets from tickets.ts (labeled/componented
  * here) + ~20 static "client backlog" rows, so the in/out split is visible.
@@ -55,9 +55,9 @@ export const BACKLOG_TOTAL = 220;
 
 const STAGE_STATUS: Record<Stage, string> = {
   backlog: "Backlog",
-  "ready-spec": "To Do — Refined",
-  "spec-review": "To Do — Refined",
-  "ready-design": "To Do — Refined",
+  "ready-spec": "To Do - Refined",
+  "spec-review": "To Do - Refined",
+  "ready-design": "To Do - Refined",
   "design-review": "In Progress",
   "ready-tasks": "In Progress",
   "tasks-review": "In Progress",
@@ -106,7 +106,7 @@ const fromTickets: BacklogTicket[] = tickets.map((t) => {
   };
 });
 
-/** Static "client backlog" extension — work that stays with the client team. */
+/** Static "client backlog" extension - work that stays with the client team. */
 const clientRows: BacklogTicket[] = [
   {
     id: "AM-101",
@@ -147,7 +147,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-105",
     title: "Saved-card vault migration",
-    status: "To Do — Refined",
+    status: "To Do - Refined",
     ageLabel: "22d",
     project: "AutoMarket",
     labels: ["client-owned", "backend-core"],
@@ -183,7 +183,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-109",
     title: "Rate-limit public search API",
-    status: "To Do — Refined",
+    status: "To Do - Refined",
     ageLabel: "17d",
     project: "AutoMarket",
     labels: ["client-owned", "backend-core"],
@@ -201,7 +201,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-111",
     title: "Chat read-receipts bug",
-    status: "To Do — Refined",
+    status: "To Do - Refined",
     ageLabel: "14d",
     project: "AutoMarket",
     labels: ["bug"],
@@ -228,7 +228,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-114",
     title: "SEO landing pages per region",
-    status: "To Do — Refined",
+    status: "To Do - Refined",
     ageLabel: "11d",
     project: "AutoMarket",
     labels: ["client-owned", "frontend"],
@@ -246,7 +246,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-116",
     title: "Push opt-in prompt copy test",
-    status: "To Do — Refined",
+    status: "To Do - Refined",
     ageLabel: "9d",
     project: "AutoMarket",
     labels: ["client-owned"],
@@ -273,7 +273,7 @@ const clientRows: BacklogTicket[] = [
   {
     id: "AM-119",
     title: "Typeahead locale support",
-    status: "To Do — Refined",
+    status: "To Do - Refined",
     ageLabel: "4d",
     project: "AutoMarket",
     labels: ["client-owned", "frontend"],
@@ -292,12 +292,12 @@ const clientRows: BacklogTicket[] = [
 
 export const BACKLOG: BacklogTicket[] = [...fromTickets, ...clientRows];
 
-/** True once a project is picked — until then the pod takes nothing. */
+/** True once a project is picked - until then the pod takes nothing. */
 export function hasScope(rule: BacklogRule | undefined | null): boolean {
   return Boolean(rule?.projectKey);
 }
 
-/** Project-only rule — the anti-swallow edge ("takes the whole backlog"). */
+/** Project-only rule - the anti-swallow edge ("takes the whole backlog"). */
 export function isWholeProject(rule: BacklogRule | undefined | null): boolean {
   return (
     hasScope(rule) && (rule?.labels?.length ?? 0) === 0 && (rule?.components?.length ?? 0) === 0
@@ -331,7 +331,7 @@ export function untouchedCount(rule: BacklogRule | undefined | null): number {
 
 /** Plain-language sentence rendering of the slice rule. */
 export function scopeSentence(rule: BacklogRule | undefined | null): string {
-  if (!hasScope(rule)) return "No scope set — the pod will take nothing until you scope it.";
+  if (!hasScope(rule)) return "No scope set - the pod will take nothing until you scope it.";
   const r = rule as BacklogRule;
   if (isWholeProject(r)) return `This pod owns: every ${r.projectKey} ticket.`;
   const labels = r.labels?.length ? ` labeled ${r.labels.map((l) => `\`${l}\``).join(", ")}` : "";

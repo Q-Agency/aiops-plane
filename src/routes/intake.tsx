@@ -1,5 +1,5 @@
 /**
- * /intake (C10) — Work Intake: the confirmation surface of the single
+ * /intake (C10) - Work Intake: the confirmation surface of the single
  * doorbell (vision §2). The board sends work; the operator confirms or
  * declines each start. Tickets are created on the board, never here.
  * ?sim=error renders the tracker-unreachable demo state.

@@ -1,13 +1,13 @@
 /**
- * RoiBaselinePanel (Settings → ROI baseline) — the home for the numbers
+ * RoiBaselinePanel (Settings → ROI baseline) - the home for the numbers
  * behind every ROI figure, built for the real sales situation (owner,
  * 2026-06-12): clients rarely share their baselines, so the pod starts on
- * an INDUSTRY-STANDARD default — always labeled — and the operator
+ * an INDUSTRY-STANDARD default - always labeled - and the operator
  * replaces it with client-agreed numbers here the moment they exist.
  *
  * Same store as the /economics "Edit assumptions" dialog (useRoiAssumptions
  * sync event), so every ROI surface re-derives live. Saves/resets land on
- * the session ledger (policy.changed) — a baseline change changes reported
+ * the session ledger (policy.changed) - a baseline change changes reported
  * ROI, so it is a recorded decision.
  *
  * The "How ROI is measured" explainer states the three buckets in plain
@@ -26,15 +26,15 @@ import { roiSourceLabel, useRoiAssumptions } from "@/components/monitor/useRoiAs
 
 const BUCKETS = [
   {
-    title: "Measured — ledger facts",
+    title: "Measured - ledger facts",
     body: "Agent run costs per ticket (reruns included), cycle times from the board drag to Done, and every human decision (gates, clarifications, rejects). Exportable evidence; no opinions.",
   },
   {
-    title: "Agreed inputs — this panel",
-    body: "What an hour of the client's team costs and what this class of work used to take them. Industry-standard defaults apply until the client provides numbers — the label tells you which is in effect.",
+    title: "Agreed inputs - this panel",
+    body: "What an hour of the client's team costs and what this class of work used to take them. Industry-standard defaults apply until the client provides numbers - the label tells you which is in effect.",
   },
   {
-    title: "Arithmetic — no magic",
+    title: "Arithmetic - no magic",
     body: "Hours freed = baseline hours − human-in-the-loop hours, × tickets shipped. Money saved = (baseline cost − pod cost) × tickets shipped, net of plan fees. Change an input and every figure re-derives.",
   },
 ] as const;
@@ -61,7 +61,7 @@ export function RoiBaselinePanel() {
     }
     setError(null);
     save({ blendedRateUsdPerHr: parsed, baselineNote: baseline.trim() || assumptions.baselineNote });
-    toast.success(`ROI baseline saved — $${Math.round(parsed)}/h · client-agreed`, {
+    toast.success(`ROI baseline saved - $${Math.round(parsed)}/h · client-agreed`, {
       description: "Every ROI surface re-derives now. Recorded in the ledger (policy.changed).",
     });
   };
@@ -84,13 +84,13 @@ export function RoiBaselinePanel() {
         </Badge>
       </div>
       <p className="max-w-2xl text-xs text-muted-foreground">
-        The comparison behind every ROI figure. Clients rarely share their baselines — so an{" "}
+        The comparison behind every ROI figure. Clients rarely share their baselines - so an{" "}
         <span className="text-foreground/80">industry-standard default</span> applies until you
         enter <span className="text-foreground/80">client-agreed</span> numbers here. The label
         travels with every figure, so a number is never presented as client-proven when it isn't.
       </p>
 
-      {/* How ROI is measured — the three buckets, in plain terms */}
+      {/* How ROI is measured - the three buckets, in plain terms */}
       <div className="grid gap-3 sm:grid-cols-3">
         {BUCKETS.map((b) => (
           <div key={b.title} className="rounded-md border border-border bg-white/[0.02] p-3">
@@ -130,7 +130,7 @@ export function RoiBaselinePanel() {
             onChange={(e) => setBaseline(e.target.value)}
           />
           <p className="text-[11px] text-muted-foreground">
-            e.g. "senior BA · 4h per spec — senior engineer · 6h per story point".
+            e.g. "senior BA · 4h per spec - senior engineer · 6h per story point".
           </p>
         </div>
       </div>
@@ -138,7 +138,7 @@ export function RoiBaselinePanel() {
 
       <div className="flex items-center gap-2 flex-wrap">
         <Button size="sm" data-test="roi-save" onClick={handleSave}>
-          Save — mark client-agreed
+          Save - mark client-agreed
         </Button>
         <Button size="sm" variant="outline" onClick={reset} disabled={industry}>
           <RotateCcw className="size-3.5" />

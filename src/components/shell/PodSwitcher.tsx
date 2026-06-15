@@ -1,5 +1,5 @@
 /**
- * Pod Switcher — standard-mode top-bar control making the pod the top-level
+ * Pod Switcher - standard-mode top-bar control making the pod the top-level
  * scope object (multi-pod shell). Reads/writes the client-side pod store.
  * Real mode keeps using <ProjectSwitcher/> (untouched).
  */

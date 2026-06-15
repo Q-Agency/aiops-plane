@@ -6,7 +6,7 @@ const hr = 60 * min;
 
 export const tickets: Ticket[] = [
   { id: "AM-142", title: "Vehicle search with filters", stage: "spec-review",  state: "waiting",  approver: "Zlatko", codebase: "backend", priority: "P1", overnightEligible: false, createdAt: now - 6*hr,  updatedAt: now - 12*min },
-  { id: "AM-138", title: "Buyer–seller messaging",      stage: "design-review",state: "waiting",  approver: "Marin",  codebase: "backend", priority: "P0", overnightEligible: false, createdAt: now - 22*hr, updatedAt: now - 40*min },
+  { id: "AM-138", title: "Buyer-seller messaging",      stage: "design-review",state: "waiting",  approver: "Marin",  codebase: "backend", priority: "P0", overnightEligible: false, createdAt: now - 22*hr, updatedAt: now - 40*min },
   { id: "AM-131", title: "Listing image upload",        stage: "ready-qa",     state: "running",  approver: "Iva",    codebase: "web",     priority: "P1", overnightEligible: true,  createdAt: now - 30*hr, updatedAt: now - 4*min,  rerunCount: 1 },
   { id: "AM-150", title: "VIN decoder service",         stage: "ready-dev",    state: "running",  approver: "Petar",  codebase: "backend", priority: "P2", overnightEligible: true,  createdAt: now - 4*hr,  updatedAt: now - 2*min },
   { id: "AM-149", title: "Offer / escrow flow",         stage: "dev-review",   state: "waiting",  approver: "Zlatko", codebase: "backend", priority: "P0", overnightEligible: false, createdAt: now - 48*hr, updatedAt: now - 70*min },
@@ -24,13 +24,13 @@ export const tickets: Ticket[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Work-intake seam (slice 2, C10) — confirmed/auto-started arrivals    */
+/* Work-intake seam (slice 2, C10) - confirmed/auto-started arrivals    */
 /* land here                                                            */
 /* ------------------------------------------------------------------ */
 
 export interface AddTicketInput {
   /**
-   * Tracker id (e.g. "AM-109") — REQUIRED: every pod ticket originates on
+   * Tracker id (e.g. "AM-109") - REQUIRED: every pod ticket originates on
    * the board (the single doorbell); Agency OS never mints ticket ids.
    */
   id: string;
@@ -45,7 +45,7 @@ export interface AddTicketInput {
  * `tickets` array (same reference every consumer reads), so started rows
  * appear at the top of the Pipeline Backlog column on the next render.
  * Derived module-load datasets (approvals, economics) intentionally do NOT
- * re-derive — a freshly started ticket has no gates or spend yet.
+ * re-derive - a freshly started ticket has no gates or spend yet.
  */
 export function addTicket(input: AddTicketInput): Ticket {
   const ts = Date.now();
@@ -70,24 +70,24 @@ export function ticketById(id: string): Ticket | undefined {
 }
 
 /* ------------------------------------------------------------------ */
-/* Demo Director seam (wave-2 COMPLETION) — additive flag, never reshapes */
+/* Demo Director seam (wave-2 COMPLETION) - additive flag, never reshapes */
 /* ------------------------------------------------------------------ */
 
 export interface TicketRestagePatch {
   stage?: Ticket["stage"];
   state?: Ticket["state"];
   updatedAt?: number;
-  /** Gate rejects bump this — the card's visible rework cost. */
+  /** Gate rejects bump this - the card's visible rework cost. */
   rerunCount?: number;
 }
 
 /**
  * Flags an existing ticket for a staged demo beat (stage/state/updatedAt
- * only — same live `tickets` reference every consumer reads). Returns the
+ * only - same live `tickets` reference every consumer reads). Returns the
  * PREVIOUS values of exactly the patched fields so the Demo Director's
  * checkpoint restore can put them back; null = unknown id. Derived
  * module-load datasets (approvals, economics) intentionally do NOT
- * re-derive — same contract as addTicket above.
+ * re-derive - same contract as addTicket above.
  */
 export function restageTicket(id: string, patch: TicketRestagePatch): TicketRestagePatch | null {
   const t = ticketById(id);

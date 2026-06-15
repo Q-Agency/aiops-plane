@@ -1,5 +1,5 @@
 /**
- * RoiAssumptionsDialog — "Edit assumptions — your numbers, not ours" (C2).
+ * RoiAssumptionsDialog - "Edit assumptions - your numbers, not ours" (C2).
  * Edits the blended hourly rate + baseline note behind every hours→$
  * conversion; saving flips provenance to "client-agreed" and persists to
  * localStorage ("aiops_roi_assumptions"); every ROI surface re-derives live
@@ -50,12 +50,12 @@ export function RoiAssumptionsDialog({ open, onOpenChange }: RoiAssumptionsDialo
       return;
     }
     if (parsed > 2000) {
-      setError("That rate looks off — enter a blended $/hour below $2,000.");
+      setError("That rate looks off - enter a blended $/hour below $2,000.");
       return;
     }
     save({ blendedRateUsdPerHr: Math.round(parsed), baselineNote: baseline.trim() || assumptions.baselineNote });
     toast.success("Assumptions updated", {
-      description: `ROI now re-derives at $${Math.round(parsed)}/h — source: client-agreed.`,
+      description: `ROI now re-derives at $${Math.round(parsed)}/h - source: client-agreed.`,
     });
     onOpenChange(false);
   };
@@ -77,7 +77,7 @@ export function RoiAssumptionsDialog({ open, onOpenChange }: RoiAssumptionsDialo
             Edit assumptions
           </DialogTitle>
           <DialogDescription>
-            Your numbers, not ours — every hours→$ figure re-derives live from your
+            Your numbers, not ours - every hours→$ figure re-derives live from your
             blended rate. ROI stays computed net of plan fees.
           </DialogDescription>
         </DialogHeader>
@@ -120,7 +120,7 @@ export function RoiAssumptionsDialog({ open, onOpenChange }: RoiAssumptionsDialo
               {assumptions.source}
             </Badge>
             {assumptions.source === "industry-standard" && (
-              <span>— industry-standard default; flips to client-agreed when you save.</span>
+              <span>- industry-standard default; flips to client-agreed when you save.</span>
             )}
           </div>
 

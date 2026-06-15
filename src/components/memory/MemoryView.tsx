@@ -1,9 +1,9 @@
 /**
- * MemoryView — /memory, Pod Memory & Constitution (wave 2, P1-A2).
+ * MemoryView - /memory, Pod Memory & Constitution (wave 2, P1-A2).
  * The compounding-moat surface: (1) the per-client Constitution with
  * provenance, (2) amendment proposals mined from rejection-reason
  * clusters (Ratify → `constitution.amended` in the ledger; Dismiss →
- * typed reason), (3) "What it knows" — the folded-in /knowledge sources
+ * typed reason), (3) "What it knows" - the folded-in /knowledge sources
  * with an audited Forget. All mutations are optimistic in-memory + toast.
  */
 
@@ -50,7 +50,7 @@ function SectionHead({
 }
 
 export function MemoryView() {
-  // Optimistic in-memory state — seeds copied so ratify/dismiss never
+  // Optimistic in-memory state - seeds copied so ratify/dismiss never
   // mutate the module datasets.
   const [rules, setRules] = useState<ConstitutionRule[]>(CONSTITUTION_RULES);
   const [proposals, setProposals] = useState<AmendmentProposal[]>(AMENDMENT_PROPOSALS);
@@ -65,7 +65,7 @@ export function MemoryView() {
     appendAuditMock({
       action: "constitution.amended",
       target: a.id,
-      detail: `Ratified: “${a.draftText}” — mined from ${a.minedFrom.clusterLabel} (${a.minedFrom.rejectionGateIds.join(", ")})`,
+      detail: `Ratified: “${a.draftText}” - mined from ${a.minedFrom.clusterLabel} (${a.minedFrom.rejectionGateIds.join(", ")})`,
     });
     setRules((rs) => [
       ...rs,
@@ -88,7 +88,7 @@ export function MemoryView() {
   function dismiss(a: AmendmentProposal, reason: string) {
     setProposals((ps) => ps.map((p) => (p.id === a.id ? { ...p, state: "dismissed" } : p)));
     toast(`Proposal ${a.id} dismissed`, {
-      description: `“${reason}” — kept with the proposal`,
+      description: `“${reason}” - kept with the proposal`,
     });
   }
 
@@ -103,7 +103,7 @@ export function MemoryView() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Memory &amp; Constitution</h1>
             <p className="text-xs text-muted-foreground mt-0.5 max-w-2xl">
-              Your standards become the pod's standards — through a gate, on the record.
+              Your standards become the pod's standards - through a gate, on the record.
             </p>
           </div>
         </div>
@@ -146,7 +146,7 @@ export function MemoryView() {
           <div className="glass-panel p-6 text-center">
             <Pickaxe className="size-5 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">
-              No amendment proposals yet — rejection reasons are mined into draft rules weekly.
+              No amendment proposals yet - rejection reasons are mined into draft rules weekly.
             </p>
           </div>
         ) : (

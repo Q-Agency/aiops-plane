@@ -1,11 +1,11 @@
 /**
- * PreferenceMatrix (C6) — the /notifications Preferences tab.
+ * PreferenceMatrix (C6) - the /notifications Preferences tab.
  *
  * Table matrix: rows = event kinds, columns = channels (In-app / Slack /
  * Email / Push), each cell a Switch. Column headers carry the Live/Roadmap
  * honesty badge (In-app + Slack live; Email + Push roadmap). Toggling a
- * roadmap channel is allowed but tagged — "Email delivery is on the
- * roadmap — in-app only for now". Mock-local state only (no persistence).
+ * roadmap channel is allowed but tagged - "Email delivery is on the
+ * roadmap - in-app only for now". Mock-local state only (no persistence).
  */
 
 import { useState } from "react";
@@ -59,7 +59,7 @@ export function PreferenceMatrix() {
     }));
     if (CHANNEL_AVAILABILITY[channel] === "roadmap") {
       toast.info(
-        `${CHANNEL_LABELS[channel]} delivery is on the roadmap — in-app only for now`,
+        `${CHANNEL_LABELS[channel]} delivery is on the roadmap - in-app only for now`,
       );
       return;
     }
@@ -112,7 +112,7 @@ export function PreferenceMatrix() {
                       className={cn("inline-flex", roadmap && "opacity-50")}
                       title={
                         roadmap
-                          ? `${CHANNEL_LABELS[ch]} delivery is on the roadmap — in-app only for now`
+                          ? `${CHANNEL_LABELS[ch]} delivery is on the roadmap - in-app only for now`
                           : undefined
                       }
                     >
@@ -142,7 +142,7 @@ export function PreferenceMatrix() {
         <div>
           <div className="text-xs font-medium">Quiet hours</div>
           <p className="text-[11px] text-muted-foreground">
-            Mute non-critical alerts 22:00–07:00 UTC (escalations always notify).
+            Mute non-critical alerts 22:00-07:00 UTC (escalations always notify).
           </p>
         </div>
       </footer>

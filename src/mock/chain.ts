@@ -1,5 +1,5 @@
 /**
- * THE CHAIN — single source of truth for the SDLC pipeline contract.
+ * THE CHAIN - single source of truth for the SDLC pipeline contract.
  *
  * Every LAUNCH surface (catalog grid, pipeline preview, blueprints,
  * readiness) derives from this module. No other file re-declares the
@@ -39,7 +39,7 @@ export interface ChainRole {
   consumes: ArtifactKind[];
   availability: RoleAvailability;
   conformance: ContractConformance;
-  /** Indicative — display only; raw COGS never shown inside LAUNCH. */
+  /** Indicative - display only; raw COGS never shown inside LAUNCH. */
   costPerTicketUsd: number;
   latencyP50Min: number;
   /** false = pod-wide peer (knowledge): never a pipeline node, no edges. */
@@ -134,8 +134,8 @@ export const CHAIN_ROLES: Record<ChainRoleId, ChainRole> = {
     produces: "knowledge",
     consumes: [],
     // Fleet truth: the Knowledge Base agent is OPERATING today (the pitch's
-    // "BA + Knowledge Base — operating" chips; dashboard federation is the
-    // next step) — and since 2026-06-12 it is MANDATORY in every pod
+    // "BA + Knowledge Base - operating" chips; dashboard federation is the
+    // next step) - and since 2026-06-12 it is MANDATORY in every pod
     // (catalog.MANDATORY_ROLE_IDS), so it cannot read "Roadmap".
     availability: "live",
     conformance: "partial",
@@ -223,7 +223,7 @@ export function estCost(selectedIds: readonly ChainRoleId[]): number {
     .reduce((sum, id) => sum + CHAIN_ROLES[id].costPerTicketUsd, 0);
 }
 
-/** End-to-end p50 latency in minutes (pipeline roles only — peers add none). */
+/** End-to-end p50 latency in minutes (pipeline roles only - peers add none). */
 export function estLatency(selectedIds: readonly ChainRoleId[]): number {
   return selectedIds
     .filter((id) => isChainRoleId(id) && CHAIN_ROLES[id].pipeline)

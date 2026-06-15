@@ -1,17 +1,17 @@
 /**
- * Pilot Scorecard (/pilot, wave 2, P1-C3) — targets-vs-actuals against the
- * criteria set in LAUNCH → Go live → Targets & budget, a week 1–6 strip,
+ * Pilot Scorecard (/pilot, wave 2, P1-C3) - targets-vs-actuals against the
+ * criteria set in LAUNCH → Go live → Targets & budget, a week 1-6 strip,
  * the human baseline ("your numbers, not ours"), and the conversion sheet.
  *
  * Honesty rules: early weeks carry real misses (same rule as the sponsor
- * report); fee figures are labeled *pricing hypothesis* — consistent with
- * billing.ts ("Pilot pricing — set with your Q account lead") and derived
+ * report); fee figures are labeled *pricing hypothesis* - consistent with
+ * billing.ts ("Pilot pricing - set with your Q account lead") and derived
  * from economics.PRICE_PAID_USD so MONITOR numbers reconcile.
  */
 
 import { PRICE_PAID_USD } from "./economics";
 
-/** Rail visibility switch — the /pilot rail item renders only when true. */
+/** Rail visibility switch - the /pilot rail item renders only when true. */
 export const PILOT_MODE = true;
 
 export interface PilotPlan {
@@ -46,9 +46,9 @@ export const PILOT_PRICING_NOTE = "Pilot fee credited to year one · pricing hyp
 
 /**
  * The seeded pilot: 6 weeks (2026-05-15 → 2026-06-26), ~62% elapsed at the
- * demo date (2026-06-10). TTFAA landed at 19h (hit); weeks 1–2 missed
- * throughput and clearance targets, week 3 nudged over the spend cap —
- * honest, then trending green. Weeks 5–6 haven't happened yet.
+ * demo date (2026-06-10). TTFAA landed at 19h (hit); weeks 1-2 missed
+ * throughput and clearance targets, week 3 nudged over the spend cap -
+ * honest, then trending green. Weeks 5-6 haven't happened yet.
  */
 export const PILOT_PLAN: PilotPlan = {
   podId: "automarket",
@@ -87,7 +87,7 @@ export const PILOT_PLAN: PilotPlan = {
         approvedArtifactsPerWeek: 11,
         gateClearanceP50Hr: 3.6,
         validatorPassRatePct: 92,
-        spendVsCapPct: 104, // over cap that week — shown red, with mitigation note
+        spendVsCapPct: 104, // over cap that week - shown red, with mitigation note
       },
     },
     {
@@ -105,10 +105,10 @@ export const PILOT_PLAN: PilotPlan = {
   baseline: { label: "Senior BA, 4h/spec", source: "client-agreed" },
   conversion: {
     // 6 weeks ≈ 1.5 × the monthly plan fee already used by the net-of-fees
-    // ROI math (economics.PRICE_PAID_USD) — pricing hypothesis, not a quote.
+    // ROI math (economics.PRICE_PAID_USD) - pricing hypothesis, not a quote.
     pilotFeeUsd: PRICE_PAID_USD * 1.5,
     creditedToYear1: true,
-    planName: "Dedicated tenant — year one",
+    planName: "Dedicated tenant - year one",
   },
 };
 

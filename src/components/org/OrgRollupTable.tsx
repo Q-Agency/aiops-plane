@@ -1,8 +1,8 @@
 /**
- * OrgRollupTable (/org, P1-C2) — one row per pod in the client org: status,
+ * OrgRollupTable (/org, P1-C2) - one row per pod in the client org: status,
  * agents / accountable humans, open gates & incidents, MTD spend vs cap, and
  * the ROI-trio mini. Row click switches the active pod and lands on that
- * pod's /economics — proving pod scoping is real (each pod keeps its own
+ * pod's /economics - proving pod scoping is real (each pod keeps its own
  * dataset). Paused rows mute; over-cap rows carry the red state inline.
  */
 
@@ -101,14 +101,14 @@ export function OrgRollupTable({
                   {s.openGates > 0 ? (
                     <span className="text-primary">{s.openGates}</span>
                   ) : (
-                    <span className="text-muted-foreground/40">—</span>
+                    <span className="text-muted-foreground/40">-</span>
                   )}
                 </td>
                 <td className="px-3 py-2.5 text-right font-mono tabular-nums">
                   {s.openIncidents > 0 ? (
                     <span className="text-status-error">{s.openIncidents}</span>
                   ) : (
-                    <span className="text-muted-foreground/40">—</span>
+                    <span className="text-muted-foreground/40">-</span>
                   )}
                 </td>
                 <td className="px-3 py-2.5">

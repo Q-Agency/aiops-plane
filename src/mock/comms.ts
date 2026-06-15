@@ -73,8 +73,8 @@ export const COMMS: CommEntry[] = [
     id: "c3", agentId: "sa", channel: "dm", channelLabel: "DM → Marin",
     trigger: "threshold", triggerReason: "design gate stale > 24h",
     recipients: ["Marin"], ticketId: "AM-138", tsOffsetMin: 26,
-    preview: "Design gate on AM-138 stale 26h — needs review",
-    body: "AM-138 (Buyer–seller messaging) design.md v2 has been waiting in Design Review for 26h. SLA is 24h. Blocking 2 downstream tickets. Please review or reassign.",
+    preview: "Design gate on AM-138 stale 26h - needs review",
+    body: "AM-138 (Buyer-seller messaging) design.md v2 has been waiting in Design Review for 26h. SLA is 24h. Blocking 2 downstream tickets. Please review or reassign.",
     status: "no-response",
   },
   {
@@ -82,7 +82,7 @@ export const COMMS: CommEntry[] = [
     trigger: "scheduled", triggerReason: "weekly delivery report · Fri 16:00",
     recipients: ["#automarket-leads"], tsOffsetMin: 60 * 18,
     preview: "Weekly delivery report · 23 tickets · cycle 3.4d",
-    body: "This week: 23 tickets closed (+12%). Avg cycle 3.4d (-6%). Cost $1,247 (-4%). Escape rate 1.8%. Top blocker: design reviews backed up Tue–Wed.",
+    body: "This week: 23 tickets closed (+12%). Avg cycle 3.4d (-6%). Cost $1,247 (-4%). Escape rate 1.8%. Top blocker: design reviews backed up Tue-Wed.",
     status: "acknowledged",
   },
   {
@@ -146,7 +146,7 @@ export const COMMS: CommEntry[] = [
     trigger: "scheduled", triggerReason: "nightly regression summary · 06:00",
     recipients: ["#automarket-dev"], tsOffsetMin: 60 * 5 + 20,
     preview: "Nightly regression · 412/418 passing · 6 flaky",
-    body: "Nightly regression suite: 412/418 passing. 6 flaky — Healer queued repairs for 4. 2 require human triage on AM-144.",
+    body: "Nightly regression suite: 412/418 passing. 6 flaky - Healer queued repairs for 4. 2 require human triage on AM-144.",
     status: "acknowledged",
   },
   {
@@ -170,7 +170,7 @@ export const COMMS: CommEntry[] = [
     trigger: "scheduled", triggerReason: "owner standup · 09:30",
     recipients: ["Ana"], tsOffsetMin: 60 * 6,
     preview: "Your queue: 3 pending approvals · 0 SLA breach",
-    body: "Morning Ana — 3 specs pending your review (AM-142, AM-128, AM-141). All within SLA. Avg approval time this week: 14m.",
+    body: "Morning Ana - 3 specs pending your review (AM-142, AM-128, AM-141). All within SLA. Avg approval time this week: 14m.",
     status: "replied",
   },
   {
@@ -269,7 +269,7 @@ export const SCHEDULED: ScheduledComm[] = [
         { heading: "Cycle time", lines: ["Avg 3.4d (-6%) · p95 6.8d"] },
         { heading: "Cost", lines: ["$1,247 (-4%) · $54/ticket avg"] },
         { heading: "Escape rate", lines: ["1.8% · 2 bugs found post-merge"] },
-        { heading: "Bottleneck", lines: ["Design Review queued Tue–Wed afternoons"] },
+        { heading: "Bottleneck", lines: ["Design Review queued Tue-Wed afternoons"] },
       ],
     },
   },

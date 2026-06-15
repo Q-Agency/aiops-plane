@@ -1,11 +1,11 @@
 /**
- * Platform Status (/status, wave 2, Blind spot 5) — per-tenant component
+ * Platform Status (/status, wave 2, Blind spot 5) - per-tenant component
  * health, 90-day uptime, and the honest degradation story ("agents keep
  * working; gates remain answerable in Slack; the ledger backfills with
  * gap-markers").
  *
  * All 90-day history is DETERMINISTIC (hand-rolled dip table anchored at
- * the demo date 2026-06-10 — no randomness), so reloads look stable. The
+ * the demo date 2026-06-10 - no randomness), so reloads look stable. The
  * 3-day degraded stretch on Ledger sync matches the Compliance gap-marker
  * seed.
  */
@@ -16,7 +16,7 @@ export interface StatusComponent {
   id: string;
   label: string;
   state: ComponentState;
-  /** Epoch ms — present while degraded/down ("since {t}"). */
+  /** Epoch ms - present while degraded/down ("since {t}"). */
   since?: number;
   lastIncidentAt?: number;
 }
@@ -35,13 +35,13 @@ export const platformSla = {
 
 /** The three-line honesty card (vision §8 "Platform availability & DR"). */
 export const DEGRADATION_EXPLAINER = [
-  "Your agents continue working — the control plane is not in their execution path.",
+  "Your agents continue working - the control plane is not in their execution path.",
   "Gates remain answerable in Slack while the dashboard is unreachable.",
   "The ledger backfills on reconnect and marks any gap honestly in Compliance.",
 ] as const;
 
 const DAY_MS = 86_400_000;
-/** Demo anchor — matches the billing period (June 1–10, 2026). */
+/** Demo anchor - matches the billing period (June 1-10, 2026). */
 const ANCHOR_UTC = Date.UTC(2026, 5, 10);
 
 function isoDay(ms: number): string {
@@ -132,7 +132,7 @@ export function overallState(): ComponentState {
 }
 
 /**
- * Components NOT currently operational (degraded or down) — the rail's
+ * Components NOT currently operational (degraded or down) - the rail's
  * Platform-status badge ("problems"). 0 in the seeded happy state (the
  * degraded stretches are historical, in the 90-day bars), so no chip
  * renders until a component actually degrades.
@@ -143,6 +143,6 @@ export function problemCount(): number {
 
 export const OVERALL_PILL_COPY: Record<ComponentState, string> = {
   operational: "All systems operational",
-  degraded: "Degraded — your agents are unaffected",
-  down: "Disruption — your agents are unaffected",
+  degraded: "Degraded - your agents are unaffected",
+  down: "Disruption - your agents are unaffected",
 };

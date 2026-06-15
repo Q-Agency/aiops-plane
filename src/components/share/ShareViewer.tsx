@@ -1,11 +1,11 @@
 /**
- * ShareViewer (/share/$token, P1-H4) — chrome-less, client-clean render of a
+ * ShareViewer (/share/$token, P1-H4) - chrome-less, client-clean render of a
  * shared report for someone with NO account: the token is the only auth.
  *
  * States:
  *  - active  → the weekly ClientStatusReport blocks, read-only, plus the
  *              "this view is recorded" footer. Opening it appends the audited
- *              view event (data.exported, via recordShareView) — once per mount.
+ *              view event (data.exported, via recordShareView) - once per mount.
  *  - expired / revoked / unknown → calm cards that leak ZERO report data.
  *
  * Light-first via ClientCleanTheme even though the app shell is dark;
@@ -30,7 +30,7 @@ export function ShareViewer({ token }: { token: string }) {
   const link = shareByToken(token);
   const state = link ? effectiveShareState(link) : "unknown";
 
-  /* The audited view event — client-only, once per mount per token
+  /* The audited view event - client-only, once per mount per token
      (recordShareView itself no-ops unless the link is active). */
   const recordedFor = useRef<string | null>(null);
   useEffect(() => {
@@ -74,7 +74,7 @@ export function ShareViewer({ token }: { token: string }) {
   const report = reportById(link.targetId);
   if (!report) {
     // Active link whose target isn't a renderable report in the mock
-    // (e.g. a usage statement) — stay graceful, stay data-free.
+    // (e.g. a usage statement) - stay graceful, stay data-free.
     return (
       <StatusCard
         icon={FileQuestion}

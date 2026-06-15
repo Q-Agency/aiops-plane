@@ -1,5 +1,5 @@
 /**
- * SpecDocument — the center pane of the gate review (C4): the artifact
+ * SpecDocument - the center pane of the gate review (C4): the artifact
  * markdown split into `## ` sections, each rendered via the shared
  * MarkdownLite (TraceabilityView) and anchored with a DOM id so the
  * left-rail outline can scroll to it.

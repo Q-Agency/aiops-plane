@@ -1,5 +1,5 @@
 /**
- * /org — Org Portfolio Rollup (wave 2, P1-C2): every pod in the client org
+ * /org - Org Portfolio Rollup (wave 2, P1-C2): every pod in the client org
  * on one page, plus the ExpansionHint cards.
  * Mock experience only: real-mode users are redirected by mockOnlyBeforeLoad.
  */

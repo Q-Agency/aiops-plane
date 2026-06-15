@@ -1,5 +1,5 @@
 /**
- * /knowledge — ABSORBED by /memory in wave 2 (Memory & Rules owns the
+ * /knowledge - ABSORBED by /memory in wave 2 (Memory & Rules owns the
  * knowledge surface now; the rail item was replaced). Kept as a pure
  * redirect so old links keep working: standard → /memory, real → /.
  */

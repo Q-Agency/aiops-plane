@@ -1,5 +1,5 @@
 /**
- * RecoveryConfirmDialog — the confirm step before any recovery action (C5).
+ * RecoveryConfirmDialog - the confirm step before any recovery action (C5).
  *
  * Ownership-changing / destructive actions (reassign-human, restart-agent,
  * pause-agent, escalate-to-q) REQUIRE a typed reason for the audit ledger;
@@ -48,7 +48,7 @@ export interface RecoveryConfirmDialogProps {
   action: RecoveryActionKind | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Fired on confirm — the parent runs the recovering → resolved simulation. */
+  /** Fired on confirm - the parent runs the recovering → resolved simulation. */
   onCommit: (action: RecoveryActionKind, commit: RecoveryCommit) => void;
 }
 
@@ -106,14 +106,14 @@ function copyFor(incident: Incident, action: RecoveryActionKind): DialogCopy {
     case "retry-run":
       return {
         title: `Retry the failed run${onTicket}?`,
-        body: "One-click recovery — the retry and its outcome are written to the audit ledger.",
+        body: "One-click recovery - the retry and its outcome are written to the audit ledger.",
         cta: "Retry & log",
         reasonPlaceholder: "Optional note for the ledger",
       };
     case "resume-run":
       return {
         title: `Resume the run${onTicket}?`,
-        body: "Resumes from the last checkpoint — recorded with timestamp.",
+        body: "Resumes from the last checkpoint - recorded with timestamp.",
         cta: "Resume & log",
         reasonPlaceholder: "Optional note for the ledger",
       };
@@ -259,7 +259,7 @@ export function RecoveryConfirmDialog({
           </div>
         )}
 
-        {/* reason — required for destructive / ownership-changing actions */}
+        {/* reason - required for destructive / ownership-changing actions */}
         <div className="space-y-1.5">
           <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
             Reason {needsReason ? "(required)" : "(optional)"}

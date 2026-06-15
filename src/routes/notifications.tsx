@@ -1,7 +1,7 @@
 /**
- * /notifications (C6) — the full notification center: Inbox / Preferences /
+ * /notifications (C6) - the full notification center: Inbox / Preferences /
  * Alert rules / Digests. Canonical URL per C1: reached from the TopBar bell
- * (popover footer + gear → ?tab=preferences) and deep links only — NO rail
+ * (popover footer + gear → ?tab=preferences) and deep links only - NO rail
  * item. View lives in src/components/notifications/NotificationsView.tsx.
  */
 

@@ -1,16 +1,16 @@
 /**
- * Agent profile (mock experience) — the PM-operable deep-dive behind
+ * Agent profile (mock experience) - the PM-operable deep-dive behind
  * /agents/$agentId. Revamped 2026-06-12 (owner ask): the old screen was
- * telemetry-only; this one leads with the OPERATE band — switch the model
+ * telemetry-only; this one leads with the OPERATE band - switch the model
  * (model plane made switchable, cross-vendor), scope its tools, reassign
  * the accountable owner, move it on the autonomy ladder (downgrade free,
- * upgrade only on a system proposal) — plus the Quality & versions
+ * upgrade only on a system proposal) - plus the Quality & versions
  * AgentOps panel (eval history + instant rollback). Every knob writes
  * policy.changed / human.reassigned / agent.rolled_back to the session
  * ledger via mock/agent-config.ts.
  *
  * The langfuse-style telemetry (charts, runs table, trace drawer, dev
- * overnight loop) is KEPT below the operating surface — it moved here
+ * overnight loop) is KEPT below the operating surface - it moved here
  * verbatim from the old inline route view. Real mode renders
  * RealAgentDeepDive instead; this file is mock-only.
  */
@@ -162,7 +162,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
               <span>
                 consumes{" "}
                 <span className="text-foreground/80">
-                  {contract.consumes.length ? contract.consumes.join(", ") : "—"}
+                  {contract.consumes.length ? contract.consumes.join(", ") : "-"}
                 </span>
               </span>
               <ArrowRight className="size-2.5" />
@@ -197,7 +197,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
         </div>
       </div>
 
-      {/* Operate band — the PM controls */}
+      {/* Operate band - the PM controls */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ModelPanel agent={a} />
         <ToolsPanel agent={a} />
@@ -473,14 +473,14 @@ function ModelPanel({ agent }: { agent: Agent }) {
     if (t !== tier) {
       setAgentTier(agent.id, agent.name, t);
       toast.success(`${agent.name} → ${llmTierDef(t).label} blend`, {
-        description: `${tierModelCount(t)} models across generation, supervisor and judge — policy.changed on the ledger.`,
+        description: `${tierModelCount(t)} models across generation, supervisor and judge - policy.changed on the ledger.`,
       });
     }
   }
 
   return (
-    <PanelShell icon={Cpu} title="Model & routing" sub="pick a tier — each is a blend of models">
-      {/* Current blend — the models behind each sub-role */}
+    <PanelShell icon={Cpu} title="Model & routing" sub="pick a tier - each is a blend of models">
+      {/* Current blend - the models behind each sub-role */}
       <div className="rounded-md border border-border bg-white/[0.02] p-3">
         <div className="flex items-center justify-between gap-2">
           <div className="text-sm font-semibold" style={{ color: `var(${def.accent})` }}>
@@ -520,7 +520,7 @@ function ModelPanel({ agent }: { agent: Agent }) {
         </div>
       </div>
 
-      {/* Tier menu — the mandatory, primary control */}
+      {/* Tier menu - the mandatory, primary control */}
       <div data-test="llm-tier-menu">
         <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1.5">
           Change tier
@@ -529,7 +529,7 @@ function ModelPanel({ agent }: { agent: Agent }) {
       </div>
 
       <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-auto">
-        Each tier is a blend — generation, supervisor and judge can run different models. Today the
+        Each tier is a blend - generation, supervisor and judge can run different models. Today the
         tier sets all three; per-role overrides land here later. Disclosed per agent in Settings →
         Models.
       </p>
@@ -545,12 +545,12 @@ function ToolsPanel({ agent }: { agent: Agent }) {
     const enabling = !tools.has(id);
     toggleAgentTool(agent.id, agent.name, id);
     toast.success(`${name} ${enabling ? "granted to" : "removed from"} ${agent.name}`, {
-      description: "Connector-vault scope updated — policy.changed on the ledger.",
+      description: "Connector-vault scope updated - policy.changed on the ledger.",
     });
   }
 
   return (
-    <PanelShell icon={Wrench} title="Tools & access" sub="what it may touch — nothing else">
+    <PanelShell icon={Wrench} title="Tools & access" sub="what it may touch - nothing else">
       <div className="flex flex-wrap gap-1.5">
         {CONNECTORS.map((c) => {
           const isRequired = required.has(c.id);
@@ -563,9 +563,9 @@ function ToolsPanel({ agent }: { agent: Agent }) {
               onClick={() => !isRequired && !roadmap && onToggle(c.id, c.name)}
               title={
                 isRequired
-                  ? `Required — ${agent.name}'s core loop breaks without it`
+                  ? `Required - ${agent.name}'s core loop breaks without it`
                   : roadmap
-                    ? "Roadmap — not connectable yet"
+                    ? "Roadmap - not connectable yet"
                     : enabled
                       ? "Click to remove access"
                       : "Click to grant access"
@@ -596,7 +596,7 @@ function ToolsPanel({ agent }: { agent: Agent }) {
         })}
       </div>
       <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-auto">
-        Grants scope the agent's connector vault — it cannot reach a tool that isn't on this
+        Grants scope the agent's connector vault - it cannot reach a tool that isn't on this
         list. Every change lands on the ledger.
       </p>
     </PanelShell>
@@ -624,20 +624,20 @@ function AccountabilityPanel({ agent }: { agent: Agent }) {
     if (level < autonomy) {
       setAgentAutonomy(agent.id, agent.name, level);
       toast.success(`${agent.name} stepped down to ${level}`, {
-        description: "Effective immediately — gates re-engage on the next run.",
+        description: "Effective immediately - gates re-engage on the next run.",
       });
       return;
     }
     if (proposal && level <= proposal) {
       setAgentAutonomy(agent.id, agent.name, level, { granted: true });
       toast.success(`${level} granted to ${agent.name}`, {
-        description: "Granted on a system proposal — policy.changed on the ledger.",
+        description: "Granted on a system proposal - policy.changed on the ledger.",
       });
       return;
     }
     toast.info(`${level} isn't earned yet`, {
       description:
-        "Promotions are proposed by the system on validator streaks, then granted by you — never self-served.",
+        "Promotions are proposed by the system on validator streaks, then granted by you - never self-served.",
     });
   }
 
@@ -655,7 +655,7 @@ function AccountabilityPanel({ agent }: { agent: Agent }) {
         >
           {humans.map((h) => (
             <option key={h.id} value={h.id} className="bg-panel text-foreground">
-              {h.name} — {h.role}
+              {h.name} - {h.role}
             </option>
           ))}
         </select>
@@ -686,7 +686,7 @@ function AccountabilityPanel({ agent }: { agent: Agent }) {
                   {l.id}
                 </span>
                 <span className={cn("truncate", active ? "text-foreground" : "text-muted-foreground")}>
-                  {l.label.replace(`${l.id} — `, "")}
+                  {l.label.replace(`${l.id} - `, "")}
                 </span>
                 {active && <Check className="size-3 text-primary ml-auto shrink-0" />}
               </div>
@@ -723,7 +723,7 @@ function QualityPanel({ agent }: { agent: Agent }) {
   function onRollback(version: string) {
     rollbackAgentVersion(agent.id, agent.name, version);
     toast.success(`${agent.name} rolled back to v${version}`, {
-      description: "agent.rolled_back on the ledger — instant; evals re-run before any re-promotion.",
+      description: "agent.rolled_back on the ledger - instant; evals re-run before any re-promotion.",
     });
   }
 
@@ -1026,7 +1026,7 @@ function OvernightPanel() {
             <div className="text-sm font-semibold">Ralph Wiggum loop · last 10 nights</div>
           </div>
         </div>
-        <div className="text-[10px] font-mono text-muted-foreground">2×H200 · 22:00–06:00 UTC</div>
+        <div className="text-[10px] font-mono text-muted-foreground">2×H200 · 22:00-06:00 UTC</div>
       </div>
 
       <div className="grid grid-cols-4 gap-2 mb-3">

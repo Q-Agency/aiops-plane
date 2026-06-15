@@ -10,7 +10,7 @@ import { isMock } from "@/lib/experience";
 import type { AppUser } from "@/lib/auth/types";
 
 export function AppShell({ children, user }: { children: ReactNode; user: AppUser }) {
-  // EXPERIENCE GATE: ⌘K palette + ⌘J copilot are mock-fed overlays —
+  // EXPERIENCE GATE: ⌘K palette + ⌘J copilot are mock-fed overlays -
   // standard experience only; real mode gets zero mock chrome.
   const mock = isMock(user);
   return (
@@ -23,11 +23,11 @@ export function AppShell({ children, user }: { children: ReactNode; user: AppUse
             <main className="flex-1 overflow-auto scrollbar-thin">{children}</main>
           </div>
         </div>
-        {/* ⌘K — mounted once for every route (C7) */}
+        {/* ⌘K - mounted once for every route (C7) */}
         {mock && <CommandPalette />}
-        {/* ⌘J — Pod Copilot overlay (wave 2, P1-A1) — the single in-app assistant */}
+        {/* ⌘J - Pod Copilot overlay (wave 2, P1-A1) - the single in-app assistant */}
         {mock && <PodCopilot />}
-        {/* ⌘⇧D — Demo Director presenter overlay (wave-2 COMPLETION); renders nothing until summoned */}
+        {/* ⌘⇧D - Demo Director presenter overlay (wave-2 COMPLETION); renders nothing until summoned */}
         {mock && <DemoDirectorOverlay />}
       </PodProvider>
     </LiveProvider>

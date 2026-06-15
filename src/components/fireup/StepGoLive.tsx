@@ -1,5 +1,5 @@
 /**
- * LAUNCH step 6 — Readiness & Launch (body only; chrome from WizardShell).
+ * LAUNCH step 6 - Readiness & Launch (body only; chrome from WizardShell).
  * THE single hard gate (D2): computeReadiness(draft) drives the checklist,
  * the gauge, and the Launch CTA. Required checks BLOCK; advisory checks
  * (Slack approver, Knowledge sources) warn and are overrideable via an
@@ -92,7 +92,7 @@ function buildRows(draft: PodDraft): GoLiveRow[] {
       label: c.label,
       severity: c.severity,
       status: zeroAgents && c.id !== "agents" ? "pending" : c.status,
-      detail: zeroAgents && c.id !== "agents" ? "Waiting on agents — add a team first." : c.detail,
+      detail: zeroAgents && c.id !== "agents" ? "Waiting on agents - add a team first." : c.detail,
       fixStep: c.fixStep,
       fixLabel: FIX_LABELS[c.id] ?? "Fix",
     };
@@ -128,7 +128,7 @@ function buildRows(draft: PodDraft): GoLiveRow[] {
     return row;
   });
 
-  // Advisory: Knowledge sources (optional) — never blocks (D2).
+  // Advisory: Knowledge sources (optional) - never blocks (D2).
   const knowledgeOn = draft.agentIds.includes("knowledge");
   rows.push({
     id: "knowledge",
@@ -136,10 +136,10 @@ function buildRows(draft: PodDraft): GoLiveRow[] {
     severity: "advisory",
     status: zeroAgents ? "pending" : knowledgeOn ? "pass" : "warn",
     detail: zeroAgents
-      ? "Waiting on agents — add a team first."
+      ? "Waiting on agents - add a team first."
       : knowledgeOn
-        ? "Knowledge agent in the pod — project memory accrues from day one."
-        : "No Knowledge sources connected — the pod will run, but agents won't draw on project memory yet.",
+        ? "Knowledge agent in the pod - project memory accrues from day one."
+        : "No Knowledge sources connected - the pod will run, but agents won't draw on project memory yet.",
     fixStep: "agents",
     fixLabel: FIX_LABELS.knowledge,
   });
@@ -438,7 +438,7 @@ export function StepGoLive() {
       // (avoids the shell's auto-draft effect recreating a stray draft).
       await navigate({ to: "/" });
       const pod = launchDraft();
-      toast.success(`Pod launched — ${pod?.name ?? name} is live`, {
+      toast.success(`Pod launched - ${pod?.name ?? name} is live`, {
         description: summary ? `${summary} · ${TENANCY_LINE}` : TENANCY_LINE,
       });
     })();
@@ -479,7 +479,7 @@ export function StepGoLive() {
   return (
     <TooltipProvider delayDuration={150}>
       <div className="grid gap-4 xl:grid-cols-[1fr_380px] items-start">
-        {/* Left — checklist */}
+        {/* Left - checklist */}
         <div className="space-y-3 min-w-0">
           {blocked ? (
             <Alert variant="destructive" className="border-status-error/50 bg-status-error/10">
@@ -507,7 +507,7 @@ export function StepGoLive() {
                 Ready, with {warnRows.length} warning{warnRows.length === 1 ? "" : "s"}
               </AlertTitle>
               <AlertDescription className="text-xs text-muted-foreground">
-                {warnRows.map((r) => r.label).join(" · ")} — you can launch anyway.
+                {warnRows.map((r) => r.label).join(" · ")} - you can launch anyway.
               </AlertDescription>
             </Alert>
           )}
@@ -536,7 +536,7 @@ export function StepGoLive() {
           )}
         </div>
 
-        {/* Right — launch panel */}
+        {/* Right - launch panel */}
         <aside className="xl:sticky xl:top-4 rounded-md border border-border bg-panel/40 backdrop-blur-md">
           <div className="px-4 py-2.5 border-b border-border">
             <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">

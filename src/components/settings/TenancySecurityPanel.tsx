@@ -1,9 +1,9 @@
 /**
- * TenancySecurityPanel — Settings "Tenancy & Security" (#tenancy):
+ * TenancySecurityPanel - Settings "Tenancy & Security" (#tenancy):
  * the trust posture dl from tenancy.ts, the TopBar tenancy-badge mirror,
  * the Trust & Evidence link-out to /compliance, and (inside it, #models)
  * the per-agent "Models & subprocessors" disclosure from modelPlane.ts.
- * Standard (mock) experience only — read-only, no mutations.
+ * Standard (mock) experience only - read-only, no mutations.
  */
 
 import { Link } from "@tanstack/react-router";
@@ -93,7 +93,7 @@ export function TenancySecurityPanel() {
           </h3>
         </div>
         <p className="text-xs text-muted-foreground max-w-3xl">
-          Which model processes your content, where, and under what retention terms — per agent,
+          Which model processes your content, where, and under what retention terms - per agent,
           pinned, honest.
         </p>
         <div className="overflow-x-auto">

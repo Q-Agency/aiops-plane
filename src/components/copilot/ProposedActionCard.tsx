@@ -1,9 +1,9 @@
 /**
- * ProposedActionCard — an NL operation rendered as a confirm-first card:
+ * ProposedActionCard - an NL operation rendered as a confirm-first card:
  * action summary, target, and THE EXACT audit row a Confirm will write
  * (previewDetail keeps the preview byte-identical to what appendAuditMock
  * receives). NOTHING EXECUTES UNCONFIRMED. Pause intents require a typed
- * reason — same rule as the equivalent buttons — and the typed reason is
+ * reason - same rule as the equivalent buttons - and the typed reason is
  * written to the ledger verbatim as the row's detail.
  *
  * Confirmed → collapses to the written row ("agent.paused · ledger #5001").
@@ -37,7 +37,7 @@ const INTENT_ICON: Record<ProposedAction["intent"], LucideIcon> = {
 interface TargetMeta {
   /** "QA Agent", "AutoMarket Web Pod", "appr-AM-142" */
   name: string;
-  /** Agent color token var — agents only. */
+  /** Agent color token var - agents only. */
   colorVar?: string;
 }
 
@@ -59,7 +59,7 @@ function titleFor(p: ProposedAction, target: TargetMeta): string {
     case "resume-agent":
       return `Resume ${target.name}`;
     case "pause-pod":
-      return `Pause pod — ${target.name}`;
+      return `Pause pod - ${target.name}`;
     case "open-gate":
       return `Open gate ${p.target}`;
   }
@@ -70,7 +70,7 @@ function summaryFor(p: ProposedAction, target: TargetMeta): string {
     case "pause-agent":
       return `${target.name} finishes its in-flight run, then stops picking up work (reason required).`;
     case "resume-agent":
-      return `${target.name} starts picking up work again — queued work resumes in order.`;
+      return `${target.name} starts picking up work again - queued work resumes in order.`;
     case "pause-pod":
       return `All agents finish in-flight runs, then stop. Open gates stay answerable (reason required).`;
     case "open-gate":
@@ -108,14 +108,14 @@ export function ProposedActionCard({
   const needsReason = actionRequiresReason(action.intent);
   const Icon = INTENT_ICON[action.intent];
 
-  /* ----- collapsed: confirmed — the written audit row ----- */
+  /* ----- collapsed: confirmed - the written audit row ----- */
   if (status === "confirmed") {
     return (
       <div className="rounded-lg border border-status-done/40 bg-status-done/10 px-3 py-2">
         <div className="flex items-center gap-2 font-mono text-xs text-status-done">
           <CheckCircle2 className="size-3.5 shrink-0" />
           <span className="truncate">
-            {action.auditPreview.action} · ledger #{ledgerId ?? "—"}
+            {action.auditPreview.action} · ledger #{ledgerId ?? "-"}
           </span>
         </div>
         {writtenDetail && (
@@ -132,7 +132,7 @@ export function ProposedActionCard({
     return (
       <div className="rounded-lg border border-border/60 bg-white/[0.02] px-3 py-2 flex items-center gap-2 text-xs text-muted-foreground">
         <Ban className="size-3.5 shrink-0" />
-        Cancelled — nothing executed, nothing written.
+        Cancelled - nothing executed, nothing written.
       </div>
     );
   }
@@ -184,7 +184,7 @@ export function ProposedActionCard({
                 ["target", action.auditPreview.target ?? action.target, false],
                 ["detail", detail, needsReason && !reason.trim()],
                 ["actor", "human · you", false],
-                ["id", "#— assigned on confirm", true],
+                ["id", "#- assigned on confirm", true],
               ] as const
             ).map(([k, v, muted]) => (
               <div key={k} className="grid grid-cols-[56px_1fr] gap-2 px-2 py-1">
@@ -197,7 +197,7 @@ export function ProposedActionCard({
           </div>
         </div>
 
-        {/* typed reason — required exactly where the equivalent button requires one */}
+        {/* typed reason - required exactly where the equivalent button requires one */}
         {needsReason && (
           <div>
             <label
@@ -211,19 +211,19 @@ export function ProposedActionCard({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
-              placeholder="Typed reason — written to the ledger verbatim."
+              placeholder="Typed reason - written to the ledger verbatim."
               className="min-h-[52px] text-xs bg-white/[0.03] border-border/60"
             />
           </div>
         )}
 
-        {/* confirm / cancel — nothing executes unconfirmed */}
+        {/* confirm / cancel - nothing executes unconfirmed */}
         <div className="flex items-center gap-2 pt-0.5">
           <Button
             size="sm"
             disabled={confirmBlocked}
             onClick={() => onConfirm(reason)}
-            title={confirmBlocked ? "Type a reason first — it is written to the ledger." : undefined}
+            title={confirmBlocked ? "Type a reason first - it is written to the ledger." : undefined}
           >
             Confirm
           </Button>

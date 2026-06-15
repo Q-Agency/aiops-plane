@@ -1,5 +1,5 @@
 /**
- * /status — Platform Status (wave 2, Blind spot 5): component health,
+ * /status - Platform Status (wave 2, Blind spot 5): component health,
  * 90-day uptime, and the honest degraded-mode story. Client-clean render.
  * Mock experience only: real-mode users are redirected by mockOnlyBeforeLoad.
  */

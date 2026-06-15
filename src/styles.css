@@ -250,7 +250,7 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Shared Report Viewer (/share/$token) — client-clean mode (vision §6) */
+/* Shared Report Viewer (/share/$token) - client-clean mode (vision §6) */
 /* Light-first and chrome-less: no neon, no glow, no scanlines. Scoped  */
 /* to .share-clean so the dark app theme never bleeds into the shared   */
 /* sheet (and these light styles never leak back into the shell).       */
@@ -275,7 +275,7 @@
 }
 
 
-/* /pitch — "See it live →" pill arrow nudge (hidden in print; respects reduced motion) */
+/* /pitch - "See it live →" pill arrow nudge (hidden in print; respects reduced motion) */
 @keyframes pitch-pill-nudge {
   0%,
   60%,

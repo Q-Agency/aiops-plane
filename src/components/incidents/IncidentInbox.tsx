@@ -1,5 +1,5 @@
 /**
- * IncidentInbox — left master list of /incidents (C5): Open/Resolved/All
+ * IncidentInbox - left master list of /incidents (C5): Open/Resolved/All
  * tabs, type · severity · agent filters, and the selectable incident rows.
  * Row order preserves the seed order (the demo's QA-down incident on top).
  */
@@ -32,7 +32,7 @@ export interface IncidentInboxProps {
   incidents: Incident[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  /** Locally in-flight recovery — row shows the recovering state. */
+  /** Locally in-flight recovery - row shows the recovering state. */
   recoveringId: string | null;
 }
 
@@ -176,7 +176,7 @@ function IncidentRow({
   onSelect: () => void;
 }) {
   const Icon = TYPE_ICON[incident.type];
-  const affected = incident.ticketId ?? incident.toolId ?? incident.agentId ?? "—";
+  const affected = incident.ticketId ?? incident.toolId ?? incident.agentId ?? "-";
   return (
     <li>
       <button

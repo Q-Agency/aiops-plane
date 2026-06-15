@@ -1,9 +1,9 @@
 /**
- * KnowledgeSourcesPanel — section 3 of /memory ("What it knows", P1-A2).
+ * KnowledgeSourcesPanel - section 3 of /memory ("What it knows", P1-A2).
  * Folds the orphaned /knowledge surface in here: the source rows are
  * lifted from KnowledgeView (same mock `sources`, same freshness/status
  * visual language), restyled as a list section with expandable read
- * scopes, last-sync, and an audited "Forget this" — the removal lands as
+ * scopes, last-sync, and an audited "Forget this" - the removal lands as
  * `policy.changed { knowledge.sources }` and the row tombstones
  * "Forgotten · {date} · on the record."
  */
@@ -187,7 +187,7 @@ export function KnowledgeSourcesPanel() {
     appendAuditMock({
       action: "policy.changed",
       target: `source:${s.id}`,
-      detail: `knowledge.sources — “${s.name}” forgotten (before: ${activeCount} sources, after: ${activeCount - 1})`,
+      detail: `knowledge.sources - “${s.name}” forgotten (before: ${activeCount} sources, after: ${activeCount - 1})`,
     });
     toast.success("Source forgotten · written to audit ledger ✓", {
       description: `policy.changed · knowledge.sources · ${s.name} · actor when-only`,
@@ -197,7 +197,7 @@ export function KnowledgeSourcesPanel() {
   if (sources.length === 0) {
     return (
       <div className="glass-panel p-6 text-center text-sm text-muted-foreground">
-        No sources connected yet — connect tools in LAUNCH and the pod starts learning from
+        No sources connected yet - connect tools in LAUNCH and the pod starts learning from
         them here.
       </div>
     );

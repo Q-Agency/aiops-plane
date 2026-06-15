@@ -1,10 +1,10 @@
 /**
- * LAUNCH step 5 — Wire Slack (body only; chrome from WizardShell).
+ * LAUNCH step 5 - Wire Slack (body only; chrome from WizardShell).
  * Routes pod events (clarification gates / approvals / escalations / daily
  * brief) to Slack channels + picks the approver channel. Wiring persists on
  * the draft: usePods().draft.slackWiring + draft.approverChannelId.
  *
- * Gating (D2): this step FLAGS only — no approver chosen shows an amber hint
+ * Gating (D2): this step FLAGS only - no approver chosen shows an amber hint
  * and leaves Readiness "Slack wired" partial; Next is never blocked here.
  */
 
@@ -65,7 +65,7 @@ const SLACK_CHANNELS: SlackChannel[] = [
 
 function channelLabel(id: string | null): string {
   const ch = SLACK_CHANNELS.find((c) => c.id === id);
-  if (!ch) return "—";
+  if (!ch) return "-";
   return ch.kind === "dm" ? ch.name : `#${ch.name}`;
 }
 
@@ -497,7 +497,7 @@ export function StepSlack() {
 
           <Separator className="bg-primary/20" />
 
-          {/* Approver channel — visually separated, accent */}
+          {/* Approver channel - visually separated, accent */}
           <div className="px-4 py-3.5 border-l-2 border-l-primary bg-primary/[0.04] rounded-br-md">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
               <div className="hidden sm:grid size-7 rounded-md border border-primary/50 bg-primary/10 text-primary place-items-center shrink-0">
@@ -513,7 +513,7 @@ export function StepSlack() {
                   )}
                 </Label>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Approvals announced here are deep-link-only — the link opens the gate review for
+                  Approvals announced here are deep-link-only - the link opens the gate review for
                   the accountable human (or their delegate); acting for someone else is recorded as
                   an override. Clarifications stay anyone-can-answer in-channel.
                 </p>
@@ -555,7 +555,7 @@ export function StepSlack() {
           {allSameChannel && (
             <p className="text-[11px] text-muted-foreground flex items-start gap-1.5 px-1">
               <Info className="size-3 shrink-0 mt-0.5" />
-              All events route to {channelLabel(enabledRows[0].channelId)} — consider splitting
+              All events route to {channelLabel(enabledRows[0].channelId)} - consider splitting
               escalations.
             </p>
           )}

@@ -1,20 +1,20 @@
-# Build Brief — `agency-agent-sdk` (make an agent pluggable into Agency OS)
+# Build Brief - `agency-agent-sdk` (make an agent pluggable into Agency OS)
 
 > **Who this is for:** the engineer / AI programmer working inside an agent's
-> codebase — **BA first**, then the Knowledge Agent (KA), SA, and others.
+> codebase - **BA first**, then the Knowledge Agent (KA), SA, and others.
 > **What you're building:** a small **reusable Python SDK** that gives any agent
 > a standard observability + human-in-the-loop (HITL) + health surface and a
 > self-describing **Agent Card**, so it plugs into **Agency OS** (our fleet
 > control plane). Build it once (extracted from BA), then KA/SA adopt it by
 > changing only their identity + `produces`/`consumes`/`sources`.
 
-This brief is self-contained — you don't need any other context to act on it.
+This brief is self-contained - you don't need any other context to act on it.
 
 ---
 
 ## 0. Background (why this exists)
 
-**Agency OS** is a separate dashboard that does **not** run agents — it
+**Agency OS** is a separate dashboard that does **not** run agents - it
 _observes and governs_ them. It reads each agent's **live API (REST + SSE)** and
 normalizes it against a shared **contract**. For an agent to appear in Agency OS
 it must (a) **emit the contract** (runs, events, HITL gates, health) and (b)
@@ -22,30 +22,30 @@ it must (a) **emit the contract** (runs, events, HITL gates, health) and (b)
 
 Rather than hand-roll this in every agent, put it in **one shared SDK**. BA
 already implements ~all of these mechanics (event bus, `/runs`, `/agent/watch`
-SSE, `/agent/health`, HITL via `waiting_for_input`) — so for BA this is mostly an
+SSE, `/agent/health`, HITL via `waiting_for_input`) - so for BA this is mostly an
 **extract-and-generalize** job, not a greenfield build.
 
 ---
 
-## Part A — The SDK (what to build)
+## Part A - The SDK (what to build)
 
 ### A.0 Packaging
 
 - Standalone, installable Python package. Working name **`agency-agent-sdk`**,
   import module **`agency_sdk`**.
-- **Zero agent-specific imports** — no Teamwork/Slack/spec/EARS logic, no BA
+- **Zero agent-specific imports** - no Teamwork/Slack/spec/EARS logic, no BA
   database models. It must be `pip install`-able by KA and SA unchanged.
 - If our agents share a monorepo, put it in `packages/agent-sdk/`. If they're
   separate repos, publish it (private index or `pip install git+…@v0.1`) and
   **pin a version**.
 - Python ≥ 3.12, **Pydantic v2**, **FastAPI** (match the agents' stack).
 
-### A.1 Contract types (Pydantic v2 — envelope + facet)
+### A.1 Contract types (Pydantic v2 - envelope + facet)
 
 Define a `SCHEMA_VERSION = "0.5"` constant, stamped on every emitted payload. The
 contract has two layers: a shared **envelope** (run lifecycle, health, gates, events,
 work-item ref) every agent emits identically and the dashboard renders generically, and
-a per-agent **facet** (`Run.artifact.facet`) carrying your craft's focus metrics —
+a per-agent **facet** (`Run.artifact.facet`) carrying your craft's focus metrics -
 `SpecFacet` (BA), `DesignFacet` (SA), `CodeFacet` (Dev), `TestFacet` (QA), … with a
 `GenericFacet` fallback so any agent still renders. **Put your structured metrics in the
 right facet** (BA's structural gate → `SpecFacet.structural`/`ears_coverage`/`missing_sections`,
@@ -55,7 +55,7 @@ with `completeness`/`dimensions` as a derived readout); only genuinely freeform 
 > **Canonical schema:** the authoritative contract is **`agent-contract.schema.json`**
 > (it lives in the Agency OS repo at `src/contract/`; copy it into this repo
 > **version-pinned**). The Pydantic models below must **conform to / be generated
-> from** that schema — the conformance suite (A.7) verifies it. Treat the models
+> from** that schema - the conformance suite (A.7) verifies it. Treat the models
 > here as the reference shape, not a second source of truth.
 
 ```python
@@ -68,7 +68,7 @@ class ProjectRef(BaseModel):   # scope a run / work item belongs to (SDLC: a pro
 # discarded, fresh run needed), blocked (stuck), error (a run failed). Map your
 # native status onto these (BA: active→in_progress, waiting_for_input→waiting,
 # spec_ready→ready, approved→approved, reset→reset, blocked→blocked, error→error).
-# Only the *artifact* differs per agent (BA spec, SA design, QA tests) — this
+# Only the *artifact* differs per agent (BA spec, SA design, QA tests) - this
 # lifecycle is the same for all.
 LifecycleStage = Literal[
     "backlog", "in_progress", "waiting", "ready", "approved", "delivered",
@@ -83,7 +83,7 @@ class ArtifactRef(BaseModel):  # the thing the agent produces & advances (BA: SP
     producer_agent_id: str | None = None
     stage: LifecycleStage
     version: int | None = None
-    completeness: float | None = None   # overall 0–100, if scored
+    completeness: float | None = None   # overall 0-100, if scored
     url: str | None = None              # deep-link into the agent's own tool
     updated_at: datetime | None = None
 
@@ -207,37 +207,37 @@ serves the Agent Card (A.6) from the constructor args.
 
 ### A.3 Standard endpoints (served by the factory)
 
-- `GET /.well-known/agent-card.json` — the Agent Card (A.6)
-- `GET /runs` — all runs, newest first (paginated); `GET /runs/{id}`; `GET /runs/by-work-item/{id}`
-- `GET /agent/watch/{run_id_or_work_item}` — **SSE** stream: replay buffer **+** live tail
-- `GET /agent/watchable` — list of streamable run/session ids
-- `GET /agent/health` — `AgentHealth` (rich readiness; 503 if unhealthy)
-- `GET /agent/active` — runs in progress
-- `GET /agent/gates` — **all open HITL gates** (`HITLGate[]`), regardless of kind.
+- `GET /.well-known/agent-card.json` - the Agent Card (A.6)
+- `GET /runs` - all runs, newest first (paginated); `GET /runs/{id}`; `GET /runs/by-work-item/{id}`
+- `GET /agent/watch/{run_id_or_work_item}` - **SSE** stream: replay buffer **+** live tail
+- `GET /agent/watchable` - list of streamable run/session ids
+- `GET /agent/health` - `AgentHealth` (rich readiness; 503 if unhealthy)
+- `GET /agent/active` - runs in progress
+- `GET /agent/gates` - **all open HITL gates** (`HITLGate[]`), regardless of kind.
   Two kinds, one per HITL _moment_ (see A.4): `clarification` (blocked mid-run,
   needs an answer) and `approval` (an artifact it produced is ready for review).
   _BA's native API still splits these across `GET /agent/interrupted`
   (`waiting_for_input` → clarification) and `GET /session/pending-approval`
   (`spec_ready` → approval); its SDK surface merges them into this single unified
   `/agency/gates`, which the dashboard consumes directly._
-- `GET /agent/events/recent` — recent **lifecycle events** as `AgentEvent[]`
+- `GET /agent/events/recent` - recent **lifecycle events** as `AgentEvent[]`
   (`type: "lifecycle.changed"`, the new stage in `data.stage`): resets, approvals,
-  blocks. Powers the activity feed without the SSE stream — and a replay buffer for
+  blocks. Powers the activity feed without the SSE stream - and a replay buffer for
   it. _BA pre-SDK: add it now per `ba-events-endpoint.md`._
 
-**Planned (product SKU — contract v0.6, NOT in v0.5).** The product SKU's in-app
+**Planned (product SKU - contract v0.6, NOT in v0.5).** The product SKU's in-app
 control surface (see `docs/product-vision-deep-dive.md`, Contract evolution
 register) adds write ops the factory will serve once contract v0.6 lands. Listed
 here so the seam is visible; do **not** build them against v0.5:
 
-- `POST /agency/gates/{id}/resolve` — `{decision, reason (required), answer?,
-  actor, idempotency_key}`; returns `409` if already resolved (CAS semantics —
+- `POST /agency/gates/{id}/resolve` - `{decision, reason (required), answer?,
+  actor, idempotency_key}`; returns `409` if already resolved (CAS semantics -
   the dual-channel race with Slack resolve is agent-arbitrated)
 - `POST /agency/control/pause` / `POST /agency/control/resume`
 - `POST /agency/runs/{id}/retry` / `POST /agency/runs/{id}/cancel`
-- `PUT /agency/config` — typed subset (Slack routing, approver ids, source
+- `PUT /agency/config` - typed subset (Slack routing, approver ids, source
   bindings, pause), advertised via card `capabilities.config`
-- `GET /agency/artifacts/{id}` — artifact content + structured facet payload
+- `GET /agency/artifacts/{id}` - artifact content + structured facet payload
 
 ### A.4 Run / event / HITL API (what agent code calls)
 
@@ -261,13 +261,13 @@ async def handle_task(task):
 ```
 
 - **Two HITL moments, one type.** Every gate is a `HITLGate`, distinguished by `kind`:
-  - `clarification` — the agent is **blocked mid-run** and needs a human answer to
+  - `clarification` - the agent is **blocked mid-run** and needs a human answer to
     continue (BA: LangGraph `__interrupt__` → `waiting_for_input` → Slack reply).
-  - `approval` — an **artifact the agent produced is ready for human review/sign-off**
+  - `approval` - an **artifact the agent produced is ready for human review/sign-off**
     (BA: `spec_ready`). Generalizes across the fleet: SA → "design ready", QA →
     "tests ready", a Knowledge agent → "doc ready", etc.
     The dashboard renders both in one Human-gates queue (distinct chips) and
-    **deep-links** to the agent's own tool for the artifact-heavy review — the SDK
+    **deep-links** to the agent's own tool for the artifact-heavy review - the SDK
     standardizes the _gate_, not the artifact's content (see architecture §5).
 - `run.request_approval(...)` should integrate with the agent's **existing**
   interrupt/resume mechanism (for BA: the LangGraph `__interrupt__` →
@@ -320,7 +320,7 @@ Served at `/.well-known/agent-card.json`, built from the `Agent(...)` args:
 }
 ```
 
-Adopt the **Card only** — do **not** implement the rest of the A2A protocol
+Adopt the **Card only** - do **not** implement the rest of the A2A protocol
 (no JSON-RPC tasks/messages). The dashboard reads our REST + SSE directly.
 
 ### A.7 Versioning & conformance
@@ -334,11 +334,11 @@ Adopt the **Card only** — do **not** implement the rest of the A2A protocol
 
 ---
 
-## Part B — First implementation: BA (extract, don't rewrite)
+## Part B - First implementation: BA (extract, don't rewrite)
 
 BA already has all the mechanics. **Lift them into the SDK, generalize, and have
 BA consume the SDK.** Approximate current locations (verify against the live
-codebase — these are from an earlier read and may have moved):
+codebase - these are from an earlier read and may have moved):
 
 | Mechanic                                       | Likely BA location to harvest                                               |
 | ---------------------------------------------- | --------------------------------------------------------------------------- |
@@ -378,13 +378,13 @@ SDLC scope dimension the dashboard filters by.
 mount `agent.router()` (or replace its routers with the SDK's), and replace inline
 event/run/HITL emission with the SDK API. Serve the card with BA's real values.
 
-**Don't break flow-observer.** BA's own dashboard must keep working — the SDK
+**Don't break flow-observer.** BA's own dashboard must keep working - the SDK
 endpoints should serve the same shapes flow-observer already consumes (or update
 flow-observer to the contract shapes in the same change).
 
 ---
 
-## Part C — Adopting it in KA / SA (the payoff)
+## Part C - Adopting it in KA / SA (the payoff)
 
 For the next agent, there's no plumbing to write:
 
@@ -423,10 +423,10 @@ app = agent.fastapi_app()
 ## Constraints / don'ts
 
 - **Card only**, not the full A2A protocol.
-- **No agent-specific behavior in the SDK** — it ships the SDLC facet *types* but no
+- **No agent-specific behavior in the SDK** - it ships the SDLC facet *types* but no
   Teamwork/Slack/spec *logic*; that stays in the agent.
 - API key / auth header name is **configurable**; secret values come from **env**,
   never hard-coded.
 - Backward-compatible, additive evolution; bump `SCHEMA_VERSION` only for breaks.
-- Keep the agent's existing HITL/runtime logic — the SDK standardizes
+- Keep the agent's existing HITL/runtime logic - the SDK standardizes
   _representation + emission_, not the agent's brain.

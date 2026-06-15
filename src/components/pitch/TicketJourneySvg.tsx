@@ -1,12 +1,12 @@
 /**
- * TicketJourneySvg (/pitch, Act II) — "one ticket's journey" as a static
+ * TicketJourneySvg (/pitch, Act II) - "one ticket's journey" as a static
  * three-lane SVG: the client's board (Jira/Teamwork) on top, the pod
  * (Agency OS) in the middle, the channels (Slack · email) below.
  * Visualizes the tracker boundary ("the board is the doorbell; Agency OS
- * is the house"), per-agent artifacts (SPEC.md belongs to the BA — every
+ * is the house"), per-agent artifacts (SPEC.md belongs to the BA - every
  * agent ships its own), and proactive outbound comms (digests, preps,
  * weekly reports, escalations pushed to Slack/email). Light-theme,
- * hard-coded, print-safe — a document figure, not an app.
+ * hard-coded, print-safe - a document figure, not an app.
  */
 
 const mono = "ui-monospace, SFMono-Regular, Menlo, monospace";
@@ -75,7 +75,7 @@ function Node({
   );
 }
 
-/** Soft outbound chip — the proactive comms row in the channels lane. */
+/** Soft outbound chip - the proactive comms row in the channels lane. */
 function OutChip({ x, w, label }: { x: number; w: number; label: string }) {
   return (
     <g>
@@ -116,7 +116,7 @@ export function TicketJourneySvg() {
       </defs>
 
       {/* ---- Lane 1: the client's board ---- */}
-      <Lane y={10} h={96} label="JIRA / TEAMWORK" sub="your board — tickets live here" fill="#f8fafc" stroke="#cbd5e1" />
+      <Lane y={10} h={96} label="JIRA / TEAMWORK" sub="your board - tickets live here" fill="#f8fafc" stroke="#cbd5e1" />
       <Node x={170} y={52} w={120} label="Backlog" tone="neutral" />
       <Node x={330} y={52} w={150} label="Ready · AM-142" tone="gate" />
       <Node x={640} y={52} w={180} label="Done ✓ + artifact links" tone="live" />
@@ -125,8 +125,8 @@ export function TicketJourneySvg() {
         the drag = the doorbell
       </text>
 
-      {/* ---- Lane 2: the pod — each agent ships its OWN artifact ---- */}
-      <Lane y={148} h={96} label="AGENCY OS" sub="the pod — agents, gates, ledger · each agent ships its own artifact" fill="#eef2ff" stroke="#c7d2fe" />
+      {/* ---- Lane 2: the pod - each agent ships its OWN artifact ---- */}
+      <Lane y={148} h={96} label="AGENCY OS" sub="the pod - agents, gates, ledger · each agent ships its own artifact" fill="#eef2ff" stroke="#c7d2fe" />
       <Node x={170} y={186} w={92} label="BA agent" tone="live" artifact="SPEC.md" />
       <Node x={294} y={186} w={108} label="gate ✓ Ana" tone="gate" />
       <Node x={434} y={186} w={92} label="SA agent" tone="neutral" artifact="DESIGN.md" />
@@ -143,7 +143,7 @@ export function TicketJourneySvg() {
       <Flow d="M 730 182 C 730 140, 730 130, 730 86" label="status + links back" lx={730} ly={140} color="#059669" />
 
       {/* ---- Lane 3: the channels ---- */}
-      <Lane y={286} h={140} label="SLACK · EMAIL" sub="your channels — Slack first-class (Teams next); agents come to you" fill="#ffffff" stroke="#cbd5e1" />
+      <Lane y={286} h={140} label="SLACK · EMAIL" sub="your channels - Slack first-class (Teams next); agents come to you" fill="#ffffff" stroke="#cbd5e1" />
       {/* conversation bubbles */}
       <g>
         <rect x={170} y={324} width={250} height={24} rx={12} fill="#f1f5f9" stroke="#cbd5e1" strokeWidth={1} />
@@ -152,11 +152,11 @@ export function TicketJourneySvg() {
         </text>
         <rect x={244} y={354} width={176} height={22} rx={11} fill="#ecfdf5" stroke="#059669" strokeWidth={1} />
         <text x={256} y={369} fontFamily={mono} fontSize="9.5" fill="#065f46">
-          PM: "Yes — per the SOW."
+          PM: "Yes - per the SOW."
         </text>
         <rect x={520} y={324} width={256} height={24} rx={12} fill="#eef2ff" stroke="#6366f1" strokeWidth={1} />
         <text x={532} y={340} fontFamily={mono} fontSize="9.5" fill="#3730a3">
-          Gate: SPEC ready — Approve? ✓ done
+          Gate: SPEC ready - Approve? ✓ done
         </text>
       </g>
       {/* agent asks down, answer flows up, gate ping down */}
@@ -164,9 +164,9 @@ export function TicketJourneySvg() {
       <Flow d="M 348 354 C 348 310, 348 280, 348 248" label="answer flows back" lx={448} ly={272} color="#059669" />
       <Flow d="M 648 222 C 648 270, 648 285, 648 320" color="#6366f1" />
 
-      {/* proactive outbound row — pushed on the pod's own schedule */}
+      {/* proactive outbound row - pushed on the pod's own schedule */}
       <text x={484} y={388} textAnchor="middle" fontFamily={mono} fontSize="9.5" fontWeight={700} fill="#6366f1">
-        pushed proactively — on the pod's schedule, to Slack and email
+        pushed proactively - on the pod's schedule, to Slack and email
       </text>
       <OutChip x={170} w={150} label="daily digest · 08:00" />
       <OutChip x={336} w={140} label="daily preparation" />

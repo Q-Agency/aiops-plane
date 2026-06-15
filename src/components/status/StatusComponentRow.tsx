@@ -1,12 +1,12 @@
 /**
- * StatusComponentRow — one platform component on /status: state dot +
+ * StatusComponentRow - one platform component on /status: state dot +
  * last-incident line + 90-day uptime bars; the header row expands the
- * last-incident detail (derived from the deterministic uptime seed — the
+ * last-incident detail (derived from the deterministic uptime seed - the
  * Ledger row links to the gap marker in Compliance).
  *
  * Degraded/down current states render "since {t}" inline; the Ledger
  * component carries the active sync-gap copy when degraded (no current
- * seed exercises it — wired for the honesty demo).
+ * seed exercises it - wired for the honesty demo).
  */
 
 import { useState } from "react";
@@ -72,16 +72,16 @@ function agoLabel(ts?: number): string {
   return `last incident · ${d} days ago`;
 }
 
-/** Honest one-liner per component — consistent with the seeded history. */
+/** Honest one-liner per component - consistent with the seeded history. */
 const COMPONENT_NOTES: Record<string, string> = {
   dashboard:
-    "Brief control-plane degradation — your agents were unaffected (the control plane is not in their execution path).",
+    "Brief control-plane degradation - your agents were unaffected (the control plane is not in their execution path).",
   ledger:
-    "A ledger sync gap — agents kept working, the ledger backfilled on reconnect, and the gap is marked honestly in Compliance.",
+    "A ledger sync gap - agents kept working, the ledger backfilled on reconnect, and the gap is marked honestly in Compliance.",
   gateway:
-    "Elevated gateway latency — gate decisions queued and delivered; none were lost.",
-  slack: "Slack bridge delays — gates remained answerable from the dashboard.",
-  tools: "A connected tool rate-limited — retries succeeded; no data was lost.",
+    "Elevated gateway latency - gate decisions queued and delivered; none were lost.",
+  slack: "Slack bridge delays - gates remained answerable from the dashboard.",
+  tools: "A connected tool rate-limited - retries succeeded; no data was lost.",
 };
 
 /* -------------------------------- row --------------------------------- */
@@ -133,19 +133,19 @@ export function StatusComponentRow({ component }: { component: StatusComponent }
 
       {open && (
         <div className="border-t border-border/60 px-4 py-3 space-y-2 text-xs text-muted-foreground">
-          {/* current degraded state — the active sync-gap honesty line */}
+          {/* current degraded state - the active sync-gap honesty line */}
           {degraded && component.since && (
             <div className="text-status-waiting" suppressHydrationWarning>
               {component.id === "ledger"
-                ? `Sync gap open since ${fmtDateTime(component.since)} — the gap will be marked in Compliance.`
-                : `Degraded since ${fmtDateTime(component.since)} — your agents are unaffected.`}
+                ? `Sync gap open since ${fmtDateTime(component.since)} - the gap will be marked in Compliance.`
+                : `Degraded since ${fmtDateTime(component.since)} - your agents are unaffected.`}
             </div>
           )}
 
           {/* last incident, derived from the seeded uptime history */}
           {run ? (
             <div>
-              <span className="text-foreground">{fmtDay(run[0].day)}</span> — degraded for{" "}
+              <span className="text-foreground">{fmtDay(run[0].day)}</span> - degraded for{" "}
               {run.length} day{run.length === 1 ? "" : "s"}, lowest daily uptime{" "}
               <span className="font-mono tabular-nums text-foreground">
                 {Math.min(...run.map((d) => d.pct))}%
@@ -156,7 +156,7 @@ export function StatusComponentRow({ component }: { component: StatusComponent }
             <div>No degradation recorded in the 90-day window.</div>
           )}
 
-          <div>{COMPONENT_NOTES[component.id] ?? "Resolved — no client action was needed."}</div>
+          <div>{COMPONENT_NOTES[component.id] ?? "Resolved - no client action was needed."}</div>
 
           {component.id === "ledger" && (
             <Link

@@ -1,7 +1,7 @@
 /**
- * DecisionRecordsList — the design's architecture decision records on the
+ * DecisionRecordsList - the design's architecture decision records on the
  * SA gate review: chosen option vs alternatives, the rationale, and an
- * honest confidence badge — Low-confidence decisions are marked and
+ * honest confidence badge - Low-confidence decisions are marked and
  * surfaced for human attention (same honesty discipline as the spec's
  * V7 marking), because the reviewer's job is exactly these judgment calls.
  */
@@ -26,7 +26,7 @@ export function DecisionRecordsList({ records }: { records: DecisionRecord[] }) 
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        The judgment calls inside this design — what was chosen, what was not, and why.
+        The judgment calls inside this design - what was chosen, what was not, and why.
         Low-confidence decisions are marked: they are where your review earns its keep.
       </p>
       <div className="mt-3 space-y-3">
@@ -53,7 +53,7 @@ export function DecisionRecordsList({ records }: { records: DecisionRecord[] }) 
                     : "border-status-done/40 bg-status-done/10 text-status-done",
                 )}
               >
-                {r.confidence === "low" ? "low confidence — review this" : "high confidence"}
+                {r.confidence === "low" ? "low confidence - review this" : "high confidence"}
               </span>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">

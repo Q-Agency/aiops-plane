@@ -1,19 +1,19 @@
 /**
- * WelcomeFlow — /welcome, the Welcome & Accountability Handshake (P1-O2).
+ * WelcomeFlow - /welcome, the Welcome & Accountability Handshake (P1-O2).
  * The accountable human's first session: a role charter, a guided
  * first-gate walkthrough, and an explicit, AUDITED "Accept accountability"
- * action. Coverage isn't assigned, it's accepted — and provable.
+ * action. Coverage isn't assigned, it's accepted - and provable.
  *
  * Single centered column (max-w-3xl), three stacked stages with slim
  * progress dots. States: fresh (CTA unlocks once the walkthrough is
  * opened) · already-accepted (collapses to the stamp via localStorage) ·
- * multiple agents (?variant=multi — Ana with two charters, one Accept
- * covers all) · deputy (?variant=deputy — covers-not-owns) · expired
+ * multiple agents (?variant=multi - Ana with two charters, one Accept
+ * covers all) · deputy (?variant=deputy - covers-not-owns) · expired
  * invite (?invite=expired).
  *
  * Accept → alert-dialog → appendAuditMock("accountability.accepted") per
  * covered agent → toast → routes to "/" after a beat. The /pod matrix
- * flips Ana's amber "assigned — not yet accepted" cells to the solid "A".
+ * flips Ana's amber "assigned - not yet accepted" cells to the solid "A".
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -30,13 +30,13 @@ import { recordAcceptance, useAcceptance, UNACCEPTED_HUMAN_ID } from "./acceptan
 
 export type WelcomeVariant = "single" | "multi" | "deputy";
 
-/** Seeded invite personas — joins humans.ts assignments (no new dataset). */
+/** Seeded invite personas - joins humans.ts assignments (no new dataset). */
 const PERSONAS: Record<WelcomeVariant, { humanId: string; agentIds: string[]; deputyOf?: string }> = {
   // Ana, the BA Agent's accountable human (the /pod amber cell).
   single: { humanId: UNACCEPTED_HUMAN_ID, agentIds: ["ba"] },
-  // Ana covering both her assigned agents — one Accept covers all.
+  // Ana covering both her assigned agents - one Accept covers all.
   multi: { humanId: UNACCEPTED_HUMAN_ID, agentIds: ["ba", "pm"] },
-  // Petra covers the BA Agent while Ana is OOO — covers, not owns.
+  // Petra covers the BA Agent while Ana is OOO - covers, not owns.
   deputy: { humanId: "petra", agentIds: ["ba"], deputyOf: "Ana Kovač" },
 };
 
@@ -82,8 +82,8 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
         action: "accountability.accepted",
         target: agentId,
         detail: persona.deputyOf
-          ? `deputy coverage accepted via /welcome — accountability stays with ${persona.deputyOf}`
-          : "accepted via /welcome — coverage is accepted, not assigned",
+          ? `deputy coverage accepted via /welcome - accountability stays with ${persona.deputyOf}`
+          : "accepted via /welcome - coverage is accepted, not assigned",
         actorName: human.name,
       });
       firstLedgerId ??= entry.id;
@@ -95,7 +95,7 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
       ledgerId: firstLedgerId ?? 0,
       deputyOf: persona.deputyOf,
     });
-    toast.success("Accountability accepted — written to the audit ledger ✓", {
+    toast.success("Accountability accepted - written to the audit ledger ✓", {
       description: `accountability.accepted · ${persona.agentIds.join(", ")} · ledger #${firstLedgerId} · actor ${human.name}`,
     });
     leaveTimer.current = setTimeout(() => navigate({ to: "/" }), 1400);
@@ -110,7 +110,7 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
             <MailX className="size-5" />
           </div>
           <div className="text-sm font-semibold">
-            This invite link has expired — ask your Pod Admin to re-send it.
+            This invite link has expired - ask your Pod Admin to re-send it.
           </div>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
             Invite links are one-time and short-lived on purpose: acceptance has to be attributable
@@ -153,7 +153,7 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
             <div className="text-xs text-muted-foreground mt-0.5">
               Recorded as{" "}
               <span className="font-mono text-[11px]">accountability.accepted</span> on the audit
-              ledger — coverage is accepted, not assigned.
+              ledger - coverage is accepted, not assigned.
             </div>
           </div>
           <Link
@@ -180,7 +180,7 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
       <Header humanName={human.name} humanRole={human.role} />
       <ProgressDots stage={stage} />
 
-      {/* stage 1 — charter */}
+      {/* stage 1 - charter */}
       <section className="space-y-2">
         <StageHead icon={ScrollText} n={1} title="Your charter" />
         <div className="space-y-3">
@@ -195,13 +195,13 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
               onClick={openWalkthrough}
               className="h-8 px-3 rounded-md border border-primary/50 bg-primary/15 text-primary text-[11px] font-semibold uppercase tracking-wider hover:bg-primary/25 transition-colors"
             >
-              Continue — see how a gate review works
+              Continue - see how a gate review works
             </button>
           </div>
         )}
       </section>
 
-      {/* stage 2 — first-gate walkthrough */}
+      {/* stage 2 - first-gate walkthrough */}
       <section ref={walkthroughRef} className="space-y-2 scroll-mt-6">
         <StageHead icon={BookOpenCheck} n={2} title="Your first gate, guided" />
         <FirstGateWalkthrough
@@ -211,7 +211,7 @@ export function WelcomeFlow({ variant = "single", inviteExpired = false }: Welco
         />
       </section>
 
-      {/* stage 3 — accept */}
+      {/* stage 3 - accept */}
       <section ref={acceptRef} className="space-y-2 scroll-mt-6">
         <StageHead icon={Handshake} n={3} title="Accept accountability" />
         <AcceptAccountabilityPanel
@@ -247,10 +247,10 @@ function Header({ humanName, humanRole }: { humanName: string; humanRole: string
         accountability handshake · {humanName} · {humanRole}
       </div>
       <h1 className="text-xl font-semibold tracking-tight">
-        Welcome — you&apos;re the accountable human.
+        Welcome - you&apos;re the accountable human.
       </h1>
       <p className="text-xs text-muted-foreground">
-        Coverage isn&apos;t assigned, it&apos;s accepted — and provable on the audit ledger.
+        Coverage isn&apos;t assigned, it&apos;s accepted - and provable on the audit ledger.
       </p>
     </div>
   );
@@ -307,7 +307,7 @@ function StageHead({
   );
 }
 
-/** Quiet demo affordance — the seeded invite states are search-param driven. */
+/** Quiet demo affordance - the seeded invite states are search-param driven. */
 function DemoVariantFooter() {
   return (
     <div className="flex items-center justify-center gap-2 text-[10px] font-mono text-muted-foreground/60 pt-2">

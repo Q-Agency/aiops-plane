@@ -1,13 +1,13 @@
 /**
- * NotificationBell (C6) — the TopBar bell: unread dot + the inbox popover.
+ * NotificationBell (C6) - the TopBar bell: unread dot + the inbox popover.
  *
  * Spec ("Notification Bell + Inbox Popover"): rows grouped by recency
  * (Now / Earlier today / This week), unread left-accent, inline action
- * buttons, 20-row cap with "+N more — open inbox", "Mark all read",
+ * buttons, 20-row cap with "+N more - open inbox", "Mark all read",
  * a gear deep-linking to /notifications Preferences, and an "Open inbox"
  * footer. Read-state is the localStorage overlay from notifications.ts
  * ("aiops_notif_read"), hydrated in a mounted useEffect (SSR-safe: the
- * server render shows seed state only — no window access during render).
+ * server render shows seed state only - no window access during render).
  */
 
 import { useEffect, useState } from "react";
@@ -43,7 +43,7 @@ export function NotificationBell() {
     setMounted(true);
   }, []);
 
-  // Demo Director staged events append via pushNotification — repaint on tick
+  // Demo Director staged events append via pushNotification - repaint on tick
   // so the bell pulses the moment a staged beat lands.
   useDemoTick();
 
@@ -142,7 +142,7 @@ export function NotificationBell() {
               onClick={() => goTo("/notifications")}
               className="w-full px-3 py-2 text-center text-[11px] text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
             >
-              +{overflow} more — open inbox
+              +{overflow} more - open inbox
             </button>
           )}
         </div>

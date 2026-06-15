@@ -100,7 +100,7 @@ function RegistryView() {
     if (!url.trim() || validating) return;
     setValidating(true);
     setCard(null);
-    // simulate the card fetch + contract check (UI only — data is deterministic)
+    // simulate the card fetch + contract check (UI only - data is deterministic)
     setTimeout(() => {
       setCard(validateAgentCard(url));
       setValidating(false);
@@ -113,7 +113,7 @@ function RegistryView() {
       { ...card, config },
       ...prev.filter((c) => c.url !== card.url),
     ]);
-    const ownerName = humans.find((h) => h.id === config.ownerId)?.name ?? "—";
+    const ownerName = humans.find((h) => h.id === config.ownerId)?.name ?? "-";
     appendAuditMock({
       action: "agent.registered",
       target: card.name,
@@ -124,7 +124,7 @@ function RegistryView() {
       } · owner ${ownerName} · starts at L0`,
     });
     toast.success(`${card.name} registered into the fleet`, {
-      description: "Governed at L0 (review all) — agent.registered written to the ledger.",
+      description: "Governed at L0 (review all) - agent.registered written to the ledger.",
     });
     setCard(null);
     setUrl("");
@@ -145,7 +145,7 @@ function RegistryView() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">Agent Registry</h1>
           <div className="text-xs text-muted-foreground mt-0.5 max-w-2xl">
-            Bring <span className="text-foreground">any</span> agent under governance — not just
+            Bring <span className="text-foreground">any</span> agent under governance - not just
             SDLC. The control plane governs agents, not a fixed workflow: anything that speaks the
             contract joins the fleet, gated and audited like the rest.
           </div>
@@ -158,7 +158,7 @@ function RegistryView() {
         </Link>
       </div>
 
-      {/* thesis — why any agent is governable */}
+      {/* thesis - why any agent is governable */}
       <section className="glass-panel p-4 lg:p-5">
         <div className="grid lg:grid-cols-[1.05fr_1.45fr] gap-5">
           <div>
@@ -170,7 +170,7 @@ function RegistryView() {
             </h2>
             <p className="text-sm text-muted-foreground mt-1.5">
               A refund approval and a deploy approval are the{" "}
-              <span className="text-foreground">same gate</span> — so the platform doesn't care
+              <span className="text-foreground">same gate</span> - so the platform doesn't care
               whether an agent ships code, closes tickets or reconciles invoices. Meet four
               obligations and it's in the fleet.
             </p>
@@ -206,7 +206,7 @@ function RegistryView() {
         <Kpi icon={FileCheck2} label="Contract" value={CONTRACT_VERSION} sub="A2A-aligned envelope" />
       </section>
 
-      {/* catalog — packs by domain */}
+      {/* catalog - packs by domain */}
       <section className="space-y-2">
         <SectionHead
           icon={Layers}
@@ -249,7 +249,7 @@ function RegistryView() {
                       <span className="size-1.5 rounded-full bg-muted-foreground/50 mt-1.5 shrink-0" />
                       <span>
                         <span className="font-medium text-foreground">{a.name}</span>
-                        <span className="text-muted-foreground"> — {a.role}</span>
+                        <span className="text-muted-foreground"> - {a.role}</span>
                       </span>
                     </li>
                   ))}
@@ -290,13 +290,13 @@ function RegistryView() {
         <SectionHead
           icon={Link2}
           title="Register a custom agent"
-          sub="paste an Agent Card URL — any vendor, any domain"
+          sub="paste an Agent Card URL - any vendor, any domain"
         />
         <div className="glass-panel p-4 space-y-3">
           <p className="text-xs text-muted-foreground max-w-3xl">
             Point us at any agent's A2A card. We validate it against the contract, then bring it
             under the <span className="text-foreground">same gates, ledger and accountability</span>{" "}
-            as the rest of the fleet. Not on the catalog? It still works — the contract is the only
+            as the rest of the fleet. Not on the catalog? It still works - the contract is the only
             requirement.
           </p>
 
@@ -343,7 +343,7 @@ function RegistryView() {
               Registered this session ({registered.length})
             </div>
             {registered.map((c) => {
-              const ownerName = humans.find((h) => h.id === c.config.ownerId)?.name ?? "—";
+              const ownerName = humans.find((h) => h.id === c.config.ownerId)?.name ?? "-";
               return (
                 <div key={c.url} className="glass-panel flex items-center gap-3 p-3">
                   <CheckCircle2 className="size-5 text-status-done shrink-0" />
@@ -393,7 +393,7 @@ function CardPreview({
   card: AgentCard;
   onRegister: (config: AgentRegistration) => void;
 }) {
-  // Configure step — seeded per domain; a registered agent gets a SCOPED
+  // Configure step - seeded per domain; a registered agent gets a SCOPED
   // setup (tools, inference, owner), never blanket access.
   const [tools, setTools] = useState<Set<ConnectorId>>(
     () => new Set(DOMAIN_SUGGESTED_TOOLS[card.domain]),
@@ -502,7 +502,7 @@ function CardPreview({
           </div>
         </div>
 
-        {/* inference — MANDATORY: a Q model-plane tier OR the agent's own engine */}
+        {/* inference - MANDATORY: a Q model-plane tier OR the agent's own engine */}
         <div>
           <div className="text-[10px] font-mono text-muted-foreground mb-1.5">
             inference <span className="text-status-waiting">· required</span>
@@ -537,7 +537,7 @@ function CardPreview({
               <span className="ml-auto font-mono text-[10px] text-muted-foreground">external</span>
             </div>
             <div className="mt-1 pl-6 text-[11px] text-muted-foreground">
-              Runs its own engine — we govern its actions, not its weights.
+              Runs its own engine - we govern its actions, not its weights.
             </div>
           </button>
         </div>
@@ -552,18 +552,18 @@ function CardPreview({
           >
             {humans.map((h) => (
               <option key={h.id} value={h.id} className="bg-panel text-foreground">
-                {h.name} — {h.role}
+                {h.name} - {h.role}
               </option>
             ))}
           </select>
           <div className="text-[10px] text-muted-foreground/80 mt-1">
-            Signs its gates — someone answers for it from minute one.
+            Signs its gates - someone answers for it from minute one.
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 flex-wrap border-t border-border pt-2.5">
           <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
-            <ShieldCheck className="size-3 text-primary" /> starts at L0 · review all — autonomy is
+            <ShieldCheck className="size-3 text-primary" /> starts at L0 · review all - autonomy is
             earned on validator streaks, never granted at the door
           </span>
           <Button

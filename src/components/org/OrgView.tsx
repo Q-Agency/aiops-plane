@@ -1,13 +1,13 @@
 /**
- * OrgView — /org Org Portfolio Rollup (wave 2, P1-C2): every pod in the
+ * OrgView - /org Org Portfolio Rollup (wave 2, P1-C2): every pod in the
  * client org on one page.
  *
- *   1. Header — org chip + period selector (re-scopes the KPI band).
- *   2. Org KPI band — the canonical ROI trio summed across pods, NET of
+ *   1. Header - org chip + period selector (re-scopes the KPI band).
+ *   2. Org KPI band - the canonical ROI trio summed across pods, NET of
  *      plan fees (reuses the RoiHeroTile pattern from /economics).
- *   3. OrgRollupTable — one row per pod from the pod store; row click
+ *   3. OrgRollupTable - one row per pod from the pod store; row click
  *      switches the active pod and lands on that pod's /economics.
- *   4. ExpansionHintCard — the expansion engine's home.
+ *   4. ExpansionHintCard - the expansion engine's home.
  *
  * States: multi-pod populated · single pod ("one pod live" note) ·
  * loading (skeleton rows until the pod store hydrates).
@@ -69,7 +69,7 @@ export function OrgView() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">Your pods</h1>
           <div className="text-xs text-muted-foreground mt-0.5">
-            Every pod in your org — status, ROI net of plan fees, open gates and incidents, spend
+            Every pod in your org - status, ROI net of plan fees, open gates and incidents, spend
             vs cap.
           </div>
         </div>
@@ -98,7 +98,7 @@ export function OrgView() {
         </div>
       </div>
 
-      {/* 2 · Org KPI band — canonical trio, net of plan fees */}
+      {/* 2 · Org KPI band - canonical trio, net of plan fees */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
         <div className="rounded-md border border-primary/30 bg-panel/40 backdrop-blur-md p-4 flex flex-col gap-1.5">
           <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
@@ -109,7 +109,7 @@ export function OrgView() {
               className="text-3xl font-semibold font-mono tabular-nums text-primary"
               suppressHydrationWarning
             >
-              {totals.mergedCount > 0 ? `${totals.roiMultiple}×` : "—"}
+              {totals.mergedCount > 0 ? `${totals.roiMultiple}×` : "-"}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground">net of plan fees</span>
           </div>
@@ -120,18 +120,18 @@ export function OrgView() {
         </div>
         <RoiHeroTile
           label="Human-hours freed"
-          value={totals.mergedCount > 0 ? `${totals.hoursFreed.toLocaleString("en-US")} h` : "—"}
+          value={totals.mergedCount > 0 ? `${totals.hoursFreed.toLocaleString("en-US")} h` : "-"}
           subcaption={`= ${usd0(totals.valueUsd)} at your blended rate (${derived.rateLine})`}
         />
         <RoiHeroTile
           label="Cost / merged ticket"
-          value={totals.mergedCount > 0 ? usd2(totals.costPerMergedUsd) : "—"}
+          value={totals.mergedCount > 0 ? usd2(totals.costPerMergedUsd) : "-"}
           tier="as_agents_ship"
           subcaption={`${totals.mergedCount} merged across pods`}
         />
         <RoiHeroTile
           label="Cost / story point"
-          value={totals.storyPoints > 0 ? usd2(totals.costPerStoryPointUsd) : "—"}
+          value={totals.storyPoints > 0 ? usd2(totals.costPerStoryPointUsd) : "-"}
           tier="as_agents_ship"
           subcaption={`${totals.storyPoints} story points across pods`}
         />
@@ -145,7 +145,7 @@ export function OrgView() {
           </span>
           {hydrated && pods.length === 1 && (
             <span className="text-[11px] text-muted-foreground font-mono">
-              One pod live — the portfolio view grows with you.
+              One pod live - the portfolio view grows with you.
             </span>
           )}
         </div>

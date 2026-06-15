@@ -3,7 +3,7 @@
  * kind icon/label/tone maps (tone = the producing agent's color token via
  * the chain contract), the approver join from the version-timeline seeds,
  * the ApproverChip, and the minimal line-level diff used by the
- * rejected-iteration demo (line add/remove tinting — no word-level diff).
+ * rejected-iteration demo (line add/remove tinting - no word-level diff).
  */
 
 import type { LucideIcon } from "lucide-react";
@@ -63,7 +63,7 @@ export const KIND_TONE: Record<ArtifactKind, string> = {
   knowledge: "text-agent-curator",
 };
 
-/** Contract order — keeps filter options in pipeline order. */
+/** Contract order - keeps filter options in pipeline order. */
 export const KIND_ORDER: ArtifactKind[] = [
   "spec",
   "design",
@@ -85,7 +85,7 @@ export function approverFor(s: ArtifactSnapshot): string {
   const it = artifactVersions(s.ticketId).find(
     (i) => i.kind === s.kind && i.version === s.version && i.state === "approved",
   );
-  return it?.actorName ?? "—";
+  return it?.actorName ?? "-";
 }
 
 /** True when the snapshot's timeline carries a rejected iteration (diff demo). */
@@ -122,7 +122,7 @@ export function ApproverChip({ name, className }: { name: string; className?: st
 }
 
 /* ------------------------------------------------------------------ */
-/* Minimal line diff (LCS over lines — bodies are small)                */
+/* Minimal line diff (LCS over lines - bodies are small)                */
 /* ------------------------------------------------------------------ */
 
 export type DiffLineType = "same" | "add" | "del";
@@ -173,7 +173,7 @@ const DIFF_LINE_TONE: Record<DiffLineType, string> = {
 
 const DIFF_GLYPH: Record<DiffLineType, string> = { same: " ", add: "+", del: "−" };
 
-/** Line-level add/remove tinting — enough for the rejected-iteration demo. */
+/** Line-level add/remove tinting - enough for the rejected-iteration demo. */
 export function LineDiff({ before, after }: { before: string; after: string }) {
   const lines = diffLines(before, after);
   return (

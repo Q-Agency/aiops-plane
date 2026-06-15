@@ -1,10 +1,10 @@
 /**
- * SlaStatusTab (/reports · "SLA" tab, C8) — service-level definitions as
+ * SlaStatusTab (/reports · "SLA" tab, C8) - service-level definitions as
  * target-vs-actual rows with breach history.
  *
  * Breached rows are pinned to the top with a red left-border accent; clicking
  * any row opens the SlaBreachDrawer (right Sheet) with that SLA's breach
- * timeline — each breach deep-links to the work item on /pipeline.
+ * timeline - each breach deep-links to the work item on /pipeline.
  */
 
 import { useMemo, useState } from "react";
@@ -176,11 +176,11 @@ export function SlaStatusTab() {
                       <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
                         {s.metric.replace("_", " ")}
                       </div>
-                      {/* P1-O1 clock mode — coverage clocks pause when nobody is staffed */}
+                      {/* P1-O1 clock mode - coverage clocks pause when nobody is staffed */}
                       {clockLine && (
                         <div
                           className="text-[10px] font-mono text-muted-foreground/60 mt-0.5 flex items-center gap-1"
-                          title="coverage_hours clock — the SLA timer pauses outside the pod's staffed window, so overnight waits are not fake breaches"
+                          title="coverage_hours clock - the SLA timer pauses outside the pod's staffed window, so overnight waits are not fake breaches"
                         >
                           <MoonStar className="size-2.5 shrink-0" />
                           {clockLine}
@@ -190,7 +190,7 @@ export function SlaStatusTab() {
                         /* honesty hint: the fake-overnight-breach fix, made visible */
                         <div className="text-[10px] font-mono text-status-waiting/90 mt-0.5">
                           would read {fmtVal(s.wouldBe24x7, s.unit)} under a 24×7 clock
-                          {s.comparator === "lte" && s.wouldBe24x7 > s.targetValue ? " — a breach" : ""}
+                          {s.comparator === "lte" && s.wouldBe24x7 > s.targetValue ? " - a breach" : ""}
                           {" · "}overnight idle excluded, not hidden
                         </div>
                       )}
@@ -218,7 +218,7 @@ export function SlaStatusTab() {
                           {s.breachCount30d}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground/40">—</span>
+                        <span className="text-muted-foreground/40">-</span>
                       )}
                     </td>
                     <td className="px-3 py-2.5">
@@ -233,7 +233,7 @@ export function SlaStatusTab() {
                       </span>
                     </td>
                     <td className="px-3 py-2.5 font-mono text-[10px] text-muted-foreground" suppressHydrationWarning>
-                      {s.lastBreachAt ? fmtDateTime(s.lastBreachAt) : "—"}
+                      {s.lastBreachAt ? fmtDateTime(s.lastBreachAt) : "-"}
                     </td>
                   </tr>
                 );
@@ -272,7 +272,7 @@ function SummaryTile({
 }
 
 /**
- * Bar scaled to max(target, actual) with a tick at the target — honest for
+ * Bar scaled to max(target, actual) with a tick at the target - honest for
  * both "stay under" (lte) and "stay above" (gte) comparators; the fill color
  * carries the verdict.
  */
@@ -325,7 +325,7 @@ function SlaBreachDrawer({ sla, onClose }: { sla: SlaDefinition | null; onClose:
         {sla && meta && (
           <>
             <SheetHeader>
-              <SheetTitle className="text-base">Breach history — {sla.label}</SheetTitle>
+              <SheetTitle className="text-base">Breach history - {sla.label}</SheetTitle>
               <SheetDescription className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-mono uppercase tracking-wider border border-border rounded px-1.5 py-0.5 text-muted-foreground">
                   target {slaTargetLabel(sla)}
@@ -388,7 +388,7 @@ function SlaBreachDrawer({ sla, onClose }: { sla: SlaDefinition | null; onClose:
             </div>
 
             <div className="mt-6 text-[10px] font-mono text-muted-foreground border-t border-border pt-3">
-              Breaches feed the weekly client report — shown honestly, with the mitigation note.
+              Breaches feed the weekly client report - shown honestly, with the mitigation note.
             </div>
           </>
         )}

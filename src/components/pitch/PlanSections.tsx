@@ -1,8 +1,8 @@
 /**
- * PlanSections (/pitch §7–§9) — ROADMAP (high-level build plan), TEAM & EFFORT,
+ * PlanSections (/pitch §7-§9) - ROADMAP (high-level build plan), TEAM & EFFORT,
  * THE ASK, and the footer. The former Pilot-plan section and the detailed
  * 7-deliverable table were removed by the product owner (2026-06-13): the
- * brief is now an internal productization plan — a four-step build over ~3
+ * brief is now an internal productization plan - a four-step build over ~3
  * months, no launch/client/pilot program. The ROI story still lives in Act III
  * where the screens carry it.
  */
@@ -14,7 +14,7 @@ function B({ children }: { children: React.ReactNode }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* §7 ROADMAP — the high-level build plan                              */
+/* §7 ROADMAP - the high-level build plan                              */
 /* ------------------------------------------------------------------ */
 
 const PLAN_STEPS: { n: string; phase: React.ReactNode; what: React.ReactNode; done?: boolean }[] = [
@@ -23,7 +23,7 @@ const PLAN_STEPS: { n: string; phase: React.ReactNode; what: React.ReactNode; do
     phase: <B>Mocked stage</B>,
     what: (
       <>
-        The walkable mock — 43 build-ready screens, the validated UX spec the build is measured
+        The walkable mock - 43 build-ready screens, the validated UX spec the build is measured
         against.
       </>
     ),
@@ -34,7 +34,7 @@ const PLAN_STEPS: { n: string; phase: React.ReactNode; what: React.ReactNode; do
     phase: <B>Architecture &amp; infrastructure design</B>,
     what: (
       <>
-        The technical blueprint and the infra it runs on — dedicated tenancy, EU residency,
+        The technical blueprint and the infra it runs on - dedicated tenancy, EU residency,
         self-hosted inference, the control plane.
       </>
     ),
@@ -60,8 +60,8 @@ export function RoadmapSection() {
   return (
     <PitchSection id="roadmap" kicker="07" title="Roadmap">
       <P>
-        <B>Four steps, ~three months for the build.</B> Step 0 — the mock — is already shipped as
-        the validated UX spec; steps 1–3 build the product underneath it. Two bigger questions sit
+        <B>Four steps, ~three months for the build.</B> Step 0 - the mock - is already shipped as
+        the validated UX spec; steps 1-3 build the product underneath it. Two bigger questions sit
         deliberately <em>beyond</em> the build, taken up once it has proven out.
       </P>
 
@@ -104,11 +104,11 @@ export function RoadmapSection() {
       </p>
       <Bullets>
         <Bullet>
-          <B>Support for general agents</B> — open the same governed harness to any agent by its
+          <B>Support for general agents</B> - open the same governed harness to any agent by its
           contract, beyond the SDLC (the registry surface is already mocked for it).
         </Bullet>
         <Bullet>
-          <B>Decide whether — and how — to sell it</B> — taking Agency OS to clients as a product is
+          <B>Decide whether - and how - to sell it</B> - taking Agency OS to clients as a product is
           a deliberate decision made once it has proven out internally, not an assumption baked in
           now.
         </Bullet>
@@ -127,7 +127,7 @@ const TEAM_ROWS: { role: React.ReactNode; load: string; mandate: React.ReactNode
     load: "Full-time",
     mandate: (
       <>
-        Leads the build end-to-end; designs and validates the <B>PM (orchestrator) agent</B> — the
+        Leads the build end-to-end; designs and validates the <B>PM (orchestrator) agent</B> - the
         role its human owner knows best
       </>
     ),
@@ -137,7 +137,7 @@ const TEAM_ROWS: { role: React.ReactNode; load: string; mandate: React.ReactNode
     load: "Full-time",
     mandate: (
       <>
-        The agent fleet on the shared contract — harness, prompts, <B>eval suites</B> before any
+        The agent fleet on the shared contract - harness, prompts, <B>eval suites</B> before any
         version ships, cost-aware model routing
       </>
     ),
@@ -157,7 +157,7 @@ const TEAM_ROWS: { role: React.ReactNode; load: string; mandate: React.ReactNode
     load: "Full-time",
     mandate: (
       <>
-        Builds the <B>control plane</B> and the services under the dashboard — entities, federation,
+        Builds the <B>control plane</B> and the services under the dashboard - entities, federation,
         gate write-back, integrations
       </>
     ),
@@ -182,7 +182,7 @@ export function TeamSection() {
   return (
     <PitchSection id="team" kicker="08" title="Team &amp; effort">
       <P>
-        <B>The team is the thesis, staffed.</B> Agency OS sells one accountable human per agent — so
+        <B>The team is the thesis, staffed.</B> Agency OS sells one accountable human per agent - so
         we build it the same way: every agent is designed and validated by the person who does that
         job today. The PM who runs delivery shapes the orchestrator; the DevOps lead owns the
         DevOps agent; the QA engineer owns the QA agent. The platform dogfoods its own
@@ -217,8 +217,8 @@ export function TeamSection() {
       </div>
 
       <P>
-        <B>Effort — a seven-person core, full-time, over ~3 months.</B> Step 0 (the mock) is shipped;
-        the three months cover steps 1–3. The two hardest tracks run in parallel without
+        <B>Effort - a seven-person core, full-time, over ~3 months.</B> Step 0 (the mock) is shipped;
+        the three months cover steps 1-3. The two hardest tracks run in parallel without
         contention: the <B>control plane has a dedicated backend owner</B> and the agent fleet its
         own engineering pair.
       </P>
@@ -235,21 +235,21 @@ export function AskSection() {
     <PitchSection id="ask" kicker="09" title="The ask">
       <Bullets>
         <Bullet>
-          <B>Approve the productization track</B> — Agency OS built as a product along the four-step
+          <B>Approve the productization track</B> - Agency OS built as a product along the four-step
           plan above.
         </Bullet>
         <Bullet>
-          <B>Resource the seven-person core team</B> — full-time for the ~3-month build.
+          <B>Resource the seven-person core team</B> - full-time for the ~3-month build.
         </Bullet>
         <Bullet>
-          <B>Kick off step 1 now</B> — the architecture &amp; infrastructure design — so the build
+          <B>Kick off step 1 now</B> - the architecture &amp; infrastructure design - so the build
           starts against a spec that already exists.
         </Bullet>
       </Bullets>
 
       <div className="break-inside-avoid rounded-xl border border-slate-300 bg-slate-50 p-5 sm:p-6">
         <p className="text-[15px] leading-7 text-slate-700">
-          <B>See it for yourself.</B> The demo is the app behind this page — leave /pitch and
+          <B>See it for yourself.</B> The demo is the app behind this page - leave /pitch and
           you are in it. Log in with{" "}
           <span className="whitespace-nowrap rounded bg-white px-1.5 py-0.5 font-mono text-[13px] font-semibold text-slate-800 ring-1 ring-slate-200">
             qai@q.agency / demo
@@ -269,7 +269,7 @@ export function AskSection() {
   );
 }
 
-/** §10 — provenance footer: stays visible in print (the approval pack). */
+/** §10 - provenance footer: stays visible in print (the approval pack). */
 export function PitchFooter() {
   return (
     <footer
@@ -281,7 +281,7 @@ export function PitchFooter() {
         of <strong className="font-semibold text-slate-700">2026-06-10</strong>. Nothing in this
         brief claims a capability that is not live today, walkable in the demo, or explicitly
         labeled roadmap / staged / hypothesis.{" "}
-        <strong className="font-semibold text-slate-700">Confidential — internal.</strong>
+        <strong className="font-semibold text-slate-700">Confidential - internal.</strong>
       </p>
     </footer>
   );

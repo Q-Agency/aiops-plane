@@ -1,9 +1,9 @@
 /**
- * Roles & members (C11) — the five role personas and what each can see/do.
+ * Roles & members (C11) - the five role personas and what each can see/do.
  * Powers the "Members & roles" panel on /pod and the read-only "What each
  * role sees" capability matrix card.
  *
- * Honesty: RBAC is mocked — roles shape landings and gate attribution in
+ * Honesty: RBAC is mocked - roles shape landings and gate attribution in
  * the mock; access is NOT enforced. NO per-role redirects/landings ship in
  * this slice (defaultLanding is forward-looking config only).
  */
@@ -24,7 +24,7 @@ export interface Role {
   id: RoleId;
   label: string;
   description: string;
-  /** Forward-looking config — NOT wired to redirects in this slice. */
+  /** Forward-looking config - NOT wired to redirects in this slice. */
   defaultLanding: string;
   readOnly: boolean;
   capabilities: RoleCapabilities;
@@ -44,12 +44,12 @@ export const roles: Role[] = [
   {
     id: "pod_admin",
     label: "Pod Admin (PM)",
-    description: "Runs the pod day to day — owns intake, gates, incidents, budget.",
+    description: "Runs the pod day to day - owns intake, gates, incidents, budget.",
     defaultLanding: "/",
     readOnly: false,
     capabilities: { read: true, act: true, approve: true, configure: true, export: true },
     sees: [
-      "Everything — full LAUNCH / RUN / MONITOR rail",
+      "Everything - full LAUNCH / RUN / MONITOR rail",
       "Approves any gate; answers clarifications",
       "Configures connections, members, budget caps",
       "Exports reports, statements, the audit ledger",
@@ -58,7 +58,7 @@ export const roles: Role[] = [
   {
     id: "eng_lead",
     label: "Engineering Lead",
-    description: "Owns Dev/Review agents — triages run failures and code gates.",
+    description: "Owns Dev/Review agents - triages run failures and code gates.",
     defaultLanding: "/pipeline",
     readOnly: false,
     capabilities: { read: true, act: true, approve: true, configure: false, export: false },
@@ -72,7 +72,7 @@ export const roles: Role[] = [
   {
     id: "qa_lead",
     label: "QA Lead",
-    description: "Owns the QA agent — clears QA gates and watches quality posture.",
+    description: "Owns the QA agent - clears QA gates and watches quality posture.",
     defaultLanding: "/approvals",
     readOnly: false,
     capabilities: { read: true, act: true, approve: true, configure: false, export: false },
@@ -86,20 +86,20 @@ export const roles: Role[] = [
   {
     id: "sponsor",
     label: "Client Sponsor",
-    description: "Pays for the pod — reads ROI, SLA and weekly reports. Read-only.",
+    description: "Pays for the pod - reads ROI, SLA and weekly reports. Read-only.",
     defaultLanding: "/economics",
     readOnly: true,
     capabilities: { read: true, act: false, approve: false, configure: false, export: true },
     sees: [
       "Overview · ROI, SLA & Reports, Compliance & Audit, Usage & Billing",
       "Downloads the weekly client report",
-      "No operator dials — cannot approve, act, or configure",
+      "No operator dials - cannot approve, act, or configure",
     ],
   },
   {
     id: "viewer",
     label: "Viewer",
-    description: "Read-only observer — status surfaces only, no exports.",
+    description: "Read-only observer - status surfaces only, no exports.",
     defaultLanding: "/economics",
     readOnly: true,
     capabilities: { read: true, act: false, approve: false, configure: false, export: false },
@@ -111,7 +111,7 @@ export const roles: Role[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Assignments — joins humans.ts; sponsor is an external member         */
+/* Assignments - joins humans.ts; sponsor is an external member         */
 /* ------------------------------------------------------------------ */
 
 export interface RoleAssignment {

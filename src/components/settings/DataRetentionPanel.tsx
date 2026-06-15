@@ -1,7 +1,7 @@
 /**
- * DataRetentionPanel — Settings "Data handling & retention": the verbatim
+ * DataRetentionPanel - Settings "Data handling & retention": the verbatim
  * data-handling statement, per-data-class retention windows (audit_log is
- * locked — append-only, never auto-deleted), and the Export-data dialog
+ * locked - append-only, never auto-deleted), and the Export-data dialog
  * ("Preparing export…" → mock file links + `data.exported` on the session
  * ledger). Retention selects are local-state only (mocked, no ledger row).
  * Standard (mock) experience only.
@@ -76,7 +76,7 @@ function RetentionTable() {
                       if (next === before) return;
                       setWindows((w) => ({ ...w, [r.dataClass]: next }));
                       toast("Retention window updated (mock)", {
-                        description: `${r.dataClass}: ${before} → ${next} days — applies from the next cycle.`,
+                        description: `${r.dataClass}: ${before} → ${next} days - applies from the next cycle.`,
                       });
                     }}
                   >
@@ -134,7 +134,7 @@ function ExportDataDialog({
       appendAuditMock({
         action: "data.exported",
         target: "settings:data-export",
-        detail: `${files.join(", ")} — generated from Settings → Data & retention`,
+        detail: `${files.join(", ")} - generated from Settings → Data & retention`,
       });
       toast.success(`Export ready (${files.join(", ")})`, {
         description: "Recorded in the ledger as data.exported.",
@@ -184,7 +184,7 @@ function ExportDataDialog({
                 <button
                   type="button"
                   onClick={() =>
-                    toast("Downloaded (mock)", { description: `${f} — sample export, no live data.` })
+                    toast("Downloaded (mock)", { description: `${f} - sample export, no live data.` })
                   }
                   className="w-full flex items-center gap-2 rounded border border-border bg-white/[0.03] px-2.5 py-2 text-xs font-mono text-foreground hover:border-primary/40 hover:text-primary transition-colors"
                 >

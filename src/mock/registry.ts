@@ -1,9 +1,9 @@
 /**
- * Agent Registry (/registry, ADVANCED · technical) — the AGENT-AGNOSTIC
+ * Agent Registry (/registry, ADVANCED · technical) - the AGENT-AGNOSTIC
  * surface: proof that the platform governs *agents*, not a fixed SDLC.
- * Anything that speaks the contract — advertises an A2A Agent Card, emits
+ * Anything that speaks the contract - advertises an A2A Agent Card, emits
  * run-events to the ledger, honors gate/pause signals, names an accountable
- * owner — joins the fleet: gated, audited, accountable. SDLC is just the
+ * owner - joins the fleet: gated, audited, accountable. SDLC is just the
  * first INSTALLED pack; the rest of the catalog spans support, marketing,
  * data, security, finance, IT/people-ops and legal to make the point that a
  * refund approval and a deploy approval are the SAME gate.
@@ -11,7 +11,7 @@
  * Pure, deterministic data (no Date.now()/Math.random()). Icons are stored
  * as string keys and mapped to lucide components in the route view, keeping
  * this file presentation-free. The "register a custom agent" flow is driven
- * by SAMPLE_CARDS + validateAgentCard(), which always resolves — any agent
+ * by SAMPLE_CARDS + validateAgentCard(), which always resolves - any agent
  * that speaks the contract is governable, which is the whole thesis.
  */
 
@@ -28,7 +28,7 @@ export type AgentDomain =
   | "legal";
 
 /**
- * Suggested tool grants per domain — seeds the configure-on-register step
+ * Suggested tool grants per domain - seeds the configure-on-register step
  * (a registered agent gets a scoped connector vault, never blanket access).
  */
 export const DOMAIN_SUGGESTED_TOOLS: Record<AgentDomain, ConnectorId[]> = {
@@ -55,7 +55,7 @@ export interface AgentPack {
   label: string;
   /** One-line pitch for the domain. */
   blurb: string;
-  /** Icon key — mapped to a lucide icon in the view (mock stays presentation-free). */
+  /** Icon key - mapped to a lucide icon in the view (mock stays presentation-free). */
   icon: string;
   /** SDLC ships installed; the rest are one click from the fleet. */
   installed: boolean;
@@ -76,7 +76,7 @@ export const GOVERNANCE_REQUIREMENTS: GovernanceRequirement[] = [
   {
     id: "card",
     label: "Advertises an Agent Card",
-    detail: "A2A-discoverable skills + endpoint — we know what it can do.",
+    detail: "A2A-discoverable skills + endpoint - we know what it can do.",
   },
   {
     id: "ledger",
@@ -96,14 +96,14 @@ export const GOVERNANCE_REQUIREMENTS: GovernanceRequirement[] = [
 ];
 
 /**
- * The catalog — SDLC installed, seven more domains one click away. Roles are
+ * The catalog - SDLC installed, seven more domains one click away. Roles are
  * deliberately NON-SDLC outside the first pack: the breadth is the argument.
  */
 export const AGENT_PACKS: AgentPack[] = [
   {
     domain: "sdlc",
     label: "Software Delivery",
-    blurb: "The spec-first delivery pod — BA through QA.",
+    blurb: "The spec-first delivery pod - BA through QA.",
     icon: "git",
     installed: true,
     agents: [
@@ -118,7 +118,7 @@ export const AGENT_PACKS: AgentPack[] = [
   {
     domain: "support",
     label: "Customer Support",
-    blurb: "Deflect, triage and resolve — refunds stay gated.",
+    blurb: "Deflect, triage and resolve - refunds stay gated.",
     icon: "headset",
     installed: false,
     agents: [
@@ -166,7 +166,7 @@ export const AGENT_PACKS: AgentPack[] = [
   {
     domain: "finance",
     label: "Finance & Ops",
-    blurb: "Close faster — reconciliations with an audit trail.",
+    blurb: "Close faster - reconciliations with an audit trail.",
     icon: "wallet",
     installed: false,
     agents: [
@@ -202,7 +202,7 @@ export const AGENT_PACKS: AgentPack[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Register-a-custom-agent — the "add ANY agent" demonstration         */
+/* Register-a-custom-agent - the "add ANY agent" demonstration         */
 /* ------------------------------------------------------------------ */
 
 export interface AgentCard {
@@ -218,7 +218,7 @@ export interface AgentCard {
   recognized: boolean;
 }
 
-/** "Try one" example cards — deliberately cross-domain (support/finance/security). */
+/** "Try one" example cards - deliberately cross-domain (support/finance/security). */
 export const SAMPLE_CARDS: AgentCard[] = [
   {
     url: "https://lingo.acme.io/translator/.well-known/agent-card.json",
@@ -280,7 +280,7 @@ function deriveName(url: string): string {
  * rich card; ANY other URL still resolves (the thesis: anything that speaks
  * the contract is governable) to a card parsed from the path with
  * self-declared skills. Returns null only for an empty string. Deterministic
- * — no network, no randomness.
+ * - no network, no randomness.
  */
 export function validateAgentCard(rawUrl: string): AgentCard | null {
   const url = rawUrl.trim();

@@ -1,5 +1,5 @@
 /**
- * Left-rail navigation config — the LAUNCH / RUN / MONITOR / ADVANCED pillar
+ * Left-rail navigation config - the LAUNCH / RUN / MONITOR / ADVANCED pillar
  * spine (product-vision §6, IA reorg build-order #1).
  *
  * Pure config + badge selectors; LeftRail.tsx renders from this.
@@ -94,7 +94,7 @@ export interface NavItem {
   live?: boolean;
   /**
    * Hidden from the DEMO experience (live keeps it). Owner call 2026-06-12:
-   * in the demo, pod creation owns tool-connecting — a standalone
+   * in the demo, pod creation owns tool-connecting - a standalone
    * Connections hub reads as a second place to do the same job.
    */
   mockHidden?: boolean;
@@ -111,7 +111,7 @@ export interface NavGroup {
 
 export const NAV: NavGroup[] = [
   // LAUNCH is deliberately lean in the demo (owner call 2026-06-12): the
-  // wizard owns the whole launch ritual — Catalog content lives in its
+  // wizard owns the whole launch ritual - Catalog content lives in its
   // agent-team step (route /catalog stays for pitch deep-links), tool
   // connections live in its Connect step (the standalone hub is live-only),
   // and people/accountability has ONE home: MONITOR · Accountability (/pod).
@@ -124,9 +124,9 @@ export const NAV: NavGroup[] = [
     ],
   },
   // RUN = operate the pod day-to-day. Agents sits right after Overview (owner
-  // call 2026-06-12): the agent roster is the product's CENTRAL object —
+  // call 2026-06-12): the agent roster is the product's CENTRAL object -
   // "how's my team doing" is a daily operating check, not an advanced/technical
-  // deep-dive — so it was promoted OUT of the ADVANCED drawer. (Its deep
+  // deep-dive - so it was promoted OUT of the ADVANCED drawer. (Its deep
   // per-agent diagnostics stay on the drill-in page; the rail entry is the
   // PM-legible roster.)
   {
@@ -152,22 +152,22 @@ export const NAV: NavGroup[] = [
     pillar: "MONITOR",
     label: "MONITOR",
     items: [
-      // prove-ROI — the wow-moment hero leads (product-vision §1 ROI reveal).
-      // "ROI & Economics" (was "Overview · ROI") — renamed with the RUN
+      // prove-ROI - the wow-moment hero leads (product-vision §1 ROI reveal).
+      // "ROI & Economics" (was "Overview · ROI") - renamed with the RUN
       // landing's Command Center → Overview rename so the rail never shows
       // two "Overview" entries.
       { to: "/economics", label: "ROI & Economics", icon: DollarSign, live: true },
       { to: "/billing", label: "Usage & Billing", icon: CreditCard },
       { to: "/pilot", label: "Pilot", icon: FlaskConical, tag: "PILOT" },
       { to: "/org", label: "Portfolio", icon: Briefcase },
-      // govern — the two "rules the pod runs under", now adjacent.
+      // govern - the two "rules the pod runs under", now adjacent.
       { to: "/governance", label: "Governance", icon: Scale, live: true },
       { to: "/memory", label: "Memory & Rules", icon: BookMarked },
-      // delivery-health — coverage + SLA + where the humans are the bottleneck.
+      // delivery-health - coverage + SLA + where the humans are the bottleneck.
       { to: "/pod", label: "Accountability", icon: ShieldCheck },
       { to: "/reports", label: "SLA & Reports", icon: FileBarChart, badgeKey: "sla" },
       { to: "/flow", label: "Flow", icon: Hourglass, live: true },
-      // audit & output — the append-only trail, the deliverables shelf, lineage.
+      // audit & output - the append-only trail, the deliverables shelf, lineage.
       { to: "/compliance", label: "Compliance & Audit", icon: ScrollText, live: true, badgeKey: "compliance" },
       { to: "/artifacts", label: "Deliverables", icon: Package },
       { to: "/traceability", label: "Traceability", icon: GitBranch },
@@ -177,8 +177,8 @@ export const NAV: NavGroup[] = [
   // "demote platform-engineer views… over-built for the PM persona"). After
   // promoting Agents → RUN and demoting Flow + Traceability → MONITOR, the SRE
   // trio (Observability / Orchestration / Platform status) remains. Agent Registry
-  // leads it (owner call 2026-06-12): the agent-agnostic extensibility surface —
-  // "register & govern ANY agent, not just SDLC" — is the platform's deepest
+  // leads it (owner call 2026-06-12): the agent-agnostic extensibility surface -
+  // "register & govern ANY agent, not just SDLC" - is the platform's deepest
   // technical capability and the proof the control plane isn't a fixed workflow.
   {
     pillar: "ADVANCED",
@@ -204,17 +204,17 @@ export const SETTINGS_ITEM: NavItem = {
  * Badge counts (mock; suppressed wholesale in real mode + read-only views by
  * LeftRail). Each mirrors the number ITS screen leads with, so the rail and
  * the page never disagree:
- *   gates       — open gates of BOTH kinds (approvals + clarifications, minus
+ *   gates       - open gates of BOTH kinds (approvals + clarifications, minus
  *                 session-resolved) via openGateCount()
- *   incidents   — open incidents DERIVED from incidents.ts
- *   escalations — unacknowledged escalations from comms.ts (moved off the
+ *   incidents   - open incidents DERIVED from incidents.ts
+ *   escalations - unacknowledged escalations from comms.ts (moved off the
  *                 TopBar's "ESC" chip onto the Comms item, 2026-06-12)
- *   intake      — board arrivals awaiting confirm/decline ("N in Ready
+ *   intake      - board arrivals awaiting confirm/decline ("N in Ready
  *                 awaiting you" on /intake)
- *   sla         — SLAs CURRENTLY breached (the "SLAs breached" tile on
- *                 /reports — not the 30-day event count)
- *   compliance  — controls with status "gap" (the "Gaps" stat on /compliance)
- *   status      — components not operational (0 in the seeded happy state →
+ *   sla         - SLAs CURRENTLY breached (the "SLAs breached" tile on
+ *                 /reports - not the 30-day event count)
+ *   compliance  - controls with status "gap" (the "Gaps" stat on /compliance)
+ *   status      - components not operational (0 in the seeded happy state →
  *                 no chip until one degrades)
  * A 0 renders nothing (LeftRail gates on count > 0).
  */

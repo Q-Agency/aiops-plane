@@ -106,17 +106,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Agency OS · Overview" },
       {
         name: "description",
-        content: "AI Agency OS — mission control for an agentic software pipeline.",
+        content: "AI Agency OS - mission control for an agentic software pipeline.",
       },
       { property: "og:title", content: "Agency OS · Overview" },
       { name: "twitter:title", content: "Agency OS · Overview" },
       {
         property: "og:description",
-        content: "AI Agency OS — mission control for an agentic software pipeline.",
+        content: "AI Agency OS - mission control for an agentic software pipeline.",
       },
       {
         name: "twitter:description",
-        content: "AI Agency OS — mission control for an agentic software pipeline.",
+        content: "AI Agency OS - mission control for an agentic software pipeline.",
       },
       { name: "twitter:card", content: "summary" },
       { property: "og:type", content: "website" },
@@ -145,7 +145,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Anti-flash: apply the theme BEFORE first paint. The app defaults to
-            LIGHT — the SSR HTML ships dark (no `light` class), so this blocking
+            LIGHT - the SSR HTML ships dark (no `light` class), so this blocking
             script adds `light` during head parse UNLESS the user explicitly
             saved "dark", avoiding a flash on first load.
             KEY/class/default must match src/hooks/useTheme.tsx ("am.theme"). */}

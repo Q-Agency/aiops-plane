@@ -1,5 +1,5 @@
 /**
- * PlaceholderPage — styled empty-state for routes that exist in the IA
+ * PlaceholderPage - styled empty-state for routes that exist in the IA
  * before their cluster lands (D9: /incidents, /reports, /billing).
  * Not a bare stub: icon, one-line purpose from the vision, build-order chip.
  */

@@ -4,7 +4,7 @@
  * Demo-binding rule: each pod keeps its own dataset. The sample pod renders
  * the canonical mock numbers (economics aggregates, billing budget, live
  * open-gate / open-incident counts); every other launched pod derives a
- * smaller variation DETERMINISTICALLY from a hash of its pod id — stable
+ * smaller variation DETERMINISTICALLY from a hash of its pod id - stable
  * across renders and sessions, no second dataset invented.
  */
 
@@ -45,7 +45,7 @@ function hash32(s: string): number {
   return h >>> 0;
 }
 
-/** Stable 0..1 per (pod id, salt) — same id always yields the same numbers. */
+/** Stable 0..1 per (pod id, salt) - same id always yields the same numbers. */
 function unit(id: string, salt: number): number {
   const x = Math.sin((hash32(id) % 100_000) + salt * 977.13) * 10_000;
   return x - Math.floor(x);
@@ -77,7 +77,7 @@ export function podStats(pod: LaunchedPod): PodStats {
     };
   }
 
-  // A pod still setting up has no delivery economics yet — honest zeros.
+  // A pod still setting up has no delivery economics yet - honest zeros.
   if (pod.status === "setup") {
     return {
       podId: pod.id,
@@ -95,7 +95,7 @@ export function podStats(pod: LaunchedPod): PodStats {
     };
   }
 
-  // Live/paused non-sample pods: 25–70% of the sample pod's scale, jittered
+  // Live/paused non-sample pods: 25-70% of the sample pod's scale, jittered
   // per metric so two pods never share a number.
   const scale = 0.25 + unit(pod.id, 1) * 0.45;
   const mergedCount = Math.max(1, Math.round(aggregates.mergedCount * scale));
@@ -129,7 +129,7 @@ export function podStats(pod: LaunchedPod): PodStats {
 }
 
 /* ------------------------------------------------------------------ */
-/* Org rollup (the KPI band) — canonical trio summed across pods        */
+/* Org rollup (the KPI band) - canonical trio summed across pods        */
 /* ------------------------------------------------------------------ */
 
 export type OrgPeriodId = "current" | "last" | "qtd";

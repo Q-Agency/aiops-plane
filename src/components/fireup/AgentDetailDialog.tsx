@@ -1,5 +1,5 @@
 /**
- * Agent Detail Card — the decision surface before committing an agent
+ * Agent Detail Card - the decision surface before committing an agent
  * to the pod. Contract row (produces → consumes), contract-version +
  * conformance badges (the anti-lock-in signal), stat mini-tiles with the
  * live Agent sparkline where one exists, capabilities checklist, and a
@@ -32,13 +32,13 @@ export interface AgentDetailDialogProps {
   roleId: ChainRoleId | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Current pod selection — drives Added state + gap context. */
+  /** Current pod selection - drives Added state + gap context. */
   selectedIds: ChainRoleId[];
   /** Add/remove (parent owns state + toasts). */
   onToggle: (id: ChainRoleId, next: boolean) => void;
   /** Chosen LLM tier for this agent (wizard). */
   tier?: LlmTier;
-  /** Setter — when provided, the mandatory LLM-tier menu renders (wizard). */
+  /** Setter - when provided, the mandatory LLM-tier menu renders (wizard). */
   onSetTier?: (id: ChainRoleId, tier: LlmTier) => void;
 }
 
@@ -187,7 +187,7 @@ export function AgentDetailDialog({
 
           {entry.availability === "roadmap" && (
             <div className="rounded-md border border-border bg-white/[0.03] px-3 py-2 text-[11px] text-muted-foreground">
-              Planned — in the catalog now, runs when this agent ships.
+              Planned - in the catalog now, runs when this agent ships.
             </div>
           )}
 
@@ -215,7 +215,7 @@ export function AgentDetailDialog({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-64 text-[11px]">
-                    Validated deterministically against {entry.contractVersion} — no LLM in the
+                    Validated deterministically against {entry.contractVersion} - no LLM in the
                     loop.
                   </TooltipContent>
                 </Tooltip>
@@ -232,7 +232,7 @@ export function AgentDetailDialog({
               </span>
               {entry.consumes.length === 0 ? (
                 <span className="text-[11px] text-muted-foreground italic">
-                  {entry.podWide ? "pod-wide peer — feeds every agent" : "nothing — entry point"}
+                  {entry.podWide ? "pod-wide peer - feeds every agent" : "nothing - entry point"}
                 </span>
               ) : (
                 entry.consumes.map((c) => (
@@ -249,7 +249,7 @@ export function AgentDetailDialog({
                     key={gap.missing}
                     className="flex flex-wrap items-center gap-1.5 text-[11px] text-status-waiting"
                   >
-                    Consumes {gap.missing} —{" "}
+                    Consumes {gap.missing} -{" "}
                     {gap.fixRoleId
                       ? `add ${ROLE_SHORT[gap.fixRoleId]} to feed it.`
                       : "no producer in the catalog."}
@@ -273,7 +273,7 @@ export function AgentDetailDialog({
           <div className="grid grid-cols-3 gap-2">
             <StatTile label="~$/ticket" value={`$${entry.costPerTicketUsd.toFixed(2)}`} />
             <StatTile label="~latency p50" value={formatLatency(entry.latencyP50Min)} />
-            <StatTile label="success rate" value={agent ? `${agent.successRate}%` : "—"}>
+            <StatTile label="success rate" value={agent ? `${agent.successRate}%` : "-"}>
               {agent ? (
                 <Sparkline data={agent.sparkline} color={color} />
               ) : (
@@ -302,7 +302,7 @@ export function AgentDetailDialog({
           <Separator />
           <p className="text-xs text-muted-foreground leading-relaxed">{entry.summary}</p>
 
-          {/* Mandatory LLM tier — appears once the agent is in the pod (wizard) */}
+          {/* Mandatory LLM tier - appears once the agent is in the pod (wizard) */}
           {onSetTier && added && (
             <div className="rounded-md border border-border bg-panel/40 p-3">
               <div className="flex items-center gap-2 mb-2">
@@ -316,7 +316,7 @@ export function AgentDetailDialog({
                   </span>
                 ) : (
                   <span className="ml-auto text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-waiting/50 bg-status-waiting/10 text-status-waiting">
-                    Required — choose one
+                    Required - choose one
                   </span>
                 )}
               </div>
@@ -326,7 +326,7 @@ export function AgentDetailDialog({
                 size="sm"
               />
               <p className="mt-2 text-[10px] text-muted-foreground/80">
-                Cost vs capability vs data-residency — set per agent. Change it any time on the
+                Cost vs capability vs data-residency - set per agent. Change it any time on the
                 agent's profile; the exact model is overridable there.
               </p>
             </div>

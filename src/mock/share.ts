@@ -1,5 +1,5 @@
 /**
- * Shared Report Viewer seeds (/share/$token, wave 2, P1-H4) — the targets
+ * Shared Report Viewer seeds (/share/$token, wave 2, P1-H4) - the targets
  * of every "Copy share link": chrome-less, client-clean report renders for
  * people with no account. Expired/revoked tokens leak NO report data; an
  * active view is itself audited ("this view is recorded").
@@ -35,7 +35,7 @@ const now = Date.now();
 
 export const SHARE_LINKS: ShareLink[] = [
   {
-    // ACTIVE — the current weekly report (report.ts rep-2026-w24).
+    // ACTIVE - the current weekly report (report.ts rep-2026-w24).
     token: "qshare-am-weekly-7f3k",
     kind: "weekly_report",
     targetId: "rep-2026-w24",
@@ -46,7 +46,7 @@ export const SHARE_LINKS: ShareLink[] = [
     views: [{ at: now - 1 * DAY }, { at: now - 3 * HOUR }],
   },
   {
-    // EXPIRED — last month's usage statement (billing.ts periodId 2026-05).
+    // EXPIRED - last month's usage statement (billing.ts periodId 2026-05).
     token: "qshare-am-usage-2c9d",
     kind: "usage_statement",
     targetId: "2026-05",
@@ -57,7 +57,7 @@ export const SHARE_LINKS: ShareLink[] = [
     views: [{ at: now - 38 * DAY }, { at: now - 33 * DAY }, { at: now - 26 * DAY }],
   },
   {
-    // REVOKED — prior week's exec digest, pulled by the pod admin.
+    // REVOKED - prior week's exec digest, pulled by the pod admin.
     token: "qshare-am-exec-9k1z",
     kind: "exec_digest",
     targetId: "rep-2026-w23",
@@ -69,7 +69,7 @@ export const SHARE_LINKS: ShareLink[] = [
   },
 ];
 
-/** Lookup by token — undefined means "unknown token" (neutral not-found card). */
+/** Lookup by token - undefined means "unknown token" (neutral not-found card). */
 export function shareByToken(token: string): ShareLink | undefined {
   return SHARE_LINKS.find((l) => l.token === token);
 }

@@ -1,9 +1,9 @@
 /**
- * ConversionSheet (/pilot, P1-C3) — the end-of-pilot conversion math,
+ * ConversionSheet (/pilot, P1-C3) - the end-of-pilot conversion math,
  * pre-filled: pilot fee credited to year one + the annual plan summary.
  *
  * Pricing canon: EVERY money figure here is a *pricing hypothesis* (derived
- * from economics.PRICE_PAID_USD so MONITOR numbers reconcile) — never a
+ * from economics.PRICE_PAID_USD so MONITOR numbers reconcile) - never a
  * quote; final pricing is set with the Q account lead. "Generate conversion
  * sheet" is an optimistic mock export: toast + a data.exported ledger row.
  */
@@ -25,10 +25,10 @@ export function generateConversionSheet() {
   appendAuditMock({
     action: "data.exported",
     target: "pilot-conversion-sheet",
-    detail: `Conversion sheet — ${conversion.planName} · pilot fee ${usd0(conversion.pilotFeeUsd)} credited to year one (pricing hypothesis)`,
+    detail: `Conversion sheet - ${conversion.planName} · pilot fee ${usd0(conversion.pilotFeeUsd)} credited to year one (pricing hypothesis)`,
   });
   toast.success("Conversion sheet generated", {
-    description: "PDF (mock) — the export is on the ledger.",
+    description: "PDF (mock) - the export is on the ledger.",
   });
 }
 
@@ -90,13 +90,13 @@ export function ConversionSheet({ ended = false }: { ended?: boolean }) {
           )}
         </div>
         <span className="text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-waiting/40 bg-status-waiting/10 text-status-waiting">
-          Pricing hypothesis — not a quote
+          Pricing hypothesis - not a quote
         </span>
       </div>
 
       <div className="divide-y divide-border/60">
-        <MoneyRow label="Pilot fee — 6 weeks" amount={usd0(fee)} />
-        <MoneyRow label={`Annual plan — ${conversion.planName}`} amount={`${usd0(annual)} / yr`} />
+        <MoneyRow label="Pilot fee - 6 weeks" amount={usd0(fee)} />
+        <MoneyRow label={`Annual plan - ${conversion.planName}`} amount={`${usd0(annual)} / yr`} />
         <MoneyRow label="Pilot fee credited to year one" amount={`−${usd0(fee)}`} credit />
       </div>
 
@@ -113,8 +113,8 @@ export function ConversionSheet({ ended = false }: { ended?: boolean }) {
 
       <p className="text-[11px] text-muted-foreground">
         {ended
-          ? "The week 1–6 record above is final — bring this sheet to your Q account lead."
-          : "Pre-filled from your pilot consumption — final pricing is set with your Q account lead."}
+          ? "The week 1-6 record above is final - bring this sheet to your Q account lead."
+          : "Pre-filled from your pilot consumption - final pricing is set with your Q account lead."}
       </p>
 
       <div className="mt-auto flex items-center justify-between gap-2 flex-wrap pt-1">

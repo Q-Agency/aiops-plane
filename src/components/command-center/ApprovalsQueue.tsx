@@ -53,7 +53,7 @@ export function ApprovalsQueue() {
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.gate}</span>
                 </div>
                 <span className={cn("text-[10px] font-mono border rounded px-1.5 py-0.5", mounted ? ageColor(age) : "text-muted-foreground border-border")}>
-                  {mounted ? ageLabel(age) : "—"}
+                  {mounted ? ageLabel(age) : "-"}
                 </span>
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">

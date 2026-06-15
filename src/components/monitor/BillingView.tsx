@@ -1,19 +1,19 @@
 /**
- * BillingView — Usage & Billing (/billing, C9): operator economics reframed
+ * BillingView - Usage & Billing (/billing, C9): operator economics reframed
  * as client consumption transparency.
  *
- *   1. Header — plan chip (Dedicated · pilot — pricing TBD, never invented)
+ *   1. Header - plan chip (Dedicated · pilot - pricing TBD, never invented)
  *      + Export statement (mock).
  *   2. Over-cap / triggered-alert banner (state-derived).
- *   3. Plan & budget summary — Plan & cap · Consumed this period ·
+ *   3. Plan & budget summary - Plan & cap · Consumed this period ·
  *      Projected at period end (cap is editable client-state; removing it
  *      exercises the honest no-cap edge).
- *   4. Budget alerts — rules with state badges + toggles (email = Roadmap).
- *   5. Consumption breakdown — by agent / by project share-bar tabs.
- *   6. Monthly statement — period rows; the current period expands to line
+ *   4. Budget alerts - rules with state badges + toggles (email = Roadmap).
+ *   5. Consumption breakdown - by agent / by project share-bar tabs.
+ *   6. Monthly statement - period rows; the current period expands to line
  *      items where EVERY line links to a gate a human cleared.
- *   7. Pricing simulator — three models on this month's actual consumption,
- *      badged "MODELING — not a quote".
+ *   7. Pricing simulator - three models on this month's actual consumption,
+ *      badged "MODELING - not a quote".
  */
 
 import { Fragment, useEffect, useState } from "react";
@@ -147,7 +147,7 @@ export function BillingView() {
           <div className="text-sm flex-1 min-w-48">
             <span className="font-semibold text-status-error">Over budget cap for this period</span>{" "}
             <span className="text-xs text-muted-foreground">
-              — projected {usd0(projected)} ({projectedPct}% of cap) by {periodEnd}.
+              - projected {usd0(projected)} ({projectedPct}% of cap) by {periodEnd}.
             </span>
           </div>
           <Button size="sm" variant="outline" onClick={() => setCapDialogOpen(true)}>
@@ -181,7 +181,7 @@ export function BillingView() {
           <div className="text-lg font-semibold">{plan.name}</div>
           <p className="text-xs text-muted-foreground">{plan.pricingNote}</p>
           <div className="text-[11px] font-mono text-muted-foreground">
-            Period {dateLabel(plan.billingPeriodStart)} – {dateLabel(plan.billingPeriodEnd, { month: "short", day: "numeric", year: "numeric" })}
+            Period {dateLabel(plan.billingPeriodStart)} - {dateLabel(plan.billingPeriodEnd, { month: "short", day: "numeric", year: "numeric" })}
           </div>
           <div className="flex items-center gap-2 pt-1">
             {capUsd !== null ? (
@@ -471,7 +471,7 @@ const STATEMENT_STATUS: Record<UsageStatement["status"], { label: string; chip: 
 };
 
 function StatementSection({ onDownload }: { onDownload: () => void }) {
-  // Current period opens expanded — the gate-linked line items ARE the pitch.
+  // Current period opens expanded - the gate-linked line items ARE the pitch.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     [usageStatements[0].periodId]: true,
   });
@@ -624,7 +624,7 @@ function PricingSimulator() {
       </div>
       <p className="text-[11px] text-muted-foreground">
         Models applied to this month&apos;s actual consumption. Pilot pricing is set with your Q
-        account lead — not by this simulator.
+        account lead - not by this simulator.
       </p>
     </section>
   );
@@ -656,7 +656,7 @@ function CapDialog({
   const handleSave = () => {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      setError("Enter a monthly cap above $0 — or remove the cap.");
+      setError("Enter a monthly cap above $0 - or remove the cap.");
       return;
     }
     onSave(Math.round(parsed));

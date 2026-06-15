@@ -1,5 +1,5 @@
 /**
- * CatalogStandalone — the /catalog left-rail page. The same catalog grid +
+ * CatalogStandalone - the /catalog left-rail page. The same catalog grid +
  * pipeline preview as wizard step 2 (AgentCatalogBody), composed browse-only
  * outside the wizard chrome: selections here are a local sandbox, and the
  * "Open in New Pod wizard" CTA carries them into a fresh draft when no
@@ -31,7 +31,7 @@ export function CatalogStandalone() {
   const openWizard = () => {
     const seeding = !draft && selectedIds.length > 0;
     if (seeding) {
-      // Functional updates apply in order — the draft exists by the time
+      // Functional updates apply in order - the draft exists by the time
       // updateDraft's updater runs.
       createDraft(null);
       updateDraft({ agentIds: selectedIds });
@@ -48,7 +48,7 @@ export function CatalogStandalone() {
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-semibold">Your curated Q delivery team</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Browse the catalog — what each role produces and consumes, indicative cost and latency,
+            Browse the catalog - what each role produces and consumes, indicative cost and latency,
             all swappable by contract. Toggles here are a sandbox; launch a pod to make it real.
           </p>
         </div>

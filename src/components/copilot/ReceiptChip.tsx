@@ -1,5 +1,5 @@
 /**
- * ReceiptChip — the "ask-with-receipts" unit. Every copilot answer cites
+ * ReceiptChip - the "ask-with-receipts" unit. Every copilot answer cites
  * the record with mono chips ("ledger ae-003" / "gate AM-142" / "8/8 checks")
  * that deep-link to the canonical URL for that evidence kind:
  * ledger → /compliance#audit, gate → /approvals/$gateId, validator → /governance.
@@ -30,7 +30,7 @@ export function receiptHref(receipt: CopilotReceipt): string {
 
 export interface ReceiptChipProps {
   receipt: CopilotReceipt;
-  /** Close the sheet, then push — supplied by PodCopilot. */
+  /** Close the sheet, then push - supplied by PodCopilot. */
   onNavigate: (href: string) => void;
 }
 

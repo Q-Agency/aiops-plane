@@ -1,5 +1,5 @@
 /**
- * view-role.ts (wave 2, ROLES) — the "viewing as" store behind the role-scoped
+ * view-role.ts (wave 2, ROLES) - the "viewing as" store behind the role-scoped
  * "/" landings. PM-only DEMO affordance: it never authenticates anything, it
  * just lets the Pod Admin preview what each persona lands on (spec: My
  * Workspace role-landing router + Read-only LeftRail).
@@ -8,7 +8,7 @@
  * always renders the default Pod Admin cockpit; the persisted persona
  * (localStorage "aiops_view_role_v1") is re-read right after hydration.
  *
- * Mock-only by construction — every consumer sits behind the experience gate
+ * Mock-only by construction - every consumer sits behind the experience gate
  * (real mode renders RealCommandCenter / the live rail and never calls this
  * with effect).
  */
@@ -23,7 +23,7 @@ const DEFAULT_ROLE: RoleId = "pod_admin";
 const VALID_ROLE_IDS = new Set<string>(roles.map((r) => r.id));
 
 /* ------------------------------------------------------------------ */
-/* Store — module-level value + subscriber set                          */
+/* Store - module-level value + subscriber set                          */
 /* ------------------------------------------------------------------ */
 
 let current: RoleId = DEFAULT_ROLE;
@@ -53,7 +53,7 @@ function getSnapshot(): RoleId {
   return current;
 }
 
-/** Server snapshot — always the PM cockpit (matches the SSR'd markup). */
+/** Server snapshot - always the PM cockpit (matches the SSR'd markup). */
 function getServerSnapshot(): RoleId {
   return DEFAULT_ROLE;
 }
@@ -65,7 +65,7 @@ export function setViewRole(next: RoleId): void {
   try {
     window.localStorage.setItem(VIEW_ROLE_STORAGE_KEY, current);
   } catch {
-    /* storage unavailable — session-only persona */
+    /* storage unavailable - session-only persona */
   }
   for (const fn of subscribers) fn();
 }
@@ -77,14 +77,14 @@ export function useViewRole(): { role: RoleId; setRole: (r: RoleId) => void } {
 }
 
 /* ------------------------------------------------------------------ */
-/* Landing resolution — which "/" surface a persona gets               */
+/* Landing resolution - which "/" surface a persona gets               */
 /* ------------------------------------------------------------------ */
 
 /**
- * cockpit — the existing mock Overview (RUN landing) (Pod Admin; Eng Lead previews
+ * cockpit - the existing mock Overview (RUN landing) (Pod Admin; Eng Lead previews
  *           the same operator cockpit in this slice);
- * qa      — the scoped QA gate queue;
- * exec    — the read-only Exec Status Digest (sponsor + viewer, and the
+ * qa      - the scoped QA gate queue;
+ * exec    - the read-only Exec Status Digest (sponsor + viewer, and the
  *           fallback for anything unknown).
  */
 export type ViewLanding = "cockpit" | "qa" | "exec";
@@ -105,7 +105,7 @@ export function viewLandingFor(role: RoleId): ViewLanding {
   }
 }
 
-/** Read-only personas — drives the filtered MONITOR-only LeftRail. */
+/** Read-only personas - drives the filtered MONITOR-only LeftRail. */
 export function isReadOnlyViewRole(role: RoleId): boolean {
   return role === "sponsor" || role === "viewer";
 }

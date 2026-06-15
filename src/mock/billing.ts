@@ -1,11 +1,11 @@
 /**
- * Usage & Billing (/billing, C9) — consumption transparency for the client:
- * plan framing (Dedicated tenant · pilot pricing TBD — NO invented prices),
+ * Usage & Billing (/billing, C9) - consumption transparency for the client:
+ * plan framing (Dedicated tenant · pilot pricing TBD - NO invented prices),
  * consumption vs budget cap, budget alerts, the monthly statement whose line
  * items link to gate decisions, and the clearly-badged pricing simulator.
  *
  * The `budget` object defined HERE is canonical (the /economics budget panel
- * imports it from "@/mock/billing" — do not re-declare it in economics.ts;
+ * imports it from "@/mock/billing" - do not re-declare it in economics.ts;
  * billing already imports economics, and a re-export would cycle).
  */
 
@@ -18,13 +18,13 @@ import {
 } from "./economics";
 
 /* ------------------------------------------------------------------ */
-/* Plan — pilot framing, no invented price (C9)                         */
+/* Plan - pilot framing, no invented price (C9)                         */
 /* ------------------------------------------------------------------ */
 
 export interface BillingPlan {
   name: string; //               "Dedicated tenant"
   tenancy: "Dedicated"; //       matches the TopBar tenancy badge
-  /** Honest pilot framing — pricing is TBD, never a fabricated number. */
+  /** Honest pilot framing - pricing is TBD, never a fabricated number. */
   pricingNote: string;
   billingPeriodStart: string; // ISO date
   billingPeriodEnd: string; //   ISO date
@@ -36,7 +36,7 @@ export interface BillingPlan {
 export const plan: BillingPlan = {
   name: "Dedicated tenant",
   tenancy: "Dedicated",
-  pricingNote: "Pilot pricing — set with your Q account lead. No list price yet.",
+  pricingNote: "Pilot pricing - set with your Q account lead. No list price yet.",
   billingPeriodStart: "2026-06-01",
   billingPeriodEnd: "2026-06-30",
   unitName: "delivery unit",
@@ -44,7 +44,7 @@ export const plan: BillingPlan = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Budget — canonical run-rate vs cap object (C2/C9)                    */
+/* Budget - canonical run-rate vs cap object (C2/C9)                    */
 /* ------------------------------------------------------------------ */
 
 export type CapStatus = "on_track" | "watch" | "over";
@@ -55,7 +55,7 @@ export interface Budget {
   daysElapsed: number;
   daysInMonth: number;
   projectedMonthlyUsd: number;
-  /** <80% of cap = on_track · 80–100% = watch · >100% = over. */
+  /** <80% of cap = on_track · 80-100% = watch · >100% = over. */
   capStatus: CapStatus;
   currency: "USD";
 }
@@ -69,7 +69,7 @@ function capStatusFor(projected: number, cap: number): CapStatus {
 export const budget: Budget = (() => {
   const monthlyCapUsd = 4000;
   const mtdSpendUsd = +aggregates.totalCost.toFixed(2);
-  const daysElapsed = 10; // demo period: June 1–10, 2026
+  const daysElapsed = 10; // demo period: June 1-10, 2026
   const daysInMonth = 30;
   const projectedMonthlyUsd = +((mtdSpendUsd / daysElapsed) * daysInMonth).toFixed(0);
   return {
@@ -135,7 +135,7 @@ export const budgetAlerts: BudgetAlert[] = [
     id: "ba-email",
     label: "Weekly spend summary by email",
     thresholdPct: 0,
-    channel: "email", // render with a Roadmap badge — email delivery isn't live
+    channel: "email", // render with a Roadmap badge - email delivery isn't live
     enabled: false,
     state: "armed",
     triggeredAt: null,
@@ -143,12 +143,12 @@ export const budgetAlerts: BudgetAlert[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Monthly statement — line items link to gate decisions (C9)           */
+/* Monthly statement - line items link to gate decisions (C9)           */
 /* ------------------------------------------------------------------ */
 
 export interface StatementLineItem {
   id: string;
-  label: string; //          "AM-136 · Listing detail page — shipped"
+  label: string; //          "AM-136 · Listing detail page - shipped"
   ticketId?: string;
   /** "Every line item links to a gate a human cleared." */
   gateId?: string;
@@ -171,7 +171,7 @@ export interface UsageStatement {
 const juneLineItems: StatementLineItem[] = [
   {
     id: "li-jun-1",
-    label: "AM-136 · Listing detail page — shipped",
+    label: "AM-136 · Listing detail page - shipped",
     ticketId: "AM-136",
     gateId: "appr-AM-136",
     clearedBy: "Iva",
@@ -180,7 +180,7 @@ const juneLineItems: StatementLineItem[] = [
   },
   {
     id: "li-jun-2",
-    label: "AM-133 · Payment intent callback — dev gate cleared",
+    label: "AM-133 · Payment intent callback - dev gate cleared",
     ticketId: "AM-133",
     gateId: "appr-AM-133",
     clearedBy: "Petar",
@@ -189,7 +189,7 @@ const juneLineItems: StatementLineItem[] = [
   },
   {
     id: "li-jun-3",
-    label: "AM-144 · Seller KYC verification — QA gate cleared",
+    label: "AM-144 · Seller KYC verification - QA gate cleared",
     ticketId: "AM-144",
     gateId: "appr-AM-144",
     clearedBy: "Iva",
@@ -198,7 +198,7 @@ const juneLineItems: StatementLineItem[] = [
   },
   {
     id: "li-jun-4",
-    label: "AM-142 · Vehicle search with filters — spec approved",
+    label: "AM-142 · Vehicle search with filters - spec approved",
     ticketId: "AM-142",
     gateId: "appr-AM-142",
     clearedBy: "Zlatko",
@@ -311,10 +311,10 @@ export function consumptionByProject(): ConsumptionRow[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Pricing simulator — badged "MODELING — not a quote" (C9)             */
+/* Pricing simulator - badged "MODELING - not a quote" (C9)             */
 /* ------------------------------------------------------------------ */
 
-export const PRICING_SIMULATOR_BADGE = "MODELING — not a quote";
+export const PRICING_SIMULATOR_BADGE = "MODELING - not a quote";
 
 export interface PricingScenario {
   id: "platform_pod" | "outcome_per_artifact" | "outcome_per_merged";

@@ -1,6 +1,6 @@
 /**
- * DefectsList — the QA review's filed defects + the agent's ship/hold
- * verdict. Each defect names its SUSPECTED ROOT-CAUSE STAGE — the rework
+ * DefectsList - the QA review's filed defects + the agent's ship/hold
+ * verdict. Each defect names its SUSPECTED ROOT-CAUSE STAGE - the rework
  * canon on a decision surface: a reject from this gate should target the
  * stage where the failure was born (QA's report proposes it via
  * traceability; the human confirms or overrides).
@@ -93,7 +93,7 @@ export function DefectsList({
 
       <p className="mt-3 text-[11px] text-muted-foreground">
         Rework follows the artifact chain: rejecting this gate can target the root-cause stage
-        directly — everything downstream of the corrected artifact re-runs forward.
+        directly - everything downstream of the corrected artifact re-runs forward.
       </p>
     </section>
   );

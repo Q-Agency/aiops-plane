@@ -1,7 +1,7 @@
 /**
- * DegradationExplainer — the "How degradation works" honesty card on
+ * DegradationExplainer - the "How degradation works" honesty card on
  * /status: the three lines (verbatim from src/mock/status.ts
- * DEGRADATION_EXPLAINER) behind the procurement story — agents keep
+ * DEGRADATION_EXPLAINER) behind the procurement story - agents keep
  * working, gates stay answerable in Slack, the ledger backfills with
  * gap-markers.
  */

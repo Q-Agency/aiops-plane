@@ -1,7 +1,7 @@
 /**
- * FirstGateWalkthrough (/welcome stage 2) — a guided, READ-ONLY tour of a
+ * FirstGateWalkthrough (/welcome stage 2) - a guided, READ-ONLY tour of a
  * Sample-pod gate (appr-AM-142 from gate-detail.ts) in coach-mark mode:
- * 4 marks — read the spec → check the validators → the decision panel →
+ * 4 marks - read the spec → check the validators → the decision panel →
  * where the decision lands in the ledger.
  *
  * Deliberately NOT an embed of GateReviewShell (which mutates the decision
@@ -35,33 +35,33 @@ interface CoachMark {
 const MARKS: CoachMark[] = [
   {
     title: "Read the spec",
-    body: "The artifact under review renders here, in-app — sections, business rules, acceptance criteria. You review inside Agency OS; the agent's own tool is only a labeled fallback.",
+    body: "The artifact under review renders here, in-app - sections, business rules, acceptance criteria. You review inside Agency OS; the agent's own tool is only a labeled fallback.",
   },
   {
     title: "Check the validators",
-    body: "8 deterministic structural checks — no model in the loop. Green means the shape is right; it says nothing about whether it's the right idea. That judgement is yours.",
+    body: "8 deterministic structural checks - no model in the loop. Green means the shape is right; it says nothing about whether it's the right idea. That judgement is yours.",
   },
   {
     title: "The decision panel",
-    body: "Approve (optional quick-reason chips) or reject. A typed reason is REQUIRED on reject — it returns the work with your note as the agent's added context.",
+    body: "Approve (optional quick-reason chips) or reject. A typed reason is REQUIRED on reject - it returns the work with your note as the agent's added context.",
   },
   {
     title: "Where the decision lands",
-    body: "Every decision writes an immutable, hash-chained row to the audit ledger — actor, action, artifact. This is what you point an auditor at.",
+    body: "Every decision writes an immutable, hash-chained row to the audit ledger - actor, action, artifact. This is what you point an auditor at.",
   },
 ];
 
 export interface FirstGateWalkthroughProps {
   /** Parent-owned: the walkthrough has been opened (enables the Accept CTA). */
   opened: boolean;
-  /** Fired by the cover-overlay button — parent flips `opened`. */
+  /** Fired by the cover-overlay button - parent flips `opened`. */
   onOpen: () => void;
   /** Fired once when mark 4 is finished. */
   onComplete: () => void;
 }
 
 export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWalkthroughProps) {
-  // 0 = covered, 1–4 = coach marks, 5 = done
+  // 0 = covered, 1-4 = coach marks, 5 = done
   const [step, setStep] = useState(0);
   const detail = gateDetailFor(WALKTHROUGH_GATE_ID);
 
@@ -72,7 +72,7 @@ export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWa
   if (!detail) {
     return (
       <div className="glass-panel p-4 text-xs text-muted-foreground">
-        Sample gate unavailable — open the live queue at{" "}
+        Sample gate unavailable - open the live queue at{" "}
         <Link to="/approvals" className="text-primary hover:underline">
           /approvals
         </Link>{" "}
@@ -139,7 +139,7 @@ export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWa
           </div>
 
           <div className="grid md:grid-cols-[minmax(0,1fr)_230px] gap-3">
-            {/* mark 1 — the spec */}
+            {/* mark 1 - the spec */}
             <Region active={step === 1} dim={opened && !done && step !== 1} mark={1}>
               <div className="p-3 space-y-1 max-h-56 overflow-hidden">
                 {excerpt.map((line, i) => (
@@ -147,12 +147,12 @@ export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWa
                 ))}
               </div>
               <div className="px-3 pb-2 text-[9px] font-mono text-muted-foreground/70">
-                … excerpt — the full document renders on the real gate
+                … excerpt - the full document renders on the real gate
               </div>
             </Region>
 
             <div className="space-y-3">
-              {/* mark 2 — validators */}
+              {/* mark 2 - validators */}
               <Region active={step === 2} dim={opened && !done && step !== 2} mark={2}>
                 <div className="p-3 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
@@ -179,14 +179,14 @@ export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWa
                 </div>
               </Region>
 
-              {/* mark 3 — decision panel */}
+              {/* mark 3 - decision panel */}
               <Region active={step === 3} dim={opened && !done && step !== 3} mark={3}>
                 <div className="p-3 space-y-2">
                   <div className="text-[9px] uppercase tracking-wider font-mono text-muted-foreground">
                     Decision
                   </div>
                   <div className="rounded border border-border/60 bg-white/[0.02] px-2 py-1.5 text-[10px] text-muted-foreground/70 italic">
-                    Required on reject — your note becomes the agent&apos;s added context.
+                    Required on reject - your note becomes the agent&apos;s added context.
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="flex-1 h-7 rounded-md border border-status-done/50 bg-status-done/15 text-status-done text-[10px] font-semibold uppercase tracking-wider inline-flex items-center justify-center gap-1">
@@ -201,7 +201,7 @@ export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWa
             </div>
           </div>
 
-          {/* mark 4 — the ledger row */}
+          {/* mark 4 - the ledger row */}
           <Region active={step === 4} dim={opened && !done && step !== 4} mark={4}>
             <div className="p-3 flex items-center gap-2 flex-wrap font-mono text-[10px]">
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mr-1">
@@ -256,7 +256,7 @@ export function FirstGateWalkthrough({ opened, onOpen, onComplete }: FirstGateWa
         <div className="rounded-md border border-status-done/40 bg-status-done/10 p-3 flex items-center gap-2 flex-wrap text-xs">
           <Check className="size-4 text-status-done shrink-0" />
           <span className="text-status-done font-medium">
-            Walkthrough complete — you&apos;ve seen the whole loop.
+            Walkthrough complete - you&apos;ve seen the whole loop.
           </span>
           <span className="flex-1" />
           <Link
@@ -305,7 +305,7 @@ function Region({
   );
 }
 
-/** Tiny markdown-ish line renderer — screenshot fidelity, not a doc engine. */
+/** Tiny markdown-ish line renderer - screenshot fidelity, not a doc engine. */
 function ExcerptLine({ line }: { line: string }) {
   if (line.startsWith("# "))
     return <div className="text-[13px] font-semibold text-foreground">{line.slice(2)}</div>;

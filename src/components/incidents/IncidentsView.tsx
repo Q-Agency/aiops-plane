@@ -1,5 +1,5 @@
 /**
- * IncidentsView — /incidents (C5): "Detect, decide, recover — every action
+ * IncidentsView - /incidents (C5): "Detect, decide, recover - every action
  * is logged." Master-detail over the INCIDENTS mock: inbox left, detail +
  * recovery controls right. Recovery actions confirm via dialog, run a short
  * mocked "recovering" delay, then commit through recoverIncident /
@@ -40,7 +40,7 @@ export function IncidentsView({ deepLinkId }: IncidentsViewProps) {
   const navigate = useNavigate();
   // Mutation seam re-render: INCIDENTS is module state; bump after each commit.
   const [, setSeq] = useState(0);
-  // Demo Director staged incident flips land in INCIDENTS — repaint on tick.
+  // Demo Director staged incident flips land in INCIDENTS - repaint on tick.
   useDemoTick();
   const [selectedId, setSelectedId] = useState<string | null>(deepLinkId ?? null);
   const [recoveringId, setRecoveringId] = useState<string | null>(null);
@@ -92,7 +92,7 @@ export function IncidentsView({ deepLinkId }: IncidentsViewProps) {
     setDialog(null);
     if (!target || target.status === "resolved") return;
 
-    // Recovering phase is purely local — navigating away mid-flight leaves
+    // Recovering phase is purely local - navigating away mid-flight leaves
     // the module state untouched ("open") until the commit lands.
     setRecoveringId(target.id);
     timersRef.current.push(
@@ -108,7 +108,7 @@ export function IncidentsView({ deepLinkId }: IncidentsViewProps) {
           const h =
             humans.find((x) => x.id === target.accountableHumanId)?.name ??
             "the accountable human";
-          toast.error(`Retry failed — escalated to ${h}. See timeline.`, {
+          toast.error(`Retry failed - escalated to ${h}. See timeline.`, {
             description: `${entry.action} · ${entry.target} · actor when-only`,
           });
         } else {
@@ -144,7 +144,7 @@ export function IncidentsView({ deepLinkId }: IncidentsViewProps) {
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Detect, decide, recover — every action is logged.
+            Detect, decide, recover - every action is logged.
           </p>
         </div>
         <div className="flex-1" />

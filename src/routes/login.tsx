@@ -29,13 +29,13 @@ export const Route = createFileRoute("/login")({
 const HIGHLIGHTS = [
   { icon: Activity, title: "Live agent telemetry", desc: "Traces, tokens, and latency in real time." },
   { icon: ShieldCheck, title: "Human-in-the-loop gates", desc: "Approve specs, designs, and releases." },
-  { icon: GitBranch, title: "End-to-end traceability", desc: "From spec to shipped — fully audited." },
+  { icon: GitBranch, title: "End-to-end traceability", desc: "From spec to shipped - fully audited." },
 ];
 
 // The brand panel is an intentional dark showcase in BOTH themes (dark navy
 // gradient + glow + grid). Lock its theme tokens to the dark-mode values so
 // its theme-aware text (text-foreground / text-muted-foreground) stays light
-// even when the app runs in light mode — otherwise the foreground flips dark
+// even when the app runs in light mode - otherwise the foreground flips dark
 // and disappears against the dark background.
 const DARK_PANEL_VARS = {
   "--foreground": "#e6e8ef",
@@ -45,7 +45,7 @@ const DARK_PANEL_VARS = {
 
 // One-click demo entry (for pitches / drive-by prospects): sign straight into
 // the sample-data account so nobody has to type credentials in front of an
-// audience. These ARE the public demo creds (users.server.ts) — the demo
+// audience. These ARE the public demo creds (users.server.ts) - the demo
 // account is "standard" (sample pods only), and Settings → Experience can
 // still flip the browser to Live afterwards. Not a secret; the login form
 // already accepts the same email+password by hand.
@@ -102,7 +102,7 @@ function LoginPage() {
     try {
       const res = await loginFn({ data: { ...DEMO_CREDENTIALS } });
       if (!res.ok) {
-        // Should never happen (creds are hardcoded-correct) — surface it anyway.
+        // Should never happen (creds are hardcoded-correct) - surface it anyway.
         setError(res.error);
         setDemoLoading(false);
         return;
@@ -148,7 +148,7 @@ function LoginPage() {
             Mission control for your agentic software pipeline.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Plan, observe, and govern autonomous delivery agents — from spec to ship — in one
+            Plan, observe, and govern autonomous delivery agents - from spec to ship - in one
             operational pane.
           </p>
 
@@ -283,7 +283,7 @@ function LoginPage() {
               </Button>
             </form>
 
-            {/* Demo entry — no credentials needed, drops straight into the
+            {/* Demo entry - no credentials needed, drops straight into the
                 sample-data workspace. Secondary by design so it never competes
                 with a real sign-in. */}
             <div className="my-5 flex items-center gap-3" aria-hidden="true">

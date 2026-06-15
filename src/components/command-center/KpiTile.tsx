@@ -8,11 +8,11 @@ interface KpiTileProps {
   label: string;
   value: number;
   format?: (n: number) => string;
-  /** % change vs last week — omit for state counts where a delta is noise. */
+  /** % change vs last week - omit for state counts where a delta is noise. */
   delta?: number;
   sparkline: number[];
   accent?: string; // css var name e.g. "primary" or "agent-dev"
-  /** Optional destination — renders the tile as a link (e.g. "/intake"). */
+  /** Optional destination - renders the tile as a link (e.g. "/intake"). */
   to?: string;
   /** Small mono hint shown instead of the delta pill (pairs with `to`). */
   hint?: string;

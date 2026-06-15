@@ -1,21 +1,21 @@
-# Agency OS — Control-Plane Data Model (draft v0)
+# Agency OS - Control-Plane Data Model (draft v0)
 
-*Status: draft v0 — entity inventory and binding rules for the product's control plane. Date: 2026-06-09. Named per the deep-dive's P0-5(d); referenced from `product-vision.md` §8.*
+*Status: draft v0 - entity inventory and binding rules for the product's control plane. Date: 2026-06-09. Named per the deep-dive's P0-5(d); referenced from `product-vision.md` §8.*
 
 ## What this is
 
-The product the planning docs describe implies a data model that no document had named. The screens appendix in [`product-vision-screens.md`](./product-vision-screens.md) lists **21 net-new mock files** (`pods.ts`, `tenancy.ts`, `connectors.ts`, `sla.ts`, `incidents.ts`, `notifications.ts`, `roles.ts`, …) which collectively define exactly that model — Pod, Connection, SLA, Incident, Notification, Role and the rest. This doc is its single named home. **The screens appendix mock shapes are draft v0 of this model** — when a shape here and a shape in the appendix drift, reconcile them deliberately, never silently.
+The product the planning docs describe implies a data model that no document had named. The screens appendix in [`product-vision-screens.md`](./product-vision-screens.md) lists **21 net-new mock files** (`pods.ts`, `tenancy.ts`, `connectors.ts`, `sla.ts`, `incidents.ts`, `notifications.ts`, `roles.ts`, …) which collectively define exactly that model - Pod, Connection, SLA, Incident, Notification, Role and the rest. This doc is its single named home. **The screens appendix mock shapes are draft v0 of this model** - when a shape here and a shape in the appendix drift, reconcile them deliberately, never silently.
 
-Relationship to the other docs: [`architecture.md`](./architecture.md)'s v2 milestone already commits to a small control-plane Postgres, but scoped it to **users/auth + the system registry + memberships** only — everything below is what the product SKU adds on top of that floor. The one durable store that already exists is the dashboard-owned audit Supabase ("Q AI Ops Plane"), created as the v1 exception to "no dashboard DB" because BA's reset deletes the spec. [`product-vision.md`](./product-vision.md) §8 registers the deferred runtime mechanics behind these entities (config API, credential vault, real identity); this doc names the shapes and their homes, not the build order.
+Relationship to the other docs: [`architecture.md`](./architecture.md)'s v2 milestone already commits to a small control-plane Postgres, but scoped it to **users/auth + the system registry + memberships** only - everything below is what the product SKU adds on top of that floor. The one durable store that already exists is the dashboard-owned audit Supabase ("Q AI Ops Plane"), created as the v1 exception to "no dashboard DB" because BA's reset deletes the spec. [`product-vision.md`](./product-vision.md) §8 registers the deferred runtime mechanics behind these entities (config API, credential vault, real identity); this doc names the shapes and their homes, not the build order.
 
-## Legend — Kind / Home
+## Legend - Kind / Home
 
 Every entity answers the federation discipline's two questions: **durable or derived, and where does it live?**
 
 | Kind | Meaning | Home |
 |---|---|---|
 | **durable** | Control-plane-owned state the product must persist; it survives any agent reset. | The dashboard-owned audit Supabase ("Q AI Ops Plane") **today** · the v2 control-plane Postgres **later**. |
-| **derived** | Computed on demand from federated agent data (contract endpoints, agent cards). Never persisted control-plane-side. | The gateway/adapters — no table exists. |
+| **derived** | Computed on demand from federated agent data (contract endpoints, agent cards). Never persisted control-plane-side. | The gateway/adapters - no table exists. |
 | **static** | Curated content shipped with the product (blueprints, connector catalog, model plane). | Repo/config today; becomes durable rows once clients can edit it. |
 | **mock-only** | Exists in `src/mock/*` to make the demo coherent; promotion to durable is an explicit later decision, not a default. | `src/mock/*`. |
 
@@ -24,34 +24,34 @@ Every entity answers the federation discipline's two questions: **durable or der
 | Entity | Kind | Notes |
 |---|---|---|
 | Tenant | durable | region, isolation, DPA state, retention; extends `tenancy.ts` |
-| Pod | durable | **must carry `projectIds: string[]`** — the gateway filters federated runs by `run.project.id ∈ pod.projectIds`; v1 simplification 1 pod = 1 project makes the `aiops_project` cookie reuse honest (see Binding rules) |
-| PodAgentConfig | durable | catalog membership, Slack routing, approver ids, autonomy level — applied to agents via the (deferred) config API; the wizard writes intent, a Q-operated applier pushes it |
+| Pod | durable | **must carry `projectIds: string[]`** - the gateway filters federated runs by `run.project.id ∈ pod.projectIds`; v1 simplification 1 pod = 1 project makes the `aiops_project` cookie reuse honest (see Binding rules) |
+| PodAgentConfig | durable | catalog membership, Slack routing, approver ids, autonomy level - applied to agents via the (deferred) config API; the wizard writes intent, a Q-operated applier pushes it |
 | Blueprint | static/durable | incl. default SLAs, default gate policies, `language` |
-| ScopeRule | durable | brownfield work-slice filter (P0-7 — the "Scope of work" sub-step); lives on `PodDraft` in the mock |
-| ConnectorCatalogEntry / SourceBinding / Connection (+ScopeGrant) | static / **derived from agent cards** / durable | the ownership split from P0-5(d): SourceBindings are read-only federation today; vault-backed pod-owned Connections are the future model — Connect tiles badge accordingly |
+| ScopeRule | durable | brownfield work-slice filter (P0-7 - the "Scope of work" sub-step); lives on `PodDraft` in the mock |
+| ConnectorCatalogEntry / SourceBinding / Connection (+ScopeGrant) | static / **derived from agent cards** / durable | the ownership split from P0-5(d): SourceBindings are read-only federation today; vault-backed pod-owned Connections are the future model - Connect tiles badge accordingly |
 | SlackWiring / NotificationRoute | durable | |
 | Member, Role, RoleAssignment, Invite | durable | identity per the §8 RBAC/IdP row |
 | Human (extended) | durable | `workingHours`, `status: "available"\|"ooo"`, `delegateId`, `capacityGatesPerDay` (P1-O1) |
 | GatePolicy / AutonomyPolicy (+promotion evidence) | durable | P1-G1; versioned, every change audited |
 | SlaDefinition (+`clockMode`, coverage calendar) / SlaBreach | durable / derived | breaches derived from federated gate/run timing against the calendar |
 | Incident (+IncidentEvent, recurrence links) | durable, **derived from** federated health/run/gate signals by a named detector | |
-| Notification / NotificationPref / AlertRule | durable | generated by extending the existing audit background-sync ingest (agent buses are ephemeral — fanout must persist control-plane-side) |
+| Notification / NotificationPref / AlertRule | durable | generated by extending the existing audit background-sync ingest (agent buses are ephemeral - fanout must persist control-plane-side) |
 | BudgetPlan / BudgetAlert / UsageStatement | durable | incl. `onCapReached` policy |
 | RoiAssumptions | durable | blended rate, baseline, `source: "client-provided" \| "Q-default"` (P0-3) |
 | WeeklyReport / PilotPlan | durable | |
-| ArtifactSnapshot | durable | approved artifacts snapshotted at gate-clearance so no agent reset deletes a paid deliverable — the same rationale that created the audit DB |
+| ArtifactSnapshot | durable | approved artifacts snapshotted at gate-clearance so no agent reset deletes a paid deliverable - the same rationale that created the audit DB |
 | Constitution (+Amendment proposals) | durable | P1-A2 |
 | ModelPlaneEntry | static/durable | provider, model pin, region, ZDR terms per agent (P0-8); `src/mock/modelPlane.ts` is its draft shape |
-| AuditEntry | durable — **exists** (Q AI Ops Plane Supabase) | extend the action vocabulary (P1-G4); dashboard-originated actions write directly server-side |
+| AuditEntry | durable - **exists** (Q AI Ops Plane Supabase) | extend the action vocabulary (P1-G4); dashboard-originated actions write directly server-side |
 | PodControlState | durable | pause/throttle states; real once the contract control ops land (contract evolution register #6) |
 
 ## Binding rules
 
-**Pod scoping.** The pod is *declared* (control-plane state); the project is *derived* (federated, from `run.project`). A `Pod` row carries `projectIds: string[]`, and the gateway scopes every federated read by `run.project.id ∈ pod.projectIds`. The v1 simplification is **1 pod = 1 project**, which is what makes reusing the existing `aiops_project` cookie as the pod scope honest rather than fake. Nothing other than `Pod.projectIds` may define pod membership — no second scoping mechanism.
+**Pod scoping.** The pod is *declared* (control-plane state); the project is *derived* (federated, from `run.project`). A `Pod` row carries `projectIds: string[]`, and the gateway scopes every federated read by `run.project.id ∈ pod.projectIds`. The v1 simplification is **1 pod = 1 project**, which is what makes reusing the existing `aiops_project` cookie as the pod scope honest rather than fake. Nothing other than `Pod.projectIds` may define pod membership - no second scoping mechanism.
 
-**Durable vs derived — never persist what federation can answer.** Runs, in-flight artifacts, gate queues, agent health, and source bindings stay agent-side and are read through the contract. The control plane persists only two classes of state: what must **outlive agent data** (decisions, artifact snapshots, policies, config intent — the audit-DB rationale generalized) and what **agents cannot know** (tenancy, members, budgets, ROI assumptions, scope rules). If an entity can be recomputed from `/agency/*` reads, it is derived; promoting it to a table requires an ArtifactSnapshot-class justification, recorded here.
+**Durable vs derived - never persist what federation can answer.** Runs, in-flight artifacts, gate queues, agent health, and source bindings stay agent-side and are read through the contract. The control plane persists only two classes of state: what must **outlive agent data** (decisions, artifact snapshots, policies, config intent - the audit-DB rationale generalized) and what **agents cannot know** (tenancy, members, budgets, ROI assumptions, scope rules). If an entity can be recomputed from `/agency/*` reads, it is derived; promoting it to a table requires an ArtifactSnapshot-class justification, recorded here.
 
-**Audit-write paths.** One append-only ledger, two writers: (1) the existing server-side background sync **ingests** agent-originated events from `/agency/events/recent`; (2) dashboard-originated actions (pod launch/pause, gate decisions made in-app, policy changes, role changes) **write directly server-side** through the same service-role path — the screens appendix's `audit-bridge.ts` is the mock of exactly this function. No client-side writes, ever; both paths land in the same `audit_log`.
+**Audit-write paths.** One append-only ledger, two writers: (1) the existing server-side background sync **ingests** agent-originated events from `/agency/events/recent`; (2) dashboard-originated actions (pod launch/pause, gate decisions made in-app, policy changes, role changes) **write directly server-side** through the same service-role path - the screens appendix's `audit-bridge.ts` is the mock of exactly this function. No client-side writes, ever; both paths land in the same `audit_log`.
 
 ---
 

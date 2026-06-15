@@ -1,11 +1,11 @@
 /**
- * Agent catalog — display layer over THE CHAIN (src/mock/chain.ts).
+ * Agent catalog - display layer over THE CHAIN (src/mock/chain.ts).
  *
  * Joins chain facts (produces/consumes/availability/cost/latency) with
  * display data. Where an Agent record exists in src/mock/agents.ts
  * (ba, sa, tasklist, dev, review, qa, curator=knowledge) we reuse its
  * name/color/engine and expose `agentId` so views can join sparkline /
- * successRate. `uiux` and `devops` are display stubs that live HERE —
+ * successRate. `uiux` and `devops` are display stubs that live HERE -
  * agents.ts is untouched.
  */
 
@@ -35,9 +35,9 @@ export interface CatalogEntry {
   conformance: ContractConformance;
   costPerTicketUsd: number;
   latencyP50Min: number;
-  /** 3–5 bullets for the detail dialog. */
+  /** 3-5 bullets for the detail dialog. */
   capabilities: string[];
-  /** One-sentence "what it does" — richer than roleLine. */
+  /** One-sentence "what it does" - richer than roleLine. */
   summary: string;
   /** Existing mock Agent id (join for successRate/sparkline); absent for uiux/devops stubs. */
   agentId?: AgentId;
@@ -90,7 +90,7 @@ export const CATALOG: CatalogEntry[] = [
     agentId: "ba",
     capabilities: [
       "EARS acceptance criteria",
-      "Structural spec validation — zero-LLM, deterministic",
+      "Structural spec validation - zero-LLM, deterministic",
       "Slack clarification gates",
       "Teamwork ticket intake",
     ],
@@ -110,21 +110,21 @@ export const CATALOG: CatalogEntry[] = [
       "Contract-validated structure",
     ],
     summary:
-      "Reads the approved spec and writes design.md — architecture, data flows and decision records that respect each codebase's constitution.",
+      "Reads the approved spec and writes design.md - architecture, data flows and decision records that respect each codebase's constitution.",
   }),
   entry("uiux", {
     name: "UI/UX Designer",
-    roleLine: "UI/UX Designer — writes UIX-UI-SPEC.md",
+    roleLine: "UI/UX Designer - writes UIX-UI-SPEC.md",
     color: "agent-uiux",
     engine: "LangGraph + Figma MCP",
     capabilities: [
       "Figma frames via MCP",
-      "Visual spec — UIX-UI-SPEC.md",
+      "Visual spec - UIX-UI-SPEC.md",
       "Design-token compliance checks",
       "Accessibility annotations",
     ],
     summary:
-      "Translates the approved design into UIX-UI-SPEC.md — Figma frames plus pixel-level visual specs the Dev agent can build against.",
+      "Translates the approved design into UIX-UI-SPEC.md - Figma frames plus pixel-level visual specs the Dev agent can build against.",
   }),
   entry("tasklist", {
     name: tasklist.name,
@@ -138,7 +138,7 @@ export const CATALOG: CatalogEntry[] = [
       "Per-task estimates & codebase routing",
     ],
     summary:
-      "Breaks the visual spec into tasks.json — a dependency-ordered, estimated work breakdown routed to the right codebase.",
+      "Breaks the visual spec into tasks.json - a dependency-ordered, estimated work breakdown routed to the right codebase.",
   }),
   entry("dev", {
     name: dev.name,
@@ -153,7 +153,7 @@ export const CATALOG: CatalogEntry[] = [
       "Branch-per-ticket workflow",
     ],
     summary:
-      "Implements the task list as reviewable pull requests across backend, web and mobile — tests included, conventions enforced.",
+      "Implements the task list as reviewable pull requests across backend, web and mobile - tests included, conventions enforced.",
   }),
   entry("review", {
     name: review.name,
@@ -186,12 +186,12 @@ export const CATALOG: CatalogEntry[] = [
   }),
   entry("devops", {
     name: "DevOps/Release",
-    roleLine: "DevOps/Release — ships what passed QA",
+    roleLine: "DevOps/Release - ships what passed QA",
     color: "agent-devops",
     engine: "LangGraph",
     capabilities: [
       "Release orchestration & changelogs",
-      "DORA metrics — lead time, deploy frequency, MTTR, change-failure rate",
+      "DORA metrics - lead time, deploy frequency, MTTR, change-failure rate",
       "Environment promotion gates",
       "Rollback playbooks",
     ],
@@ -209,10 +209,10 @@ export const CATALOG: CatalogEntry[] = [
       "Project memory & context bundles",
       "Source freshness telemetry",
       "Pod-wide retrieval for every agent",
-      "Runs pod-wide — not a pipeline stage",
+      "Runs pod-wide - not a pipeline stage",
     ],
     summary:
-      "Curates the pod's project knowledge — every other agent draws on its context bundles. Runs pod-wide as a peer, not in the pipeline rail.",
+      "Curates the pod's project knowledge - every other agent draws on its context bundles. Runs pod-wide as a peer, not in the pipeline rail.",
   }),
 ];
 
@@ -227,14 +227,14 @@ export const TOGGLABLE_IDS: ChainRoleId[] = [...PIPELINE_ORDER, "knowledge"];
 
 /**
  * Mandatory in EVERY pod (owner call, 2026-06-12): the Knowledge Base
- * agent holds the pod's shared context — the moat's cornerstone (SOW as
+ * agent holds the pod's shared context - the moat's cornerstone (SOW as
  * source of truth, every agent and human drawing on the same context).
  * Its toggle renders locked, every blueprint includes it, and the wizard
  * re-adds it if a draft ever loses it.
  */
 export const MANDATORY_ROLE_IDS = new Set<ChainRoleId>(["knowledge"]);
 
-/** PM Supervisor — always-on, non-togglable; rendered in its own "Always-on" subsection. */
+/** PM Supervisor - always-on, non-togglable; rendered in its own "Always-on" subsection. */
 export const ALWAYS_ON = (() => {
   const pm = agentById("pm");
   return {
@@ -244,6 +244,6 @@ export const ALWAYS_ON = (() => {
     color: pm.color,
     engine: pm.engine,
     summary:
-      "Supervises the whole pipeline — sequencing handoffs, watching SLAs and escalating to humans. Included in every pod, always on.",
+      "Supervises the whole pipeline - sequencing handoffs, watching SLAs and escalating to humans. Included in every pod, always on.",
   };
 })();

@@ -61,7 +61,7 @@ const rawAudit: Omit<AuditEntry, "hash" | "prevHash">[] = [
   { id: "ae-002", ts: now - 47 * h, actor: { kind: "agent", id: "ba" }, action: "artifact.created", ticketId: "AM-142", rationale: "spec.md v1 drafted from synthesized sources", artifactRef: "AM-142/spec.md@v1" },
   { id: "ae-003", ts: now - 46 * h, actor: { kind: "human", id: "zlatko" }, action: "gate.approved", ticketId: "AM-142", rationale: "Spec scope matches SOW §3.2", artifactRef: "AM-142/spec.md@v1" },
   { id: "ae-004", ts: now - 40 * h, actor: { kind: "agent", id: "sa" }, action: "artifact.created", ticketId: "AM-138", rationale: "design.md v1 produced", artifactRef: "AM-138/design.md@v1" },
-  { id: "ae-005", ts: now - 39 * h, actor: { kind: "human", id: "marin" }, action: "gate.rejected", ticketId: "AM-138", rationale: "Threading model incomplete — reroute to SA", artifactRef: "AM-138/design.md@v1" },
+  { id: "ae-005", ts: now - 39 * h, actor: { kind: "human", id: "marin" }, action: "gate.rejected", ticketId: "AM-138", rationale: "Threading model incomplete - reroute to SA", artifactRef: "AM-138/design.md@v1" },
   { id: "ae-006", ts: now - 36 * h, actor: { kind: "agent", id: "sa" }, action: "artifact.versioned", ticketId: "AM-138", rationale: "design.md v2 with threaded model", artifactRef: "AM-138/design.md@v2" },
   { id: "ae-007", ts: now - 30 * h, actor: { kind: "agent", id: "dev" }, action: "model.invoked", ticketId: "AM-131", rationale: "local qwen2.5-coder-32b @ on-prem H200", artifactRef: "model:qwen2.5-coder-32b" },
   { id: "ae-008", ts: now - 26 * h, actor: { kind: "human", id: "ivan" }, action: "gate.approved", ticketId: "AM-133", rationale: "Callback signature verified", artifactRef: "AM-133/pr#412" },
@@ -107,14 +107,14 @@ export interface IngestedSource {
 
 export const SOURCES: IngestedSource[] = [
   { id: "s1", name: "Slack #automarket-product", kind: "Slack", classification: "Business", retentionDays: 365, residency: "on-prem", erasureRequests: 0, docs: 1248 },
-  { id: "s2", name: "Google Drive — Contracts", kind: "Drive", classification: "Sensitive", retentionDays: 2555, residency: "on-prem", erasureRequests: 0, docs: 312 },
-  { id: "s3", name: "Jira — AutoMarket", kind: "Jira", classification: "Business", retentionDays: 730, residency: "on-prem", erasureRequests: 0, docs: 891 },
-  { id: "s4", name: "Gmail — client thread", kind: "Gmail", classification: "PII", retentionDays: 180, residency: "on-prem", erasureRequests: 2, docs: 412 },
+  { id: "s2", name: "Google Drive - Contracts", kind: "Drive", classification: "Sensitive", retentionDays: 2555, residency: "on-prem", erasureRequests: 0, docs: 312 },
+  { id: "s3", name: "Jira - AutoMarket", kind: "Jira", classification: "Business", retentionDays: 730, residency: "on-prem", erasureRequests: 0, docs: 891 },
+  { id: "s4", name: "Gmail - client thread", kind: "Gmail", classification: "PII", retentionDays: 180, residency: "on-prem", erasureRequests: 2, docs: 412 },
   { id: "s5", name: "HubSpot CRM", kind: "HubSpot", classification: "PII", retentionDays: 1095, residency: "on-prem", erasureRequests: 1, docs: 2104 },
   { id: "s6", name: "SOWs / MSAs", kind: "SOW", classification: "Sensitive", retentionDays: 2555, residency: "on-prem", erasureRequests: 0, docs: 48 },
 ];
 
-// Residency split per project — % of inference compute
+// Residency split per project - % of inference compute
 export const RESIDENCY_SPLIT = {
   automarket: { onPrem: 78, cloudEU: 22, cloudUS: 0 },
   fintrust: { onPrem: 100, cloudEU: 0, cloudUS: 0 },
@@ -162,8 +162,8 @@ export const CONTROLS: Control[] = [
     evidence: "Gate decision log (Pod / Accountability)",
     evidenceRef: "/pod",
     frameworks: [
-      { framework: "EU_AI_ACT", requirement: "Art. 14 — Human oversight" },
-      { framework: "ISO_42001", requirement: "A.6.2.4 — Human oversight" },
+      { framework: "EU_AI_ACT", requirement: "Art. 14 - Human oversight" },
+      { framework: "ISO_42001", requirement: "A.6.2.4 - Human oversight" },
     ],
     status: "captured",
   },
@@ -173,8 +173,8 @@ export const CONTROLS: Control[] = [
     evidence: "Immutable audit trail (this view)",
     evidenceRef: "#audit",
     frameworks: [
-      { framework: "EU_AI_ACT", requirement: "Art. 12 — Record-keeping" },
-      { framework: "SOC2", requirement: "CC7.2 — System monitoring" },
+      { framework: "EU_AI_ACT", requirement: "Art. 12 - Record-keeping" },
+      { framework: "SOC2", requirement: "CC7.2 - System monitoring" },
     ],
     status: "captured",
   },
@@ -184,8 +184,8 @@ export const CONTROLS: Control[] = [
     evidence: "Residency split (this view)",
     evidenceRef: "#residency",
     frameworks: [
-      { framework: "GDPR", requirement: "Art. 32 — Security of processing" },
-      { framework: "GDPR", requirement: "Art. 44 — Cross-border transfers" },
+      { framework: "GDPR", requirement: "Art. 32 - Security of processing" },
+      { framework: "GDPR", requirement: "Art. 44 - Cross-border transfers" },
     ],
     status: "captured",
   },
@@ -195,7 +195,7 @@ export const CONTROLS: Control[] = [
     evidence: "Traceability lineage (Curator → spec)",
     evidenceRef: "/traceability",
     frameworks: [
-      { framework: "EU_AI_ACT", requirement: "Art. 13 — Transparency" },
+      { framework: "EU_AI_ACT", requirement: "Art. 13 - Transparency" },
     ],
     status: "captured",
   },
@@ -206,7 +206,7 @@ export const CONTROLS: Control[] = [
     evidenceRef: "#provenance",
     frameworks: [
       { framework: "EU_AI_ACT", requirement: "Annex IV §2(b)" },
-      { framework: "ISO_42001", requirement: "A.8.4 — AI system documentation" },
+      { framework: "ISO_42001", requirement: "A.8.4 - AI system documentation" },
     ],
     status: "captured",
   },
@@ -215,7 +215,7 @@ export const CONTROLS: Control[] = [
     control: "Erasure-request handling within 30 days",
     evidence: "Data governance table",
     evidenceRef: "#governance",
-    frameworks: [{ framework: "GDPR", requirement: "Art. 17 — Right to erasure" }],
+    frameworks: [{ framework: "GDPR", requirement: "Art. 17 - Right to erasure" }],
     status: "partial",
   },
   {
@@ -224,8 +224,8 @@ export const CONTROLS: Control[] = [
     evidence: "Risk register (this view)",
     evidenceRef: "#risks",
     frameworks: [
-      { framework: "EU_AI_ACT", requirement: "Art. 9 — Risk management" },
-      { framework: "ISO_42001", requirement: "A.5 — AI risk" },
+      { framework: "EU_AI_ACT", requirement: "Art. 9 - Risk management" },
+      { framework: "ISO_42001", requirement: "A.5 - AI risk" },
     ],
     status: "captured",
   },
@@ -234,7 +234,7 @@ export const CONTROLS: Control[] = [
     control: "Incident notification ≤ 72h",
     evidence: "Incident log → escalation routing",
     evidenceRef: "/comms",
-    frameworks: [{ framework: "GDPR", requirement: "Art. 33 — Breach notification" }],
+    frameworks: [{ framework: "GDPR", requirement: "Art. 33 - Breach notification" }],
     status: "partial",
   },
   {
@@ -242,7 +242,7 @@ export const CONTROLS: Control[] = [
     control: "Bias / fairness testing on user-facing models",
     evidence: "Not yet implemented",
     evidenceRef: "#",
-    frameworks: [{ framework: "EU_AI_ACT", requirement: "Art. 10 — Data governance" }],
+    frameworks: [{ framework: "EU_AI_ACT", requirement: "Art. 10 - Data governance" }],
     status: "gap",
   },
 ];
@@ -263,9 +263,9 @@ export interface Risk {
 }
 
 export const RISKS: Risk[] = [
-  { id: "r1", title: "Curator source conflict — pricing tier ambiguity", severity: "med", mitigation: "Synthesis agent prefers SOW; flagged to BA for human confirm", ownerHumanId: "zlatko", status: "mitigating", source: "esc-002" },
+  { id: "r1", title: "Curator source conflict - pricing tier ambiguity", severity: "med", mitigation: "Synthesis agent prefers SOW; flagged to BA for human confirm", ownerHumanId: "zlatko", status: "mitigating", source: "esc-002" },
   { id: "r2", title: "PII leak via Gmail thread re-index", severity: "high", mitigation: "Erasure queue + per-thread classifier", ownerHumanId: "ana", status: "mitigating", source: "incident-2026-05-28" },
-  { id: "r3", title: "Escaped defect — escrow callback race", severity: "high", mitigation: "Added integration test gate; QA prompt v3", ownerHumanId: "petra", status: "closed", source: "AM-133" },
+  { id: "r3", title: "Escaped defect - escrow callback race", severity: "high", mitigation: "Added integration test gate; QA prompt v3", ownerHumanId: "petra", status: "closed", source: "AM-133" },
   { id: "r4", title: "Local model degradation under load", severity: "med", mitigation: "Auto-failover to cloud-eu with audit flag", ownerHumanId: "ivan", status: "open", source: "ops" },
   { id: "r5", title: "No bias testing for ranking model", severity: "med", mitigation: "Planned: fairness suite Q3", ownerHumanId: "marin", status: "open", source: "control-c9" },
 ];
@@ -285,7 +285,7 @@ export interface Attestation {
 export const ATTESTATIONS: Attestation[] = [
   {
     id: "att-001",
-    release: "AutoMarket v0.4.1 — Buyer messaging GA",
+    release: "AutoMarket v0.4.1 - Buyer messaging GA",
     date: now - 10 * 24 * h,
     signerHumanId: "zlatko",
     frameworks: ["GDPR", "EU_AI_ACT"],
@@ -294,7 +294,7 @@ export const ATTESTATIONS: Attestation[] = [
   },
   {
     id: "att-002",
-    release: "AutoMarket v0.4.2 — Listing image upload",
+    release: "AutoMarket v0.4.2 - Listing image upload",
     date: now - 2 * 24 * h,
     signerHumanId: "ana",
     frameworks: ["GDPR", "EU_AI_ACT"],
@@ -303,11 +303,11 @@ export const ATTESTATIONS: Attestation[] = [
   },
   {
     id: "att-003",
-    release: "AutoMarket v0.5.0 — VIN decoder + KYC",
+    release: "AutoMarket v0.5.0 - VIN decoder + KYC",
     date: now + 3 * 24 * h,
     signerHumanId: "zlatko",
     frameworks: ["GDPR", "EU_AI_ACT"],
-    bundle: { auditEntries: 0, oversightDecisions: 0, residencyReport: "—" },
+    bundle: { auditEntries: 0, oversightDecisions: 0, residencyReport: "-" },
     status: "pending",
   },
 ];

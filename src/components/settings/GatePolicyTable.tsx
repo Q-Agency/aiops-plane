@@ -1,6 +1,6 @@
 /**
- * GatePolicyTable — Settings "Gate policies & autonomy" (#gates, P1-G1a):
- * one row per pipeline ArtifactKind from ARTIFACT_GATE_POLICIES — required
+ * GatePolicyTable - Settings "Gate policies & autonomy" (#gates, P1-G1a):
+ * one row per pipeline ArtifactKind from ARTIFACT_GATE_POLICIES - required
  * role, N-eyes, clearance SLA (editable), delegation, override policy, and
  * review mode (full · batch · auto-with-sampling, editable).
  *
@@ -130,7 +130,7 @@ export function GatePolicyTable() {
       detail: `${pending.field}: ${pending.before} → ${pending.after}`,
     });
     toast.success("Policy updated · recorded in the ledger", {
-      description: `${KIND_LABEL[pending.kind]} — ${pending.fieldLabel}: ${pending.before} → ${pending.after}`,
+      description: `${KIND_LABEL[pending.kind]} - ${pending.fieldLabel}: ${pending.before} → ${pending.after}`,
     });
     setPending(null);
   };
@@ -142,7 +142,7 @@ export function GatePolicyTable() {
         <h3 className="text-sm font-semibold">Gate policies</h3>
       </div>
       <p className="text-xs text-muted-foreground max-w-3xl">
-        Who clears which gate, under what SLA — seeded from blueprint defaults. Every change is on
+        Who clears which gate, under what SLA - seeded from blueprint defaults. Every change is on
         the record.
       </p>
 
@@ -235,7 +235,7 @@ export function GatePolicyTable() {
         </table>
       </div>
 
-      {/* Confirm dialog — preview stat inside, per the screens spec */}
+      {/* Confirm dialog - preview stat inside, per the screens spec */}
       <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
@@ -260,7 +260,7 @@ export function GatePolicyTable() {
                     </div>
                     <p className="text-[11px]">
                       Recorded in the ledger as{" "}
-                      <code className="font-mono rounded bg-white/10 px-1">policy.changed</code> —
+                      <code className="font-mono rounded bg-white/10 px-1">policy.changed</code> -
                       revertable the same way.
                     </p>
                   </>
@@ -271,7 +271,7 @@ export function GatePolicyTable() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmPending}>
-              Confirm — record in ledger
+              Confirm - record in ledger
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

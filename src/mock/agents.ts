@@ -22,7 +22,7 @@ export const agents: Agent[] = [
   {
     id: "ba",
     name: "BA Agent",
-    role: "Business Analyst — writes spec.md",
+    role: "Business Analyst - writes spec.md",
     color: "agent-ba",
     engine: "LangGraph",
     state: "running",
@@ -36,7 +36,7 @@ export const agents: Agent[] = [
   {
     id: "sa",
     name: "SA Agent",
-    role: "Solution Architect — writes design.md",
+    role: "Solution Architect - writes design.md",
     color: "agent-sa",
     engine: "LangGraph",
     state: "waiting",
@@ -63,7 +63,7 @@ export const agents: Agent[] = [
   {
     id: "dev",
     name: "Dev Agent",
-    role: "Developer — Backend · Web · Mobile",
+    role: "Developer - Backend · Web · Mobile",
     color: "agent-dev",
     engine: "Claude Code headless",
     state: "running",

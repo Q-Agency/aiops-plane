@@ -1,11 +1,11 @@
 /**
- * RoiHeroTile — one of the three enlarged headline ROI tiles (C2):
+ * RoiHeroTile - one of the three enlarged headline ROI tiles (C2):
  * "Human-hours freed" · "Cost / merged ticket" · "Cost / story point".
  *
  * Tier honesty: pass tier="live" for the live-tier metrics (cost-per-
  * approved-spec, time-to-approved-spec) and tier="as_agents_ship" for
  * merged-ticket economics. The optional onEditAssumptions affordance
- * renders the "Edit assumptions — your numbers, not ours" link (C2);
+ * renders the "Edit assumptions - your numbers, not ours" link (C2);
  * the editor dialog itself lives with the /economics builder and persists
  * to localStorage ROI_ASSUMPTIONS_STORAGE_KEY ("aiops_roi_assumptions").
  */
@@ -25,7 +25,7 @@ export interface RoiHeroTileProps {
   tier?: RoiTier;
   /** Visually dominant variant for the hero band. */
   emphasis?: boolean;
-  /** Renders the "Edit assumptions — your numbers, not ours" affordance. */
+  /** Renders the "Edit assumptions - your numbers, not ours" affordance. */
   onEditAssumptions?: () => void;
   className?: string;
 }
@@ -93,7 +93,7 @@ export function RoiHeroTile({
           className="mt-1 inline-flex items-center gap-1.5 self-start text-[11px] text-primary hover:underline"
         >
           <SlidersHorizontal className="size-3" />
-          Edit assumptions — your numbers, not ours
+          Edit assumptions - your numbers, not ours
         </button>
       )}
     </div>

@@ -1,5 +1,5 @@
 /**
- * Pipeline Preview — the live produces→consumes rail (right panel of the
+ * Pipeline Preview - the live produces→consumes rail (right panel of the
  * Agent Catalog). Derived entirely from THE CHAIN (src/mock/chain.ts):
  * nodes follow PIPELINE_ORDER, an inbound edge is wired iff every consumed
  * artifact has a selected producer, gaps render dashed-amber with the
@@ -89,7 +89,7 @@ function GapConnector({ gaps, onAdd }: { gaps: ChainGap[]; onAdd: (id: ChainRole
               </span>
             </TooltipTrigger>
             <TooltipContent side="left" className="text-[11px] max-w-56">
-              {ROLE_SHORT[gap.roleId]} consumes {gap.missing} — nothing selected produces it.
+              {ROLE_SHORT[gap.roleId]} consumes {gap.missing} - nothing selected produces it.
             </TooltipContent>
           </Tooltip>
           {gap.fixRoleId && (
@@ -255,7 +255,7 @@ export function PipelinePreview({
           );
         })}
 
-        {/* Pod-wide peer — never a pipeline node */}
+        {/* Pod-wide peer - never a pipeline node */}
         {knowledgeOn && (
           <>
             <Separator className="my-3" />
@@ -289,7 +289,7 @@ export function PipelinePreview({
       {/* Footer summary */}
       <div className="px-3 py-2.5 border-t border-border flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-mono text-muted-foreground">
         {selectedIds.length === 0 ? (
-          <span>— no agents selected</span>
+          <span>- no agents selected</span>
         ) : (
           <>
             <span>est. ~${cost.toFixed(2)}/ticket</span>

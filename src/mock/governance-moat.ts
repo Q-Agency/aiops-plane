@@ -1,16 +1,16 @@
 /**
- * Governance moat — fleet-level aggregation of the 8 deterministic
+ * Governance moat - fleet-level aggregation of the 8 deterministic
  * structural validators (validators.ts) across every spec BA has emitted,
  * plus the visually-walled LLM-advisory signals (C3).
  *
  * Consumed by /governance (GovernanceView): the trust banner, the two
  * walled validator panels, and the per-spec structural table. Per-artifact
- * results stay in validators.ts `validatorsFor` — this module only
+ * results stay in validators.ts `validatorsFor` - this module only
  * aggregates them; it never re-declares check ids.
  *
  * Honest language: deterministic checks prove specs are WELL-FORMED
  * (structural), not that they're the right idea (semantic). LLM signals
- * are advisory — they never gate.
+ * are advisory - they never gate.
  */
 
 import { tickets } from "./tickets";
@@ -28,7 +28,7 @@ import {
 } from "./validators";
 
 /* ------------------------------------------------------------------ */
-/* Assessed specs — every ticket BA has emitted a spec for              */
+/* Assessed specs - every ticket BA has emitted a spec for              */
 /* ------------------------------------------------------------------ */
 
 export interface AssessedSpec {
@@ -38,7 +38,7 @@ export interface AssessedSpec {
   stage: Ticket["stage"];
   /** The 8 per-artifact structural checks (validators.ts). */
   checks: ValidatorCheck[];
-  /** 0–100 — passed/total. */
+  /** 0-100 - passed/total. */
   score: number;
   failing: AnyCheckId[];
   warning: AnyCheckId[];
@@ -76,7 +76,7 @@ export function assessedSpecs(): AssessedSpec[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Deterministic wall — per-check aggregate across all assessed specs   */
+/* Deterministic wall - per-check aggregate across all assessed specs   */
 /* ------------------------------------------------------------------ */
 
 export interface MoatValidatorRow {
@@ -86,7 +86,7 @@ export interface MoatValidatorRow {
   check: "deterministic";
   /** Aggregate: fail = at least one spec fails; partial = warns only. */
   status: "pass" | "fail" | "partial";
-  /** % of assessed specs that hard-pass this check (0–100). */
+  /** % of assessed specs that hard-pass this check (0-100). */
   coverage: number;
   detail: string;
   /** A failing deterministic check blocks structural readiness. */
@@ -127,7 +127,7 @@ export function moatValidators(): MoatValidatorRow[] {
 
 /** Aggregate rows reshaped as ValidatorCheck[] so the shared walled
  *  ValidatorPanel (C3) renders the SAME component on /governance and the
- *  gate review — check-for-check. */
+ *  gate review - check-for-check. */
 export function moatChecks(): ValidatorCheck[] {
   return moatValidators().map((r) => ({
     id: r.id,
@@ -166,13 +166,13 @@ export function structuralReadiness(): StructuralReadiness {
 }
 
 /* ------------------------------------------------------------------ */
-/* LLM-assisted wall — advisory signals, never a gate                   */
+/* LLM-assisted wall - advisory signals, never a gate                   */
 /* ------------------------------------------------------------------ */
 
 export interface LlmSignal {
   id: "judge_agreement" | "persona_approval";
   label: string;
-  /** 0–1 model-graded score. */
+  /** 0-1 model-graded score. */
   score: number;
   kind: "judge" | "persona";
   advisory: true;
@@ -198,15 +198,15 @@ export const llmSignals: LlmSignal[] = [
   },
 ];
 
-/** The demoable separation beat: the judge disagrees, structure passes —
- *  rendered as "advisory disagreement — does not block." */
+/** The demoable separation beat: the judge disagrees, structure passes -
+ *  rendered as "advisory disagreement - does not block." */
 export const advisoryDisagreement = {
   ticketId: "AM-133",
-  line: "Judge scored AM-133 below its bar; all 8 structural checks pass. Advisory disagreement — does not block.",
+  line: "Judge scored AM-133 below its bar; all 8 structural checks pass. Advisory disagreement - does not block.",
 };
 
 /* ------------------------------------------------------------------ */
-/* Facet completeness — counted from extracted facets (structural)      */
+/* Facet completeness - counted from extracted facets (structural)      */
 /* ------------------------------------------------------------------ */
 
 export const FACET_DIMENSIONS = [
@@ -229,7 +229,7 @@ export const FACET_LABELS: Record<FacetDimension, string> = {
   data_model: "Data model",
 };
 
-/** Counted facet coverage per dimension (0–100) — extraction counts, not grades. */
+/** Counted facet coverage per dimension (0-100) - extraction counts, not grades. */
 export const facetCompleteness: Record<FacetDimension, number> = {
   user_roles: 92,
   business_rules: 88,

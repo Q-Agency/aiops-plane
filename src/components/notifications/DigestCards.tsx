@@ -1,5 +1,5 @@
 /**
- * DigestCard (C6) — the /notifications Digests tab. Reuses the existing
+ * DigestCard (C6) - the /notifications Digests tab. Reuses the existing
  * SCHEDULED digest model from src/mock/comms.ts: name, cadence, audience,
  * channel, next-run countdown (minutesUntilUtc, SSR-safe via mounted state),
  * on/off switch, "Edit recipients" (mock toast), and an inline expandable
@@ -63,7 +63,7 @@ function DigestCard({ digest }: { digest: ScheduledComm }) {
           size="sm"
           className="text-muted-foreground"
           onClick={() =>
-            toast.success(`Recipient editor — mock. ${digest.name} stays with ${digest.audience.join(", ")}.`)
+            toast.success(`Recipient editor - mock. ${digest.name} stays with ${digest.audience.join(", ")}.`)
           }
         >
           <UsersRound className="size-3.5 mr-1" />
@@ -106,7 +106,7 @@ export function DigestsPanel() {
   return (
     <section className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Scheduled stakeholder digests — what goes out, to whom, and when. Expand a card to see
+        Scheduled stakeholder digests - what goes out, to whom, and when. Expand a card to see
         the live preview.
       </p>
       <div className="space-y-2">

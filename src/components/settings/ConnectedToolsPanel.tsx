@@ -1,5 +1,5 @@
 /**
- * ConnectedToolsPanel — Settings "Connected tools & scopes": one row per
+ * ConnectedToolsPanel - Settings "Connected tools & scopes": one row per
  * connector from connectors.ts with granted scopes, Live/Roadmap honesty
  * badge, last health check (static mock), and an inert "Review scopes"
  * popover listing every scope + the plain-language reason it was granted.
@@ -21,7 +21,7 @@ import {
 import { CONNECTORS, type Connector, type ConnectorId } from "@/mock/connectors";
 import { cn } from "@/lib/utils";
 
-/** Static, deterministic health seed (live connectors only) — no Date.now(). */
+/** Static, deterministic health seed (live connectors only) - no Date.now(). */
 const HEALTH: Partial<Record<ConnectorId, { checked: string; state: "ok" | "degraded" }>> = {
   teamwork: { checked: "2m ago", state: "ok" },
   slack: { checked: "4m ago", state: "ok" },
@@ -47,7 +47,7 @@ function ScopeChips({ connector }: { connector: Connector }) {
   if (connector.availability !== "live") {
     return (
       <span className="text-[11px] text-muted-foreground italic">
-        requested at connect-time — not connected
+        requested at connect-time - not connected
       </span>
     );
   }
@@ -92,11 +92,11 @@ function ReviewScopesButton({ connector }: { connector: Connector }) {
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-3">
-        <div className="text-xs font-semibold mb-0.5">{connector.name} — scopes</div>
+        <div className="text-xs font-semibold mb-0.5">{connector.name} - scopes</div>
         <p className="text-[11px] text-muted-foreground mb-2">
           {connector.availability === "live"
             ? "Granted at connect-time · minimum required."
-            : "Roadmap — these scopes would be requested at connect-time."}
+            : "Roadmap - these scopes would be requested at connect-time."}
         </p>
         <ul className="space-y-2">
           {connector.scopes.map((s) => (
@@ -174,7 +174,7 @@ export function ConnectedToolsPanel() {
                         <span className="text-muted-foreground">· {health.state}</span>
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                   <td className="px-2 py-2.5 text-right">

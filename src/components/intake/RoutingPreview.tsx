@@ -1,11 +1,11 @@
 /**
- * RoutingPreview — the compact per-ticket routing rail (C10): shows exactly
- * where a board-sent arrival lands once its start is confirmed — "AM-142 →
+ * RoutingPreview - the compact per-ticket routing rail (C10): shows exactly
+ * where a board-sent arrival lands once its start is confirmed - "AM-142 →
  * Backlog → Ready for Spec → BA Agent runs first · Ana accountable". Steps
- * derive from chain.ts (the first pipeline agent whose `consumes` is empty —
+ * derive from chain.ts (the first pipeline agent whose `consumes` is empty -
  * BA); the accountable human from the active pod's accountability map
  * (pod-store), falling back to the sample-pod ownership in humans.ts.
- * Always renders a REAL tracker id — under the single doorbell there is no
+ * Always renders a REAL tracker id - under the single doorbell there is no
  * "ticket that doesn't exist yet" on this screen.
  */
 
@@ -17,7 +17,7 @@ import { accountableFor, humans } from "@/mock/humans";
 import { routingPreview } from "@/mock/intake";
 
 export interface RoutingPreviewProps {
-  /** Real tracker/ticket id — rendered mono and deep-linked to the Pipeline. */
+  /** Real tracker/ticket id - rendered mono and deep-linked to the Pipeline. */
   ticketId: string;
   className?: string;
 }

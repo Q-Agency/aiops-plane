@@ -1,13 +1,13 @@
 /**
- * RoiHeroRow — Row 0 of the Overview (RUN landing) (the wow-moment TEASER).
+ * RoiHeroRow - Row 0 of the Overview (RUN landing) (the wow-moment TEASER).
  * Compact rendering of the C2 canonical trio (human-hours freed ·
  * cost / merged ticket · cost / story point) with the tier badges and the
  * net-of-fees ROI multiple; the whole row deep-links to /economics
- * ("promoted here, full story there" — the full reveal + Edit assumptions
+ * ("promoted here, full story there" - the full reveal + Edit assumptions
  * live on Overview / ROI).
  *
  * ROLES slice: the exported RoiHeroRow now wraps the hero in the
- * RoleLandingRouter — this is Row 0 of the standard-mode "/" cockpit, and
+ * RoleLandingRouter - this is Row 0 of the standard-mode "/" cockpit, and
  * index.tsx is frozen, so the role-scoped landing switch (PM cockpit /
  * QA gate queue / sponsor digest) mounts HERE. PM view renders the hero
  * exactly as before.
@@ -61,7 +61,7 @@ function Metric({
   );
 }
 
-/** Standard-mode "/" Row 0 — hosts the role-landing switch (see header). */
+/** Standard-mode "/" Row 0 - hosts the role-landing switch (see header). */
 export function RoiHeroRow() {
   return (
     <RoleLandingRouter>
@@ -77,11 +77,11 @@ function RoiHeroRowCore() {
   return (
     <Link
       to="/economics"
-      aria-label="View ROI — Overview / ROI"
+      aria-label="View ROI - Overview / ROI"
       className="glass-panel block px-4 py-3 group"
     >
       <div className="flex items-center gap-4 lg:gap-6 flex-wrap">
-        {/* ROI multiple — net of plan fees */}
+        {/* ROI multiple - net of plan fees */}
         <div className="pr-4 lg:pr-6 border-r border-border">
           <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
             Return on investment · this period
@@ -91,7 +91,7 @@ function RoiHeroRowCore() {
               className="text-2xl font-semibold font-mono tabular-nums text-primary"
               suppressHydrationWarning
             >
-              {hasMerged ? `${derived.roiMultiple}×` : "—"}
+              {hasMerged ? `${derived.roiMultiple}×` : "-"}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground">
               net of plan fees
@@ -104,17 +104,17 @@ function RoiHeroRowCore() {
           <Metric
             label="Human-hours freed"
             value={
-              hasMerged ? `${Math.round(derived.hoursFreed).toLocaleString("en-US")} h` : "—"
+              hasMerged ? `${Math.round(derived.hoursFreed).toLocaleString("en-US")} h` : "-"
             }
           />
           <Metric
             label="Cost / merged ticket"
-            value={hasMerged ? usd(aggregates.costPerMerged) : "—"}
+            value={hasMerged ? usd(aggregates.costPerMerged) : "-"}
             tier="ship"
           />
           <Metric
             label="Cost / story point"
-            value={hasMerged ? usd(aggregates.costPerStoryPoint) : "—"}
+            value={hasMerged ? usd(aggregates.costPerStoryPoint) : "-"}
             tier="ship"
           />
         </div>

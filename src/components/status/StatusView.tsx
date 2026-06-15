@@ -1,6 +1,6 @@
 /**
- * StatusView — /status "Platform status" (wave 2, Blind spot 5): the
- * per-tenant status page, client-clean and calm — header with the overall
+ * StatusView - /status "Platform status" (wave 2, Blind spot 5): the
+ * per-tenant status page, client-clean and calm - header with the overall
  * pill, component health rows with 90-day uptime bars, the degradation
  * honesty card, and the SLA footer (uptime target + ledger RPO). Doubles
  * as the procurement artifact ("what happens when *you* go down").
@@ -45,7 +45,7 @@ export function StatusView() {
               platform status
             </div>
             <h1 className="text-xl font-semibold tracking-tight mt-0.5">
-              Platform status — {tenant}
+              Platform status - {tenant}
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
               {TENANCY_LINE} · component health and 90-day uptime for your tenant.

@@ -1,9 +1,9 @@
 /**
- * LAUNCH step 2 — Agent Catalog (body only; chrome from WizardShell).
+ * LAUNCH step 2 - Agent Catalog (body only; chrome from WizardShell).
  *
  * Exports:
- *   StepAgents       — draft-backed wizard step (selection = draft.agentIds).
- *   AgentCatalogBody — the shared grid + summary bar + PipelinePreview +
+ *   StepAgents       - draft-backed wizard step (selection = draft.agentIds).
+ *   AgentCatalogBody - the shared grid + summary bar + PipelinePreview +
  *                      AgentDetailDialog composition, reused by /catalog.
  *
  * Chain facts (gaps, edges, cost/latency) come from src/mock/chain.ts;
@@ -69,7 +69,7 @@ function CatalogCard({
   const color = `var(--${entry.color})`;
   const agent = entry.agentId ? agents.find((a) => a.id === entry.agentId) : undefined;
   const certified = entry.conformance === "certified";
-  // Mandatory roles (knowledge): the toggle locks — every pod ships with
+  // Mandatory roles (knowledge): the toggle locks - every pod ships with
   // the shared context (catalog MANDATORY_ROLE_IDS).
   const mandatory = MANDATORY_ROLE_IDS.has(entry.id);
 
@@ -112,7 +112,7 @@ function CatalogCard({
             {entry.engine}
           </div>
         </div>
-        {/* Switch zone — never opens the dialog */}
+        {/* Switch zone - never opens the dialog */}
         <span
           className="flex items-center gap-1.5 shrink-0"
           onClick={(e) => e.stopPropagation()}
@@ -127,7 +127,7 @@ function CatalogCard({
                 </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-60 text-[11px]">
-                Every pod ships with the Knowledge Base agent — it holds the shared context
+                Every pod ships with the Knowledge Base agent - it holds the shared context
                 (SOW, decisions, domain truth) every other agent and human draws on.
               </TooltipContent>
             </Tooltip>
@@ -234,7 +234,7 @@ function CatalogCard({
         </div>
       )}
 
-      {/* Mandatory LLM tier (wizard) — chip when chosen, amber CTA when not */}
+      {/* Mandatory LLM tier (wizard) - chip when chosen, amber CTA when not */}
       {selected && showTier && (
         <div
           onClick={(e) => e.stopPropagation()}
@@ -280,7 +280,7 @@ function CatalogCard({
 }
 
 /* ------------------------------------------------------------------ */
-/* Always-on strip (PM Supervisor — never togglable)                    */
+/* Always-on strip (PM Supervisor - never togglable)                    */
 /* ------------------------------------------------------------------ */
 
 function AlwaysOnStrip() {
@@ -315,14 +315,14 @@ function AlwaysOnStrip() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Shared body — summary bar + grid + preview + detail dialog           */
+/* Shared body - summary bar + grid + preview + detail dialog           */
 /* ------------------------------------------------------------------ */
 
 export interface AgentCatalogBodyProps {
   selectedIds: ChainRoleId[];
-  /** Pure state mutation — toasts are handled here in the body. */
+  /** Pure state mutation - toasts are handled here in the body. */
   onToggle: (id: ChainRoleId, next: boolean) => void;
-  /** Wizard only — per-agent LLM tier map + setter (enables the mandatory tier UI). */
+  /** Wizard only - per-agent LLM tier map + setter (enables the mandatory tier UI). */
   tiers?: Partial<Record<ChainRoleId, LlmTier>>;
   onSetTier?: (id: ChainRoleId, tier: LlmTier) => void;
   /** Optional "Reset to blueprint" ghost link in the summary bar. */
@@ -359,12 +359,12 @@ export function AgentCatalogBody({
 
   const handleToggle = (id: ChainRoleId, next: boolean) => {
     if (next === selectedIds.includes(id)) return;
-    // The single choke point both the wizard and /catalog funnel through —
+    // The single choke point both the wizard and /catalog funnel through -
     // mandatory roles (knowledge) cannot be removed from any pod.
     if (!next && MANDATORY_ROLE_IDS.has(id)) {
       toast.info("The Knowledge Base agent is mandatory", {
         description:
-          "Every pod ships with its shared context — the SOW, decisions and domain truth every other agent draws on.",
+          "Every pod ships with its shared context - the SOW, decisions and domain truth every other agent draws on.",
       });
       return;
     }
@@ -398,7 +398,7 @@ export function AgentCatalogBody({
   return (
     <TooltipProvider delayDuration={150}>
       <div className="flex flex-col lg:flex-row gap-4 items-start">
-        {/* LEFT — summary bar + card grid */}
+        {/* LEFT - summary bar + card grid */}
         <div className="flex-1 min-w-0 w-full space-y-3">
           <div className="rounded-md border border-border bg-panel/40 backdrop-blur-md px-3 py-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono text-muted-foreground">
             <span className="text-foreground">{selectedIds.length} agents</span>
@@ -448,7 +448,7 @@ export function AgentCatalogBody({
           <AlwaysOnStrip />
         </div>
 
-        {/* RIGHT — sticky pipeline preview */}
+        {/* RIGHT - sticky pipeline preview */}
         <PipelinePreview
           selectedIds={selectedIds}
           onAdd={(id) => handleToggle(id, true)}
@@ -471,14 +471,14 @@ export function AgentCatalogBody({
 }
 
 /* ------------------------------------------------------------------ */
-/* Wizard step — selection lives on the draft                           */
+/* Wizard step - selection lives on the draft                           */
 /* ------------------------------------------------------------------ */
 
 export function StepAgents() {
   const { draft, hydrated, updateDraft } = usePods();
   const selectedIds = draft?.agentIds ?? [];
 
-  // Normalization: every pod ships with the mandatory roles (knowledge) —
+  // Normalization: every pod ships with the mandatory roles (knowledge) -
   // covers "start from scratch" drafts and any pre-rule persisted draft.
   useEffect(() => {
     if (!hydrated || !draft) return;

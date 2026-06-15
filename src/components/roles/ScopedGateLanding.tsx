@@ -1,5 +1,5 @@
 /**
- * ScopedGateLanding — the QA Lead "/" landing: "what needs my sign-off and
+ * ScopedGateLanding - the QA Lead "/" landing: "what needs my sign-off and
  * what's the quality posture". A thin wrapper over the SAME queue rows the
  * unified /approvals renders (ApprovalRow / ClarificationRow imported, not
  * forked) pre-filtered to QA-owned gates, plus the walled deterministic
@@ -54,7 +54,7 @@ export function ScopedGateLanding() {
   // bump after a decision so resolved rows drop out immediately
   const [decisionTick, setDecisionTick] = useState(0);
 
-  const qaLead = accountableFor("qa"); // Petra — owns the QA agent
+  const qaLead = accountableFor("qa"); // Petra - owns the QA agent
 
   const ticketOf = (id: string): Ticket | undefined => tickets.find((t) => t.id === id);
 
@@ -71,7 +71,7 @@ export function ScopedGateLanding() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [approvals, decisionTick]);
 
-  /* "Mine" — QA-owned: QA Review sign-offs + anything the QA agent asks */
+  /* "Mine" - QA-owned: QA Review sign-offs + anything the QA agent asks */
   const mine = useMemo(
     () =>
       openRows.filter((r) =>
@@ -84,7 +84,7 @@ export function ScopedGateLanding() {
 
   const rows = tab === "mine" ? mine : openRows;
 
-  /* decisions — same canon as the unified queue */
+  /* decisions - same canon as the unified queue */
   const onApprove = (a: Approval, reason: string) => {
     recordGateDecision({
       gateId: a.id,
@@ -97,7 +97,7 @@ export function ScopedGateLanding() {
     appendAuditMock({ action: "gate.approved", target: a.id, detail: reason });
     approve(a.id);
     setDecisionTick((n) => n + 1);
-    toast.success(`${a.ticketId} approved — moved forward`, {
+    toast.success(`${a.ticketId} approved - moved forward`, {
       description: `${a.gate} cleared · "${reason.slice(0, 90)}"`,
     });
   };
@@ -114,7 +114,7 @@ export function ScopedGateLanding() {
     appendAuditMock({ action: "gate.rejected", target: a.id, detail: feedback });
     reject(a.id);
     setDecisionTick((n) => n + 1);
-    toast(`${a.ticketId} returned to ${agentName(GATE_AGENT_ID[a.gate])} with feedback — rerunning`, {
+    toast(`${a.ticketId} returned to ${agentName(GATE_AGENT_ID[a.gate])} with feedback - rerunning`, {
       description: feedback.slice(0, 140),
       icon: <X className="size-4 text-status-error" />,
     });
@@ -132,12 +132,12 @@ export function ScopedGateLanding() {
     appendAuditMock({ action: "clarification.answered", target: c.id, detail: answer });
     setDecisionTick((n) => n + 1);
     setExpanded(null);
-    toast.success(`Answer sent to ${agentName(c.agentId)} — rerunning`, {
+    toast.success(`Answer sent to ${agentName(c.agentId)} - rerunning`, {
       description: answer.slice(0, 140),
     });
   };
 
-  /* quality posture — the latest open QA artifact's deterministic checks */
+  /* quality posture - the latest open QA artifact's deterministic checks */
   const firstQaApproval = mine.find((r) => r.kind === "approval");
   const postureChecks =
     firstQaApproval?.kind === "approval"
@@ -166,15 +166,15 @@ export function ScopedGateLanding() {
       </div>
 
       <div className="grid gap-4 lg:gap-5 xl:grid-cols-[1fr_340px] items-start">
-        {/* gate list — the same rows /approvals renders */}
+        {/* gate list - the same rows /approvals renders */}
         <div className="space-y-2 min-w-0">
           {rows.length === 0 && (
             <div className="glass-panel p-12 text-center space-y-3">
               <CheckCircle2 className="size-10 text-status-done mx-auto" />
               <div className="text-sm font-medium">
                 {tab === "mine"
-                  ? "You're clear — no QA gates waiting."
-                  : "All clear — no gates waiting."}
+                  ? "You're clear - no QA gates waiting."
+                  : "All clear - no gates waiting."}
               </div>
               {tab === "mine" ? (
                 <button
@@ -234,7 +234,7 @@ export function ScopedGateLanding() {
 
           <ValidatorPanel checks={postureChecks} compact />
 
-          {/* My SLA mini — humans.ts workload */}
+          {/* My SLA mini - humans.ts workload */}
           <section className="glass-panel p-4">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
               My SLA · {qaLead.name.split(" ")[0]}

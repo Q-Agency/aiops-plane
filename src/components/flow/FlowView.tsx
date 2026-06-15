@@ -30,7 +30,7 @@ export function FlowView() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">Flow Analytics</h1>
           <div className="text-xs text-muted-foreground mt-0.5">
-            Where the human-in-the-loop is the constraint — gate wait time, reviewer load and the cycle-time impact of fixing the slowest gate.
+            Where the human-in-the-loop is the constraint - gate wait time, reviewer load and the cycle-time impact of fixing the slowest gate.
           </div>
         </div>
         <WaitVsWorkHeadline />
@@ -47,7 +47,7 @@ export function FlowView() {
 
       {/* Gate cycle-time analysis */}
       <section className="space-y-2">
-        <SectionHead icon={Hourglass} title="Gate cycle-time" sub="Avg & p95 wait per review column — bar fills against SLA target" />
+        <SectionHead icon={Hourglass} title="Gate cycle-time" sub="Avg & p95 wait per review column - bar fills against SLA target" />
         <div className="glass-panel p-3 space-y-2">
           {[...gateStats].sort((a, b) => b.avgWaitMin - a.avgWaitMin).map((g) => {
             const max = Math.max(...gateStats.map((x) => x.p95WaitMin));
@@ -112,14 +112,14 @@ export function FlowView() {
 
       {/* Wait vs Work split */}
       <section className="space-y-2">
-        <SectionHead icon={Gauge} title="Wait vs work split" sub="Per ticket — human-waiting (blue) vs agent-compute (green). The diagnostic." />
+        <SectionHead icon={Gauge} title="Wait vs work split" sub="Per ticket - human-waiting (blue) vs agent-compute (green). The diagnostic." />
         <WaitWorkChart />
       </section>
 
       {/* Reviewer load + Bottleneck impact side by side */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="lg:col-span-2 space-y-2">
-          <SectionHead icon={Users2} title="Reviewer load" sub="Per accountable human — queue, throughput, SLA" />
+          <SectionHead icon={Users2} title="Reviewer load" sub="Per accountable human - queue, throughput, SLA" />
           <div className="glass-panel overflow-hidden">
             <table className="w-full text-xs">
               <thead>
@@ -216,7 +216,7 @@ export function FlowView() {
 
       {/* Backup heatmap */}
       <section className="space-y-2">
-        <SectionHead icon={Activity} title="Backup heatmap" sub="Queue depth by gate × hour of day (UTC) — overnight pile-ups visible" />
+        <SectionHead icon={Activity} title="Backup heatmap" sub="Queue depth by gate × hour of day (UTC) - overnight pile-ups visible" />
         <Heatmap selectedGate={selectedGate} />
       </section>
     </div>

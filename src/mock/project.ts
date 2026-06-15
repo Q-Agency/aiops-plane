@@ -1,6 +1,6 @@
 export const project = {
   id: "automarket",
-  name: "AutoMarket — Car Selling Platform",
+  name: "AutoMarket - Car Selling Platform",
   codebases: [
     {
       id: "backend" as const,
@@ -26,4 +26,4 @@ export const project = {
   ],
 };
 
-export const projects = [project.name, "Listr — Property Marketplace", "Kasa — POS Suite"];
+export const projects = [project.name, "Listr - Property Marketplace", "Kasa - POS Suite"];

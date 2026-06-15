@@ -1,6 +1,6 @@
 /**
- * GatePolicyChip — small mono chip stating an agent's gate regime:
- * autonomy level (L0–L3) + gate-clearance SLA, from gate-policies.ts.
+ * GatePolicyChip - small mono chip stating an agent's gate regime:
+ * autonomy level (L0-L3) + gate-clearance SLA, from gate-policies.ts.
  * Hover/focus tooltip carries the full autonomy-ladder line. Used by the
  * /welcome charter card and any surface that promises a gate policy.
  *
@@ -23,7 +23,7 @@ import {
 
 export interface GatePolicyChipProps {
   policy: GatePolicy;
-  /** Per-ArtifactKind gate policy — enriches the tooltip (queue/review rows). */
+  /** Per-ArtifactKind gate policy - enriches the tooltip (queue/review rows). */
   artifactPolicy?: ArtifactGatePolicy;
   /** Dense body for queue rows: "L0 · ≤ 4h" (full slaLabel stays in the tooltip). */
   compact?: boolean;

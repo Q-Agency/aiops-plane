@@ -1,9 +1,9 @@
 /**
- * LAUNCH step 1 — Pod Blueprints (body only; chrome from WizardShell).
+ * LAUNCH step 1 - Pod Blueprints (body only; chrome from WizardShell).
  * Start-from-scratch is the PRIMARY path (owner call 2026-06-15): a
  * prominent hero card first ("Recommended"), since most pods are hand-built.
  * The ready-made templates are demoted into a collapsed-by-default
- * "Or start from a template" section (rarely used) — each still a
+ * "Or start from a template" section (rarely used) - each still a
  * radio-style card with its "what's included" stack (agent chips, connector
  * chips live-first/Roadmap-trailing, SLA + roles) plus the tabbed pre-fill
  * preview for the selected template. Selecting pre-fills the draft via
@@ -99,8 +99,8 @@ function ConnectorChip({ id, optional }: { id: ConnectorId; optional?: boolean }
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-56 text-[11px]">
         {optional
-          ? `${connector.name} — Roadmap. Request access; the pod runs without it.`
-          : `${connector.name} — Live. Connect it during launch.`}
+          ? `${connector.name} - Roadmap. Request access; the pod runs without it.`
+          : `${connector.name} - Live. Connect it during launch.`}
       </TooltipContent>
     </Tooltip>
   );
@@ -175,7 +175,7 @@ function BlueprintCard({
       {/* What's included */}
       {scratch ? (
         <p className="text-[11px] text-muted-foreground italic flex-1">
-          Nothing pre-filled — the agent, tool and people steps start empty, under your full
+          Nothing pre-filled - the agent, tool and people steps start empty, under your full
           control.
         </p>
       ) : (
@@ -218,7 +218,7 @@ function BlueprintPreview({ bp }: { bp: PodBlueprint }) {
   return (
     <div className="rounded-md border border-border bg-panel/40 backdrop-blur-md p-4 anim-in">
       <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-3">
-        Pre-fill preview — what &ldquo;{bp.name}&rdquo; sets up
+        Pre-fill preview - what &ldquo;{bp.name}&rdquo; sets up
       </div>
       <Tabs defaultValue="agents">
         <TabsList className="mb-3">
@@ -323,7 +323,7 @@ function BlueprintPreview({ bp }: { bp: PodBlueprint }) {
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground pt-1">
-            Nothing here is locked in — every default can be adjusted in the next steps.
+            Nothing here is locked in - every default can be adjusted in the next steps.
           </p>
         </TabsContent>
       </Tabs>
@@ -331,7 +331,7 @@ function BlueprintPreview({ bp }: { bp: PodBlueprint }) {
   );
 }
 
-/** The primary, prominent path — hand-build the pod (the common case). */
+/** The primary, prominent path - hand-build the pod (the common case). */
 function ScratchHero({
   bp,
   selected,
@@ -371,7 +371,7 @@ function ScratchHero({
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1 leading-snug max-w-prose">
-          Hand-pick your agents, tools and people — full control, nothing pre-filled. The default
+          Hand-pick your agents, tools and people - full control, nothing pre-filled. The default
           path for a pod tailored to this client.
         </p>
       </div>
@@ -395,7 +395,7 @@ export function StepBlueprint() {
   const scratch = BLUEPRINTS.find((b) => b.id === "scratch");
   const templates = BLUEPRINTS.filter((b) => b.id !== "scratch");
   const templateSelected = selectedId !== null && selectedId !== "scratch";
-  // Templates are rarely used — collapsed by default, auto-open if one is picked.
+  // Templates are rarely used - collapsed by default, auto-open if one is picked.
   const [showTemplates, setShowTemplates] = useState(templateSelected);
 
   const apply = (bp: PodBlueprint) => {
@@ -407,8 +407,8 @@ export function StepBlueprint() {
     });
     toast.success(
       bp.id === "scratch"
-        ? "Starting from scratch — pick your agents next."
-        : `${bp.name} blueprint applied — agents and connector suggestions pre-filled.`,
+        ? "Starting from scratch - pick your agents next."
+        : `${bp.name} blueprint applied - agents and connector suggestions pre-filled.`,
     );
   };
 
@@ -423,11 +423,11 @@ export function StepBlueprint() {
     <TooltipProvider delayDuration={150}>
       <div className="space-y-4" role="radiogroup" aria-label="Pod blueprint">
         <p className="text-xs text-muted-foreground">
-          Most pods are built from scratch — hand-pick exactly what this client needs. Ready-made
+          Most pods are built from scratch - hand-pick exactly what this client needs. Ready-made
           templates are there for common shapes if you want a head start.
         </p>
 
-        {/* Primary path — prominent, first */}
+        {/* Primary path - prominent, first */}
         {scratch && (
           <ScratchHero
             bp={scratch}
@@ -436,7 +436,7 @@ export function StepBlueprint() {
           />
         )}
 
-        {/* Secondary path — templates, de-emphasized (rarely used) */}
+        {/* Secondary path - templates, de-emphasized (rarely used) */}
         <Collapsible open={showTemplates} onOpenChange={setShowTemplates}>
           <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md border border-border bg-white/[0.02] px-3 py-2 text-left text-xs text-muted-foreground hover:text-foreground hover:border-white/20 transition-colors">
             <Layers className="size-3.5 shrink-0" />

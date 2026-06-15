@@ -1,5 +1,5 @@
 /**
- * CommandPalette (⌘K, C7) — the global jump-anywhere overlay.
+ * CommandPalette (⌘K, C7) - the global jump-anywhere overlay.
  * Mounted ONCE in AppShell (inside PodProvider); opened by Cmd/Ctrl-K,
  * the TopBar search chip (openCommandPalette()), or any caller dispatching
  * the OPEN_EVENT.
@@ -106,7 +106,7 @@ export function CommandPalette() {
   const go = useCallback(
     (href: string) => {
       setOpen(false);
-      // untyped push — palette deep-links span param/search routes
+      // untyped push - palette deep-links span param/search routes
       router.history.push(href);
     },
     [router],
@@ -453,7 +453,7 @@ export function CommandPalette() {
             <AlertDialogAction
               onClick={() =>
                 toast.success(
-                  `${activePod?.name ?? "Pod"} paused — agents wind down after in-flight runs`,
+                  `${activePod?.name ?? "Pod"} paused - agents wind down after in-flight runs`,
                 )
               }
             >

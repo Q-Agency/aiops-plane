@@ -1,8 +1,8 @@
 /**
- * QaCoverageMap — the spec → test coverage map on the QA gate review (the
+ * QaCoverageMap - the spec → test coverage map on the QA gate review (the
  * chain closing where it started): one row per acceptance criterion of the
  * ORIGINAL spec, showing the tests that verify it and their result. This
- * is what deterministic check Q1 verifies — a failing test here links a
+ * is what deterministic check Q1 verifies - a failing test here links a
  * filed defect (Q3), never a bare red.
  */
 

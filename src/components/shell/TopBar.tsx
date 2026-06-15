@@ -45,7 +45,7 @@ export function TopBar({ user }: { user: AppUser }) {
       <div className="flex-1" />
 
       {/* ----- Mock-fed chrome (⌘K search, system health, Spend·24h ticker,
-             notification bell, Pod Copilot) — standard experience ONLY. Real
+             notification bell, Pod Copilot) - standard experience ONLY. Real
              mode renders none of it until each surface is live-connected. ----- */}
       {!isReal && (
         <>
@@ -109,7 +109,7 @@ export function TopBar({ user }: { user: AppUser }) {
       {isReal && (
         <div
           className="hidden sm:flex items-center h-8 px-2.5 rounded-md border border-status-waiting/50 bg-status-waiting/10 text-status-waiting text-[10px] font-semibold uppercase tracking-wider"
-          title="Production workspace — live agent data not connected yet"
+          title="Production workspace - live agent data not connected yet"
         >
           Live · not connected
         </div>

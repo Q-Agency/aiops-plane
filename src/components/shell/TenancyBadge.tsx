@@ -1,5 +1,5 @@
 /**
- * Tenancy badge — the always-on enterprise-trust signal in the top bar:
+ * Tenancy badge - the always-on enterprise-trust signal in the top bar:
  * "Dedicated · EU-West · isolated DB" (D5), with the data-handling statement
  * on hover. Standard mode only.
  */
@@ -24,7 +24,7 @@ export function TenancyBadge() {
         <div className="text-sm font-semibold">Your data stays yours</div>
         <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
           Storage, memory, and the audit ledger live in your isolated EU-West tenant. Inference:
-          pinned models — see Settings.
+          pinned models - see Settings.
         </p>
       </HoverCardContent>
     </HoverCard>

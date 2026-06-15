@@ -1,11 +1,11 @@
 /**
- * GateReviewShell — the client-grade gate review surface
+ * GateReviewShell - the client-grade gate review surface
  * (/approvals/$gateId, C4). The single most load-bearing surface in the
- * RUN cluster: a paying PM signs off HERE, inside Agency OS — never
+ * RUN cluster: a paying PM signs off HERE, inside Agency OS - never
  * dropped into the agent's own tool except as a labeled fallback.
  *
  * Layout (approval kind): review header bar (breadcrumb · badges · SLA ·
- * sticky Approve/Reject) over a 3-region grid — outline nav + validator
+ * sticky Approve/Reject) over a 3-region grid - outline nav + validator
  * score (left) | rendered SPEC.md + EARS criteria (center) | the walled
  * 8-validator panel (C3) + decision panel (right).
  *
@@ -96,7 +96,7 @@ export function GateReviewShell({ gateId }: GateReviewShellProps) {
   const detail = useMemo(() => gateDetailFor(gateId), [gateId]);
 
   if (!detail) {
-    // error / gate-unavailable state — the fallback deep-link goes prominent
+    // error / gate-unavailable state - the fallback deep-link goes prominent
     return (
       <div className="h-full grid place-items-center p-6">
         <div className="max-w-md w-full rounded-md border border-border bg-panel/40 backdrop-blur-md p-8 text-center space-y-4">
@@ -125,7 +125,7 @@ export function GateReviewShell({ gateId }: GateReviewShellProps) {
     );
   }
 
-  // key by gateId — gate→gate navigation must remount (fresh reason/prefill state)
+  // key by gateId - gate→gate navigation must remount (fresh reason/prefill state)
   return <GateReviewBody key={detail.gateId} detail={detail} />;
 }
 
@@ -139,7 +139,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   const [earsFlash, setEarsFlash] = useState(false);
   // submitting = the brief optimistic-submit beat (spinner + disabled actions)
   const [submitting, setSubmitting] = useState(false);
-  // <md only — validators collapse behind a toggle (desktop always open)
+  // <md only - validators collapse behind a toggle (desktop always open)
   const [mobileValidatorsOpen, setMobileValidatorsOpen] = useState(false);
   const [resolvedDecision, setResolvedDecision] = useState<GateDecision | null>(
     () => gateDecisions.find((d) => d.gateId === detail.gateId) ?? null,
@@ -159,7 +159,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   const isQa = Boolean(detail.qaCoverage);
 
   // Root-cause reject targeting (vision §2 "rework follows the artifact
-  // chain"): targets in chain order; default = the gate's own agent —
+  // chain"): targets in chain order; default = the gate's own agent -
   // unless the QA report's defects propose an upstream root cause
   // (highest severity wins; the human can override).
   const proposal = useMemo(() => {
@@ -175,13 +175,13 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
       return {
         targets,
         target,
-        note: `proposed from ${top.id}'s root-cause trace — override if you disagree`,
+        note: `proposed from ${top.id}'s root-cause trace - override if you disagree`,
       };
     }
     return { targets, target: own, note: null };
   }, [detail]);
   const [rejectTarget, setRejectTarget] = useState<RejectTarget | null>(proposal.target);
-  // Stages between the target and this gate — stale by the consumes-graph.
+  // Stages between the target and this gate - stale by the consumes-graph.
   const cascadeNames = useMemo(() => {
     if (!rejectTarget) return [];
     const i = proposal.targets.findIndex((x) => x.stage === rejectTarget.stage);
@@ -190,7 +190,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   const failingCount = detail.validators.filter((v) => v.status === "fail").length;
   const passingCount = detail.validators.filter((v) => v.status === "pass").length;
   const nextStage = APPROVAL_ADVANCE[detail.gateLabel]?.label ?? "the next stage";
-  // P1-G1 — the policy regime behind this gate (artifact row where mapped)
+  // P1-G1 - the policy regime behind this gate (artifact row where mapped)
   const gatePolicy = gatePolicyFor(detail.agentId);
   const artifactKind = isClarification ? null : artifactKindForGate(detail.gateLabel);
   const artifactPolicy = artifactKind ? artifactGatePolicyFor(artifactKind) : undefined;
@@ -221,7 +221,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
   function decide(decision: GateDecisionVerb) {
     if (submitting) return;
     setSubmitting(true);
-    // brief submit beat — action bars show spinner + disable, then resolve
+    // brief submit beat - action bars show spinner + disable, then resolve
     window.setTimeout(() => {
       const entry = recordGateDecision({
         gateId: detail.gateId,
@@ -232,7 +232,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
         actor: null, // when-only until auth
       });
       // The decision MOVES the ticket (vision §2: stages change only as
-      // consequences of audited decisions) — visible on the Pipeline board.
+      // consequences of audited decisions) - visible on the Pipeline board.
       if (decision === "rejected" && rejectTarget) {
         restageTicket(detail.ticketId, {
           stage: rejectTarget.stage,
@@ -252,7 +252,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           bumpDemo();
         }
       }
-      // session audit ledger — vocabulary: gate.approved|rejected|override, clarification.answered
+      // session audit ledger - vocabulary: gate.approved|rejected|override, clarification.answered
       appendAuditMock({
         action:
           decision === "answered"
@@ -275,13 +275,13 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
       emit("human", detail.ticketId);
       const msg =
         decision === "approved"
-          ? `${detail.ticketId} approved — moved to ${nextStage}. Recorded in the audit log.`
+          ? `${detail.ticketId} approved - moved to ${nextStage}. Recorded in the audit log.`
           : decision === "rejected"
             ? `${detail.ticketId} sent back to ${rejectTarget?.agentName ?? agentName}` +
               (cascadeNames.length
-                ? ` — downstream ${cascadeNames.join(", ")} re-run forward.`
-                : " — rerunning with your note as added context.")
-            : `Answer sent to ${agentName} — rerunning.`;
+                ? ` - downstream ${cascadeNames.join(", ")} re-run forward.`
+                : " - rerunning with your note as added context.")
+            : `Answer sent to ${agentName} - rerunning.`;
       toast.success(msg, {
         action: {
           label: "View on board",
@@ -297,7 +297,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
     if (submitting) return;
     if (failingCount > 0 && reason.trim().length === 0) {
       focusNote(
-        `${failingCount} structural ${failingCount === 1 ? "check is" : "checks are"} failing — approving overrides ${failingCount === 1 ? "it" : "them"}; type your override note first.`,
+        `${failingCount} structural ${failingCount === 1 ? "check is" : "checks are"} failing - approving overrides ${failingCount === 1 ? "it" : "them"}; type your override note first.`,
       );
       return;
     }
@@ -336,7 +336,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           <span className="text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
             {detail.gateLabel}
           </span>
-          {/* P1-G1 — the gate's policy regime + review mode */}
+          {/* P1-G1 - the gate's policy regime + review mode */}
           <GatePolicyChip policy={gatePolicy} artifactPolicy={artifactPolicy} compact />
           {artifactPolicy && (
             <span className="text-[10px] font-mono text-muted-foreground">
@@ -356,7 +356,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           >
             <Clock className="size-3" /> {detail.sla.label}
           </span>
-          {/* The QA agent's verdict is the most decision-relevant signal —
+          {/* The QA agent's verdict is the most decision-relevant signal -
               surface it in the header (the full block sits below the fold). */}
           {detail.releaseRecommendation && (
             <button
@@ -405,12 +405,12 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
       <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 lg:p-6">
         {resolved && (
           <div className="mb-4 rounded-md border border-status-done/40 bg-status-done/10 px-3 py-2 text-xs text-status-done">
-            This gate is already decided — the decision panel shows the recorded outcome.
+            This gate is already decided - the decision panel shows the recorded outcome.
           </div>
         )}
         {detail.rerunCount > 0 && detail.priorDecisions.length > 0 && (
           <div className="mb-4 rounded-md border border-status-waiting/40 bg-status-waiting/10 px-3 py-2 text-xs text-status-waiting">
-            This artifact was returned {detail.rerunCount}× — now v{detail.rerunCount + 1}. Last
+            This artifact was returned {detail.rerunCount}× - now v{detail.rerunCount + 1}. Last
             feedback: “{detail.priorDecisions[0].reason}”
           </div>
         )}
@@ -663,7 +663,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           </div>
         </div>
 
-        {/* <md sticky bottom action bar — decision-reason canon intact */}
+        {/* <md sticky bottom action bar - decision-reason canon intact */}
         {!resolved && (
           <div className="md:hidden sticky bottom-0 z-10 -mx-4 -mb-4 mt-4 border-t border-border bg-background/90 backdrop-blur-md px-4 pt-3 pb-4 space-y-2">
             {isClarification ? (
@@ -720,7 +720,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                 <>
                   {" "}
                   <span className="text-status-error">
-                    {failingCount} structural {failingCount === 1 ? "check" : "checks"} failing —
+                    {failingCount} structural {failingCount === 1 ? "check" : "checks"} failing -
                     your note is recorded as the override reason.
                   </span>
                 </>
@@ -730,7 +730,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => decide("approved")}>
-              Approve — advance {detail.ticketId}
+              Approve - advance {detail.ticketId}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

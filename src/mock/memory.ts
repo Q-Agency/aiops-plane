@@ -1,5 +1,5 @@
 /**
- * Pod Memory & Constitution (/memory, wave 2, P1-A2) — the compounding
+ * Pod Memory & Constitution (/memory, wave 2, P1-A2) - the compounding
  * moat: per-client rules with provenance, plus amendment proposals MINED
  * from rejection-reason clusters and ratified through a gate, on the record.
  *
@@ -39,7 +39,7 @@ export interface AmendmentProposal {
 export const PROVENANCE_LABELS: Record<RuleProvenance, string> = {
   blueprint: "Blueprint default",
   client: "Client-provided",
-  "ratified-amendment": "Ratified — from rejection cluster",
+  "ratified-amendment": "Ratified - from rejection cluster",
 };
 
 /** Render order for the rule list's category groups. */
@@ -63,7 +63,7 @@ export const CONSTITUTION_RULES: ConstitutionRule[] = [
   },
   {
     id: "cr-2",
-    text: "Pagination is cursor-based (?after=…) — offset pagination is rejected at spec review.",
+    text: "Pagination is cursor-based (?after=…) - offset pagination is rejected at spec review.",
     category: "Specs & acceptance criteria",
     provenance: "client",
     citedByGateIds: ["appr-AM-142"],
@@ -79,7 +79,7 @@ export const CONSTITUTION_RULES: ConstitutionRule[] = [
   // -- Architecture & integrations ----------------------------------
   {
     id: "cr-4",
-    text: "Money amounts are integer cents in a single currency field — floats never cross a service boundary.",
+    text: "Money amounts are integer cents in a single currency field - floats never cross a service boundary.",
     category: "Architecture & integrations",
     provenance: "client",
     citedByGateIds: ["appr-AM-133", "appr-AM-149"],
@@ -93,7 +93,7 @@ export const CONSTITUTION_RULES: ConstitutionRule[] = [
   },
   {
     id: "cr-6",
-    text: "The mobile client consumes the identical contract schema served to web — no parallel endpoints.",
+    text: "The mobile client consumes the identical contract schema served to web - no parallel endpoints.",
     category: "Architecture & integrations",
     provenance: "ratified-amendment",
     ratifiedAt: now - 23 * DAY,
@@ -102,14 +102,14 @@ export const CONSTITUTION_RULES: ConstitutionRule[] = [
   // -- Process & gates -----------------------------------------------
   {
     id: "cr-7",
-    text: "Rejections always carry a typed reason — the note becomes the agent's added context on rerun.",
+    text: "Rejections always carry a typed reason - the note becomes the agent's added context on rerun.",
     category: "Process & gates",
     provenance: "blueprint",
     citedByGateIds: ["appr-AM-138", "appr-AM-140"],
   },
   {
     id: "cr-8",
-    text: "P0 work items require a named human approval at every gate — no auto-clear at any autonomy level.",
+    text: "P0 work items require a named human approval at every gate - no auto-clear at any autonomy level.",
     category: "Process & gates",
     provenance: "client",
     citedByGateIds: ["appr-AM-149", "appr-AM-144", "appr-AM-133"],
@@ -117,11 +117,11 @@ export const CONSTITUTION_RULES: ConstitutionRule[] = [
 ];
 
 /**
- * Proposed amendments — mined weekly from rejection-reason clusters.
+ * Proposed amendments - mined weekly from rejection-reason clusters.
  * Cluster evidence references the seeded rejection history: AM-142's spec
- * v1 (returned for missing error-state ACs — see artifacts.ts), AM-140
+ * v1 (returned for missing error-state ACs - see artifacts.ts), AM-140
  * (rerunCount 2, rejected by Zlatko), AM-131 (rerunCount 1) and AM-138's
- * design v1 ("Threading model incomplete" — compliance ae-005).
+ * design v1 ("Threading model incomplete" - compliance ae-005).
  */
 export const AMENDMENT_PROPOSALS: AmendmentProposal[] = [
   {

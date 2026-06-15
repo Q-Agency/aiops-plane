@@ -42,7 +42,7 @@ export function SettingsView({ initial }: Props) {
   );
 
   // Real mode: the pre-wave-2 surface (header + audit panel) PLUS the
-  // experience switch — the one owner-requested addition that must render
+  // experience switch - the one owner-requested addition that must render
   // in both modes (you have to be able to switch back). All trust-surface
   // tabs below remain standard-mode only.
   if (!isMock(user)) {
@@ -65,7 +65,7 @@ export function SettingsView({ initial }: Props) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Standard (mock) experience — the trust surface (screens doc):       */
+/* Standard (mock) experience - the trust surface (screens doc):       */
 /* Tenancy & Security · Connected tools · Gate policies & autonomy ·   */
 /* Roles & Access · Data & retention · Audit database (verbatim).      */
 /* Deep links: #tenancy · #models · #tools · #gates · #roles · #data.  */
@@ -99,7 +99,7 @@ function MockSettingsPanels(props: AuditSectionProps) {
     if (!target) return;
     setTab(target);
     if (hash === "models") {
-      // The tenancy tab mounts first — scroll once the anchor exists.
+      // The tenancy tab mounts first - scroll once the anchor exists.
       requestAnimationFrame(() =>
         document.getElementById("models")?.scrollIntoView({ block: "start" }),
       );
@@ -169,7 +169,7 @@ function MockSettingsPanels(props: AuditSectionProps) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Audit database — the original panel, verbatim. Renders standalone   */
+/* Audit database - the original panel, verbatim. Renders standalone   */
 /* in real mode and inside the "Audit database" tab in standard mode.  */
 /* ------------------------------------------------------------------ */
 
@@ -191,16 +191,16 @@ function AuditDatabaseSection({ s, refetch, isFetching }: AuditSectionProps) {
 
       <dl className="grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2">
         <Field label="Project URL" mono>
-          {s?.url ?? <span className="text-muted-foreground">—</span>}
+          {s?.url ?? <span className="text-muted-foreground">-</span>}
         </Field>
         <Field label="Recorded events">
-          {s?.reachable ? (s.rowCount ?? 0).toLocaleString("en-US") : "—"}
+          {s?.reachable ? (s.rowCount ?? 0).toLocaleString("en-US") : "-"}
         </Field>
         <Field label="Last action">
-          {s?.lastOccurredAt ? fmtDateTime(s.lastOccurredAt) : "—"}
+          {s?.lastOccurredAt ? fmtDateTime(s.lastOccurredAt) : "-"}
         </Field>
         <Field label="Service-role key" mono>
-          <span className="text-muted-foreground">set via env — never shown</span>
+          <span className="text-muted-foreground">set via env - never shown</span>
         </Field>
       </dl>
 

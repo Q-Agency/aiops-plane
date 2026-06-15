@@ -1,8 +1,8 @@
 /**
- * DemoDirectorOverlay (wave-2 COMPLETION) — the hidden ⌘⇧D presenter
+ * DemoDirectorOverlay (wave-2 COMPLETION) - the hidden ⌘⇧D presenter
  * overlay: a compact draggable corner-pinned card whose step list mirrors
  * the 3-minute demo script. Each step dispatches staged mutations into the
- * EXISTING mock stores (demoDirector.ts) — the product surfaces just react.
+ * EXISTING mock stores (demoDirector.ts) - the product surfaces just react.
  *
  * Footprint rules:
  *  - renders NOTHING until the first ⌘⇧D (the keydown listener is the only
@@ -41,7 +41,7 @@ export function DemoDirectorOverlay() {
   const dragState = useRef<{ px: number; py: number; bx: number; by: number } | null>(null);
   const script = useDemoScript();
 
-  // ⌘⇧D / Ctrl⇧D — registered client-side only (SSR-safe), never in ⌘K.
+  // ⌘⇧D / Ctrl⇧D - registered client-side only (SSR-safe), never in ⌘K.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "d") {
@@ -81,7 +81,7 @@ export function DemoDirectorOverlay() {
       aria-label="Demo Director"
     >
       <Card className="bg-panel/80 backdrop-blur-xl border-border/60 shadow-2xl shadow-black/50 overflow-hidden">
-        {/* Header — drag handle + script name + elapsed timer */}
+        {/* Header - drag handle + script name + elapsed timer */}
         <div
           onPointerDown={onHeaderPointerDown}
           className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 cursor-grab active:cursor-grabbing select-none touch-none"
@@ -110,7 +110,7 @@ export function DemoDirectorOverlay() {
           </button>
         </div>
 
-        {/* Advance mode — Auto-advance / On my cue */}
+        {/* Advance mode - Auto-advance / On my cue */}
         <div className="flex items-center justify-between px-3 pt-2">
           <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
             Advance
@@ -132,7 +132,7 @@ export function DemoDirectorOverlay() {
           </ToggleGroup>
         </div>
 
-        {/* Step list — mirrors the 3-minute script verbatim */}
+        {/* Step list - mirrors the 3-minute script verbatim */}
         <ScrollArea className="max-h-60">
           <div className="px-2 py-2 space-y-0.5">
             {script.steps.map((s) => (
@@ -143,7 +143,7 @@ export function DemoDirectorOverlay() {
 
         <Separator className="bg-border/60" />
 
-        {/* Transport — Run / Pause / Step → */}
+        {/* Transport - Run / Pause / Step → */}
         <div className="flex items-center gap-1.5 px-3 py-2">
           {script.running ? (
             <Button size="sm" variant="secondary" className="h-7 px-2.5 text-xs" onClick={script.pause}>
@@ -155,7 +155,7 @@ export function DemoDirectorOverlay() {
               className="h-7 px-2.5 text-xs"
               onClick={script.run}
               disabled={script.allFired || manual}
-              title={manual ? "On my cue — use Step →" : undefined}
+              title={manual ? "On my cue - use Step →" : undefined}
             >
               <Play className="size-3" /> Run
             </Button>

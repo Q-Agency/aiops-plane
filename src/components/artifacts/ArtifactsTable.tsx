@@ -1,8 +1,8 @@
 /**
- * ArtifactsTable — the Deliverables shelf rows: kind icon (producing
+ * ArtifactsTable - the Deliverables shelf rows: kind icon (producing
  * agent's tone), title, mono ticket id, version (+ rejected-history hint),
  * approved-by chip joined from the seeds, approved date, and the gate
- * link → /approvals/$gateId (canonical URL — read-only decided stamp).
+ * link → /approvals/$gateId (canonical URL - read-only decided stamp).
  * Row click opens the VersionTimeline sheet.
  */
 
@@ -76,7 +76,7 @@ export function ArtifactsTable({ rows, onOpen }: ArtifactsTableProps) {
                   <span className="font-mono text-foreground">v{s.version}</span>
                   {rejectedHistory && (
                     <div className="text-[10px] font-mono text-status-waiting mt-0.5">
-                      v{s.version - 1} rejected — view diff
+                      v{s.version - 1} rejected - view diff
                     </div>
                   )}
                 </td>

@@ -1,10 +1,10 @@
 /**
- * WizardShell — owns ALL chrome of the LAUNCH wizard (D1):
+ * WizardShell - owns ALL chrome of the LAUNCH wizard (D1):
  * header (step title + sub + pod name + autosave), stepper breadcrumb,
  * footer Back/Next. Step components render BODY ONLY via the registry.
  *
  * Gating (D2): steps FLAG (amber warnings, Next always enabled);
- * Readiness (golive) BLOCKS — "Launch pod" disables while any required
+ * Readiness (golive) BLOCKS - "Launch pod" disables while any required
  * check fails.
  */
 
@@ -86,7 +86,7 @@ export function WizardShell({ step }: { step: WizardStepId }) {
   const handleNext = () => {
     if (isLaunchStep) {
       // Delegate to StepGoLive's launch sequence (warn-confirm + overlay)
-      // when its body is mounted — it cancels the event to take over.
+      // when its body is mounted - it cancels the event to take over.
       const delegated = !window.dispatchEvent(
         new Event(LAUNCH_REQUEST_EVENT, { cancelable: true }),
       );
@@ -95,7 +95,7 @@ export function WizardShell({ step }: { step: WizardStepId }) {
       launchingRef.current = true;
       const pod = launchDraft();
       if (pod) {
-        toast.success(`Pod launched — ${pod.name} is live`, {
+        toast.success(`Pod launched - ${pod.name} is live`, {
           description: `${podSummaryLine(pod)} · ${TENANCY_LINE}`,
         });
         void navigate({ to: "/" });
@@ -109,7 +109,7 @@ export function WizardShell({ step }: { step: WizardStepId }) {
 
   const handleSaveAndExit = () => {
     toast("Draft saved", {
-      description: "Your draft is saved — you can resume any time from LAUNCH → New Pod.",
+      description: "Your draft is saved - you can resume any time from LAUNCH → New Pod.",
     });
     void navigate({ to: "/" });
   };
@@ -214,7 +214,7 @@ export function WizardShell({ step }: { step: WizardStepId }) {
           <div className="flex-1" />
           {active.id === "people" && uncoveredCount > 0 && (
             <span className="text-[10px] uppercase tracking-wider font-mono px-2 py-1 rounded-md border border-status-waiting/50 bg-status-waiting/10 text-status-waiting">
-              {uncoveredCount} uncovered — you&apos;ll be blocked at launch
+              {uncoveredCount} uncovered - you&apos;ll be blocked at launch
             </span>
           )}
           {isLaunchStep && launchDisabled ? (

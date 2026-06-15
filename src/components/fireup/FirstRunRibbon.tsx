@@ -1,5 +1,5 @@
 /**
- * FirstRunRibbon — the dismissible "your pod is live" banner shown on the
+ * FirstRunRibbon - the dismissible "your pod is live" banner shown on the
  * Overview (RUN landing) right after launch (closes the LAUNCH → RUN loop).
  * Shows while the active pod launched < 10 minutes ago; dismissal persists
  * per pod id (localStorage, SSR-safe: read in useEffect, render null until).
@@ -43,7 +43,7 @@ export function FirstRunRibbon() {
     try {
       window.localStorage.setItem(DISMISS_KEY, JSON.stringify(next));
     } catch {
-      /* storage unavailable — dismiss for this session only */
+      /* storage unavailable - dismiss for this session only */
     }
   };
 
@@ -54,7 +54,7 @@ export function FirstRunRibbon() {
         <div className="leading-snug">
           <span className="text-sm font-semibold">{activePod.name} is live</span>{" "}
           <span className="text-xs text-muted-foreground">
-            · {podSummaryLine(activePod)} — first ticket will appear here.
+            · {podSummaryLine(activePod)} - first ticket will appear here.
           </span>
         </div>
         <div className="mt-1 flex items-center gap-2 flex-wrap">

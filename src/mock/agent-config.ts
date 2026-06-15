@@ -1,5 +1,5 @@
 /**
- * Per-agent operating configuration (agent profile revamp, 2026-06-12) —
+ * Per-agent operating configuration (agent profile revamp, 2026-06-12) -
  * the PM-tunable knobs behind /agents/$agentId and the /registry configure
  * step: which MODEL the agent runs on (the model plane made switchable),
  * which TOOLS it may touch, who ANSWERS for it, where it sits on the
@@ -12,7 +12,7 @@
  * `primaryAgentId`. Edits live in a session overlay (same idiom as
  * audit-bridge): in-memory, reactive via useSyncExternalStore, and EVERY
  * mutation writes a `policy.changed` / `human.reassigned` /
- * `agent.rolled_back` row through appendAuditMock — config changes are
+ * `agent.rolled_back` row through appendAuditMock - config changes are
  * decisions, so they land on the ledger.
  */
 
@@ -24,11 +24,11 @@ import { humans } from "./humans";
 import type { ConnectorId } from "./connectors";
 
 /* ------------------------------------------------------------------ */
-/* Model catalog — the switchable engines (model-agnostic by design)    */
+/* Model catalog - the switchable engines (model-agnostic by design)    */
 /* ------------------------------------------------------------------ */
 
 export interface ModelOption {
-  /** Pinned model id — never "latest" (model-plane honesty rule). */
+  /** Pinned model id - never "latest" (model-plane honesty rule). */
   id: string;
   label: string;
   provider: string;
@@ -59,7 +59,7 @@ export const MODEL_OPTIONS: ModelOption[] = [
     retention: "Zero-data-retention API terms",
     costPerRunUsd: 1.84,
     p50s: 38,
-    note: "Frontier reasoning — architecture calls and gnarly refactors.",
+    note: "Frontier reasoning - architecture calls and gnarly refactors.",
   },
   {
     id: "claude-sonnet-4-5-20250929",
@@ -81,7 +81,7 @@ export const MODEL_OPTIONS: ModelOption[] = [
     retention: "Zero-data-retention API terms",
     costPerRunUsd: 0.09,
     p50s: 4,
-    note: "Fast and cheap — routing, summaries, light edits.",
+    note: "Fast and cheap - routing, summaries, light edits.",
   },
   {
     id: "gpt-5.1",
@@ -92,7 +92,7 @@ export const MODEL_OPTIONS: ModelOption[] = [
     retention: "Zero-data-retention API terms",
     costPerRunUsd: 0.71,
     p50s: 16,
-    note: "Swappable by contract — same harness, different engine.",
+    note: "Swappable by contract - same harness, different engine.",
   },
   {
     id: "qwen2.5-coder-32b-instruct",
@@ -103,7 +103,7 @@ export const MODEL_OPTIONS: ModelOption[] = [
     retention: "Never leaves your tenant",
     costPerRunUsd: 0.04,
     p50s: 9,
-    note: "Q's local inference — privacy-critical pods and cost control.",
+    note: "Q's local inference - privacy-critical pods and cost control.",
   },
 ];
 
@@ -117,13 +117,13 @@ export function modelShort(id: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* LLM tiers — a mandatory model-POLICY menu (each tier is a BLEND)     */
+/* LLM tiers - a mandatory model-POLICY menu (each tier is a BLEND)     */
 /* ------------------------------------------------------------------ */
 
 /**
- * A tier is NOT a single model. An agent's run is composed of sub-roles —
+ * A tier is NOT a single model. An agent's run is composed of sub-roles -
  * Generation (produces the artifact), Supervisor (plans & routes the run),
- * Judge (LLM-advisory critique before the deterministic gate) — and each
+ * Judge (LLM-advisory critique before the deterministic gate) - and each
  * tier assigns an appropriate model to EACH sub-role. So "Budget" generates
  * on Haiku but judges on the in-tenant model; "Max" generates on Opus but
  * supervises/judges on Sonnet. The product makes you pick a TIER (a
@@ -136,7 +136,7 @@ export type LlmTier = "max" | "balanced" | "budget" | "local";
 /** The parts of an agent's run, each backed by its own model. */
 export type LlmRole = "generation" | "supervisor" | "judge";
 export const LLM_ROLES: { id: LlmRole; label: string; blurb: string }[] = [
-  { id: "generation", label: "Generation", blurb: "Produces the artifact — the heavy lifter." },
+  { id: "generation", label: "Generation", blurb: "Produces the artifact - the heavy lifter." },
   { id: "supervisor", label: "Supervisor", blurb: "Plans the run and routes each step." },
   { id: "judge", label: "Judge", blurb: "LLM-advisory critique before the deterministic gate." },
 ];
@@ -146,11 +146,11 @@ export interface LlmTierDef {
   label: string;
   /** One-line "when to pick this". */
   blurb: string;
-  /** The blend — a model id per sub-role. */
+  /** The blend - a model id per sub-role. */
   composition: Record<LlmRole, string>;
   /** CSS var for the accent. */
   accent: string;
-  /** Local/in-tenant tier — data never leaves the tenant. */
+  /** Local/in-tenant tier - data never leaves the tenant. */
   inTenant?: boolean;
 }
 
@@ -158,7 +158,7 @@ export const LLM_TIERS: LlmTierDef[] = [
   {
     id: "max",
     label: "Max capability",
-    blurb: "Frontier reasoning where it counts — hardest specs, architecture, gnarly refactors.",
+    blurb: "Frontier reasoning where it counts - hardest specs, architecture, gnarly refactors.",
     composition: {
       generation: "claude-opus-4-1-20250805",
       supervisor: "claude-sonnet-4-5-20250929",
@@ -169,7 +169,7 @@ export const LLM_TIERS: LlmTierDef[] = [
   {
     id: "balanced",
     label: "Balanced",
-    blurb: "The recommended default — a strong generator with cheap orchestration.",
+    blurb: "The recommended default - a strong generator with cheap orchestration.",
     composition: {
       generation: "claude-sonnet-4-5-20250929",
       supervisor: "claude-haiku-4-5-20251001",
@@ -180,7 +180,7 @@ export const LLM_TIERS: LlmTierDef[] = [
   {
     id: "budget",
     label: "Budget",
-    blurb: "Fast and cheap — high-volume, light-touch work; the judge runs in-tenant.",
+    blurb: "Fast and cheap - high-volume, light-touch work; the judge runs in-tenant.",
     composition: {
       generation: "claude-haiku-4-5-20251001",
       supervisor: "claude-haiku-4-5-20251001",
@@ -191,7 +191,7 @@ export const LLM_TIERS: LlmTierDef[] = [
   {
     id: "local",
     label: "Local only",
-    blurb: "Every sub-role on Q's managed H200 rig — data never leaves your tenant.",
+    blurb: "Every sub-role on Q's managed H200 rig - data never leaves your tenant.",
     composition: {
       generation: "qwen2.5-coder-32b-instruct",
       supervisor: "qwen2.5-coder-32b-instruct",
@@ -219,17 +219,17 @@ export function tierComposition(
   }));
 }
 
-/** Headline (generation) model of a tier — used where one model is shown. */
+/** Headline (generation) model of a tier - used where one model is shown. */
 export function tierGenerationModelId(tier: LlmTier): string {
   return llmTierDef(tier).composition.generation;
 }
 
-/** Indicative cost PER RUN — the blend touches every sub-role, so we sum. */
+/** Indicative cost PER RUN - the blend touches every sub-role, so we sum. */
 export function tierCostPerRun(tier: LlmTier): number {
   return tierComposition(tier).reduce((sum, c) => sum + c.model.costPerRunUsd, 0);
 }
 
-/** Headline latency — the generation pass dominates the critical path. */
+/** Headline latency - the generation pass dominates the critical path. */
 export function tierP50(tier: LlmTier): number {
   return modelOptionById(tierGenerationModelId(tier)).p50s;
 }
@@ -254,7 +254,7 @@ export function agentTier(agentId: string): LlmTier {
   return ov(agentId).tier ?? tierForModelId(defaultModelId(agentId));
 }
 
-/** Set an agent's LLM tier — the whole blend (audited). */
+/** Set an agent's LLM tier - the whole blend (audited). */
 export function setAgentTier(agentId: string, agentName: string, tier: LlmTier): void {
   const before = agentTier(agentId);
   if (before === tier) return;
@@ -268,7 +268,7 @@ export function setAgentTier(agentId: string, agentName: string, tier: LlmTier):
 }
 
 /**
- * Default model per agent — the modelPlane.ts pin when the agent has a
+ * Default model per agent - the modelPlane.ts pin when the agent has a
  * row there (ids differ: agents.ts says curator/pm, the plane says
  * knowledge/devops), else a sensible tier for the role.
  */
@@ -279,7 +279,7 @@ function defaultModelId(agentId: string): string {
   if (plane && MODEL_OPTIONS.some((m) => m.id === plane.pinnedModel)) {
     return plane.pinnedModel;
   }
-  // curator's plane row is an embeddings model — its generation runs local;
+  // curator's plane row is an embeddings model - its generation runs local;
   // pm has no plane row (coordination tier).
   if (agentId === "curator") return "qwen2.5-coder-32b-instruct";
   if (agentId === "pm") return "claude-haiku-4-5-20251001";
@@ -287,12 +287,12 @@ function defaultModelId(agentId: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tool access — which connectors the agent may touch                   */
+/* Tool access - which connectors the agent may touch                   */
 /* ------------------------------------------------------------------ */
 
 /**
  * Default tool grants per agent. REQUIRED tools are the ones the role's
- * core loop breaks without (QA can't verify without Playwright — the
+ * core loop breaks without (QA can't verify without Playwright - the
  * mandatory-connector canon, scoped per agent here).
  */
 const DEFAULT_TOOLS: Record<string, ConnectorId[]> = {
@@ -319,7 +319,7 @@ export function requiredToolsFor(agentId: string): Set<ConnectorId> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Versions & evals — the AgentOps quality history                      */
+/* Versions & evals - the AgentOps quality history                      */
 /* ------------------------------------------------------------------ */
 
 export interface AgentVersion {
@@ -334,7 +334,7 @@ export interface AgentVersion {
 /**
  * Current-first version history. ba/sa/qa versions DELIBERATELY match
  * their validator-family versions (ba-spec@1.4.2 / sa-design@2.1.0 /
- * qa-report@1.0.7) — the eval family IS the agent's quality bar, one
+ * qa-report@1.0.7) - the eval family IS the agent's quality bar, one
  * version story across /governance, gate reviews and this panel.
  */
 const VERSIONS: Record<string, AgentVersion[]> = {
@@ -425,7 +425,7 @@ function ov(agentId: string): AgentOverrides {
 
 /* ---------------- merged getters (defaults + overlay) ---------------- */
 
-/** The agent's headline (generation) model — derived from its tier's blend. */
+/** The agent's headline (generation) model - derived from its tier's blend. */
 export function agentModel(agentId: string): ModelOption {
   return modelOptionById(tierGenerationModelId(agentTier(agentId)));
 }
@@ -451,11 +451,11 @@ export function agentVersions(agentId: string): (AgentVersion & { current: boole
 }
 
 /* ---------------- audited mutations ---------------- */
-/* (setAgentTier lives in the LLM-tiers section above — the agent's model is
+/* (setAgentTier lives in the LLM-tiers section above - the agent's model is
    a tier/blend now, not a single id, so there is no setAgentModel.)        */
 
 export function toggleAgentTool(agentId: string, agentName: string, tool: ConnectorId): void {
-  if (requiredToolsFor(agentId).has(tool)) return; // required — not unplugable
+  if (requiredToolsFor(agentId).has(tool)) return; // required - not unplugable
   const current = agentTools(agentId);
   const has = current.includes(tool);
   ov(agentId).tools = has ? current.filter((t) => t !== tool) : [...current, tool];
@@ -483,7 +483,7 @@ export function setAgentOwner(agentId: string, agentName: string, ownerId: strin
 
 /**
  * Move the agent on the ladder. Downgrades are always allowed (safety is
- * one click); upgrades are only written when `granted` — the caller must
+ * one click); upgrades are only written when `granted` - the caller must
  * hold a system proposal (autonomy is EARNED, never self-served).
  */
 export function setAgentAutonomy(

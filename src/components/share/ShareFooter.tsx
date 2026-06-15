@@ -1,5 +1,5 @@
 /**
- * ShareFooter (/share/$token) — the slim provenance line under an active
+ * ShareFooter (/share/$token) - the slim provenance line under an active
  * shared report: "Shared by {pod} via Agency OS · this view is recorded ·
  * expires {date}". The muted "What is Agency OS?" link is the funnel asset
  * and the page's only navigation (spec: Shared Report Viewer, P1-H4).
@@ -13,7 +13,7 @@ const _date = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
 });
 
-/** Muted funnel link — a plain <a> (full load) since the viewer has no session. */
+/** Muted funnel link - a plain <a> (full load) since the viewer has no session. */
 export function FunnelLink() {
   return (
     <a

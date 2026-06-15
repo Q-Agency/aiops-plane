@@ -1,12 +1,12 @@
 /**
- * MembersRoles (/pod, C11) — the "Members & roles" panel on the People &
+ * MembersRoles (/pod, C11) - the "Members & roles" panel on the People &
  * Roles surface:
  *
  *  - member rows: humans.ts ⋈ roles.ts (role Select, remove w/ confirm)
  *  - pending invites: reuses the LAUNCH InviteDialog → ghost "Invited" rows
  *  - read-only "What each role sees" capability matrix card
  *
- * Honesty: RBAC is mocked — roles shape attribution/landing config only;
+ * Honesty: RBAC is mocked - roles shape attribution/landing config only;
  * NO per-role redirects ship in this slice, access is not enforced.
  * All mutations are in-memory (survive SPA navigation, not hard reloads).
  */
@@ -222,7 +222,7 @@ export function MembersRoles() {
             );
           })}
 
-          {/* pending invites — ghost rows */}
+          {/* pending invites - ghost rows */}
           {invites.map((inv) => (
             <div key={inv.id} className="flex items-center gap-3 px-3 py-2.5 opacity-80">
               <span className="size-9 shrink-0 rounded-full grid place-items-center font-mono font-semibold text-xs border border-dashed border-border text-muted-foreground">
@@ -255,7 +255,7 @@ export function MembersRoles() {
 
           {members.length === 0 && invites.length === 0 && (
             <div className="px-3 py-8 text-center space-y-2">
-              <div className="text-sm text-foreground">No people on this pod yet — invite your team.</div>
+              <div className="text-sm text-foreground">No people on this pod yet - invite your team.</div>
               <Button size="sm" variant="outline" onClick={() => setInviteOpen(true)}>
                 <MailPlus className="size-3.5" /> Invite
               </Button>
@@ -263,7 +263,7 @@ export function MembersRoles() {
           )}
         </div>
 
-        {/* capability matrix — read-only */}
+        {/* capability matrix - read-only */}
         <div className="glass-panel xl:col-span-2 p-3">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
             What each role sees
@@ -305,7 +305,7 @@ export function MembersRoles() {
                       {r.capabilities[k] ? (
                         <Check className="size-3.5 text-status-done inline" aria-label="yes" />
                       ) : (
-                        <span className="text-muted-foreground/40" aria-label="no">—</span>
+                        <span className="text-muted-foreground/40" aria-label="no">-</span>
                       )}
                     </td>
                   ))}
@@ -315,13 +315,13 @@ export function MembersRoles() {
           </table>
           <div className="mt-2.5 pt-2.5 border-t border-border flex items-start gap-1.5 text-[10px] text-muted-foreground font-mono">
             <ShieldAlert className="size-3 shrink-0 mt-px text-status-waiting" />
-            Mocked RBAC — roles are designed now and shape gate attribution; access is enforced when
+            Mocked RBAC - roles are designed now and shape gate attribution; access is enforced when
             sign-in lands (auth v2). No per-role redirects in this slice.
           </div>
         </div>
       </div>
 
-      {/* invite dialog — reused from LAUNCH */}
+      {/* invite dialog - reused from LAUNCH */}
       <InviteDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}
@@ -341,7 +341,7 @@ export function MembersRoles() {
               {removeTarget && removeTarget.agentCount > 0 ? (
                 <>
                   {removeTarget.name} is accountable for {removeTarget.agentCount} agent
-                  {removeTarget.agentCount > 1 ? "s" : ""} — those columns become uncovered risk until
+                  {removeTarget.agentCount > 1 ? "s" : ""} - those columns become uncovered risk until
                   you assign a new owner.
                 </>
               ) : (

@@ -1,7 +1,7 @@
 /**
- * LlmTierMenu — the mandatory model-policy selector. The user picks a TIER
+ * LlmTierMenu - the mandatory model-policy selector. The user picks a TIER
  * (Max capability / Balanced / Budget / Local-only), and each tier is a
- * BLEND of models — a different model per sub-role (generation, supervisor,
+ * BLEND of models - a different model per sub-role (generation, supervisor,
  * judge). The menu never presents a tier as one model: it shows the blended
  * cost, an "N-model blend" tag, and (in `md`) the per-role composition.
  * Controlled: pass `value` (null = nothing chosen yet) and `onChange`.
@@ -79,7 +79,7 @@ export function LlmTierMenu({
               </span>
             </div>
 
-            {/* Blend tag — always shown so a tier never reads as one model */}
+            {/* Blend tag - always shown so a tier never reads as one model */}
             <div className="mt-1 pl-6 flex items-center gap-1.5">
               <span
                 className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-border text-muted-foreground"

@@ -118,8 +118,8 @@ export function ComplianceView() {
             <ShieldCheck className="size-6 text-primary" /> Compliance & Audit
           </h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Evidence the system already generates — artifact lineage, human approvals, accountability,
-            data flows — surfaced for compliance officers, auditors, and procurement reviews.
+            Evidence the system already generates - artifact lineage, human approvals, accountability,
+            data flows - surfaced for compliance officers, auditors, and procurement reviews.
             Read-only view; no certification claims.
           </p>
         </div>
@@ -236,7 +236,7 @@ export function ComplianceView() {
                 </div>
               ))}
               <div className="px-4 py-1 bg-white/[0.02] text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                earlier — seeded ledger
+                earlier - seeded ledger
               </div>
             </>
           )}
@@ -274,7 +274,7 @@ export function ComplianceView() {
                 </button>
                 {isOpen && (
                   <div className="mt-2 ml-9 grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] font-mono">
-                    <Kv k="artifact" v={e.artifactRef ?? "—"} />
+                    <Kv k="artifact" v={e.artifactRef ?? "-"} />
                     <Kv k="hash" v={e.hash} />
                     <Kv k="prev_hash" v={e.prevHash} />
                     <Kv k="entry_id" v={e.id} />
@@ -343,8 +343,8 @@ export function ComplianceView() {
           <div className="p-4 space-y-4">
             <div className="space-y-2">
               <ResidencyBar label="On-prem (vLLM / H200)" pct={split.onPrem} icon={Server} tone="done" />
-              <ResidencyBar label="Cloud — EU region" pct={split.cloudEU} icon={Cloud} tone="warn" />
-              <ResidencyBar label="Cloud — US region" pct={split.cloudUS} icon={Cloud} tone="error" />
+              <ResidencyBar label="Cloud - EU region" pct={split.cloudEU} icon={Cloud} tone="warn" />
+              <ResidencyBar label="Cloud - US region" pct={split.cloudUS} icon={Cloud} tone="error" />
             </div>
             <div className="text-[11px] text-muted-foreground border-t border-border pt-3">
               All client PII ingested by the Curator is stored and processed on-prem.
@@ -358,7 +358,7 @@ export function ComplianceView() {
       <section id="governance" className="rounded-lg border border-border bg-panel/40">
         <div className="px-4 py-3 border-b border-border flex items-center gap-2">
           <Database className="size-4 text-primary" />
-          <h2 className="font-semibold">Data governance — ingested sources</h2>
+          <h2 className="font-semibold">Data governance - ingested sources</h2>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-white/[0.02]">
@@ -450,7 +450,7 @@ export function ComplianceView() {
       <section className="rounded-lg border border-border bg-panel/40">
         <div className="px-4 py-3 border-b border-border flex items-center gap-2">
           <FileLock2 className="size-4 text-primary" />
-          <h2 className="font-semibold">Regulatory mapping — {profile.active.map((f) => FRAMEWORK_LABEL[f]).join(" · ")}</h2>
+          <h2 className="font-semibold">Regulatory mapping - {profile.active.map((f) => FRAMEWORK_LABEL[f]).join(" · ")}</h2>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-white/[0.02]">

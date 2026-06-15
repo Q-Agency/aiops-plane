@@ -1,5 +1,5 @@
 /**
- * Pod store — client-side state for the multi-pod shell + LAUNCH wizard.
+ * Pod store - client-side state for the multi-pod shell + LAUNCH wizard.
  * Mock/standard-mode only: persisted to localStorage ("aiops_pods_v1"),
  * SSR-safe (initialize with the sample pod, hydrate in useEffect).
  *
@@ -40,7 +40,7 @@ export interface DraftConnection {
   status: "connected" | "skipped";
 }
 
-/** Brownfield slice rule (Connect sub-screen 3b) — AND semantics across fields. */
+/** Brownfield slice rule (Connect sub-screen 3b) - AND semantics across fields. */
 export interface ScopeRule {
   connectorId: ConnectorId;
   projectKey?: string;
@@ -55,11 +55,11 @@ export interface PodDraft {
   agentIds: ChainRoleId[];
   connections: DraftConnection[];
   scopeNote?: string;
-  /** Structured brownfield slice — re-editable source of scopeNote. */
+  /** Structured brownfield slice - re-editable source of scopeNote. */
   scopeRule?: ScopeRule;
   /** agentId → humanId (null = uncovered). */
   accountability: Partial<Record<ChainRoleId, string | null>>;
-  /** agentId → chosen LLM tier — mandatory for every agent before launch. */
+  /** agentId → chosen LLM tier - mandatory for every agent before launch. */
   agentTiers?: Partial<Record<ChainRoleId, LlmTier>>;
   slackWiring: SlackWiringRow[];
   approverChannelId: string | null;
@@ -98,7 +98,7 @@ export const SAMPLE_POD: LaunchedPod = {
     dev: "ivan",
     review: "ivan",
     qa: "petra",
-    // D5: 4 distinct humans (Ana/Marin/Ivan/Petra) cover 7 agents —
+    // D5: 4 distinct humans (Ana/Marin/Ivan/Petra) cover 7 agents -
     // "7 agents · 4 accountable humans" (one human covers several).
     knowledge: "ana",
   },
@@ -144,7 +144,7 @@ export interface ReadinessCheck {
 
 export interface DraftReadiness {
   checks: ReadinessCheck[];
-  /** True while any required check fails — Launch is disabled. */
+  /** True while any required check fails - Launch is disabled. */
   blocked: boolean;
   uncovered: ChainRoleId[];
   /** Passed-required ÷ total-required × 100. */
@@ -181,7 +181,7 @@ export function computeReadiness(draft: PodDraft | null): DraftReadiness {
       detail:
         hasAgents && uncovered.length === 0
           ? "Every agent has an accountable human."
-          : `${uncovered.length} uncovered — assign one human per agent.`,
+          : `${uncovered.length} uncovered - assign one human per agent.`,
       fixStep: "people",
     },
     {
@@ -192,7 +192,7 @@ export function computeReadiness(draft: PodDraft | null): DraftReadiness {
       detail:
         hasAgents && needingTier.length === 0
           ? "Every agent has a model tier set."
-          : `${needingTier.length} agent${needingTier.length === 1 ? "" : "s"} need an LLM tier — pick one per agent.`,
+          : `${needingTier.length} agent${needingTier.length === 1 ? "" : "s"} need an LLM tier - pick one per agent.`,
       fixStep: "agents",
     },
     {
@@ -290,7 +290,7 @@ export function PodProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const stored = JSON.parse(raw) as Partial<PodsState>;
         // C12: ALL draft/pods updates are functional (prev => next) so
-        // same-tick updates don't race — hydration must not clobber a
+        // same-tick updates don't race - hydration must not clobber a
         // draft created before this effect ran.
         setState((prev) => {
           const next = withSamplePod(stored);
@@ -298,7 +298,7 @@ export function PodProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch {
-      /* corrupt storage — keep defaults */
+      /* corrupt storage - keep defaults */
     }
     setHydrated(true);
   }, []);
@@ -309,7 +309,7 @@ export function PodProvider({ children }: { children: ReactNode }) {
       const toStore: PodsState = { ...state, pods: state.pods.filter((p) => !p.sample) };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     } catch {
-      /* storage full/unavailable — non-fatal in mock mode */
+      /* storage full/unavailable - non-fatal in mock mode */
     }
   }, [state, hydrated]);
 

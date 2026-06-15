@@ -1,9 +1,9 @@
 /**
- * Experience gate (wave 2) — the single helper that walls the FULL mock
+ * Experience gate (wave 2) - the single helper that walls the FULL mock
  * product off from the live-only experience.
  *
  * EXPERIENCE RULE (since 2026-06-12): `user.dataMode` is the EFFECTIVE
- * mode — the account's default ("standard" for qai@, "real" for zlatko)
+ * mode - the account's default ("standard" for qai@, "real" for zlatko)
  * unless the per-browser switch (Settings → Experience) overrides it; the
  * override is resolved server-side in fetchUser (auth.ts), so every
  * consumer here sees one truth. "standard" = the full product on sample

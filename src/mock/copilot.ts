@@ -1,8 +1,8 @@
 /**
- * Pod Copilot (⌘J overlay, wave 2, P1-A1) — canned ask-with-receipts Q&A
+ * Pod Copilot (⌘J overlay, wave 2, P1-A1) - canned ask-with-receipts Q&A
  * plus NL operations rendered as proposed-action cards. NO LLM IN THE MOCK:
  * answers are precomputed from pod telemetry (seed modules) and every
- * receipt chip points at a REAL seed id — ledger rows (compliance.ts ae-*),
+ * receipt chip points at a REAL seed id - ledger rows (compliance.ts ae-*),
  * gate ids (approvals.ts "appr-…" / "clar-…"), validator reports (ticket ids).
  *
  * Actions NEVER execute unconfirmed: matchCopilot only returns a
@@ -38,12 +38,12 @@ export type CopilotMatch =
   | { kind: "action"; p: ProposedAction }
   | { kind: "fallback" };
 
-/** Persistent honesty badge under the input — render verbatim. */
+/** Persistent honesty badge under the input - render verbatim. */
 export const COPILOT_HONESTY_BADGE =
   "Answers computed from pod telemetry · actions always confirmed by you.";
 
 export const COPILOT_FALLBACK_LINE =
-  "I answer from the ledger, gates, and runs — not from the internet. Try a gate, ticket, or person.";
+  "I answer from the ledger, gates, and runs - not from the internet. Try a gate, ticket, or person.";
 
 export const SUGGESTED_PROMPTS = [
   "What needs me?",
@@ -53,7 +53,7 @@ export const SUGGESTED_PROMPTS = [
 ] as const;
 
 /* ------------------------------------------------------------------ */
-/* Canned answers — keyed to the demo spine                             */
+/* Canned answers - keyed to the demo spine                             */
 /* ------------------------------------------------------------------ */
 
 const report = currentReport();
@@ -73,7 +73,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   {
     q: "Why did AM-142 ship?",
     answerMd:
-      "AM-142's spec cleared its gate as **v2**: Zlatko approved it with the reason *\"Spec scope matches SOW §3.2\"* after v1 was returned for **missing error-state ACs** — and all **8 structural validators passed** on the approved version. The approval is on the ledger.",
+      "AM-142's spec cleared its gate as **v2**: Zlatko approved it with the reason *\"Spec scope matches SOW §3.2\"* after v1 was returned for **missing error-state ACs** - and all **8 structural validators passed** on the approved version. The approval is on the ledger.",
     receipts: [
       { kind: "ledger", refId: "ae-003", label: "ledger ae-003" },
       { kind: "gate", refId: "appr-AM-142", label: "gate AM-142" },
@@ -83,7 +83,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   {
     q: "What changed overnight?",
     answerMd:
-      "The 22:00 overnight batch dispatched to the dev agent and came back green — **3 PRs, all passing** — and the **AM-150 VIN decoder implementation** was pushed on local compute (qwen2.5-coder-32b, on-prem). Nothing needed a human overnight.",
+      "The 22:00 overnight batch dispatched to the dev agent and came back green - **3 PRs, all passing** - and the **AM-150 VIN decoder implementation** was pushed on local compute (qwen2.5-coder-32b, on-prem). Nothing needed a human overnight.",
     receipts: [
       { kind: "ledger", refId: "ae-010", label: "ledger ae-010" },
       { kind: "ledger", refId: "ae-020", label: "ledger ae-020" },
@@ -91,7 +91,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   },
   {
     q: "How is the pod doing this week?",
-    answerMd: `A steady week: **${report.headline.itemsDelivered} items delivered**, **${report.headline.gatesCleared} gates cleared**, spend ${fmtUsd(report.headline.spendUsd)} against the ${fmtUsd(budget.monthlyCapUsd)} cap. One honest miss: the **AM-138 design review breached its 8h target (26h)** — reassignment is in progress.`,
+    answerMd: `A steady week: **${report.headline.itemsDelivered} items delivered**, **${report.headline.gatesCleared} gates cleared**, spend ${fmtUsd(report.headline.spendUsd)} against the ${fmtUsd(budget.monthlyCapUsd)} cap. One honest miss: the **AM-138 design review breached its 8h target (26h)** - reassignment is in progress.`,
     receipts: [
       { kind: "gate", refId: "appr-AM-138", label: "gate AM-138" },
       { kind: "ledger", refId: "ae-013", label: "ledger ae-013" },
@@ -100,7 +100,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   {
     q: "Who cleared the KYC test matrix?",
     answerMd:
-      "**Petra Novak** (QA Lead) approved the AM-144 Seller KYC verification gate with the reason *\"KYC test matrix complete\"* — the cleared artifact is **qa.md v3**, snapshotted at clearance.",
+      "**Petra Novak** (QA Lead) approved the AM-144 Seller KYC verification gate with the reason *\"KYC test matrix complete\"* - the cleared artifact is **qa.md v3**, snapshotted at clearance.",
     receipts: [
       { kind: "ledger", refId: "ae-013", label: "ledger ae-013" },
       { kind: "gate", refId: "appr-AM-144", label: "gate AM-144" },
@@ -109,7 +109,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   {
     q: "Why was AM-138 rejected?",
     answerMd:
-      "Marin Crnković rejected the AM-138 messaging design at v1 with the typed reason *\"Threading model incomplete — reroute to SA\"*. His note became the SA agent's added context, and **v2 with the threaded model** landed 3 hours later.",
+      "Marin Crnković rejected the AM-138 messaging design at v1 with the typed reason *\"Threading model incomplete - reroute to SA\"*. His note became the SA agent's added context, and **v2 with the threaded model** landed 3 hours later.",
     receipts: [
       { kind: "ledger", refId: "ae-005", label: "ledger ae-005" },
       { kind: "ledger", refId: "ae-006", label: "ledger ae-006" },
@@ -118,7 +118,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   },
   {
     q: "Are we over budget?",
-    answerMd: `No — month-to-date spend is **${fmtUsd(budget.mtdSpendUsd)}** of a **${fmtUsd(budget.monthlyCapUsd)}** cap (day ${budget.daysElapsed} of ${budget.daysInMonth}), projecting **${fmtUsd(budget.projectedMonthlyUsd)}** by month end — status **${CAP_STATUS_LABELS[budget.capStatus]}**. The biggest single line item was AM-136's ship gate.`,
+    answerMd: `No - month-to-date spend is **${fmtUsd(budget.mtdSpendUsd)}** of a **${fmtUsd(budget.monthlyCapUsd)}** cap (day ${budget.daysElapsed} of ${budget.daysInMonth}), projecting **${fmtUsd(budget.projectedMonthlyUsd)}** by month end - status **${CAP_STATUS_LABELS[budget.capStatus]}**. The biggest single line item was AM-136's ship gate.`,
     receipts: [
       { kind: "gate", refId: "appr-AM-136", label: "gate AM-136" },
       { kind: "ledger", refId: "ae-010", label: "ledger ae-010" },
@@ -127,7 +127,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   {
     q: "What's blocked right now?",
     answerMd:
-      "One real blocker: the **AM-149 offer/escrow quality gate** is stuck — a retry already failed and it's escalated to a human. Separately, the curator raised a **SOW-vs-Slack pricing conflict** that needs a ruling before the BA drafts against it.",
+      "One real blocker: the **AM-149 offer/escrow quality gate** is stuck - a retry already failed and it's escalated to a human. Separately, the curator raised a **SOW-vs-Slack pricing conflict** that needs a ruling before the BA drafts against it.",
     receipts: [
       { kind: "gate", refId: "appr-AM-149", label: "gate AM-149" },
       { kind: "ledger", refId: "ae-011", label: "ledger ae-011" },
@@ -167,7 +167,7 @@ export const PROPOSED_ACTIONS: ProposedAction[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Matching — keyword scoring, no model                                 */
+/* Matching - keyword scoring, no model                                 */
 /* ------------------------------------------------------------------ */
 
 /** Parallel keyword sets for COPILOT_ANSWERS (same index order). */

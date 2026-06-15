@@ -1,12 +1,12 @@
 /**
- * TicketPickerTable — the confirmation table of Work Intake (C10), under
+ * TicketPickerTable - the confirmation table of Work Intake (C10), under
  * the SINGLE DOORBELL (vision §2): the board sends work; the operator
  * confirms or declines each start. Three row states, one truth:
- *   on the board (visible, NOT selectable — the board hasn't sent it)
- *   → in Ready (arrived — confirm/decline)
+ *   on the board (visible, NOT selectable - the board hasn't sent it)
+ *   → in Ready (arrived - confirm/decline)
  *   → In pod (started; entry provenance chip shows HOW it entered).
  * "Confirm start" calls pullTickets() (lands at the top of the Pipeline
- * Backlog); "Decline — return to board" requires a typed reason and writes
+ * Backlog); "Decline - return to board" requires a typed reason and writes
  * the ledger row. Nothing on this table originates work.
  *
  * States: not-connected gate, skeleton loading, populated, no-arrivals
@@ -39,7 +39,7 @@ import {
 } from "@/mock/intake";
 import { TRIGGER_RULE, recordDecline, useTriggerMode, type TicketProvenance } from "@/mock/trigger";
 
-/** Decline canon — same typed-reason floor as every reject surface. */
+/** Decline canon - same typed-reason floor as every reject surface. */
 const DECLINE_REASON_MIN = 10;
 
 const PRIORITY_CHIP: Record<IntakeTicket["priority"], string> = {
@@ -50,8 +50,8 @@ const PRIORITY_CHIP: Record<IntakeTicket["priority"], string> = {
 };
 
 /**
- * Entry provenance — rendered ONLY on rows already in the pod (`pulled`):
- * how the start happened. Rows still on the board carry no provenance —
+ * Entry provenance - rendered ONLY on rows already in the pod (`pulled`):
+ * how the start happened. Rows still on the board carry no provenance -
  * nothing has been confirmed about them yet.
  */
 function EntryChip({ provenance }: { provenance?: TicketProvenance }) {
@@ -76,7 +76,7 @@ function EntryChip({ provenance }: { provenance?: TicketProvenance }) {
 }
 
 export interface TicketPickerTableProps {
-  /** ?sim=error demo affordance — renders the tracker-unreachable state. */
+  /** ?sim=error demo affordance - renders the tracker-unreachable state. */
   simError?: boolean;
 }
 
@@ -115,12 +115,12 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
   // Decline-the-start (vision §2): a not-actionable arrival is RETURNED to
   // the board (To-Do, via tagged write-back + comment) on a typed-reason
   // decision. The mock state lives in trigger.ts (recordDecline) so the row
-  // drops back to the "on the board" state — it does NOT vanish.
+  // drops back to the "on the board" state - it does NOT vanish.
   const [declining, setDeclining] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
   const [, setDeclineSeq] = useState(0); // re-render after the decline mutation
 
-  // Call per render — `pulled`/`arrived` reflect live mock state; demoTick
+  // Call per render - `pulled`/`arrived` reflect live mock state; demoTick
   // repaints staged arrivals (simulateDragArrival / Demo Director beats).
   const rows = useMemo(
     () => intakeBacklog().filter((t) => t.inScope),
@@ -128,7 +128,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
   );
   // Confirmable = the board SENT it (arrived, not declined) and it isn't in
   // the pod yet. Rows the board hasn't sent are visible but never
-  // selectable — the single doorbell means this screen cannot originate work.
+  // selectable - the single doorbell means this screen cannot originate work.
   const pickable = rows.filter((t) => t.arrived && !t.pulled);
   const awaiting = pickable.length;
   const allPicked = pickable.length > 0 && pickable.every((t) => selected.has(t.id));
@@ -167,10 +167,10 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
         const podName = activePod?.name ?? "the pod";
         toast.success(
           created.length === 1
-            ? `${created[0].id} confirmed — routing to BA Agent`
-            : `${created.length} starts confirmed — routing to BA Agent`,
+            ? `${created[0].id} confirmed - routing to BA Agent`
+            : `${created.length} starts confirmed - routing to BA Agent`,
           {
-            description: `Start confirmed in ${podName} — landing at the top of the Pipeline Backlog.`,
+            description: `Start confirmed in ${podName} - landing at the top of the Pipeline Backlog.`,
             action: {
               label: "View in Pipeline",
               onClick: () =>
@@ -203,7 +203,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
             : `${ids.length} tickets returned to To-Do on '${TRIGGER_RULE.board}'`,
           {
             description:
-              "Comment posted to the ticket ([AgencyOS] tagged) — the row is back 'on the board'; add detail and drag to Ready again. Recorded on the ledger.",
+              "Comment posted to the ticket ([AgencyOS] tagged) - the row is back 'on the board'; add detail and drag to Ready again. Recorded on the ledger.",
           },
         );
         setDeclining(false);
@@ -218,11 +218,11 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
       <Alert className="bg-panel/40 border-status-waiting/40">
         <AlertTriangle className="size-4 text-status-waiting" />
         <AlertTitle className="text-sm">
-          Connect Teamwork or Jira — work arrives from your board.
+          Connect Teamwork or Jira - work arrives from your board.
         </AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
           <span>
-            Tickets are created where they live — on the board. The pod starts when a scoped
+            Tickets are created where they live - on the board. The pod starts when a scoped
             ticket is dragged into the agreed column; without a tracker there is nothing to
             listen to (the LAUNCH readiness check flags this before launch).
           </span>
@@ -239,9 +239,9 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
     return (
       <Alert variant="destructive" className="bg-status-error/5 border-status-error/40">
         <AlertTriangle className="size-4" />
-        <AlertTitle className="text-sm">Couldn't reach Teamwork — retry</AlertTitle>
+        <AlertTitle className="text-sm">Couldn't reach Teamwork - retry</AlertTitle>
         <AlertDescription className="text-xs">
-          <span>The board fetch failed — arrivals resume when the connector recovers.</span>
+          <span>The board fetch failed - arrivals resume when the connector recovers.</span>
           <Button size="sm" variant="outline" className="mt-2 w-fit" onClick={retry}>
             <RefreshCcw className="size-3.5" /> Retry
           </Button>
@@ -291,7 +291,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
         </div>
       ) : rows.length === 0 ? (
         <div className="p-10 text-center text-sm text-muted-foreground">
-          Your scope matches no open tickets — widen it in the Connect step.{" "}
+          Your scope matches no open tickets - widen it in the Connect step.{" "}
           <Link to="/connections" className="text-primary hover:underline">
             Edit scope
           </Link>
@@ -326,7 +326,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
                   onClick={() => confirmable && !isLeaving && toggle(t.id)}
                   title={
                     !t.arrived && !t.pulled
-                      ? "On the board — starts when the client drags it into 'Ready'"
+                      ? "On the board - starts when the client drags it into 'Ready'"
                       : undefined
                   }
                   className={cn(
@@ -387,14 +387,14 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
                       </span>
                     ) : t.arrived ? (
                       <span
-                        title="Sent by the board — sits in 'Ready', awaiting your decision"
+                        title="Sent by the board - sits in 'Ready', awaiting your decision"
                         className="text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-indigo-400/40 bg-indigo-500/10 text-indigo-300"
                       >
                         in Ready
                       </span>
                     ) : (
                       <span
-                        title="In scope, but the board hasn't sent it — starts when dragged to 'Ready'"
+                        title="In scope, but the board hasn't sent it - starts when dragged to 'Ready'"
                         className="text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-border bg-white/5 text-muted-foreground"
                       >
                         on the board
@@ -408,7 +408,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
         </table>
       )}
 
-      {/* write-back mapping — what the pod posts back to the ticket */}
+      {/* write-back mapping - what the pod posts back to the ticket */}
       <WriteBackStrip />
 
       {/* sticky footer: arrivals count + routing rails + confirm/decline CTAs */}
@@ -416,14 +416,14 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
         {!loading && awaiting === 0 && (
           <div className="text-[11px] font-mono text-muted-foreground">
             {triggerMode === "operator"
-              ? `Nothing awaiting confirmation — tickets arrive here when the board sends them (drag to '${TRIGGER_RULE.column}').`
-              : `No pending arrivals — under auto-start, tickets start the moment the board sends them (drag to '${TRIGGER_RULE.column}').`}
+              ? `Nothing awaiting confirmation - tickets arrive here when the board sends them (drag to '${TRIGGER_RULE.column}').`
+              : `No pending arrivals - under auto-start, tickets start the moment the board sends them (drag to '${TRIGGER_RULE.column}').`}
           </div>
         )}
         {!loading && awaiting > 0 && triggerMode === "tracker" && (
           <div className="text-[11px] font-mono text-status-waiting">
             {awaiting} arrival{awaiting === 1 ? "" : "s"} from the confirm-first era still need
-            your decision — new drags start automatically.
+            your decision - new drags start automatically.
           </div>
         )}
         {selected.size > 0 && (
@@ -433,7 +433,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
             ))}
             {selected.size > 3 && (
               <div className="text-[11px] font-mono text-muted-foreground">
-                + {selected.size - 3} more — all route to BA Agent first
+                + {selected.size - 3} more - all route to BA Agent first
               </div>
             )}
           </div>
@@ -467,7 +467,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
                 : "border-border bg-white/5 text-muted-foreground opacity-50",
             )}
           >
-            Decline — return to board
+            Decline - return to board
           </button>
           <button
             type="button"
@@ -480,12 +480,12 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
                 : "border-border bg-white/5 text-muted-foreground opacity-50",
             )}
           >
-            Confirm start{selected.size ? ` — ${selected.size} ticket${selected.size === 1 ? "" : "s"}` : ""}
+            Confirm start{selected.size ? ` - ${selected.size} ticket${selected.size === 1 ? "" : "s"}` : ""}
           </button>
         </div>
       </div>
 
-      {/* decline dialog — a decision with a typed reason; the card goes back to To-Do */}
+      {/* decline dialog - a decision with a typed reason; the card goes back to To-Do */}
       {declining && (
         <div
           className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm anim-in"
@@ -498,12 +498,12 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
               intake decision
             </div>
-            <div className="text-lg font-semibold mt-1">Decline — return to the board?</div>
+            <div className="text-lg font-semibold mt-1">Decline - return to the board?</div>
             <div className="text-sm text-muted-foreground mt-2">
               {selected.size === 1 ? [...selected][0] : `${selected.size} tickets`} go back to{" "}
               <span className="font-semibold text-foreground">To-Do</span> on &lsquo;
               {TRIGGER_RULE.board}&rsquo; with your note as a ticket comment. Decline is for{" "}
-              <em>not actionable / out of scope</em> — if it&rsquo;s real but unclear, confirm it
+              <em>not actionable / out of scope</em> - if it&rsquo;s real but unclear, confirm it
               and let the BA ask.
             </div>
             <textarea
@@ -528,7 +528,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
                 onClick={decline}
                 className="h-9 px-4 rounded-md text-sm bg-status-error/90 text-white hover:opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Decline — record reason
+                Decline - record reason
               </button>
             </div>
           </div>

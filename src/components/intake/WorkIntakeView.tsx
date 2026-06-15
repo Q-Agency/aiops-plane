@@ -1,8 +1,8 @@
 /**
- * Work Intake (/intake) — the confirmation surface of the single doorbell
+ * Work Intake (/intake) - the confirmation surface of the single doorbell
  * (vision §2, the tracker boundary): the board sends work (a scoped ticket
  * dragged into the agreed column); the operator CONFIRMS or DECLINES each
- * start here. Nothing on this screen originates work — ticket creation
+ * start here. Nothing on this screen originates work - ticket creation
  * happens on the board, full stop (the old "paste/draft a ticket" composer
  * was removed 2026-06-11 for exactly that reason).
  *
@@ -15,7 +15,7 @@ import { TicketPickerTable } from "./TicketPickerTable";
 import { TriggerListeningBanner, TriggerModeControl } from "./TriggerModeControl";
 
 interface WorkIntakeViewProps {
-  /** ?sim=error — render the simulated tracker-error state (demo affordance). */
+  /** ?sim=error - render the simulated tracker-error state (demo affordance). */
   simError?: boolean;
 }
 
@@ -29,7 +29,7 @@ export function WorkIntakeView({ simError }: WorkIntakeViewProps) {
         <div>
           <h1 className="text-base font-semibold tracking-tight">Work intake</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            What the board sent — confirm or decline each start. Tickets are created on the board,
+            What the board sent - confirm or decline each start. Tickets are created on the board,
             never here.
           </p>
         </div>

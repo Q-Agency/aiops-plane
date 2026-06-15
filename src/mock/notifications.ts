@@ -1,10 +1,10 @@
 /**
- * Notifications (C6) — the canonical per-user notification dataset.
+ * Notifications (C6) - the canonical per-user notification dataset.
  * Drives the TopBar bell popover AND the /notifications inbox; the bell
  * defers to this shape (never re-declare a lighter one).
  *
  * Read-state is a client-side overlay persisted to localStorage under
- * NOTIF_READ_STORAGE_KEY ("aiops_notif_read") — SSR-safe helpers below
+ * NOTIF_READ_STORAGE_KEY ("aiops_notif_read") - SSR-safe helpers below
  * (call them inside a mounted useEffect, never during render on the server).
  *
  * Deep links follow the canonical URLs (C1): gates → /approvals/$gateId,
@@ -76,7 +76,7 @@ export const KIND_LABELS: Record<NotificationKind, string> = {
   delivered: "Delivered",
 };
 
-/** The demo operator — bell counts default to this user. */
+/** The demo operator - bell counts default to this user. */
 export const CURRENT_USER_ID = "zlatko";
 
 const now = Date.now();
@@ -90,7 +90,7 @@ export const notifications: AppNotification[] = [
     kind: "clarification_gate",
     severity: "warning",
     title: "Clarification needed · AM-142",
-    body: "BA Agent asks: saved filter chips — per account or per device?",
+    body: "BA Agent asks: saved filter chips - per account or per device?",
     ts: now - 9 * min,
     read: false,
     actorId: "ba",
@@ -108,7 +108,7 @@ export const notifications: AppNotification[] = [
     kind: "approval_gate",
     severity: "warning",
     title: "Spec approval waiting · AM-142",
-    body: "spec.md v3 ready — 8/8 structural checks pass. Awaiting your sign-off.",
+    body: "spec.md v3 ready - 8/8 structural checks pass. Awaiting your sign-off.",
     ts: now - 12 * min,
     read: false,
     actorId: "ba",
@@ -126,7 +126,7 @@ export const notifications: AppNotification[] = [
     kind: "incident_opened",
     severity: "critical",
     title: "Incident · QA Agent down",
-    body: "Liveness lost 6m — suggested action: Restart agent.",
+    body: "Liveness lost 6m - suggested action: Restart agent.",
     ts: now - 6 * min,
     read: false,
     actorId: null,
@@ -158,7 +158,7 @@ export const notifications: AppNotification[] = [
     kind: "escalation",
     severity: "critical",
     title: "Escalation · design gate stale 26h",
-    body: "AM-138 design.md v2 over SLA — 2 downstream tickets blocked.",
+    body: "AM-138 design.md v2 over SLA - 2 downstream tickets blocked.",
     ts: now - 26 * hr,
     read: false,
     actorId: "sa",
@@ -207,7 +207,7 @@ export const notifications: AppNotification[] = [
     kind: "approval_gate",
     severity: "warning",
     title: "QA approval waiting · AM-144",
-    body: "qa.report ready on Seller KYC verification — 18m in queue.",
+    body: "qa.report ready on Seller KYC verification - 18m in queue.",
     ts: now - 18 * min,
     read: false,
     actorId: "qa",
@@ -268,7 +268,7 @@ export const notifications: AppNotification[] = [
     kind: "approval_gate",
     severity: "warning",
     title: "Spec approval waiting · AM-128",
-    body: "Search autocomplete spec v2 — 110m in queue, nearing the 4h target.",
+    body: "Search autocomplete spec v2 - 110m in queue, nearing the 4h target.",
     ts: now - 110 * min,
     read: false,
     actorId: "ba",
@@ -286,7 +286,7 @@ export const notifications: AppNotification[] = [
     kind: "comment",
     severity: "info",
     title: "Curator flagged a source conflict",
-    body: "SOW v4 vs Slack decision on AM-149 escrow — synthesis picked the SOW.",
+    body: "SOW v4 vs Slack decision on AM-149 escrow - synthesis picked the SOW.",
     ts: now - 95 * min,
     read: true,
     actorId: "curator",
@@ -300,7 +300,7 @@ export const notifications: AppNotification[] = [
     kind: "sla_at_risk",
     severity: "warning",
     title: "Sync stale · Drive sources amber 12h",
-    body: "Curator's Drive sync degraded — spec context may miss the latest SOW.",
+    body: "Curator's Drive sync degraded - spec context may miss the latest SOW.",
     ts: now - 12 * hr,
     read: true,
     actorId: null,
@@ -394,7 +394,7 @@ export const alertRules: AlertRule[] = [
 export const recentEntities: string[] = ["AM-142", "appr-AM-142", "inc-1", "ana", "automarket"];
 
 /* ------------------------------------------------------------------ */
-/* Read-state overlay — localStorage "aiops_notif_read" (SSR-safe)      */
+/* Read-state overlay - localStorage "aiops_notif_read" (SSR-safe)      */
 /* ------------------------------------------------------------------ */
 
 export const NOTIF_READ_STORAGE_KEY = "aiops_notif_read";
@@ -416,7 +416,7 @@ export function persistRead(ids: string[]): Set<string> {
   try {
     window.localStorage.setItem(NOTIF_READ_STORAGE_KEY, JSON.stringify([...next]));
   } catch {
-    /* storage unavailable — non-fatal in mock mode */
+    /* storage unavailable - non-fatal in mock mode */
   }
   return next;
 }
@@ -454,7 +454,7 @@ export function gatesFor(humanId: string = CURRENT_USER_ID): AppNotification[] {
 
 let ntfSeq = notifications.length;
 
-/** Mock mutation seam — intake pulls / demo events append through this. */
+/** Mock mutation seam - intake pulls / demo events append through this. */
 export function pushNotification(
   n: Omit<AppNotification, "id" | "ts" | "read"> & { ts?: number },
 ): AppNotification {

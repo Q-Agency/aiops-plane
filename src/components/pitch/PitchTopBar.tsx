@@ -1,8 +1,8 @@
 /**
- * PitchTopBar (/pitch) — slim sticky bar over the product brief: brand
+ * PitchTopBar (/pitch) - slim sticky bar over the product brief: brand
  * (→ #hero), the section anchor nav from the copy's SECTION NAV, and the
  * primary "Open the demo →" CTA with the mono credentials hint.
- * Plain <a> anchors (it's a single document) — hidden entirely in print.
+ * Plain <a> anchors (it's a single document) - hidden entirely in print.
  */
 
 const NAV: { id: string; label: string }[] = [
@@ -25,7 +25,7 @@ export function PitchTopBar() {
           href="#hero"
           className="truncate text-sm font-semibold tracking-tight text-slate-900 no-underline hover:text-slate-600"
         >
-          Agency OS — Product Brief
+          Agency OS - Product Brief
         </a>
         <div className="flex shrink-0 flex-col items-end gap-0.5">
           <a

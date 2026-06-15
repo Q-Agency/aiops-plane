@@ -1,5 +1,5 @@
 /**
- * BaselinePanel (/pilot, P1-C3) — the human baseline every pilot target is
+ * BaselinePanel (/pilot, P1-C3) - the human baseline every pilot target is
  * measured against. "Your numbers, not ours": the baseline carries a source
  * badge (client-agreed vs industry-standard) and links to the Edit-assumptions
  * affordance on Overview · ROI rather than duplicating it.
@@ -47,11 +47,11 @@ export function BaselinePanel() {
       <div className="text-lg font-semibold">{baseline.label}</div>
 
       <p className="text-xs text-muted-foreground leading-relaxed">
-        Every target on this scorecard is measured against the baseline you set before launch —{" "}
+        Every target on this scorecard is measured against the baseline you set before launch -{" "}
         <span className="text-foreground">your numbers, not ours</span>.
         {baseline.source === "client-agreed"
           ? " You provided this figure in LAUNCH → Go live → Targets & budget."
-          : " This is the Q default — replace it with your own figure any time."}
+          : " This is the Q default - replace it with your own figure any time."}
       </p>
 
       <Link

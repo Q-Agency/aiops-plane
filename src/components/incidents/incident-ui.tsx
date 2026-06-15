@@ -1,5 +1,5 @@
 /**
- * Shared incident UI atoms — severity/type/status chips and the relative-time
+ * Shared incident UI atoms - severity/type/status chips and the relative-time
  * formatter, reused by the inbox, the detail pane and the recovery dialog.
  * Style language mirrors CommsView (TriggerBadge/StatusDot chips).
  */
@@ -27,7 +27,7 @@ export function fmtAgo(min: number): string {
   return `${Math.round(min / (60 * 24))}d`;
 }
 
-/** "just now" / "6m ago" — never "just now ago". */
+/** "just now" / "6m ago" - never "just now ago". */
 export function agoLabel(min: number): string {
   return min < 1 ? "just now" : `${fmtAgo(min)} ago`;
 }

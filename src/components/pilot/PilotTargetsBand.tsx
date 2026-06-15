@@ -1,10 +1,10 @@
 /**
- * PilotTargetsBand (/pilot, P1-C3) — one target-vs-actual tile per pilot
+ * PilotTargetsBand (/pilot, P1-C3) - one target-vs-actual tile per pilot
  * criterion, fed by the latest weekly signal in PILOT_PLAN.
  *
  * Honesty rules (same as the sponsor report): a missed latest signal renders
  * red with a one-line mitigation; a recovered metric keeps its earlier misses
- * on the record ("missed wk 1–2 · recovered"). Each tile click-throughs to
+ * on the record ("missed wk 1-2 · recovered"). Each tile click-throughs to
  * the surface that owns the number (TTFAA → /reports, spend → /billing,
  * validator pass-rate → /governance, …).
  */
@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 /* Per-metric wiring                                                    */
 /* ------------------------------------------------------------------ */
 
-/** Tile click-through — the surface that owns each number. */
+/** Tile click-through - the surface that owns each number. */
 const TILE_LINKS = {
   ttfaaHr: "/reports",
   approvedArtifactsPerWeek: "/artifacts",
@@ -41,16 +41,16 @@ const TILE_LINK_LABELS: Record<keyof typeof TILE_LINKS, string> = {
   spendVsCapPct: "Usage & Billing",
 };
 
-/** One-line mitigation per metric — rendered whenever the record shows a miss. */
+/** One-line mitigation per metric - rendered whenever the record shows a miss. */
 const MITIGATIONS: Record<string, string> = {
-  ttfaaHr: "Escalated to your Q account lead — first artifact re-targeted inside the window.",
+  ttfaaHr: "Escalated to your Q account lead - first artifact re-targeted inside the window.",
   approvedArtifactsPerWeek:
-    "Wk 1–2 ramp ran below target — intake widened from your backlog; above target since wk 3.",
+    "Wk 1-2 ramp ran below target - intake widened from your backlog; above target since wk 3.",
   gateClearanceP50Hr:
-    "Wk 1–2 clearance ran slow — approver nudges enabled in Slack; under target since wk 3.",
+    "Wk 1-2 clearance ran slow - approver nudges enabled in Slack; under target since wk 3.",
   validatorPassRatePct:
-    "Wk 1–2 under target — two constitution rules ratified from your rejections; passing since wk 3.",
-  spendVsCapPct: "Wk 3 ran 104% of cap — caps tightened with your account lead; back under in wk 4.",
+    "Wk 1-2 under target - two constitution rules ratified from your rejections; passing since wk 3.",
+  spendVsCapPct: "Wk 3 ran 104% of cap - caps tightened with your account lead; back under in wk 4.",
 };
 
 function fmtMetricValue(metric: string, v: number): string {
@@ -112,7 +112,7 @@ export function PilotTargetsBand() {
           <Link
             key={c.metric}
             to={href}
-            aria-label={`${PILOT_METRIC_LABELS[c.metric] ?? c.metric} — open ${linkLabel}`}
+            aria-label={`${PILOT_METRIC_LABELS[c.metric] ?? c.metric} - open ${linkLabel}`}
             className={cn(
               "glass-panel p-4 flex flex-col gap-1.5 group transition-colors",
               status === "miss" && "border-status-error/50 bg-status-error/[0.04]",
@@ -136,7 +136,7 @@ export function PilotTargetsBand() {
                       : "text-foreground",
                 )}
               >
-                {latest ? fmtMetricValue(c.metric, latest.value) : "—"}
+                {latest ? fmtMetricValue(c.metric, latest.value) : "-"}
               </span>
               <span className="text-[11px] font-mono text-muted-foreground">
                 target {targetLabel(c.metric, c.target)}
@@ -153,10 +153,10 @@ export function PilotTargetsBand() {
                   <span className="text-status-waiting font-mono">
                     missed wk {missedWeeks.join(" & ")} · recovered
                   </span>{" "}
-                  — {MITIGATIONS[c.metric]}
+                  - {MITIGATIONS[c.metric]}
                 </>
               ) : c.metric === "ttfaaHr" ? (
-                <>landed in week {latest.week.week} — one-time metric, inside target</>
+                <>landed in week {latest.week.week} - one-time metric, inside target</>
               ) : (
                 <>wk {latest.week.week} actual · inside target every week</>
               )}

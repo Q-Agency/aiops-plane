@@ -1,9 +1,9 @@
 /**
- * AmendmentCard — section 2 of /memory (P1-A2): a draft rule mined from a
+ * AmendmentCard - section 2 of /memory (P1-A2): a draft rule mined from a
  * rejection-reason cluster. Evidence chips deep-link to the /compliance
  * audit ledger (hover-card peeks the typed reason; gate canon link inside).
  * Ratify confirms via alert-dialog ("Recorded in the ledger"); Dismiss
- * requires a short typed reason — consistent with the reject canon.
+ * requires a short typed reason - consistent with the reject canon.
  */
 
 import { useEffect, useState } from "react";
@@ -146,15 +146,15 @@ export function AmendmentCard({
         </Button>
       </div>
 
-      {/* Ratify — "Recorded in the ledger" confirm */}
+      {/* Ratify - "Recorded in the ledger" confirm */}
       <AlertDialog open={ratifyOpen} onOpenChange={setRatifyOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Ratify this amendment?</AlertDialogTitle>
             <AlertDialogDescription>
-              Recorded in the ledger — <code className="font-mono">constitution.amended</code>{" "}
+              Recorded in the ledger - <code className="font-mono">constitution.amended</code>{" "}
               lands with timestamp, and the rule joins the Constitution with provenance
-              “Ratified {today} — from rejection cluster”.
+              “Ratified {today} - from rejection cluster”.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="text-xs text-muted-foreground border border-border rounded-md bg-white/[0.02] px-3 py-2">
@@ -180,13 +180,13 @@ export function AmendmentCard({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Dismiss — short typed reason required (reject canon) */}
+      {/* Dismiss - short typed reason required (reject canon) */}
       <Dialog open={dismissOpen} onOpenChange={setDismissOpen}>
         <DialogContent className="sm:max-w-[440px]">
           <DialogHeader>
             <DialogTitle>Dismiss this proposal?</DialogTitle>
             <DialogDescription>
-              Dismissals carry a short typed reason — consistent with every reject in the pod.
+              Dismissals carry a short typed reason - consistent with every reject in the pod.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">

@@ -1,10 +1,10 @@
 /**
- * ValidatorPanel — the C3 walled deterministic-validator panel: the moat.
+ * ValidatorPanel - the C3 walled deterministic-validator panel: the moat.
  *
- * Renders one artifact family's deterministic checks (validators.ts) —
- * the BA's 8 spec checks or the SA's 7 design checks — inside a visually
- * WALLED section — solid emerald-tinted border, ShieldCheck iconography,
- * the "DETERMINISTIC — NO MODEL IN THE LOOP" badge — so it can never be
+ * Renders one artifact family's deterministic checks (validators.ts) -
+ * the BA's 8 spec checks or the SA's 7 design checks - inside a visually
+ * WALLED section - solid emerald-tinted border, ShieldCheck iconography,
+ * the "DETERMINISTIC - NO MODEL IN THE LOOP" badge - so it can never be
  * confused with LLM/advisory signals (those get a separate amber/dashed
  * treatment + "LLM-ADVISORY" badge, NOT this component).
  *
@@ -25,9 +25,9 @@ import {
   type ValidatorStatus,
 } from "@/mock/validators";
 
-/** Fleet-level extras per check — set on /governance, absent on gate review. */
+/** Fleet-level extras per check - set on /governance, absent on gate review. */
 export interface ValidatorRowMeta {
-  /** % of assessed specs that hard-pass this check (0–100). */
+  /** % of assessed specs that hard-pass this check (0-100). */
   coverage?: number;
   /** Failing deterministic check = blocks structural readiness. */
   blocksReadiness?: boolean;
@@ -48,7 +48,7 @@ export interface ValidatorPanelProps {
   headline?: string;
   /** Family-true honesty line (defaults to the spec wording). */
   honestyLine?: string;
-  /** Row click — gate review scrolls to the offending block; governance expands failing specs. */
+  /** Row click - gate review scrolls to the offending block; governance expands failing specs. */
   onCheckClick?: (id: AnyCheckId) => void;
   className?: string;
 }
@@ -97,7 +97,7 @@ export function ValidatorPanel({
   return (
     <section
       className={cn(
-        // the WALL: solid emerald-tinted border — never dashed, never amber
+        // the WALL: solid emerald-tinted border - never dashed, never amber
         "rounded-md border-2 border-status-done/40 bg-panel/40 backdrop-blur-md",
         className,
       )}
@@ -216,7 +216,7 @@ export function ValidatorPanel({
           compact ? "p-2.5" : "p-3",
         )}
       >
-        Pure code over the spec — reproducible, model-free. Checked in code, no LLM.
+        Pure code over the spec - reproducible, model-free. Checked in code, no LLM.
       </footer>
     </section>
   );

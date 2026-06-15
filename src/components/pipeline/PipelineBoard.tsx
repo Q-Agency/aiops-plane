@@ -69,7 +69,7 @@ function stageProgress(stage: Stage): number {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tracker boundary (vision §2) — this board is the EXECUTION view.     */
+/* Tracker boundary (vision §2) - this board is the EXECUTION view.     */
 /* Tickets LIVE in Teamwork (we never create/edit/close them); we       */
 /* mirror them here and write plain status + artifact links back via    */
 /* WRITE_BACK_MAPPING (trigger.ts) so nobody is ever asked twice.       */
@@ -81,11 +81,11 @@ const WB_PICKUP = wbStatus("pickup", "In Progress");
 const WB_GATE = wbStatus("gate", "In Review");
 const WB_DONE = wbStatus("released", "Done + artifact links");
 
-/** Tooltip body — the full moment→status mapping, built from the canon module. */
+/** Tooltip body - the full moment→status mapping, built from the canon module. */
 const WB_DETAIL =
-  `Write-back to Teamwork · board "${TRIGGER_RULE.board}" — ` +
+  `Write-back to Teamwork · board "${TRIGGER_RULE.board}" - ` +
   WRITE_BACK_MAPPING.map((m) => `${m.podStage} → "${m.trackerStatus}"`).join(" · ") +
-  ". Plain status + artifact links are posted on the ticket automatically, [AgencyOS]-tagged so the listener ignores our own moves. Tickets live in your tracker — we never create, edit or close them.";
+  ". Plain status + artifact links are posted on the ticket automatically, [AgencyOS]-tagged so the listener ignores our own moves. Tickets live in your tracker - we never create, edit or close them.";
 
 /** Stage-derived write-back state for a card (column kind ⇄ mapping moment). */
 function writeBackFor(kind: ColKind): { label: string; pending?: boolean } {
@@ -100,11 +100,11 @@ function writeBackFor(kind: ColKind): { label: string; pending?: boolean } {
 export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: string } = {}) {
   const { tickets: liveTickets } = useLive();
   // Demo-bus tick: Demo Director beats (e.g. "AM-142 arrives · BA picks it up")
-  // mutate the live mock arrays in place — subscribe so the beat repaints here.
+  // mutate the live mock arrays in place - subscribe so the beat repaints here.
   const demoTick = useDemoTick();
   const [tickets, setTickets] = useState<Ticket[]>(() => [...liveTickets, ...extraTickets]);
   const [overnight, setOvernight] = useState(false);
-  // Reject = a DECISION, not a drag (vision §2: no freeform stage moves) —
+  // Reject = a DECISION, not a drag (vision §2: no freeform stage moves) -
   // the typed reason is required and lands on the session ledger. `target`
   // is the root-cause stage: rework follows the artifact chain, so the
   // reject can aim at ANY upstream agent stage (QA finds a design flaw →
@@ -116,7 +116,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
   useEffect(() => setMounted(true), []);
 
   // Adopt tickets that entered the pod AFTER mount (intake pulls / staged
-  // arrivals unshift into the live seed array — same reference the provider
+  // arrivals unshift into the live seed array - same reference the provider
   // holds). Same-reference return bails out of the state update when quiet.
   useEffect(() => {
     setTickets((ts) => {
@@ -132,7 +132,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
     ) as Record<Stage, Ticket[]>;
     tickets.forEach((t) => map[t.stage]?.push(t));
     return map;
-    // demoTick: restage beats mutate ticket objects in place — regroup on tick
+    // demoTick: restage beats mutate ticket objects in place - regroup on tick
   }, [tickets, demoTick]);
 
   // Stage changes happen ONLY as consequences of decisions/events (vision §2
@@ -140,8 +140,8 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
   // agents finish; the reject dialog below moves them back with a typed
   // reason. There is deliberately NO drag-and-drop on this board.
   // Reject = the target agent re-runs (state "running") and the rerun is
-  // counted — the rerun chip on the card is the visible rework cost.
-  // Mutates IN PLACE (the state array holds the live seed objects — same
+  // counted - the rerun chip on the card is the visible rework cost.
+  // Mutates IN PLACE (the state array holds the live seed objects - same
   // idiom as the Demo Director's restage beats) so the decision survives
   // navigating away and back; the demo-bus tick triggers the regroup.
   const applyReject = (id: string, to: Stage) => {
@@ -163,11 +163,11 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">project · automarket</div>
           <h1 className="text-xl font-semibold tracking-tight">Pipeline Board</h1>
-          {/* tracker-boundary subline (vision §2) — execution view, never a second kanban */}
+          {/* tracker-boundary subline (vision §2) - execution view, never a second kanban */}
           <div className="text-xs text-muted-foreground mt-0.5 flex items-center flex-wrap gap-x-2 gap-y-1">
             <span>
-              Execution view — your tracker stays the system of record. Plain status + artifact links write back automatically.
-              Cards move as agents finish and gates clear — no dragging; decisions happen on the gate surfaces.
+              Execution view - your tracker stays the system of record. Plain status + artifact links write back automatically.
+              Cards move as agents finish and gates clear - no dragging; decisions happen on the gate surfaces.
             </span>
             <span
               title={WB_DETAIL}
@@ -181,7 +181,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Work Intake CTA (C10) — where board arrivals are confirmed; never "add" */}
+          {/* Work Intake CTA (C10) - where board arrivals are confirmed; never "add" */}
           <Link
             to="/intake"
             className="h-9 px-3 rounded-md border border-primary/50 bg-primary/15 text-primary text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-1.5 hover:bg-primary/25 transition-colors"
@@ -284,7 +284,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                       to="/intake"
                       className="block rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
                     >
-                      No work yet — tickets arrive when your board sends them.
+                      No work yet - tickets arrive when your board sends them.
                       <span className="mt-1.5 inline-flex items-center gap-1 text-primary font-semibold">
                         Open Work intake →
                       </span>
@@ -313,10 +313,10 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
         </div>
       </div>
 
-      {/* reject dialog — a decision with a typed reason, never a freeform move.
+      {/* reject dialog - a decision with a typed reason, never a freeform move.
           Rework follows the artifact chain: the reject targets the ROOT-CAUSE
           stage (default: the gate's own agent); picking an earlier stage
-          invalidates everything downstream (consumes-graph) — it re-runs
+          invalidates everything downstream (consumes-graph) - it re-runs
           forward. Repeated bounces escalate to the accountable human. */}
       {rejecting && (() => {
         const gateIdx = COLS.findIndex((c) => c.id === rejecting.ticket.stage);
@@ -335,10 +335,10 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
             className="glass-panel p-6 max-w-md w-full mx-4 border-status-error/40"
           >
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">human gate</div>
-            <div className="text-lg font-semibold mt-1">Reject — send back to the root cause</div>
+            <div className="text-lg font-semibold mt-1">Reject - send back to the root cause</div>
             <div className="text-sm text-muted-foreground mt-2">
               <span className="font-mono text-foreground">{rejecting.ticket.id}</span> · "
-              {rejecting.ticket.title}" — which stage caused it? Rework follows the artifact
+              {rejecting.ticket.title}" - which stage caused it? Rework follows the artifact
               chain.
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Send back to">
@@ -363,7 +363,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
             <p className="mt-2 text-[11px] font-mono text-muted-foreground">
               {stale.length === 0
                 ? `${targetCol?.agentName} re-runs with your note as added context.`
-                : `${targetCol?.agentName} re-runs first — downstream ${stale
+                : `${targetCol?.agentName} re-runs first - downstream ${stale
                     .map((c) => c.agentName)
                     .join(", ")} ${stale.length === 1 ? "is" : "are"} stale (the chain consumes upstream artifacts) and re-run${stale.length === 1 ? "s" : ""} forward.`}
             </p>
@@ -376,7 +376,7 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
             />
             <p className="mt-1.5 text-[11px] text-muted-foreground">
               A reason is required on reject and is written to the audit log.
-              {nextRerun >= 2 && " Rerun #" + nextRerun + " — the accountable human is notified (escalation)."}
+              {nextRerun >= 2 && " Rerun #" + nextRerun + " - the accountable human is notified (escalation)."}
             </p>
             <div className="mt-4 flex gap-2 justify-end">
               <button
@@ -402,21 +402,21 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                   });
                   toast.success(
                     stale.length
-                      ? `${rejecting.ticket.id} sent back to ${targetCol?.agentName} — downstream re-runs forward`
-                      : `${rejecting.ticket.id} sent back — reason recorded`,
+                      ? `${rejecting.ticket.id} sent back to ${targetCol?.agentName} - downstream re-runs forward`
+                      : `${rejecting.ticket.id} sent back - reason recorded`,
                     {
                       description:
                         (stale.length
                           ? `Root-cause rework: ${stale.map((c) => c.agentName).join(", ")} re-run on the corrected artifact. `
                           : "Your note becomes the agent's added context on the rerun.") +
-                        (nextRerun >= 2 ? ` Rerun #${nextRerun} — accountable human notified.` : ""),
+                        (nextRerun >= 2 ? ` Rerun #${nextRerun} - accountable human notified.` : ""),
                     },
                   );
                   setRejecting(null);
                 }}
                 className="h-9 px-4 rounded-md text-sm bg-status-error/90 text-white hover:opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Reject — record reason
+                Reject - record reason
               </button>
             </div>
           </div>
@@ -434,7 +434,7 @@ function TicketCard({
   col: Col;
   overnight: boolean;
   isRunning: boolean;
-  /** ?ticket=<id> deep link from Work Intake — draws the highlight ring. */
+  /** ?ticket=<id> deep link from Work Intake - draws the highlight ring. */
   flagged?: boolean;
   onReject: () => void;
   mounted: boolean;
@@ -442,7 +442,7 @@ function TicketCard({
   const highlight = overnight && col.id === "ready-dev" && t.overnightEligible;
   const wb = writeBackFor(col.kind); // stage-derived write-back state (trigger.ts)
   const ageMin = mounted && t.updatedAt ? Math.max(0, Math.floor((Date.now() - t.updatedAt) / 60_000)) : null;
-  const ageLabel = ageMin === null ? "—" : ageMin < 60 ? `${ageMin}m` : `${Math.floor(ageMin / 60)}h ${ageMin % 60}m`;
+  const ageLabel = ageMin === null ? "-" : ageMin < 60 ? `${ageMin}m` : `${Math.floor(ageMin / 60)}h ${ageMin % 60}m`;
   const ageTone =
     ageMin === null ? "text-muted-foreground border-border" :
     ageMin < 60 ? "text-status-done border-status-done/40 bg-status-done/10" :
@@ -533,7 +533,7 @@ function TicketCard({
         ) : null}
       </div>
 
-      {/* tracker line — the ticket lives in Teamwork; this card is its execution mirror */}
+      {/* tracker line - the ticket lives in Teamwork; this card is its execution mirror */}
       <div
         title={WB_DETAIL}
         className="mt-2 pt-1.5 border-t border-border/40 flex items-center justify-between gap-2 text-[9px] font-mono text-muted-foreground"

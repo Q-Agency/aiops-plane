@@ -1,8 +1,8 @@
 /**
- * ClientReportTab (/reports · "Client report" tab, C8) — the weekly
+ * ClientReportTab (/reports · "Client report" tab, C8) - the weekly
  * sponsor-facing status report in a CLIENT-CLEAN style: a light "paper"
  * card island inside the dark shell. No neon, no scanlines, no mono
- * chips — plain language a sponsor reads in 60 seconds.
+ * chips - plain language a sponsor reads in 60 seconds.
  *
  * Action bar: period selector + Copy share link (copies the real
  * /share/$token viewer URL, P1-H4) + Export PDF (mock toast) +
@@ -28,7 +28,7 @@ import type { Stage } from "@/mock/types";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
-/* Plain-language helpers (sponsor copy — no internal jargon)           */
+/* Plain-language helpers (sponsor copy - no internal jargon)           */
 /* ------------------------------------------------------------------ */
 
 /** Fixed display TZ (same convention as @/lib/time) so SSR === client. */
@@ -59,7 +59,7 @@ const fmtUsd = (n: number) =>
 
 export function ClientReportTab() {
   const [periodId, setPeriodId] = useState<string>(() => currentReport().id);
-  /** Local "Mark as sent" overlay — mock-only, survives tab switches. */
+  /** Local "Mark as sent" overlay - mock-only, survives tab switches. */
   const [sentOverride, setSentOverride] = useState<Record<string, number>>({});
 
   const report = reportById(periodId) ?? currentReport();
@@ -67,7 +67,7 @@ export function ClientReportTab() {
   const isSent = report.status === "sent" || report.id in sentOverride;
 
   const copyShareLink = async () => {
-    // The live token for the weekly report — its /share/$token viewer (P1-H4).
+    // The live token for the weekly report - its /share/$token viewer (P1-H4).
     const link = SHARE_LINKS.find(
       (l) => l.kind === "weekly_report" && effectiveShareState(l) === "active",
     );
@@ -79,10 +79,10 @@ export function ClientReportTab() {
     try {
       await navigator.clipboard.writeText(url);
     } catch {
-      /* clipboard unavailable — toast still shows the link */
+      /* clipboard unavailable - toast still shows the link */
     }
     const daysLeft = Math.max(1, Math.ceil((link.expiresAt - Date.now()) / 86_400_000));
-    toast.success(`Share link copied — expires in ${daysLeft} days`, { description: url });
+    toast.success(`Share link copied - expires in ${daysLeft} days`, { description: url });
   };
 
   const exportPdf = () => {
@@ -94,7 +94,7 @@ export function ClientReportTab() {
   const markAsSent = () => {
     setSentOverride((prev) => ({ ...prev, [report.id]: Date.now() }));
     toast.success("Weekly report sent to sponsor", {
-      description: `${report.podName} · ${fmtDay(report.periodStart)} – ${fmtDay(report.periodEnd)}`,
+      description: `${report.podName} · ${fmtDay(report.periodStart)} - ${fmtDay(report.periodEnd)}`,
     });
   };
 
@@ -110,7 +110,7 @@ export function ClientReportTab() {
             {reports.map((r) => (
               <SelectItem key={r.id} value={r.id} className="text-xs">
                 <span suppressHydrationWarning>
-                  {fmtDay(r.periodStart)} – {fmtDay(r.periodEnd)}
+                  {fmtDay(r.periodStart)} - {fmtDay(r.periodEnd)}
                   {" · "}
                   {r.status === "sent" || r.id in sentOverride ? "sent" : "draft"}
                 </span>
@@ -137,7 +137,7 @@ export function ClientReportTab() {
 }
 
 /* ------------------------------------------------------------------ */
-/* The report sheet — CLIENT-CLEAN (light paper card, plain language)   */
+/* The report sheet - CLIENT-CLEAN (light paper card, plain language)   */
 /* ------------------------------------------------------------------ */
 
 export function ClientStatusReport({
@@ -166,10 +166,10 @@ export function ClientStatusReport({
               Weekly client status report
             </div>
             <h2 className="text-lg font-semibold text-slate-900 mt-0.5 truncate">
-              Weekly Status — {report.podName}
+              Weekly Status - {report.podName}
             </h2>
             <div className="text-xs text-slate-500 mt-0.5" suppressHydrationWarning>
-              {fmtDay(report.periodStart)} – {fmtDay(report.periodEnd)} · prepared for AutoMarket GmbH
+              {fmtDay(report.periodStart)} - {fmtDay(report.periodEnd)} · prepared for AutoMarket GmbH
             </div>
           </div>
         </div>
@@ -226,8 +226,8 @@ export function ClientStatusReport({
             </ul>
           </ReportBlock>
 
-          {/* gates cleared — the named-human sign-off table */}
-          <ReportBlock title="Gates cleared — and who cleared them">
+          {/* gates cleared - the named-human sign-off table */}
+          <ReportBlock title="Gates cleared - and who cleared them">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-slate-400 border-b border-slate-200">
@@ -269,7 +269,7 @@ export function ClientStatusReport({
             </p>
           </ReportBlock>
 
-          {/* service levels — honest, incl. breaches */}
+          {/* service levels - honest, incl. breaches */}
           <ReportBlock title="Service levels">
             <div className="flex items-center gap-5 text-sm">
               <SlaDot color="bg-emerald-500" label={`${report.slaSummary.onTrack} on track`} />
@@ -308,7 +308,7 @@ export function ClientStatusReport({
       )}
 
       <footer className="px-6 sm:px-8 py-4 border-t border-slate-200 flex items-center justify-between gap-3 text-xs text-slate-400">
-        <span>Prepared by Agency OS · Q — generated from the pod&apos;s live delivery record.</span>
+        <span>Prepared by Agency OS · Q - generated from the pod&apos;s live delivery record.</span>
         <span suppressHydrationWarning>{isSent && sentAt ? `Sent ${fmtDay(sentAt)}` : "Not sent yet"}</span>
       </footer>
     </div>

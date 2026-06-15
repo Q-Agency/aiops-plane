@@ -13,14 +13,14 @@ const sp = (b: number, n = 18) =>
 
 export function KpiStrip() {
   const { tickets, approvals, tokenSpend } = useLive();
-  // Demo-bus tick: arrivals/confirms/declines mutate the intake mock state —
+  // Demo-bus tick: arrivals/confirms/declines mutate the intake mock state -
   // subscribe so the doorbell tile repaints immediately.
   useDemoTick();
   const inFlight = tickets.filter((t) => t.stage !== "done" && t.stage !== "backlog").length;
   const interventions = approvals.length;
   // The single doorbell on the landing: board-sent arrivals awaiting the
   // operator's confirmation (confirm-first). Replaces the off-persona GPU
-  // tile — infra metrics live in ADVANCED · Observability.
+  // tile - infra metrics live in ADVANCED · Observability.
   const awaiting = intakeBacklog().filter((t) => t.inScope && t.arrived && !t.pulled).length;
 
   return (

@@ -1,9 +1,9 @@
 /**
- * SLA (C8, /reports "SLA" tab) — the single SLA shape: per-stage/pod
+ * SLA (C8, /reports "SLA" tab) - the single SLA shape: per-stage/pod
  * service-level definitions with target-vs-actual and breach history.
  *
  * The Exec Digest's lighter SlaTarget { id; label; targetMin; actualMin;
- * breached } is DERIVED here via slaTargets() — no separate file/shape.
+ * breached } is DERIVED here via slaTargets() - no separate file/shape.
  */
 
 import type { Stage } from "./types";
@@ -14,7 +14,7 @@ export type SlaMetric = "response_time" | "gate_clearance" | "delivery_cadence" 
 export type SlaStatus = "on_track" | "at_risk" | "breached";
 
 /**
- * P1-O1 clock mode — which clock the target runs on. `coverage_hours`
+ * P1-O1 clock mode - which clock the target runs on. `coverage_hours`
  * pauses the SLA clock outside the pod's staffed window (humans.ts
  * coverageWindow()), so an overnight wait is not a fake breach.
  */
@@ -32,14 +32,14 @@ export interface SlaDefinition {
   actualValue: number;
   status: SlaStatus;
   breachCount30d: number;
-  /** Last 7 buckets — drives the inline sparkline. */
+  /** Last 7 buckets - drives the inline sparkline. */
   trend: number[];
   lastBreachAt?: number; // epoch ms
   /** Human-gated SLAs run on coverage_hours; agent/uptime ones on 24x7. */
   clockMode: SlaClockMode;
   /**
    * Honesty hint: what `actualValue` would read under a 24×7 clock
-   * (overnight idle counted). Seeded on ONE row — the deep-dive's
+   * (overnight idle counted). Seeded on ONE row - the deep-dive's
    * fake-overnight-breach fix made visible.
    */
   wouldBe24x7?: number;
@@ -82,7 +82,7 @@ export const slaDefinitions: SlaDefinition[] = [
     status: "on_track",
     breachCount30d: 0,
     trend: [18, 16, 12, 15, 14, 13, 14],
-    clockMode: "24x7", // agent responds — agents don't sleep
+    clockMode: "24x7", // agent responds - agents don't sleep
   },
   {
     id: "sla-clarification-response",
@@ -115,7 +115,7 @@ export const slaDefinitions: SlaDefinition[] = [
     trend: [2.4, 2.8, 3.6, 4.4, 3.2, 2.9, 3.1],
     lastBreachAt: now - 2 * day,
     clockMode: "coverage_hours",
-    // Honesty hint: counting overnight idle the same gates read 6.2h — a
+    // Honesty hint: counting overnight idle the same gates read 6.2h - a
     // would-be breach. The coverage clock excludes it, not hides it.
     wouldBe24x7: 6.2,
   },
@@ -148,7 +148,7 @@ export const slaDefinitions: SlaDefinition[] = [
     status: "on_track",
     breachCount30d: 0,
     trend: [3, 4, 3, 5, 4, 4, 4],
-    clockMode: "24x7", // calendar cadence — no pause
+    clockMode: "24x7", // calendar cadence - no pause
   },
   {
     id: "sla-rework-rate",
@@ -177,9 +177,9 @@ export const slaBreaches: SlaBreach[] = [
     targetValue: 8,
     stage: "design-review",
     workItemId: "AM-138",
-    workItemTitle: "Buyer–seller messaging",
+    workItemTitle: "Buyer-seller messaging",
     durationOverMin: 18 * 60,
-    note: "Marin unavailable Tue–Wed · escalation esc1 open",
+    note: "Marin unavailable Tue-Wed · escalation esc1 open",
   },
   {
     id: "br-2",
@@ -212,9 +212,9 @@ export const slaBreaches: SlaBreach[] = [
     targetValue: 8,
     stage: "design-review",
     workItemId: "AM-138",
-    workItemTitle: "Buyer–seller messaging",
+    workItemTitle: "Buyer-seller messaging",
     durationOverMin: 2 * 60,
-    note: "First design pass — returned with feedback",
+    note: "First design pass - returned with feedback",
   },
   {
     id: "br-5",
@@ -282,7 +282,7 @@ export function slaSummary(): { onTrack: number; atRisk: number; breached: numbe
   };
 }
 
-/** Lighter shape for the Exec Digest's target-vs-actual bars — DERIVED. */
+/** Lighter shape for the Exec Digest's target-vs-actual bars - DERIVED. */
 export interface SlaTarget {
   id: string;
   label: string;
@@ -310,13 +310,13 @@ export const SLA_CLOCK_LABELS: Record<SlaClockMode, string> = {
 
 /**
  * Muted sub-line for coverage_hours rows:
- * "clock paused outside coverage · Europe/Zagreb 07:00–18:00".
+ * "clock paused outside coverage · Europe/Zagreb 07:00-18:00".
  * Returns null for 24×7 rows (no pause, nothing to disclose).
  */
 export function slaClockSubline(s: SlaDefinition): string | null {
   if (s.clockMode !== "coverage_hours") return null;
   const w = coverageWindow();
-  return `clock paused outside coverage · ${w.tz} ${w.start}–${w.end}`;
+  return `clock paused outside coverage · ${w.tz} ${w.start}-${w.end}`;
 }
 
 /** "≤ 4h" / "≥ 3/week" / "≤ 15%" target rendering helper. */

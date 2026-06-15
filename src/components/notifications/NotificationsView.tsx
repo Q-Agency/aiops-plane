@@ -1,8 +1,8 @@
 /**
- * NotificationsView (C6) — the /notifications full notification center:
+ * NotificationsView (C6) - the /notifications full notification center:
  * Inbox (filter chips All/Gates/Incidents/SLA/Digest + search + read/unread
  * + channel + bulk mark-read) · Preferences (channel matrix, Email/Push
- * roadmap) · Alert rules · Digests. Canonical URL /notifications — TopBar
+ * roadmap) · Alert rules · Digests. Canonical URL /notifications - TopBar
  * bell + deep links only, NO rail item (C1).
  */
 
@@ -268,7 +268,7 @@ export function NotificationsView({ initialTab = "inbox" }: { initialTab?: Notif
         <div>
           <h1 className="text-base font-semibold">Notifications & Alerts</h1>
           <p className="text-xs text-muted-foreground">
-            Everything that reached you — gates, escalations, SLA alerts, digests.
+            Everything that reached you - gates, escalations, SLA alerts, digests.
           </p>
         </div>
       </header>

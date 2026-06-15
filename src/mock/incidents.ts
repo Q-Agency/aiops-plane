@@ -1,5 +1,5 @@
 /**
- * Incidents & Recovery (/incidents, C5) — the operator's "an agent failed,
+ * Incidents & Recovery (/incidents, C5) - the operator's "an agent failed,
  * what now?" dataset: typed incidents across five fault kinds, each with a
  * timeline, a suggested action, and explicit recovery controls.
  *
@@ -52,11 +52,11 @@ export interface Incident {
   severity: EscSeverity; //            reuse "low"|"med"|"high"|"critical" from comms.ts
   status: IncidentStatus;
   title: string; //                    one-liner
-  summary: string; //                  1–2 sentences of what/why
+  summary: string; //                  1-2 sentences of what/why
   agentId?: AgentId; //                affected agent
   ticketId?: string; //                affected work item
   toolId?: ConnectorId; //             for tool-disconnected / sync-stale
-  accountableHumanId?: string; //      humans.ts id — who owns the fix
+  accountableHumanId?: string; //      humans.ts id - who owns the fix
   openedMinAgo: number;
   slaToResolveMin: number; //          target window (countdown bar)
   detectedBy: string; //               "liveness probe" | "CI" | "gate SLA timer" | …
@@ -102,9 +102,9 @@ export const INCIDENTS: Incident[] = [
     suggestedAction: "restart-agent",
     availableActions: ["restart-agent", "pause-agent", "escalate-to-q"],
     timeline: [
-      { id: "inc-1-e1", tsOffsetMin: 6, kind: "detected", label: "Detected by liveness probe — no heartbeat 3 consecutive checks", actor: null },
+      { id: "inc-1-e1", tsOffsetMin: 6, kind: "detected", label: "Detected by liveness probe - no heartbeat 3 consecutive checks", actor: null },
       { id: "inc-1-e2", tsOffsetMin: 5, kind: "notified", label: "Notified #automarket-dev and Petra (QA accountable)", actor: null },
-      { id: "inc-1-e3", tsOffsetMin: 4, kind: "auto-attempt", label: "Auto-restart 1/1 attempted — agent did not come back healthy", actor: null },
+      { id: "inc-1-e3", tsOffsetMin: 4, kind: "auto-attempt", label: "Auto-restart 1/1 attempted - agent did not come back healthy", actor: null },
     ],
   },
   {
@@ -125,9 +125,9 @@ export const INCIDENTS: Incident[] = [
     availableActions: ["retry-run", "pause-agent", "escalate-to-q"],
     linkedCommId: "c14",
     timeline: [
-      { id: "inc-2-e1", tsOffsetMin: 22, kind: "detected", label: "Detected by CI — build failed (TS2345, ListingCard.tsx)", actor: null },
+      { id: "inc-2-e1", tsOffsetMin: 22, kind: "detected", label: "Detected by CI - build failed (TS2345, ListingCard.tsx)", actor: null },
       { id: "inc-2-e2", tsOffsetMin: 21, kind: "notified", label: "Notified #automarket-dev", actor: null },
-      { id: "inc-2-e3", tsOffsetMin: 18, kind: "auto-attempt", label: "Auto-retry 1/3 failed — same error", actor: null },
+      { id: "inc-2-e3", tsOffsetMin: 18, kind: "auto-attempt", label: "Auto-retry 1/3 failed - same error", actor: null },
     ],
   },
   {
@@ -149,9 +149,9 @@ export const INCIDENTS: Incident[] = [
     linkedEscalationId: "esc1",
     linkedCommId: "c3",
     timeline: [
-      { id: "inc-3-e1", tsOffsetMin: 120, kind: "detected", label: "Detected by gate SLA timer — Design Review > 24h", actor: null },
+      { id: "inc-3-e1", tsOffsetMin: 120, kind: "detected", label: "Detected by gate SLA timer - Design Review > 24h", actor: null },
       { id: "inc-3-e2", tsOffsetMin: 118, kind: "notified", label: "DM sent to Marin · escalation esc1 raised", actor: null },
-      { id: "inc-3-e3", tsOffsetMin: 60, kind: "notified", label: "Reminder notified — no response yet", actor: null },
+      { id: "inc-3-e3", tsOffsetMin: 60, kind: "notified", label: "Reminder notified - no response yet", actor: null },
     ],
   },
   {
@@ -170,9 +170,9 @@ export const INCIDENTS: Incident[] = [
     suggestedAction: "reauth-tool",
     availableActions: ["reauth-tool", "pause-agent", "escalate-to-q"],
     timeline: [
-      { id: "inc-4-e1", tsOffsetMin: 47, kind: "detected", label: "Detected by OAuth health check — 401 on token refresh", actor: null },
+      { id: "inc-4-e1", tsOffsetMin: 47, kind: "detected", label: "Detected by OAuth health check - 401 on token refresh", actor: null },
       { id: "inc-4-e2", tsOffsetMin: 46, kind: "notified", label: "Notified #automarket-dev and Ivan (Dev accountable)", actor: null },
-      { id: "inc-4-e3", tsOffsetMin: 40, kind: "auto-attempt", label: "Token refresh retried 3/3 — still expired, re-auth required", actor: null },
+      { id: "inc-4-e3", tsOffsetMin: 40, kind: "auto-attempt", label: "Token refresh retried 3/3 - still expired, re-auth required", actor: null },
     ],
   },
   {
@@ -182,7 +182,7 @@ export const INCIDENTS: Incident[] = [
     status: "open",
     title: "Drive knowledge sync amber > 12h",
     summary:
-      "Curator's Drive source sync has been amber for 12h — 3 sources stale. Spec context may miss the latest SOW revision.",
+      "Curator's Drive source sync has been amber for 12h - 3 sources stale. Spec context may miss the latest SOW revision.",
     toolId: "gdrive",
     agentId: "curator",
     accountableHumanId: "zlatko",
@@ -193,7 +193,7 @@ export const INCIDENTS: Incident[] = [
     availableActions: ["reauth-tool", "escalate-to-q"],
     linkedCommId: "c18",
     timeline: [
-      { id: "inc-5-e1", tsOffsetMin: 720, kind: "detected", label: "Detected by sync watchdog — last successful sync 12h ago", actor: null },
+      { id: "inc-5-e1", tsOffsetMin: 720, kind: "detected", label: "Detected by sync watchdog - last successful sync 12h ago", actor: null },
       { id: "inc-5-e2", tsOffsetMin: 700, kind: "notified", label: "Flagged in Curator weekly digest (3 stale sources)", actor: null },
     ],
   },
@@ -212,13 +212,13 @@ export const INCIDENTS: Incident[] = [
     slaToResolveMin: 2 * 60,
     detectedBy: "quality gate",
     suggestedAction: null,
-    // retry-run is the forced-fail demo path (recoverIncident) — keep it first.
+    // retry-run is the forced-fail demo path (recoverIncident) - keep it first.
     availableActions: ["retry-run", "resume-run", "reassign-human", "pause-agent", "escalate-to-q"],
     linkedEscalationId: "esc2",
     timeline: [
-      { id: "inc-6-e1", tsOffsetMin: 80, kind: "detected", label: "Detected by quality gate — 3rd consecutive blocker on AM-149", actor: null },
+      { id: "inc-6-e1", tsOffsetMin: 80, kind: "detected", label: "Detected by quality gate - 3rd consecutive blocker on AM-149", actor: null },
       { id: "inc-6-e2", tsOffsetMin: 78, kind: "notified", label: "Escalation esc2 raised → Ivan (acknowledged 22m later)", actor: null },
-      { id: "inc-6-e3", tsOffsetMin: 30, kind: "auto-attempt", label: "Manual triage required — no safe auto-recovery for blockers", actor: null },
+      { id: "inc-6-e3", tsOffsetMin: 30, kind: "auto-attempt", label: "Manual triage required - no safe auto-recovery for blockers", actor: null },
     ],
   },
   {
@@ -239,10 +239,10 @@ export const INCIDENTS: Incident[] = [
     availableActions: [],
     linkedCommId: "c7",
     timeline: [
-      { id: "inc-7-e1", tsOffsetMin: 180, kind: "detected", label: "Detected by source-conflict scanner — SOW v4 vs Slack decision", actor: null },
+      { id: "inc-7-e1", tsOffsetMin: 180, kind: "detected", label: "Detected by source-conflict scanner - SOW v4 vs Slack decision", actor: null },
       { id: "inc-7-e2", tsOffsetMin: 178, kind: "notified", label: "DM sent to Zlatko with both sources", actor: null },
-      { id: "inc-7-e3", tsOffsetMin: 95, kind: "human-action", label: "Resume run confirmed — SOW kept as source of truth", actor: null },
-      { id: "inc-7-e4", tsOffsetMin: 93, kind: "resolved", label: "Recovered — spec updated, run resumed", actor: null },
+      { id: "inc-7-e3", tsOffsetMin: 95, kind: "human-action", label: "Resume run confirmed - SOW kept as source of truth", actor: null },
+      { id: "inc-7-e4", tsOffsetMin: 93, kind: "resolved", label: "Recovered - spec updated, run resumed", actor: null },
     ],
   },
 ];
@@ -280,14 +280,14 @@ export function incidentIdFor(esc: Escalation): string | null {
 }
 
 /**
- * Derived open count — keeps the legacy INCIDENTS_OPEN_COUNT export name
+ * Derived open count - keeps the legacy INCIDENTS_OPEN_COUNT export name
  * working (incidents-stub.ts re-exports this; the nav badge reads it).
  * Snapshot at module load; live views should call openIncidents().length.
  */
 export const INCIDENTS_OPEN_COUNT = openIncidents().length;
 
 /* ------------------------------------------------------------------ */
-/* Recovery actions — every action returns an audit-shaped entry        */
+/* Recovery actions - every action returns an audit-shaped entry        */
 /* ------------------------------------------------------------------ */
 
 /** Mirrors the dashboard audit_log row shape (actor null = "when-only"). */
@@ -320,7 +320,7 @@ export function recoverIncident(
     id: `${id}-h${++recoverySeq}`,
     tsOffsetMin: 0,
     kind: "human-action",
-    label: reason ? `${label} — "${reason}"` : label,
+    label: reason ? `${label} - "${reason}"` : label,
     actor: null, // when-only until auth
   });
 
@@ -332,7 +332,7 @@ export function recoverIncident(
       id: `${id}-f${recoverySeq}`,
       tsOffsetMin: 0,
       kind: "recovery-failed",
-      label: "Retry failed — escalating to accountable human",
+      label: "Retry failed - escalating to accountable human",
       actor: null,
     });
   } else {
@@ -364,7 +364,7 @@ export function reassignIncident(id: string, humanId: string, reason?: string): 
 }
 
 /* ------------------------------------------------------------------ */
-/* Demo Director seam (wave-2 COMPLETION) — additive flag, never reshapes */
+/* Demo Director seam (wave-2 COMPLETION) - additive flag, never reshapes */
 /* ------------------------------------------------------------------ */
 
 export interface IncidentRestagePatch {
@@ -374,7 +374,7 @@ export interface IncidentRestagePatch {
 
 /**
  * Flips a seeded incident for a staged demo beat (status/openedMinAgo only
- * — timelines and recovery actions stay untouched). Returns the PREVIOUS
+ * - timelines and recovery actions stay untouched). Returns the PREVIOUS
  * values of exactly the patched fields so the Demo Director's checkpoint
  * restore can put them back; null = unknown id.
  */

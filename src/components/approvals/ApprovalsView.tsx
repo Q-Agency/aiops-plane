@@ -1,12 +1,12 @@
 /**
- * ApprovalsView — "Gates": ONE queue, TWO kinds of human checkpoint —
+ * ApprovalsView - "Gates": ONE queue, TWO kinds of human checkpoint -
  * approval gates (artifact sign-off) and clarification gates (the agent
  * needs an answer to proceed). Slice-2 reframe (C4/C1):
  *
  *   - kind switch (All · Approvals · Clarifications) + kind glyph per row
  *   - clarification rows interleaved by openedAt, answerable inline
  *   - approval rows click through to the client-grade review surface
- *     (/approvals/$gateId) — primary CTA for Spec/Design gates
+ *     (/approvals/$gateId) - primary CTA for Spec/Design gates
  *   - inline decisions REQUIRE a typed reason (both approve and reject)
  *     and write the mock decision log (recordGateDecision)
  *   - rows decided on the review surface render as resolved stamps
@@ -91,7 +91,7 @@ const SLA_MIN = 60;
 
 type KindFilter = "all" | "approvals" | "clarifications";
 
-/** Unified queue row — both gate kinds, interleaved by openedAt. */
+/** Unified queue row - both gate kinds, interleaved by openedAt. */
 type GateRow =
   | { kind: "approval"; id: string; openedAt: number; a: Approval }
   | { kind: "clarification"; id: string; openedAt: number; c: ClarificationGate };
@@ -113,7 +113,7 @@ const decisionFor = (gateId: string): GateDecision | undefined =>
   gateDecisions.find((d) => d.gateId === gateId);
 
 /**
- * P1-G1 policy bits for one row — the artifact gate policy where the gate
+ * P1-G1 policy bits for one row - the artifact gate policy where the gate
  * maps to a pipeline ArtifactKind (approvals), else the agent policy alone
  * (clarifications).
  */
@@ -128,13 +128,13 @@ function policyBitsFor(r: GateRow) {
   };
 }
 
-/** "⚠ 4h over SLA" / "⚠ 25m over SLA" — mobile card breach copy. */
+/** "⚠ 4h over SLA" / "⚠ 25m over SLA" - mobile card breach copy. */
 function overSlaLabel(m: number): string {
   const over = Math.max(1, m - SLA_MIN);
   return over >= 60 ? `${Math.floor(over / 60)}h over SLA` : `${over}m over SLA`;
 }
 
-/** Single-select mobile filter — kind, mine, or breach (<md only). */
+/** Single-select mobile filter - kind, mine, or breach (<md only). */
 type MobileFilter = "all" | "approvals" | "clarifications" | "mine" | "breach";
 
 export function ApprovalsView() {
@@ -165,7 +165,7 @@ export function ApprovalsView() {
   const assignedToMe = (r: GateRow): boolean =>
     r.kind === "approval" ? r.a.approver === ME : r.c.accountable === ME_HUMAN_ID;
 
-  /* unified queue — approvals + clarifications interleaved by openedAt */
+  /* unified queue - approvals + clarifications interleaved by openedAt */
   const rows = useMemo<GateRow[]>(() => {
     const fromApprovals: GateRow[] = approvals.map((a) => ({
       kind: "approval" as const, id: a.id, openedAt: a.openedAt, a,
@@ -198,7 +198,7 @@ export function ApprovalsView() {
     });
   }, [rows, kind, gate, approver, humanFilter, ageBucket]);
 
-  /* mobile (<md) card stack — single-select filter, most-overdue first */
+  /* mobile (<md) card stack - single-select filter, most-overdue first */
   const mobileRows = useMemo(() => {
     return unresolved
       .filter((r) => {
@@ -253,7 +253,7 @@ export function ApprovalsView() {
     appendAuditMock({ action: "gate.approved", target: a.id, detail: reason });
     approve(a.id); // row collapses out of the live queue
     setDecisionTick((n) => n + 1);
-    toast.success(`${a.ticketId} approved — moved forward`, {
+    toast.success(`${a.ticketId} approved - moved forward`, {
       description: `${a.gate} cleared · "${reason.slice(0, 90)}"`,
     });
   };
@@ -267,7 +267,7 @@ export function ApprovalsView() {
     reject(a.id);
     setDecisionTick((n) => n + 1);
     const back = GATE_AGENT[a.gate].name;
-    toast(`${a.ticketId} returned to ${back} with feedback — rerunning`, {
+    toast(`${a.ticketId} returned to ${back} with feedback - rerunning`, {
       description: feedback.slice(0, 140),
       icon: <X className="size-4 text-status-error" />,
     });
@@ -281,7 +281,7 @@ export function ApprovalsView() {
     appendAuditMock({ action: "clarification.answered", target: c.id, detail: answer });
     setDecisionTick((n) => n + 1);
     setExpanded(null);
-    toast.success(`Answer sent to ${agentOf(c.agentId).name} — rerunning`, {
+    toast.success(`Answer sent to ${agentOf(c.agentId).name} - rerunning`, {
       description: answer.slice(0, 140),
     });
   };
@@ -333,8 +333,8 @@ export function ApprovalsView() {
           <span className="hidden md:inline">Gates</span>
         </h1>
         <div className="text-xs text-muted-foreground mt-0.5">
-          <span className="md:hidden">Sorted by SLA urgency — tap a gate to review and decide.</span>
-          <span className="hidden md:inline">Every pending human checkpoint — approvals to sign off and clarifications the agents need answered.</span>
+          <span className="md:hidden">Sorted by SLA urgency - tap a gate to review and decide.</span>
+          <span className="hidden md:inline">Every pending human checkpoint - approvals to sign off and clarifications the agents need answered.</span>
         </div>
       </div>
 
@@ -392,7 +392,7 @@ export function ApprovalsView() {
         })}
       </div>
 
-      {/* mobile filter — everything collapses into one select (<md) */}
+      {/* mobile filter - everything collapses into one select (<md) */}
       <div className="md:hidden flex items-center gap-2">
         <Select value={mobileFilter} onValueChange={(v) => setMobileFilter(v as MobileFilter)}>
           <SelectTrigger className="h-8 flex-1 text-xs bg-white/5 border-border">
@@ -411,7 +411,7 @@ export function ApprovalsView() {
         </span>
       </div>
 
-      {/* kind switch — the unified-queue reframe */}
+      {/* kind switch - the unified-queue reframe */}
       <div className="hidden md:flex items-center gap-3 flex-wrap">
         <div className="glass-panel p-1 inline-flex gap-1">
           {([
@@ -471,7 +471,7 @@ export function ApprovalsView() {
         <FilterGroup label="age">
           <Chip active={ageBucket === "all"}    onClick={() => setAge("all")}>any</Chip>
           <Chip active={ageBucket === "fresh"}  onClick={() => setAge("fresh")}>{"< 30m"}</Chip>
-          <Chip active={ageBucket === "aging"}  onClick={() => setAge("aging")}>30–60m</Chip>
+          <Chip active={ageBucket === "aging"}  onClick={() => setAge("aging")}>30-60m</Chip>
           <Chip active={ageBucket === "breach"} onClick={() => setAge("breach")} tone="error">SLA breach</Chip>
         </FilterGroup>
 
@@ -487,7 +487,7 @@ export function ApprovalsView() {
 
       {/* list */}
       <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-        {/* mobile card stack (<md) — most-overdue first, cards open the review surface */}
+        {/* mobile card stack (<md) - most-overdue first, cards open the review surface */}
         <div className="md:hidden space-y-2">
           {allClear && (
             <div className="glass-panel p-10 text-center space-y-3">
@@ -515,7 +515,7 @@ export function ApprovalsView() {
         {allClear && (
           <div className="glass-panel p-12 text-center space-y-3">
             <CheckCircle2 className="size-10 text-status-done mx-auto" />
-            <div className="text-sm font-medium">All clear — no gates waiting.</div>
+            <div className="text-sm font-medium">All clear - no gates waiting.</div>
             <div className="text-xs text-muted-foreground">The pod is running unblocked.</div>
           </div>
         )}
@@ -686,7 +686,7 @@ export function ApprovalRow({
   const breached = m >= SLA_MIN;
   const mine = approval.approver === ME;
   const fullReviewPrimary = FULL_REVIEW_PRIMARY.has(approval.gate);
-  // P1-G1 — the gate's policy regime, keyed by artifact kind
+  // P1-G1 - the gate's policy regime, keyed by artifact kind
   const policy = gatePolicyFor(GATE_AGENT_ID[approval.gate]);
   const artifactKind = artifactKindForGate(approval.gate);
   const artifactPolicy = artifactKind ? artifactGatePolicyFor(artifactKind) : undefined;
@@ -753,7 +753,7 @@ export function ApprovalRow({
           <div className="space-y-3">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">decision</div>
 
-            {/* the client-grade review surface — primary for Spec/Design */}
+            {/* the client-grade review surface - primary for Spec/Design */}
             <Link
               to="/approvals/$gateId"
               params={{ gateId: approval.id }}
@@ -775,7 +775,7 @@ export function ApprovalRow({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
-                placeholder="Why is this good enough to ship? Rejections need ≥10 chars — they become the agent's added context on rerun."
+                placeholder="Why is this good enough to ship? Rejections need ≥10 chars - they become the agent's added context on rerun."
                 className="w-full rounded-md bg-background border border-border px-2.5 py-2 text-xs leading-relaxed outline-none focus:ring-1 focus:ring-primary/50"
               />
             </div>
@@ -785,7 +785,7 @@ export function ApprovalRow({
                 disabled={approveDisabled}
                 onClick={() => onApprove(reason.trim())}
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-status-done/15 border border-status-done/40 text-status-done text-sm font-medium px-3 py-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-status-done/25 transition-colors"
-                title={approveDisabled ? "Type a decision note — even a one-liner. It feeds the human-decision audit." : undefined}
+                title={approveDisabled ? "Type a decision note - even a one-liner. It feeds the human-decision audit." : undefined}
               >
                 <Check className="size-4" /> Approve gate
               </button>
@@ -931,7 +931,7 @@ export function ClarificationRow({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={4}
-              placeholder="Pick an option or type your answer — it becomes the agent's added context."
+              placeholder="Pick an option or type your answer - it becomes the agent's added context."
               className="w-full rounded-md bg-background border border-border px-2.5 py-2 text-xs leading-relaxed outline-none focus:ring-1 focus:ring-primary/50"
             />
             <button

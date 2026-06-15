@@ -102,7 +102,7 @@ export const sources: KnowledgeSource[] = [
     docsDelta24h: 0,
     spark: spark(6),
     status: "disconnected",
-    note: "Last sync failed — 2 PDFs malformed (see Docling)",
+    note: "Last sync failed - 2 PDFs malformed (see Docling)",
   },
 ];
 
@@ -132,7 +132,7 @@ export interface ParseFailure {
 }
 
 export const parseFailures: ParseFailure[] = [
-  { file: "automarket-escrow-amendment-v3.pdf", source: "sows",   reason: "encrypted — password-protected", ts: 142 },
+  { file: "automarket-escrow-amendment-v3.pdf", source: "sows",   reason: "encrypted - password-protected", ts: 142 },
   { file: "Q4-roadmap-deck.pptx",               source: "gdrive", reason: "embedded font missing glyph table", ts: 88 },
   { file: "seller-kyc-flow.pdf",                source: "sows",   reason: "image-only scan · OCR confidence 41%", ts: 56 },
   { file: "compliance-checklist.xlsx",          source: "gdrive", reason: "merged cells broke table extractor", ts: 22 },
@@ -220,7 +220,7 @@ export const specLineage: SpecLineage[] = [
   },
   {
     ticketId: "AM-138",
-    spec: "spec.md · Buyer–seller messaging",
+    spec: "spec.md · Buyer-seller messaging",
     fedBy: [
       { source: "gdrive", doc: "Messaging PRD v2.docx", weight: 0.38 },
       { source: "slack",  doc: "#design-reviews · 6 threads", weight: 0.27 },

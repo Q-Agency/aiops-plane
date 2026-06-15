@@ -8,7 +8,7 @@ import type { Stage } from "@/mock/types";
 export const REJECT_REASON_MIN_CHARS = 10;
 
 /**
- * Where an approval sends the ticket next — ONE record for both the copy
+ * Where an approval sends the ticket next - ONE record for both the copy
  * (label) and the actual move (stage id), so they can never drift.
  */
 export const APPROVAL_ADVANCE: Record<string, { label: string; stage: Stage }> = {
@@ -21,7 +21,7 @@ export const APPROVAL_ADVANCE: Record<string, { label: string; stage: Stage }> =
 
 /**
  * Root-cause reject targets per gate (vision §2 "rework follows the
- * artifact chain"): a reject can aim at ANY upstream agent stage — the
+ * artifact chain"): a reject can aim at ANY upstream agent stage - the
  * gate's own agent is the default, but a QA failure born in the design
  * goes back to the SA, and everything downstream re-runs forward.
  */
@@ -78,7 +78,7 @@ export function artifactKindForGate(gateLabel: string): ArtifactKind | null {
   return GATE_ARTIFACT_KIND[gateLabel] ?? null;
 }
 
-/** Review-mode header copy — "Review mode: full" etc. (P1-G1). */
+/** Review-mode header copy - "Review mode: full" etc. (P1-G1). */
 export const REVIEW_MODE_LABEL: Record<ArtifactGatePolicy["reviewMode"], string> = {
   full: "full",
   batch: "batch",

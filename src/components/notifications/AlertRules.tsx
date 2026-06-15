@@ -1,5 +1,5 @@
 /**
- * AlertRuleCard + AlertRuleEditorSheet (C6) — the /notifications Alert rules
+ * AlertRuleCard + AlertRuleEditorSheet (C6) - the /notifications Alert rules
  * tab. Card list of rules (trigger condition, threshold, channels, routedTo,
  * on/off switch, Edit) + a side Sheet with the rule form. "New rule" prepends.
  * Mock-local state only.
@@ -160,14 +160,14 @@ export function AlertRulesPanel() {
       draft.id ? prev.map((r) => (r.id === draft.id ? next : r)) : [next, ...prev],
     );
     setDraft(null);
-    toast.success(`Rule saved — ${next.name}`);
+    toast.success(`Rule saved - ${next.name}`);
   }
 
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          Get paged when an SLA is about to breach — rules fire into the channels you pick.
+          Get paged when an SLA is about to breach - rules fire into the channels you pick.
         </p>
         <Button size="sm" onClick={() => setDraft(draftFrom(null))}>
           <BellPlus className="size-3.5 mr-1.5" />
@@ -178,7 +178,7 @@ export function AlertRulesPanel() {
       {rules.length === 0 ? (
         <div className="rounded-md border border-border bg-panel/40 backdrop-blur-md p-10 text-center">
           <p className="text-sm text-muted-foreground">
-            No alert rules yet — add one to get paged when an SLA is about to breach.
+            No alert rules yet - add one to get paged when an SLA is about to breach.
           </p>
           <Button size="sm" className="mt-3" onClick={() => setDraft(draftFrom(null))}>
             New rule
@@ -236,8 +236,8 @@ export function AlertRulesPanel() {
                 <SheetDescription>
                   When <span className="text-foreground">{KIND_LABELS[draft.kind]}</span>
                   {draft.thresholdMin !== "" && ` is >${draft.thresholdMin}m overdue`} →{" "}
-                  {draft.channels.map((c) => CHANNEL_LABELS[c]).join(" + ") || "—"} →{" "}
-                  {draft.routedTo ? targetLabel(draft.routedTo) : "—"}
+                  {draft.channels.map((c) => CHANNEL_LABELS[c]).join(" + ") || "-"} →{" "}
+                  {draft.routedTo ? targetLabel(draft.routedTo) : "-"}
                 </SheetDescription>
               </SheetHeader>
 
@@ -279,7 +279,7 @@ export function AlertRulesPanel() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="rule-threshold" className="text-xs">
-                    Threshold (minutes overdue — leave empty to fire immediately)
+                    Threshold (minutes overdue - leave empty to fire immediately)
                   </Label>
                   <Input
                     id="rule-threshold"

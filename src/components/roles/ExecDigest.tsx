@@ -1,9 +1,9 @@
 /**
- * ExecDigest — the Sponsor / Viewer "/" landing (read-only): "what did my
+ * ExecDigest - the Sponsor / Viewer "/" landing (read-only): "what did my
  * money buy this week?" ROI hero trio, delivered list, SLA target-vs-actual
  * bars (DERIVED from sla.ts), accountability coverage and an informational
- * open-gates count — with ZERO operator dials (no approve/pause/reset
- * anywhere). roiMultiple appears ONLY as the hero subcaption — its single
+ * open-gates count - with ZERO operator dials (no approve/pause/reset
+ * anywhere). roiMultiple appears ONLY as the hero subcaption - its single
  * place in the product.
  */
 
@@ -32,10 +32,10 @@ function weekRange(): string {
   const sun = new Date(mon);
   sun.setDate(mon.getDate() + 6);
   const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return `${fmt(mon)} – ${fmt(sun)}`;
+  return `${fmt(mon)} - ${fmt(sun)}`;
 }
 
-/** ROI hero tile — same compact label/value/tier idiom as the monitor hero. */
+/** ROI hero tile - same compact label/value/tier idiom as the monitor hero. */
 function HeroTile({
   label,
   value,
@@ -92,7 +92,7 @@ export function ExecDigest({ role }: { role: RoleId }) {
 
   return (
     <div className="space-y-4 lg:space-y-5">
-      {/* header strip — pod · window · export */}
+      {/* header strip - pod · window · export */}
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
@@ -121,21 +121,21 @@ export function ExecDigest({ role }: { role: RoleId }) {
         )}
       </div>
 
-      {/* hero band — the canonical ROI trio; roiMultiple ONLY as subcaption */}
+      {/* hero band - the canonical ROI trio; roiMultiple ONLY as subcaption */}
       <div className="glass-panel px-4 py-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-3">
           <HeroTile
             label="Human-hours freed"
-            value={hasMerged ? `${Math.round(derived.hoursFreed).toLocaleString("en-US")} h` : "—"}
+            value={hasMerged ? `${Math.round(derived.hoursFreed).toLocaleString("en-US")} h` : "-"}
           />
           <HeroTile
             label="Cost per shipped ticket"
-            value={hasMerged ? usd(aggregates.costPerMerged) : "—"}
+            value={hasMerged ? usd(aggregates.costPerMerged) : "-"}
             tier="ship"
           />
           <HeroTile
             label="Cost per story point"
-            value={hasMerged ? usd(aggregates.costPerStoryPoint) : "—"}
+            value={hasMerged ? usd(aggregates.costPerStoryPoint) : "-"}
             tier="ship"
           />
         </div>
@@ -146,7 +146,7 @@ export function ExecDigest({ role }: { role: RoleId }) {
               spend, net of fees
             </span>
           ) : (
-            <span>No delivered work yet — your first report generates once a ticket ships.</span>
+            <span>No delivered work yet - your first report generates once a ticket ships.</span>
           )}
         </div>
       </div>
@@ -183,13 +183,13 @@ export function ExecDigest({ role }: { role: RoleId }) {
               )}
               {merged.length === 0 && (
                 <div className="text-xs text-muted-foreground px-3 py-4">
-                  No delivered work yet — your first report generates once a ticket ships.
+                  No delivered work yet - your first report generates once a ticket ships.
                 </div>
               )}
             </div>
           </section>
 
-          {/* SLA target vs actual — derived from the /reports definitions */}
+          {/* SLA target vs actual - derived from the /reports definitions */}
           <section className="glass-panel p-4">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
               SLA · target vs actual
@@ -255,14 +255,14 @@ export function ExecDigest({ role }: { role: RoleId }) {
             </div>
           </section>
 
-          {/* open gates — informational only, no actions */}
+          {/* open gates - informational only, no actions */}
           <section className="glass-panel p-4">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
               Open gates · informational
             </div>
             <div className="mt-1 text-2xl font-semibold font-mono tabular-nums">{openGates}</div>
             <div className="text-[11px] text-muted-foreground mt-0.5">
-              Human checkpoints awaiting your operators — nothing for you to action here.
+              Human checkpoints awaiting your operators - nothing for you to action here.
             </div>
           </section>
         </aside>

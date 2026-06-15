@@ -1,7 +1,7 @@
 /**
- * Pod blueprints — LAUNCH step 1. A blueprint pre-fills the whole wizard.
+ * Pod blueprints - LAUNCH step 1. A blueprint pre-fills the whole wizard.
  * Connector honesty (load-bearing): `connectorIds` are Live, connect-now;
- * `optionalConnectorIds` are Roadmap, rendered as "Optional · Roadmap" —
+ * `optionalConnectorIds` are Roadmap, rendered as "Optional · Roadmap" -
  * a blueprint never leads with a connector the buyer can't connect today.
  */
 
@@ -26,7 +26,7 @@ export interface PodBlueprint {
   agentIds: ChainRoleId[];
   /** Live connectors, ordered live-first. */
   connectorIds: ConnectorId[];
-  /** Roadmap connectors — "Optional · Roadmap" chips. */
+  /** Roadmap connectors - "Optional · Roadmap" chips. */
   optionalConnectorIds: ConnectorId[];
   defaultSlaLine: string;
   recommendedRolesLine: string;
@@ -35,7 +35,7 @@ export interface PodBlueprint {
   popular?: boolean;
 }
 
-// Every blueprint includes "knowledge" — the Knowledge Base agent is
+// Every blueprint includes "knowledge" - the Knowledge Base agent is
 // MANDATORY in every pod (owner call, 2026-06-12; catalog MANDATORY_ROLE_IDS):
 // the shared context is the moat's cornerstone, not an option.
 export const BLUEPRINTS: PodBlueprint[] = [
@@ -43,7 +43,7 @@ export const BLUEPRINTS: PodBlueprint[] = [
     id: "web-app",
     name: "Web App Delivery Pod",
     icon: "Globe",
-    outcomeLine: "Ship features on a web codebase — spec to merged PR.",
+    outcomeLine: "Ship features on a web codebase - spec to merged PR.",
     agentIds: ["ba", "sa", "uiux", "tasklist", "dev", "review", "qa", "knowledge"],
     connectorIds: ["teamwork", "slack", "github", "playwright"],
     optionalConnectorIds: ["jira", "gdrive", "email"],
@@ -56,7 +56,7 @@ export const BLUEPRINTS: PodBlueprint[] = [
     id: "mobile",
     name: "Mobile App Pod",
     icon: "Smartphone",
-    outcomeLine: "Deliver mobile releases (Flutter) — store-ready builds.",
+    outcomeLine: "Deliver mobile releases (Flutter) - store-ready builds.",
     agentIds: ["ba", "sa", "uiux", "tasklist", "dev", "review", "qa", "knowledge"],
     connectorIds: ["teamwork", "slack", "github", "playwright"],
     optionalConnectorIds: ["jira", "email"],
@@ -68,7 +68,7 @@ export const BLUEPRINTS: PodBlueprint[] = [
     id: "fullstack",
     name: "Full-Stack Product Pod",
     icon: "Layers",
-    outcomeLine: "Web, mobile and backend in ONE pod — one spec, three codebases, one ledger.",
+    outcomeLine: "Web, mobile and backend in ONE pod - one spec, three codebases, one ledger.",
     agentIds: ["ba", "sa", "uiux", "tasklist", "dev", "review", "qa", "knowledge"],
     connectorIds: ["teamwork", "slack", "github", "figma", "playwright"],
     optionalConnectorIds: ["jira", "gdrive"],
@@ -81,7 +81,7 @@ export const BLUEPRINTS: PodBlueprint[] = [
     name: "AI Agentic Development Pod",
     icon: "Bot",
     outcomeLine:
-      "Build agentic systems — agents, tools and MCP integrations, with evals as the quality gate.",
+      "Build agentic systems - agents, tools and MCP integrations, with evals as the quality gate.",
     agentIds: ["ba", "sa", "tasklist", "dev", "review", "qa", "knowledge"],
     connectorIds: ["teamwork", "slack", "github", "notion", "playwright"],
     optionalConnectorIds: ["gdrive", "email"],
@@ -93,7 +93,7 @@ export const BLUEPRINTS: PodBlueprint[] = [
     id: "maintenance",
     name: "Maintenance & Support Pod",
     icon: "Wrench",
-    outcomeLine: "Keep a live product healthy — bugfixes, patches, small features.",
+    outcomeLine: "Keep a live product healthy - bugfixes, patches, small features.",
     agentIds: ["ba", "dev", "review", "qa", "knowledge"],
     connectorIds: ["teamwork", "slack", "github", "playwright"],
     optionalConnectorIds: ["jira", "email"],

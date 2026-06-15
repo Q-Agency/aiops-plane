@@ -1,14 +1,14 @@
 /**
- * Work Intake (/intake, C10) — the confirmation surface of the SINGLE
+ * Work Intake (/intake, C10) - the confirmation surface of the SINGLE
  * DOORBELL (vision §2, the tracker boundary): the board sends work (a
  * scoped ticket dragged into the agreed column = "arrived"); the operator
- * confirms or declines each start. Nothing here originates work — rows
+ * confirms or declines each start. Nothing here originates work - rows
  * that the board has NOT sent are visible but not confirmable.
  *
  * The rows derive from backlog.ts (the client board); confirmed starts
  * land in tickets.ts via the addTicket seam and fire a notifications.ts
  * entry. Trigger modes, the trigger rule, write-back mapping and the
- * simulated drag arrival live in trigger.ts — this file threads `arrived`
+ * simulated drag arrival live in trigger.ts - this file threads `arrived`
  * + provenance into the rows. (The old "paste a ticket" composer was
  * removed 2026-06-11: tickets are created on the board, never here.)
  */
@@ -34,17 +34,17 @@ export interface IntakeTicket {
   ageDays: number;
   /** Matches the pod's scope rule (AutoMarket · label `pod-owned`). */
   inScope: boolean;
-  /** Already in the pod (renders greyed, "In pod" badge — no double-start). */
+  /** Already in the pod (renders greyed, "In pod" badge - no double-start). */
   pulled: boolean;
   /**
-   * The board SENT this ticket (it sits in the agreed start column —
+   * The board SENT this ticket (it sits in the agreed start column -
    * "Ready"). Only arrived rows are confirmable/declinable: the single
    * doorbell means Agency OS never starts work the board didn't send.
    */
   arrived: boolean;
   component: string;
   /**
-   * How the ticket entered the pod — "drag-to-ready" when the client's drag
+   * How the ticket entered the pod - "drag-to-ready" when the client's drag
    * auto-started it, "manual-pull" when the operator confirmed the start
    * (confirm-first). Only meaningful once `pulled`.
    */
@@ -59,13 +59,13 @@ export const INTAKE_SCOPE_SENTENCE =
 export const INTAKE_CONNECTOR_ID = "teamwork" as const;
 
 /**
- * Client-board rows inside the pod's scope rule but not yet in the pod —
+ * Client-board rows inside the pod's scope rule but not yet in the pod -
  * these make the picker meaningful on a fresh pod. The set deliberately
  * SPLITS into two visible states:
- *   AM-112 / AM-117 / AM-120 — in scope, NOT sent ("on the board"): visible
- *   but never confirmable (the single doorbell — AM-112 is the simulate-drag
+ *   AM-112 / AM-117 / AM-120 - in scope, NOT sent ("on the board"): visible
+ *   but never confirmable (the single doorbell - AM-112 is the simulate-drag
  *   target, so the demo can watch it flip states);
- *   AM-109 / AM-111 / AM-114 / AM-119 — see ARRIVED_SEEDS below.
+ *   AM-109 / AM-111 / AM-114 / AM-119 - see ARRIVED_SEEDS below.
  */
 const NEWLY_IN_SCOPE = new Set([
   "AM-109",
@@ -78,7 +78,7 @@ const NEWLY_IN_SCOPE = new Set([
 ]);
 
 /**
- * Rows the client has already DRAGGED into the start column ("Ready") —
+ * Rows the client has already DRAGGED into the start column ("Ready") -
  * the board sent them before this session opened; they sit awaiting the
  * operator's confirmation (confirm-first). The single-doorbell seeds.
  */
@@ -102,7 +102,7 @@ export function isPulled(id: string): boolean {
 }
 
 /**
- * The picker rows — the client board sample from backlog.ts, scope-matched.
+ * The picker rows - the client board sample from backlog.ts, scope-matched.
  * AM-142 sits at the top (the canonical demo ticket; already in pod).
  * Call this per render: `pulled` reflects live tickets.ts state.
  */
@@ -119,7 +119,7 @@ export function intakeBacklog(): IntakeTicket[] {
         NEWLY_IN_SCOPE.has(row.id) ||
         isDragArrived(row.id)),
     pulled: isPulled(row.id),
-    // Declined arrivals drop back to "on the board" — the decline returned
+    // Declined arrivals drop back to "on the board" - the decline returned
     // them to To-Do; a re-drag (simulateDragArrival) can ring again.
     arrived: (ARRIVED_SEEDS.has(row.id) || isDragArrived(row.id)) && !isDeclined(row.id),
     component: row.component,
@@ -140,7 +140,7 @@ export function inScopeCount(): number {
 
 /**
  * Board-sent arrivals still awaiting the operator's confirm/decline
- * (confirm-first) — `arrived` and not yet pulled into the pod. The SAME
+ * (confirm-first) - `arrived` and not yet pulled into the pod. The SAME
  * derivation TicketPickerTable shows as "{n} in Ready awaiting you", reused
  * by the rail's Work Intake badge so the two never disagree. Demo-reactive:
  * confirming, declining, or simulating a drag changes it on the next tick.
@@ -155,7 +155,7 @@ export function outOfScopeCount(): number {
 }
 
 /* ------------------------------------------------------------------ */
-/* Routing preview — derived from chain.ts, never stored                */
+/* Routing preview - derived from chain.ts, never stored                */
 /* ------------------------------------------------------------------ */
 
 export interface RoutingPreview {
@@ -178,7 +178,7 @@ const AGENT_DISPLAY: Partial<Record<ChainRoleId, string>> = {
   devops: "DevOps Agent",
 };
 
-/** First pipeline agent whose `consumes` is empty — BA by contract. */
+/** First pipeline agent whose `consumes` is empty - BA by contract. */
 export function firstPipelineAgent(): ChainRoleId {
   return (
     PIPELINE_ORDER.find(
@@ -200,17 +200,17 @@ export function routingPreview(ticketId: string): RoutingPreview {
 }
 
 /* ------------------------------------------------------------------ */
-/* Start — the mutation behind Confirm start / auto-start               */
+/* Start - the mutation behind Confirm start / auto-start               */
 /* ------------------------------------------------------------------ */
 
 /**
  * Starts board-sent arrivals in the pod: each lands at the top of the
  * Pipeline Backlog (tickets.ts) and fires a bell notification. Returns the
  * created tickets (already-started ids are skipped).
- * `provenance` records HOW the start happened — "manual-pull" (the operator
+ * `provenance` records HOW the start happened - "manual-pull" (the operator
  * confirmed it; confirm-first) or "drag-to-ready" (the drag itself started
  * it; auto-start). ENFORCES the single doorbell: rows the board did not
- * send (arrived=false) are skipped — Agency OS does not originate work.
+ * send (arrived=false) are skipped - Agency OS does not originate work.
  */
 export function pullTickets(
   ids: string[],
@@ -222,7 +222,7 @@ export function pullTickets(
     if (isPulled(id)) continue;
     const row = board.find((t) => t.id === id);
     if (!row) continue;
-    if (!row.arrived) continue; // single doorbell — the board didn't send it
+    if (!row.arrived) continue; // single doorbell - the board didn't send it
     const t = addTicket({
       id: row.id,
       title: row.title,
@@ -236,7 +236,7 @@ export function pullTickets(
       kind: "delivered",
       severity: "info",
       title: `${t.id} entered the pod`,
-      body: "Routing to BA Agent — first stop Ready for Spec.",
+      body: "Routing to BA Agent - first stop Ready for Spec.",
       ticketId: t.id,
       deepLink: "/pipeline",
       channels: ["in_app"],

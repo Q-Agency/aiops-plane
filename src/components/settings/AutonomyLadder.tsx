@@ -1,8 +1,8 @@
 /**
- * AutonomyLadder — Settings "Gate policies & autonomy" (#gates, P1-G1b):
+ * AutonomyLadder - Settings "Gate policies & autonomy" (#gates, P1-G1b):
  * per chain agent, the earned autonomy rung (L0 review-all → L3
  * auto-low-risk) plus the system-proposed promotions. Promotion criteria
- * are deterministic validator streaks — proposed by the system, granted by
+ * are deterministic validator streaks - proposed by the system, granted by
  * the accountable human, written to the ledger.
  *
  *  - Grant: alert-dialog confirm (evidence + preview stat + "Recorded in
@@ -84,7 +84,7 @@ function agentDisplay(chainId: string): { name: string; color: string } {
 /** "L2" → "Sample 1-in-5" (from the canonical AUTONOMY_LEVELS labels). */
 function rungLabel(id: Level): string {
   const label = AUTONOMY_LEVELS.find((l) => l.id === id)?.label ?? id;
-  return label.includes("— ") ? label.split("— ")[1] : label;
+  return label.includes("- ") ? label.split("- ")[1] : label;
 }
 
 const LEVEL_ORDER: Level[] = ["L0", "L1", "L2", "L3"];
@@ -123,11 +123,11 @@ export function AutonomyLadder() {
     appendAuditMock({
       action: "policy.changed",
       target: `autonomy:${a.agentId}`,
-      detail: `autonomy-level: ${before} → ${after} — granted on ${a.evidence?.line ?? "validator streak"}`,
+      detail: `autonomy-level: ${before} → ${after} - granted on ${a.evidence?.line ?? "validator streak"}`,
       actorName: granter,
     });
     toast.success("Autonomy granted · recorded in the ledger", {
-      description: `${name}: ${before} → ${after} (${rungLabel(after)}) — granted by ${granter}.`,
+      description: `${name}: ${before} → ${after} (${rungLabel(after)}) - granted by ${granter}.`,
     });
     setGrantFor(null);
   };
@@ -141,10 +141,10 @@ export function AutonomyLadder() {
     appendAuditMock({
       action: "policy.changed",
       target: `autonomy:${a.agentId}`,
-      detail: `autonomy-proposal: ${a.eligibleFor} dismissed — level stays ${level} · reason: ${reason.trim()}`,
+      detail: `autonomy-proposal: ${a.eligibleFor} dismissed - level stays ${level} · reason: ${reason.trim()}`,
     });
     toast("Proposal dismissed", {
-      description: `${name} stays at ${level} — typed reason recorded in the ledger.`,
+      description: `${name} stays at ${level} - typed reason recorded in the ledger.`,
     });
     setDismissFor(null);
     setReason("");
@@ -157,7 +157,7 @@ export function AutonomyLadder() {
         <h3 className="text-sm font-semibold">Autonomy ladder</h3>
       </div>
       <p className="text-xs text-muted-foreground max-w-3xl">
-        Deterministic checks are the precondition for safe delegation — promotion criteria are
+        Deterministic checks are the precondition for safe delegation - promotion criteria are
         validator streaks, not vibes. Proposed by the system, granted by the accountable human,
         written to the ledger.
       </p>
@@ -241,19 +241,19 @@ export function AutonomyLadder() {
                         Dismiss
                       </Button>
                       <span className="text-[10px] text-muted-foreground">
-                        Grant rests with {accountableName(a.agentId)} — the accountable human.
+                        Grant rests with {accountableName(a.agentId)} - the accountable human.
                       </span>
                     </div>
                   </div>
                 )}
                 {state.proposal === "granted" && (
                   <span className="text-[11px] text-status-done">
-                    Promotion granted this session — on the ledger ✓
+                    Promotion granted this session - on the ledger ✓
                   </span>
                 )}
                 {state.proposal === "dismissed" && (
                   <span className="text-[11px] text-muted-foreground">
-                    Proposal dismissed — typed reason on the ledger.
+                    Proposal dismissed - typed reason on the ledger.
                   </span>
                 )}
               </div>
@@ -288,7 +288,7 @@ export function AutonomyLadder() {
                 )}
                 <p className="text-[11px]">
                   Recorded in the ledger as{" "}
-                  <code className="font-mono rounded bg-white/10 px-1">policy.changed</code> —
+                  <code className="font-mono rounded bg-white/10 px-1">policy.changed</code> -
                   revocable at any time.
                 </p>
               </div>
@@ -296,12 +296,12 @@ export function AutonomyLadder() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmGrant}>Grant — record in ledger</AlertDialogAction>
+            <AlertDialogAction onClick={confirmGrant}>Grant - record in ledger</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Dismiss — typed reason required (reject canon) */}
+      {/* Dismiss - typed reason required (reject canon) */}
       <Dialog
         open={dismissFor !== null}
         onOpenChange={(open) => {
@@ -329,7 +329,7 @@ export function AutonomyLadder() {
               id="dismiss-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Hold until the next quality review — streak window too short."
+              placeholder="e.g. Hold until the next quality review - streak window too short."
               rows={3}
             />
           </div>
@@ -344,7 +344,7 @@ export function AutonomyLadder() {
               Cancel
             </Button>
             <Button disabled={reason.trim().length < 4} onClick={confirmDismiss}>
-              Dismiss — record reason
+              Dismiss - record reason
             </Button>
           </DialogFooter>
         </DialogContent>

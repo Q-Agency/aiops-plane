@@ -1,5 +1,5 @@
 /**
- * IncidentDetail — right pane of /incidents (C5): header (type, severity,
+ * IncidentDetail - right pane of /incidents (C5): header (type, severity,
  * affected entity, SLA-to-resolve countdown), Suggested-action callout,
  * type-aware Recovery controls, the per-incident timeline (newest-last) and
  * the linked comms / escalation footer cross-linking back to /comms.
@@ -38,7 +38,7 @@ import { agoLabel, fmtAgo, SeverityChip, TypeChip } from "./incident-ui";
 
 export interface IncidentDetailProps {
   incident: Incident | null;
-  /** Derived status — "recovering" while the parent's mock delay is in flight. */
+  /** Derived status - "recovering" while the parent's mock delay is in flight. */
   status: IncidentStatus;
   onAction: (action: RecoveryActionKind) => void;
 }
@@ -62,7 +62,7 @@ const EVENT_TONE: Record<IncidentEvent["kind"], string> = {
 };
 
 function humanName(id: string | undefined): string {
-  return humans.find((h) => h.id === id)?.name ?? "—";
+  return humans.find((h) => h.id === id)?.name ?? "-";
 }
 
 function firstSentence(s: string): string {
@@ -101,7 +101,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
   const resolvedEvent = [...incident.timeline].reverse().find((e) => e.kind === "resolved");
   const humanActionEvent = [...incident.timeline].reverse().find((e) => e.kind === "human-action");
   const resolvedVia = humanActionEvent
-    ? humanActionEvent.label.split(" — ")[0].replace(" confirmed", "")
+    ? humanActionEvent.label.split(" - ")[0].replace(" confirmed", "")
     : "auto-recovery";
 
   return (
@@ -166,7 +166,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
           <div className="rounded-md border border-status-error/40 bg-status-error/10 px-3 py-2.5 flex items-start gap-2 anim-in">
             <AlertTriangle className="size-4 text-status-error shrink-0 mt-0.5" />
             <div className="text-xs text-status-error">
-              Retry failed — escalated to {humanName(incident.accountableHumanId)}. See timeline.
+              Retry failed - escalated to {humanName(incident.accountableHumanId)}. See timeline.
             </div>
           </div>
         )}
@@ -193,7 +193,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
                 </div>
                 <div className="text-xs text-foreground">
                   Suggested: <span className="font-semibold">{RECOVERY_ACTION_LABELS[incident.suggestedAction]}</span>
-                  {" — "}
+                  {" - "}
                   {firstSentence(incident.summary)}.
                 </div>
                 <button
@@ -208,7 +208,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
               <div className="rounded-md border border-border bg-white/[0.03] p-3 flex items-center gap-2">
                 <Wrench className="size-4 text-muted-foreground shrink-0" />
                 <div className="text-xs text-muted-foreground">
-                  Manual triage — choose a recovery control below.
+                  Manual triage - choose a recovery control below.
                 </div>
               </div>
             )}
@@ -238,7 +238,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
                 </div>
                 {incident.type === "gate-overdue" && (
                   <p className="text-[11px] text-muted-foreground">
-                    {accountable?.name ?? "Nobody"} owns this gate — an uncovered gate is an
+                    {accountable?.name ?? "Nobody"} owns this gate - an uncovered gate is an
                     unbounded risk. Reassign if they're unavailable.
                   </p>
                 )}
@@ -247,7 +247,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
           </>
         )}
 
-        {/* timeline — vertical, newest-last */}
+        {/* timeline - vertical, newest-last */}
         <div className="space-y-1.5">
           <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
             Timeline
@@ -290,7 +290,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
   );
 }
 
-/** Progress bar: elapsed vs the resolve-SLA window. Static mock minutes — SSR-safe. */
+/** Progress bar: elapsed vs the resolve-SLA window. Static mock minutes - SSR-safe. */
 function SlaCountdown({ openedMinAgo, targetMin }: { openedMinAgo: number; targetMin: number }) {
   const remaining = targetMin - openedMinAgo;
   const overdue = remaining < 0;

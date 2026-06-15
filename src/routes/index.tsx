@@ -63,7 +63,7 @@ function MockCommandCenter() {
   return (
     <div className="p-4 lg:p-6 grid gap-4 lg:gap-5 xl:grid-cols-[1fr_360px]">
       <div className="space-y-4 lg:space-y-5 min-w-0">
-        {/* Row 0 — the ROI wow-moment teaser (full reveal on /economics, C2) */}
+        {/* Row 0 - the ROI wow-moment teaser (full reveal on /economics, C2) */}
         <RoiHeroRow />
         <FirstRunRibbon />
         <FlowRiver />

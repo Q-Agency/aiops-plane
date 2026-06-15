@@ -1,5 +1,5 @@
 /**
- * PodCopilot (⌘J, P1-A1) — the second mode of the one-omnibox family:
+ * PodCopilot (⌘J, P1-A1) - the second mode of the one-omnibox family:
  * ⌘K navigates, ⌘J asks/acts. Right-side sheet, mounted ONCE in AppShell
  * (standard mode only) beside <CommandPalette />; opened by Cmd/Ctrl-J or
  * the TopBar sparkle dispatching COPILOT_TOGGLE_EVENT.
@@ -7,7 +7,7 @@
  * Ask-with-receipts: answers come from matchCopilot (zero-LLM, computed
  * from pod telemetry seeds) and every answer cites the record via
  * ReceiptChips deep-linking to /compliance#audit, /approvals/$gateId,
- * /governance. NL ops render as ProposedActionCards — nothing executes
+ * /governance. NL ops render as ProposedActionCards - nothing executes
  * unconfirmed; Confirm appends the previewed row to the session audit
  * ledger. Conversation history lives in component state for the session.
  */
@@ -40,7 +40,7 @@ export function togglePodCopilot() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(COPILOT_TOGGLE_EVENT));
 }
 
-/** Idle chips — the task-locked trio: ask, why-with-receipts, NL operation. */
+/** Idle chips - the task-locked trio: ask, why-with-receipts, NL operation. */
 const IDLE_PROMPTS = [SUGGESTED_PROMPTS[0], SUGGESTED_PROMPTS[1], SUGGESTED_PROMPTS[3]] as const;
 
 export function PodCopilot() {
@@ -52,7 +52,7 @@ export function PodCopilot() {
   const { activePod } = usePods();
   const { items, ask, confirmAction, cancelAction } = useCopilotAnswers();
 
-  // ⌘J + TopBar toggle event — registered client-side only (SSR-safe).
+  // ⌘J + TopBar toggle event - registered client-side only (SSR-safe).
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
@@ -76,7 +76,7 @@ export function PodCopilot() {
     if (open) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [items, open]);
 
-  // Receipt deep-links close the sheet, then push (untyped — param routes).
+  // Receipt deep-links close the sheet, then push (untyped - param routes).
   const go = useCallback(
     (href: string) => {
       setOpen(false);
@@ -118,12 +118,12 @@ export function PodCopilot() {
           <div className="min-w-0">
             <SheetTitle className="text-sm font-semibold leading-tight">Pod Copilot</SheetTitle>
             <SheetDescription className="text-[10px] font-mono text-muted-foreground leading-tight truncate">
-              ⌘K navigate · ⌘J ask — every answer cites the record
+              ⌘K navigate · ⌘J ask - every answer cites the record
             </SheetDescription>
           </div>
         </div>
 
-        {/* omnibox input — same affordance as the ⌘K palette */}
+        {/* omnibox input - same affordance as the ⌘K palette */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -141,7 +141,7 @@ export function PodCopilot() {
               className="h-11 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
-          {/* persistent honesty badge — the deterministic wall */}
+          {/* persistent honesty badge - the deterministic wall */}
           <div className="px-4 py-2">
             <span className="inline-flex items-center gap-1.5 rounded border border-primary/30 bg-primary/5 px-2 py-1 text-[10px] font-mono text-muted-foreground">
               <ShieldCheck className="size-3 shrink-0 text-primary" />
@@ -191,7 +191,7 @@ export function PodCopilot() {
           <div ref={endRef} />
         </div>
 
-        {/* footer — omnibox-family hints + pod scope */}
+        {/* footer - omnibox-family hints + pod scope */}
         <div className="shrink-0 border-t border-border px-3 py-2 flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
           <span>↵ ask</span>
           <span>·</span>
@@ -205,14 +205,14 @@ export function PodCopilot() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Idle state — suggested prompts                                       */
+/* Idle state - suggested prompts                                       */
 /* ------------------------------------------------------------------ */
 
 function IdleState({ onPick }: { onPick: (prompt: string) => void }) {
   return (
     <div className="pt-2">
       <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-        Ask why something shipped, what needs you — or tell the pod what to do. Answers cite
+        Ask why something shipped, what needs you - or tell the pod what to do. Answers cite
         ledger rows, gates, and validator reports.
       </p>
       <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">
@@ -239,7 +239,7 @@ function IdleState({ onPick }: { onPick: (prompt: string) => void }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Answer bubble — short paragraph + receipt chips                      */
+/* Answer bubble - short paragraph + receipt chips                      */
 /* ------------------------------------------------------------------ */
 
 function AnswerBubble({

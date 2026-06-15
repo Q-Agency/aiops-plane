@@ -33,7 +33,7 @@ const ORDERED_AGENTS: AgentId[] = ["curator", "ba", "pm", "sa", "tasklist", "dev
 export function PodView() {
   const baseMap = useMemo(() => ownershipMap(), []);
   const humans = useMemo(() => activeHumans(), []);
-  // P1-O2: coverage is accepted, not assigned — null until /welcome's Accept.
+  // P1-O2: coverage is accepted, not assigned - null until /welcome's Accept.
   const acceptance = useAcceptance();
   const orderedAgents = ORDERED_AGENTS;
 
@@ -63,12 +63,12 @@ export function PodView() {
     const entry = appendAuditMock({
       action: "human.reassigned",
       target: reassignAgent,
-      detail: `${from?.name ?? "?"} → ${to?.name ?? "?"} — pending acceptance on /welcome (accountability transfers on accept)`,
+      detail: `${from?.name ?? "?"} → ${to?.name ?? "?"} - pending acceptance on /welcome (accountability transfers on accept)`,
       actorName: humanById("zlatko")?.name ?? "Zlatko",
     });
     setReassigned((prev) => ({ ...prev, [reassignAgent]: reassignTo }));
     closeReassign();
-    toast.success("Reassigned — written to the audit ledger ✓", {
+    toast.success("Reassigned - written to the audit ledger ✓", {
       description: `human.reassigned · ${agent.name} · ${from?.name} → ${to?.name} · ledger #${entry.id}`,
     });
   }
@@ -93,7 +93,7 @@ export function PodView() {
         </div>
       </div>
 
-      {/* members & roles (C11) — management surface; matrix below stays the hero */}
+      {/* members & roles (C11) - management surface; matrix below stays the hero */}
       <MembersRoles />
 
       {/* roster */}
@@ -139,7 +139,7 @@ export function PodView() {
                       )}
                       {h.status !== "ooo" && cap?.near && (
                         <span
-                          title={`${h.name} near capacity — ${cap.used}/${cap.cap} gates today. ${THROTTLE_POLICY_LINE}`}
+                          title={`${h.name} near capacity - ${cap.used}/${cap.cap} gates today. ${THROTTLE_POLICY_LINE}`}
                           className="text-[10px] font-mono px-1 rounded border border-status-waiting/50 bg-status-waiting/10 text-status-waiting"
                         >
                           {cap.used}/{cap.cap} today
@@ -149,7 +149,7 @@ export function PodView() {
                     <div className="text-[11px] text-muted-foreground truncate">{h.role}</div>
                     {h.workingHours && (
                       <div className="text-[10px] font-mono text-muted-foreground/80 truncate">
-                        {h.workingHours.start}–{h.workingHours.end} {h.workingHours.tz} · {h.workingHours.days}
+                        {h.workingHours.start}-{h.workingHours.end} {h.workingHours.tz} · {h.workingHours.days}
                       </div>
                     )}
                   </div>
@@ -269,7 +269,7 @@ export function PodView() {
                           )}
                           {h.status !== "ooo" && cap?.near && (
                             <span
-                              title={`${h.name} near capacity — upstream intake pauses at cap. ${THROTTLE_POLICY_LINE}`}
+                              title={`${h.name} near capacity - upstream intake pauses at cap. ${THROTTLE_POLICY_LINE}`}
                               className="inline-block max-w-full truncate text-[9px] font-mono px-1 py-px mt-0.5 rounded border border-status-waiting/50 bg-status-waiting/10 text-status-waiting"
                             >
                               near capacity · {cap.used}/{cap.cap} gates today
@@ -287,21 +287,21 @@ export function PodView() {
                           {owns ? (
                             <div className="inline-flex flex-col items-center gap-1">
                               {pendingReassign ? (
-                                /* P1-O1: reassigned this session — amber until the
+                                /* P1-O1: reassigned this session - amber until the
                                    /welcome handshake (same treatment as P1-O2). */
                                 <Link
                                   to="/welcome"
-                                  title={`${h.name} assigned to ${m.name} — not yet accepted. Reassigned this session (audited as human.reassigned); open the accountability handshake.`}
+                                  title={`${h.name} assigned to ${m.name} - not yet accepted. Reassigned this session (audited as human.reassigned); open the accountability handshake.`}
                                   className="inline-flex items-center justify-center size-7 rounded font-mono font-bold text-[11px] border border-dashed border-status-waiting/70 bg-status-waiting/10 text-status-waiting hover:bg-status-waiting/25 transition-colors"
                                 >
                                   A
                                 </Link>
                               ) : h.id === UNACCEPTED_HUMAN_ID && !acceptance ? (
-                                /* assigned — not yet accepted (P1-O2): amber until
+                                /* assigned - not yet accepted (P1-O2): amber until
                                    the /welcome handshake writes the acceptance */
                                 <Link
                                   to="/welcome"
-                                  title={`${h.name} assigned to ${m.name} — not yet accepted. Open the accountability handshake.`}
+                                  title={`${h.name} assigned to ${m.name} - not yet accepted. Open the accountability handshake.`}
                                   className="inline-flex items-center justify-center size-7 rounded font-mono font-bold text-[11px] border border-dashed border-status-waiting/70 bg-status-waiting/10 text-status-waiting hover:bg-status-waiting/25 transition-colors"
                                 >
                                   A
@@ -310,7 +310,7 @@ export function PodView() {
                                 <button
                                   type="button"
                                   onClick={() => { setReassignAgent(aid); setReassignTo(""); }}
-                                  title={`${h.name} accountable for ${m.name} — click to reassign (audited)`}
+                                  title={`${h.name} accountable for ${m.name} - click to reassign (audited)`}
                                   className="inline-flex items-center justify-center size-7 rounded font-mono font-bold text-[11px] border cursor-pointer transition-all hover:brightness-125"
                                   style={{
                                     color: m.color,
@@ -323,9 +323,9 @@ export function PodView() {
                                 </button>
                               )}
                               {deputy && (
-                                /* P1-O1 deputy chip — covers-not-owns; the cell keeps ONE "A". */
+                                /* P1-O1 deputy chip - covers-not-owns; the cell keeps ONE "A". */
                                 <span
-                                  title={`${deputy.name} covers while ${h.name} is OOO — accountability stays with ${h.name}`}
+                                  title={`${deputy.name} covers while ${h.name} is OOO - accountability stays with ${h.name}`}
                                   className="text-[9px] font-mono px-1 py-px rounded border border-border/70 bg-white/[0.04] text-muted-foreground whitespace-nowrap"
                                 >
                                   deputy: {deputy.name.split(" ")[0]}
@@ -346,11 +346,11 @@ export function PodView() {
         </div>
         <div className="text-[11px] text-muted-foreground font-mono">
           Rows spanning multiple cells show 1-to-many ownership. Any empty column above is an uncovered risk.
-          Click a solid A to reassign — audited as human.reassigned; the new assignee must accept on /welcome.
+          Click a solid A to reassign - audited as human.reassigned; the new assignee must accept on /welcome.
         </div>
       </section>
 
-      {/* coverage timeline (P1-O1) — time gaps get the uncovered treatment */}
+      {/* coverage timeline (P1-O1) - time gaps get the uncovered treatment */}
       <CoverageStrip />
 
       {/* audited reassignment confirm */}
@@ -362,9 +362,9 @@ export function PodView() {
             </DialogTitle>
             <DialogDescription>
               Hands the &quot;A&quot; from {reassignFrom?.name ?? "the current owner"} to a new accountable
-              human — written to the ledger as{" "}
+              human - written to the ledger as{" "}
               <span className="font-mono text-foreground/80">human.reassigned</span>. The assignee must
-              accept on /welcome; until then their cell shows amber &quot;assigned — not yet accepted&quot;.
+              accept on /welcome; until then their cell shows amber &quot;assigned - not yet accepted&quot;.
               One accountable human per agent stays the invariant.
             </DialogDescription>
           </DialogHeader>
@@ -387,7 +387,7 @@ export function PodView() {
               Cancel
             </Button>
             <Button size="sm" disabled={!reassignTo} onClick={confirmReassign}>
-              Reassign — audited
+              Reassign - audited
             </Button>
           </DialogFooter>
         </DialogContent>

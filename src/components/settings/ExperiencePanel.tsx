@@ -1,8 +1,8 @@
 /**
- * ExperiencePanel (Settings) — the explicit Demo ↔ Live switch.
+ * ExperiencePanel (Settings) - the explicit Demo ↔ Live switch.
  *
  * Owner call (2026-06-12): the experience is a per-browser CHOICE, not a
- * property of who logged in — any account can present the demo or drop to
+ * property of who logged in - any account can present the demo or drop to
  * the live-connected surfaces. The override lives in an httpOnly cookie
  * (auth.ts setExperienceFn) and is resolved into the effective
  * `user.dataMode` by fetchUser, so every gate (route guards, nav, isMock)
@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 const MODE_COPY: Record<DataMode, { label: string; hint: string }> = {
   standard: {
     label: "Demo product",
-    hint: "the full product on sample pods — Demo Director, seeded gates, intake & pipeline walkthroughs",
+    hint: "the full product on sample pods - Demo Director, seeded gates, intake & pipeline walkthroughs",
   },
   real: {
     label: "Live only",
@@ -43,7 +43,7 @@ export function ExperiencePanel() {
   const switchTo = async (mode: DataMode) => {
     if (mode === current || switching) return;
     setSwitching(mode);
-    // Send null when returning to the account's own default — keeps the
+    // Send null when returning to the account's own default - keeps the
     // cookie jar clean rather than pinning the default as an override.
     await setExperienceFn({ data: { mode: mode === accountDefault ? null : mode } });
     window.location.assign("/");
@@ -61,7 +61,7 @@ export function ExperiencePanel() {
         )}
       </div>
       <p className="mb-3 max-w-2xl text-xs text-muted-foreground">
-        Choose what this browser shows — independent of the account you logged in with.{" "}
+        Choose what this browser shows - independent of the account you logged in with.{" "}
         <span className="text-foreground/80">Demo product</span> is {MODE_COPY.standard.hint};{" "}
         <span className="text-foreground/80">Live only</span> shows {MODE_COPY.real.hint}.
       </p>
@@ -100,7 +100,7 @@ export function ExperiencePanel() {
             Account default: {MODE_COPY[accountDefault].label}.{" "}
           </>
         )}
-        Switching reloads the app — session demo state (staged beats, this-session ledger rows)
+        Switching reloads the app - session demo state (staged beats, this-session ledger rows)
         starts fresh.
       </p>
     </section>

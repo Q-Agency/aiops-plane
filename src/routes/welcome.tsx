@@ -1,5 +1,5 @@
 /**
- * /welcome — Welcome & Accountability Handshake (wave 2, P1-O2).
+ * /welcome - Welcome & Accountability Handshake (wave 2, P1-O2).
  * Mock experience only: real-mode users are redirected by mockOnlyBeforeLoad.
  * Variants via search: ?variant=multi | deputy · ?invite=expired.
  */

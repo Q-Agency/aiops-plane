@@ -67,7 +67,7 @@ export function buildLineage(ticket: Ticket): TraceNode[] {
 
     if (!wasReached) {
       return {
-        kind, agent: meta.agent, artifact: meta.file, version: "—",
+        kind, agent: meta.agent, artifact: meta.file, version: "-",
         status: "not-yet-reached" as const,
         producedAtOffsetMin: 0,
       };
@@ -154,19 +154,19 @@ Users browsing AutoMarket need to ${title.toLowerCase()} with predictable perfor
 ## Acceptance criteria
 - [ ] Endpoint **p95 latency < 200ms** under 50 RPS sustained load.
 - [ ] Empty state renders \`<EmptyListingsHint />\` with CTA to broaden filters.
-- [ ] Pagination uses **cursor** (\`?after=...\`) — never offset.
+- [ ] Pagination uses **cursor** (\`?after=...\`) - never offset.
 - [ ] Mobile (Flutter BLoC) consumes the same contract via \`${t.codebase === "mobile" ? "ListingsBloc" : "ListingsRepository"}\`.
 - [ ] Telemetry: emit \`listing.${t.id.toLowerCase()}.invoked\` with payload size & duration.
 
 ## Non-goals
 - No re-ranking ML in this iteration.
-- No saved-search persistence — covered by AM-147.
+- No saved-search persistence - covered by AM-147.
 `;
 }
 
 export function designMd(t: Ticket): { md: string; endpoints: Array<{ method: string; path: string; auth: string; notes: string }>; table: Array<{ column: string; type: string; notes: string }> } {
   const version = (t.rerunCount ?? 0) + 1;
-  // The full design document the SA gate review renders (C4 — design twin
+  // The full design document the SA gate review renders (C4 - design twin
   // of the BA spec review). Sections are `## ` so the outline + scroll-nav
   // derive automatically; endpoint/column data is mirrored as bullets so a
   // simple markdown renderer shows it faithfully.
@@ -190,27 +190,27 @@ export function designMd(t: Ticket): { md: string; endpoints: Array<{ method: st
 > design.md@v${version} · produced by SA Agent · consumes spec.md@v2 · contract v0.5
 
 ## Approach
-Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC. The design covers every acceptance criterion of the approved spec — the coverage map below is checked deterministically (D1).
+Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC. The design covers every acceptance criterion of the approved spec - the coverage map below is checked deterministically (D1).
 
 ## Architecture & components
-- \`search-api\` (FastAPI router) — entry point; consumes the typed contract.
-- \`query-builder\` — translates filter params onto \`listings_search_idx\`; consumed by search-api.
-- \`pagination-util\` (shared) — cursor encode/decode; consumed by search-api and the web hook.
-- \`web/useListingSearch\` (React Query) — consumes search-api; renders results + filters.
-- \`mobile/ListingsBloc\` (Dio) — consumes search-api; same contract, no fork.
+- \`search-api\` (FastAPI router) - entry point; consumes the typed contract.
+- \`query-builder\` - translates filter params onto \`listings_search_idx\`; consumed by search-api.
+- \`pagination-util\` (shared) - cursor encode/decode; consumed by search-api and the web hook.
+- \`web/useListingSearch\` (React Query) - consumes search-api; renders results + filters.
+- \`mobile/ListingsBloc\` (Dio) - consumes search-api; same contract, no fork.
 
 ## API contract
-${endpoints.map((e) => `- \`${e.method} ${e.path}\` — auth: ${e.auth} — ${e.notes}`).join("\n")}
+${endpoints.map((e) => `- \`${e.method} ${e.path}\` - auth: ${e.auth} - ${e.notes}`).join("\n")}
 
 All four endpoints declare request/response schemas in the typed contract; error envelopes follow the platform standard (D2).
 
 ## Data model
-${table.map((c) => `- \`${c.column}\` · ${c.type} — ${c.notes}`).join("\n")}
+${table.map((c) => `- \`${c.column}\` · ${c.type} - ${c.notes}`).join("\n")}
 
 One foreign key (\`seller_id → users.user_id\`); no dangling references (D3).
 
 ## NFR budgets
-Spec bound: p95 < 200ms under 50 RPS (AC-1). Decomposition: edge 15ms + API 25ms + query 110ms + serialize 30ms = **180ms budget** — 20ms headroom (D6).
+Spec bound: p95 < 200ms under 50 RPS (AC-1). Decomposition: edge 15ms + API 25ms + query 110ms + serialize 30ms = **180ms budget** - 20ms headroom (D6).
 
 ## Failure modes & fallbacks
 - Postgres search: 250ms statement timeout → cached facet fallback + degraded-results banner.
@@ -222,7 +222,7 @@ Spec bound: p95 < 200ms under 50 RPS (AC-1). Decomposition: edge 15ms + API 25ms
 - Rate limited at 30 req/min per session (Redis token-bucket).
 
 ## Decisions
-Three decision records accompany this design — chosen option, alternatives and rationale render in the review's Decision-records block; one is marked Low-confidence and is surfaced for human attention.
+Three decision records accompany this design - chosen option, alternatives and rationale render in the review's Decision-records block; one is marked Low-confidence and is surfaced for human attention.
 `,
     endpoints,
     table,
@@ -279,16 +279,16 @@ export function prCard(t: Ticket) {
 
 export function reviewReport(t: Ticket) {
   return [
-    { severity: "blocker" as const, file: "backend/app/listings/repository.py", line: 84,  msg: "Raw string concatenation in dynamic order_by — SQL injection risk via ?sort param." },
-    { severity: "major"   as const, file: "backend/app/listings/router.py",     line: 31,  msg: "Missing rate-limit decorator — design.md requires 30 req/min." },
+    { severity: "blocker" as const, file: "backend/app/listings/repository.py", line: 84,  msg: "Raw string concatenation in dynamic order_by - SQL injection risk via ?sort param." },
+    { severity: "major"   as const, file: "backend/app/listings/router.py",     line: 31,  msg: "Missing rate-limit decorator - design.md requires 30 req/min." },
     { severity: "minor"   as const, file: "web/src/features/listings/FilterBar.tsx", line: 142, msg: "Debounce hook recreated every render; memoise input handler." },
     { severity: "minor"   as const, file: "mobile/lib/features/listings/listings_bloc.dart", line: 67, msg: "Equatable props missing `cursor`; will mis-trigger BlocBuilder rebuilds." },
-    { severity: "info"    as const, file: "backend/app/listings/schemas.py",    line: 22,  msg: `Consider extracting Filter model — reused by ${t.id} and AM-147.` },
+    { severity: "info"    as const, file: "backend/app/listings/schemas.py",    line: 22,  msg: `Consider extracting Filter model - reused by ${t.id} and AM-147.` },
   ];
 }
 
 /**
- * The full qa-report document the QA gate review renders (C4 — QA twin of
+ * The full qa-report document the QA gate review renders (C4 - QA twin of
  * the spec/design reviews). Built FROM qaReport(t)'s data so the review,
  * Traceability and the artifact shelf stay one source of truth.
  */
@@ -301,17 +301,17 @@ export function qaReportMd(t: Ticket): string {
 > qa-report@v1 · produced by QA Agent · verifies PR #421 against spec.md@v2 · suite \`${r.suite}\`
 
 ## Summary
-${r.passed}/${r.total} tests pass in ${Math.round(r.durationMs / 1000)}s. ${failed.length} failures — both filed as defects below. Recommendation: **HOLD** until QA-1 is fixed; QA-2 can ride the next train.
+${r.passed}/${r.total} tests pass in ${Math.round(r.durationMs / 1000)}s. ${failed.length} failures - both filed as defects below. Recommendation: **HOLD** until QA-1 is fixed; QA-2 can ride the next train.
 
 ## Scope & environments
-- Suites: web (Playwright) · mobile (Patrol) · api (pytest) — all three executed.
-- Environment matrix: chrome + safari × iOS + Android — 4/4 cells run.
+- Suites: web (Playwright) · mobile (Patrol) · api (pytest) - all three executed.
+- Environment matrix: chrome + safari × iOS + Android - 4/4 cells run.
 
 ## Results by suite
-${r.tests.map((x) => `- ${x.state === "pass" ? "✓" : "✗"} ${x.name} · ${x.ms}ms${x.note ? ` — ${x.note}` : ""}`).join("\n")}
+${r.tests.map((x) => `- ${x.state === "pass" ? "✓" : "✗"} ${x.name} · ${x.ms}ms${x.note ? ` - ${x.note}` : ""}`).join("\n")}
 
 ## Performance vs budget
-AC-1 bound: p95 < 200ms under 50 RPS. Measured: k6 soak, 50 RPS × 10min — **p95 174ms** (26ms headroom). Evidence attached to the run.
+AC-1 bound: p95 < 200ms under 50 RPS. Measured: k6 soak, 50 RPS × 10min - **p95 174ms** (26ms headroom). Evidence attached to the run.
 
 ## Flaky & quarantined
 ${healed.length} selector drift auto-repaired by the Healer (recorded, not skipped). 0 tests quarantined.
@@ -319,10 +319,10 @@ ${healed.length} selector drift auto-repaired by the Healer (recorded, not skipp
 ## Defects
 ${r.bugsFiled.map((b) => `- ${b}`).join("\n")}
 
-Each defect carries a suspected root-cause stage in the Defects block of this review — a reject from this gate can target that stage directly.
+Each defect carries a suspected root-cause stage in the Defects block of this review - a reject from this gate can target that stage directly.
 
 ## Recommendation
-**HOLD** — ship after QA-1 (missing Retry-After header) is fixed and re-verified. The failing contract behaviour traces upstream; see the defect's root-cause line.
+**HOLD** - ship after QA-1 (missing Retry-After header) is fixed and re-verified. The failing contract behaviour traces upstream; see the defect's root-cause line.
 `;
 }
 

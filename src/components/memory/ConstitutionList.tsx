@@ -1,5 +1,5 @@
 /**
- * ConstitutionList — section 1 of /memory (P1-A2): the pod's per-client
+ * ConstitutionList - section 1 of /memory (P1-A2): the pod's per-client
  * rules, accordion-grouped by category. Each row carries its provenance
  * badge and expands into the gate decisions that cited it (real seed ids,
  * deep-linked to /approvals/$gateId and the /compliance audit ledger).
@@ -33,7 +33,7 @@ function CitingDecisionRow({ gateId }: { gateId: string }) {
       </span>
       <div className="min-w-0 flex-1">
         <span className="text-foreground">{d.actorName ?? "when-only"}</span>
-        <span className="text-muted-foreground"> — “{d.detail}”</span>
+        <span className="text-muted-foreground"> - “{d.detail}”</span>
       </div>
       <span className="font-mono text-muted-foreground shrink-0 hidden sm:block">
         {fmtShortDate(d.ts)}
@@ -110,7 +110,7 @@ export function ConstitutionList({
       <div className="glass-panel p-6 text-center">
         <Scale className="size-5 text-muted-foreground mx-auto mb-2" />
         <p className="text-sm text-muted-foreground">
-          Your pod starts with the blueprint's defaults — rules accrue as you reject with
+          Your pod starts with the blueprint's defaults - rules accrue as you reject with
           reasons.
         </p>
       </div>

@@ -1,17 +1,17 @@
 /**
- * RoiHeroBand — the full ROI hero for the /economics (Overview / ROI)
- * landing: the C2 staging rendered exactly —
+ * RoiHeroBand - the full ROI hero for the /economics (Overview / ROI)
+ * landing: the C2 staging rendered exactly -
  *
  *   · a thin LIVE-tier strip on top (cost / approved spec + time to approved
- *     spec — what the BA agent earns TODAY),
+ *     spec - what the BA agent earns TODAY),
  *   · the canonical trio as three dominant tiles: "Human-hours freed"
  *     (data key humanHoursDisplaced) · "Cost / merged ticket" ·
  *     "Cost / story point", merged-ticket economics badged "as agents ship",
- *   · the "Edit assumptions — your numbers, not ours" affordance (dialog →
+ *   · the "Edit assumptions - your numbers, not ours" affordance (dialog →
  *     localStorage; every hours→$ figure re-derives live),
  *   · the honest footer: ROI is computed net of plan fees.
  *
- * Empty state (no merged tickets yet): tiles show "—" with the staging copy.
+ * Empty state (no merged tickets yet): tiles show "-" with the staging copy.
  */
 
 import { useState } from "react";
@@ -35,7 +35,7 @@ export function RoiHeroBand({ className }: { className?: string }) {
 
   return (
     <section className={cn("space-y-2", className)}>
-      {/* LIVE tier strip — real today via the BA agent */}
+      {/* LIVE tier strip - real today via the BA agent */}
       <div className="rounded-md border border-status-done/30 bg-status-done/5 px-3 py-2 flex items-center gap-x-4 gap-y-1.5 flex-wrap">
         <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-mono text-status-done">
           <Activity className="size-3" />
@@ -69,7 +69,7 @@ export function RoiHeroBand({ className }: { className?: string }) {
         )}
       </div>
 
-      {/* The canonical trio — visually dominant */}
+      {/* The canonical trio - visually dominant */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         <RoiHeroTile
           emphasis
@@ -77,7 +77,7 @@ export function RoiHeroBand({ className }: { className?: string }) {
           value={
             hasMerged
               ? `${Math.round(derived.hoursFreed).toLocaleString("en-US")} h`
-              : "—"
+              : "-"
           }
           subcaption={
             hasMerged
@@ -90,7 +90,7 @@ export function RoiHeroBand({ className }: { className?: string }) {
           emphasis
           tier="as_agents_ship"
           label="Cost / merged ticket"
-          value={hasMerged ? usd(aggregates.costPerMerged) : "—"}
+          value={hasMerged ? usd(aggregates.costPerMerged) : "-"}
           subcaption={
             hasMerged
               ? `${aggregates.mergedCount} merged this period · vs. a human team at ${usd(derived.rate)}/h`
@@ -101,7 +101,7 @@ export function RoiHeroBand({ className }: { className?: string }) {
           emphasis
           tier="as_agents_ship"
           label="Cost / story point"
-          value={hasMerged ? usd(aggregates.costPerStoryPoint) : "—"}
+          value={hasMerged ? usd(aggregates.costPerStoryPoint) : "-"}
           subcaption={
             hasMerged
               ? `blended across merged tickets · vs. ~6h/point human baseline`

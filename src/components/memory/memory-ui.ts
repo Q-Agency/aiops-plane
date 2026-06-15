@@ -1,5 +1,5 @@
 /**
- * Shared helpers for the /memory surface (P1-A2) — deterministic date
+ * Shared helpers for the /memory surface (P1-A2) - deterministic date
  * formatting plus the join from a rule/amendment's gate ids to the seeded
  * decision evidence (compliance AUDIT rows + clarification gates), so
  * "citing decisions" render real actors, typed reasons and timestamps.
@@ -14,9 +14,9 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-/** "10 Jun 2026" — locale-independent (deterministic SSR/client render). */
+/** "10 Jun 2026" - locale-independent (deterministic SSR/client render). */
 export function fmtShortDate(ts?: number): string {
-  if (!ts) return "—";
+  if (!ts) return "-";
   const d = new Date(ts);
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }

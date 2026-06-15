@@ -97,15 +97,15 @@ export function CommsView() {
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
-          Every outbound message and escalation is fired by a deterministic rule — cadence or threshold. Agents do not
+          Every outbound message and escalation is fired by a deterministic rule - cadence or threshold. Agents do not
           decide to reach out from nothing; the trigger is always shown.
         </p>
       </header>
 
-      {/* Proactive outbound — the demo beat: the pod talks first */}
+      {/* Proactive outbound - the demo beat: the pod talks first */}
       <OutboundFeed />
 
-      {/* Escalation tracker — top, most prominent */}
+      {/* Escalation tracker - top, most prominent */}
       <section className="glass-panel p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -345,8 +345,8 @@ function EscalationRow({ e }: { e: Escalation }) {
           <div className="text-[10px] text-muted-foreground font-mono">open {fmtAgo(e.openedMinAgo)}</div>
         )}
       </td>
-      <td className="py-2 px-2 text-right font-mono tabular-nums">{e.ackMin ? fmtAgo(e.ackMin) : "—"}</td>
-      <td className="py-2 px-2 text-right font-mono tabular-nums">{e.resolvedMin ? fmtAgo(e.resolvedMin) : "—"}</td>
+      <td className="py-2 px-2 text-right font-mono tabular-nums">{e.ackMin ? fmtAgo(e.ackMin) : "-"}</td>
+      <td className="py-2 px-2 text-right font-mono tabular-nums">{e.resolvedMin ? fmtAgo(e.resolvedMin) : "-"}</td>
     </tr>
   );
 }

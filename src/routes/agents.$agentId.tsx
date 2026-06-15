@@ -21,7 +21,7 @@ export const Route = createFileRoute("/agents/$agentId")({
 });
 
 // The mock profile (PM-operable: model/tools/owner/autonomy + telemetry)
-// lives in components/agents/AgentProfile.tsx — extracted 2026-06-12 so the
+// lives in components/agents/AgentProfile.tsx - extracted 2026-06-12 so the
 // real branch below stays untouched by mock work.
 function AgentDeepDive() {
   const data = Route.useLoaderData();

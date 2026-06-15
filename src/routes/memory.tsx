@@ -1,5 +1,5 @@
 /**
- * /memory — Pod Memory & Constitution (wave 2, P1-A2).
+ * /memory - Pod Memory & Constitution (wave 2, P1-A2).
  * Mock experience only: real-mode users are redirected by mockOnlyBeforeLoad.
  * Absorbs the old /knowledge view as section 3 ("What it knows").
  */

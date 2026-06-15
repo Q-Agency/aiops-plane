@@ -1,7 +1,7 @@
 /**
- * PilotWeekStrip (/pilot, P1-C3) — the week 1–6 record: one column per week,
+ * PilotWeekStrip (/pilot, P1-C3) - the week 1-6 record: one column per week,
  * one status dot per metric. Weeks with no actuals yet render as pending
- * (hollow dots); a one-time metric (TTFAA) shows "—" after its signal week.
+ * (hollow dots); a one-time metric (TTFAA) shows "-" after its signal week.
  * The period select re-scopes the strip without touching the tiles above.
  */
 
@@ -47,8 +47,8 @@ type StripScope = "all" | "1-3" | "4-6";
 
 const SCOPES: { id: StripScope; label: string }[] = [
   { id: "all", label: "All weeks" },
-  { id: "1-3", label: "Weeks 1–3" },
-  { id: "4-6", label: "Weeks 4–6" },
+  { id: "1-3", label: "Weeks 1-3" },
+  { id: "4-6", label: "Weeks 4-6" },
 ];
 
 export function PilotWeekStrip() {
@@ -68,7 +68,7 @@ export function PilotWeekStrip() {
         <div className="flex items-center gap-2">
           <CalendarRange className="size-3.5 text-muted-foreground" />
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
-            Week 1–6 record
+            Week 1-6 record
           </span>
           <span className="text-[10px] text-muted-foreground/70 font-mono">
             · measured by the same ledger that runs the pod
@@ -132,8 +132,8 @@ export function PilotWeekStrip() {
                         v !== undefined
                           ? `wk ${w.week} · ${PILOT_METRIC_LABELS[c.metric]}: ${cellValueLabel(c.metric, v)} vs target ${c.target} ${c.unit}`
                           : pendingCol
-                            ? `wk ${w.week} — no signal yet`
-                            : `wk ${w.week} — no signal (one-time metric)`
+                            ? `wk ${w.week} - no signal yet`
+                            : `wk ${w.week} - no signal (one-time metric)`
                       }
                     >
                       {v !== undefined ? (
@@ -158,7 +158,7 @@ export function PilotWeekStrip() {
                       ) : pendingCol ? (
                         <span className="inline-block size-2.5 rounded-full border border-dashed border-muted-foreground/40" />
                       ) : (
-                        <span className="text-muted-foreground/40 font-mono">—</span>
+                        <span className="text-muted-foreground/40 font-mono">-</span>
                       )}
                     </td>
                   );
@@ -174,14 +174,14 @@ export function PilotWeekStrip() {
           <span className="size-2 rounded-full bg-status-done" /> hit
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-status-error" /> missed — shown honestly
+          <span className="size-2 rounded-full bg-status-error" /> missed - shown honestly
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="size-2 rounded-full border border-dashed border-muted-foreground/50" />{" "}
           pending
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span>—</span> no signal
+          <span>-</span> no signal
         </span>
       </div>
     </section>

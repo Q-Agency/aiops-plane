@@ -25,7 +25,7 @@ export interface StepDef {
   sub: string;
   /** Footer primary CTA label while this step is active. */
   nextLabel: string;
-  /** Body-only step component (no props — state via usePods()). */
+  /** Body-only step component (no props - state via usePods()). */
   Component: ComponentType;
 }
 
@@ -34,7 +34,7 @@ export const STEPS: StepDef[] = [
     id: "blueprint",
     label: "Blueprint",
     title: "Choose a pod blueprint",
-    sub: "Pick a proven shape and adjust later — nothing here is locked in.",
+    sub: "Pick a proven shape and adjust later - nothing here is locked in.",
     nextLabel: "Next: Choose agents",
     Component: StepBlueprint,
   },
@@ -42,7 +42,7 @@ export const STEPS: StepDef[] = [
     id: "agents",
     label: "Agents",
     title: "Choose your agents",
-    sub: "Your curated Q delivery team — add what this pod needs.",
+    sub: "Your curated Q delivery team - add what this pod needs.",
     nextLabel: "Next: Connect tools",
     Component: StepAgents,
   },
@@ -50,7 +50,7 @@ export const STEPS: StepDef[] = [
     id: "connect",
     label: "Connect",
     title: "Connect your tools",
-    sub: "Wire the pod into the tools your team already uses — your board stays the source of truth.",
+    sub: "Wire the pod into the tools your team already uses - your board stays the source of truth.",
     nextLabel: "Next: People",
     Component: StepConnect,
   },
@@ -58,7 +58,7 @@ export const STEPS: StepDef[] = [
     id: "people",
     label: "People",
     title: "Who's accountable?",
-    sub: "Assign one human per agent. An empty column is an uncovered risk — every agent needs an owner before launch.",
+    sub: "Assign one human per agent. An empty column is an uncovered risk - every agent needs an owner before launch.",
     nextLabel: "Next: Wire Slack",
     Component: StepPeople,
   },
@@ -74,7 +74,7 @@ export const STEPS: StepDef[] = [
     id: "golive",
     label: "Go live",
     title: "Readiness",
-    sub: "Step 6 of 6 — confirm the pod is ready, then go live.",
+    sub: "Step 6 of 6 - confirm the pod is ready, then go live.",
     nextLabel: "Launch pod",
     Component: StepGoLive,
   },

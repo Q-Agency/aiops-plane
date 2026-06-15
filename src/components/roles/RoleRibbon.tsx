@@ -1,8 +1,8 @@
 /**
- * RoleRibbon — the thin context ribbon on every non-PM "/" landing.
+ * RoleRibbon - the thin context ribbon on every non-PM "/" landing.
  * Names the active persona ("Your landing · {RoleLabel}") and, since the
  * view-as switch is a PM demo affordance, always offers the way home:
- * "Previewing as {role} — Back to my cockpit". Nobody gets stranded.
+ * "Previewing as {role} - Back to my cockpit". Nobody gets stranded.
  */
 
 import { Eye, Undo2 } from "lucide-react";
@@ -22,7 +22,7 @@ export function RoleRibbon({ role, onBack }: { role: RoleId; onBack: () => void 
         </span>
       )}
       <span className="ml-auto text-[11px] text-muted-foreground hidden sm:inline">
-        Previewing as {r.label} —
+        Previewing as {r.label} -
       </span>
       <button
         type="button"

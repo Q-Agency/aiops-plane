@@ -1,11 +1,11 @@
 /**
- * Gate policies (wave 2) — per-agent gate-clearance SLA + autonomy level.
+ * Gate policies (wave 2) - per-agent gate-clearance SLA + autonomy level.
  * Feeds the /welcome charter card ("you clear its gates within {sla}"),
  * the GatePolicyChip, and any surface that states what an agent's gate
  * regime is.
  *
  * Autonomy ladder (L0 strictest → L3 loosest). The Sample pod runs mostly
- * L0/L1 — autonomy is EARNED through validator pass-rates, never default.
+ * L0/L1 - autonomy is EARNED through validator pass-rates, never default.
  * SLA minutes align with gate-detail.ts (approvals ≤ 4h) and the report
  * seed (design review target 8h).
  */
@@ -28,10 +28,10 @@ export interface GatePolicy {
 }
 
 export const AUTONOMY_LABELS: Record<GatePolicy["autonomy"], string> = {
-  L0: "Review all — every artifact stops at a human gate",
-  L1: "Auto-clear on green — 8/8 validator passes skip the queue; anything flagged stops",
-  L2: "Spot-check — sampled human review; every decision still on the ledger",
-  L3: "Autonomous — runs without routine gates; ledger-audited",
+  L0: "Review all - every artifact stops at a human gate",
+  L1: "Auto-clear on green - 8/8 validator passes skip the queue; anything flagged stops",
+  L2: "Spot-check - sampled human review; every decision still on the ledger",
+  L3: "Autonomous - runs without routine gates; ledger-audited",
 };
 
 export const GATE_POLICIES: GatePolicy[] = [
@@ -54,27 +54,27 @@ const DEFAULT_POLICY: GatePolicy = {
   autonomyLabel: AUTONOMY_LABELS.L0,
 };
 
-/** Policy for one agent — unknown ids fall back to the strict L0 default. */
+/** Policy for one agent - unknown ids fall back to the strict L0 default. */
 export function gatePolicyFor(agentId: string): GatePolicy {
   return GATE_POLICIES.find((p) => p.agentId === agentId) ?? { ...DEFAULT_POLICY, agentId };
 }
 
 /* ------------------------------------------------------------------ */
-/* Wave-2 COMPLETION (P1-G1) — the policy layer behind the gates.      */
+/* Wave-2 COMPLETION (P1-G1) - the policy layer behind the gates.      */
 /* Settings → "Gate policies & autonomy" (GatePolicyTable +            */
 /* AutonomyLadder) reads everything below. Edits/grants write          */
-/* `policy.changed {field, before, after}` via the audit bridge —      */
+/* `policy.changed {field, before, after}` via the audit bridge -      */
 /* THIS file stays a read-only seed.                                   */
 /* ------------------------------------------------------------------ */
 
-/** Per-ArtifactKind gate policy — one row per pipeline artifact (chain.ts). */
+/** Per-ArtifactKind gate policy - one row per pipeline artifact (chain.ts). */
 export interface ArtifactGatePolicy {
   artifactKind: ArtifactKind;
   /** Role label that must clear this gate (matches roles.ts/humans.ts vocabulary). */
   requiredRole: string;
   /** 2 = a second reviewer countersigns (code, release). */
   nEyes: 1 | 2;
-  /** Clearance SLA in minutes — aligned with GATE_POLICIES per producing agent. */
+  /** Clearance SLA in minutes - aligned with GATE_POLICIES per producing agent. */
   slaClearMin: number;
   delegation: "deputy-allowed" | "none";
   overridePolicy: "pod-admin-only" | "accountable-human";
@@ -83,7 +83,7 @@ export interface ArtifactGatePolicy {
 
 /**
  * Blueprint defaults, one row per pipeline ArtifactKind (knowledge is a
- * pod-wide peer — no pipeline gate). spec/design/code = full review;
+ * pod-wide peer - no pipeline gate). spec/design/code = full review;
  * tasks/review = batch; test = auto-with-sampling.
  */
 export const ARTIFACT_GATE_POLICIES: ArtifactGatePolicy[] = [
@@ -97,7 +97,7 @@ export const ARTIFACT_GATE_POLICIES: ArtifactGatePolicy[] = [
   { artifactKind: "release",     requiredRole: "Pod Admin (PM)",     nEyes: 2, slaClearMin: 240, delegation: "none",           overridePolicy: "pod-admin-only",    reviewMode: "full" },
 ];
 
-/** Row lookup — unknown kinds fall back to the strict spec-row defaults. */
+/** Row lookup - unknown kinds fall back to the strict spec-row defaults. */
 export function artifactGatePolicyFor(kind: ArtifactKind): ArtifactGatePolicy {
   return (
     ARTIFACT_GATE_POLICIES.find((p) => p.artifactKind === kind) ?? {
@@ -119,10 +119,10 @@ export const AUTONOMY_LEVELS: {
   label: string;
   description: string;
 }[] = [
-  { id: "L0", label: "L0 — Review all",          description: "Every artifact stops at a human gate before it moves." },
-  { id: "L1", label: "L1 — Batch review",         description: "Green artifacts (8/8 validators) queue into a daily review batch; anything flagged stops immediately." },
-  { id: "L2", label: "L2 — Sample 1-in-5",        description: "One in five green artifacts is pulled for human review; every decision still lands on the ledger." },
-  { id: "L3", label: "L3 — Auto-clear low-risk",  description: "Low-risk green artifacts clear without a gate — ledger-audited, revocable at any time." },
+  { id: "L0", label: "L0 - Review all",          description: "Every artifact stops at a human gate before it moves." },
+  { id: "L1", label: "L1 - Batch review",         description: "Green artifacts (8/8 validators) queue into a daily review batch; anything flagged stops immediately." },
+  { id: "L2", label: "L2 - Sample 1-in-5",        description: "One in five green artifacts is pulled for human review; every decision still lands on the ledger." },
+  { id: "L3", label: "L3 - Auto-clear low-risk",  description: "Low-risk green artifacts clear without a gate - ledger-audited, revocable at any time." },
 ];
 
 /** An agent's position on the ladder + any system-proposed promotion. */
@@ -139,7 +139,7 @@ export interface AutonomyStatus {
   };
 }
 
-/** Current level comes from GATE_POLICIES — one source for both surfaces. */
+/** Current level comes from GATE_POLICIES - one source for both surfaces. */
 const levelOf = (agentId: string): AutonomyStatus["level"] =>
   gatePolicyFor(agentId).autonomy;
 
@@ -177,7 +177,7 @@ export const AUTONOMY_LADDER: AutonomyStatus[] = [
   { agentId: "knowledge", level: levelOf("knowledge") },
 ];
 
-/** Ladder lookup — unknown agents sit at strict L0 with no proposal. */
+/** Ladder lookup - unknown agents sit at strict L0 with no proposal. */
 export function autonomyStatusFor(agentId: string): AutonomyStatus {
   return AUTONOMY_LADDER.find((a) => a.agentId === agentId) ?? { agentId, level: "L0" };
 }
@@ -185,14 +185,14 @@ export function autonomyStatusFor(agentId: string): AutonomyStatus {
 /* ---------------- Preview stat ("what would this change do?") ---------------- */
 
 /**
- * Avg human review minutes per gate — matches the engineering-lead
+ * Avg human review minutes per gate - matches the engineering-lead
  * workload seed in humans.ts (avgApprovalMin 38). 14 gates × 38m ≈ 9h.
  */
 const AVG_GATE_REVIEW_MIN = 38;
 
 /**
  * Last-week gate volume per agent, consistent with the approvals seed
- * (one open gate per in-review ticket) extrapolated over a week — BA is
+ * (one open gate per in-review ticket) extrapolated over a week - BA is
  * the spec's showcase: 14 of 22 would have auto-cleared.
  */
 const PREVIEW_SEED: Record<ChainRoleId, { wouldAutoClear: number; of: number }> = {

@@ -1,7 +1,7 @@
 /**
- * SlaTargetBar — one "target vs actual" mini-bar on the Exec Status Digest.
+ * SlaTargetBar - one "target vs actual" mini-bar on the Exec Status Digest.
  * Renders a DERIVED `SlaTarget` projection (sla.ts `slaTargets()`), never a
- * second stored shape — the SLA definitions on /reports stay the source.
+ * second stored shape - the SLA definitions on /reports stay the source.
  */
 
 import { cn } from "@/lib/utils";

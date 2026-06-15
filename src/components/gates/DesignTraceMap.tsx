@@ -1,8 +1,8 @@
 /**
- * DesignTraceMap — the spec → design coverage map on the SA gate review
+ * DesignTraceMap - the spec → design coverage map on the SA gate review
  * (design twin of the EARS block): one row per acceptance criterion of the
  * CONSUMED spec, showing which design sections address it. This is the
- * consumes-graph made reviewable — and exactly what deterministic check D1
+ * consumes-graph made reviewable - and exactly what deterministic check D1
  * verifies, so a failing D1 click lands here with the uncovered rows red.
  */
 
@@ -42,7 +42,7 @@ export function DesignTraceMap({
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        This design consumes <span className="font-mono">spec.md@v2</span> — every acceptance
+        This design consumes <span className="font-mono">spec.md@v2</span> - every acceptance
         criterion must land in a design section. Checked deterministically (D1), not by a model.
       </p>
       <ul className="mt-3 divide-y divide-border/60">
@@ -71,7 +71,7 @@ export function DesignTraceMap({
               </span>
             ) : (
               <span className="text-[11px] px-1.5 py-0.5 rounded border border-status-error/40 bg-status-error/10 text-status-error">
-                not addressed — D1 fails
+                not addressed - D1 fails
               </span>
             )}
           </li>

@@ -1,5 +1,5 @@
 /**
- * DecisionPanel — the right-rail decision surface of the gate review (C4).
+ * DecisionPanel - the right-rail decision surface of the gate review (C4).
  *
  * Approval gates: optional quick-reason chips + Approve (confirm dialog is
  * owned by the parent) / Reject (REQUIRES a typed reason, min 10 chars).
@@ -26,9 +26,9 @@ import type { GateDetail } from "@/mock/gate-detail";
 import type { GateDecision } from "@/mock/approvals";
 import { REJECT_REASON_MIN_CHARS, type RejectTarget } from "./gate-config";
 
-/** Optional structured quick-reasons (C4) — one click fills the note. */
+/** Optional structured quick-reasons (C4) - one click fills the note. */
 export const APPROVE_QUICK_REASONS = [
-  "Looks good — ship it",
+  "Looks good - ship it",
   "Meets all acceptance criteria",
   "Reviewed with the client",
 ] as const;
@@ -51,21 +51,21 @@ export interface DecisionPanelProps {
   agentName: string;
   reason: string;
   setReason: (v: string) => void;
-  /** Hard-failing deterministic checks — approving overrides them (note required). */
+  /** Hard-failing deterministic checks - approving overrides them (note required). */
   failingCount: number;
   resolvedDecision: GateDecision | null;
-  /** Decision in flight — buttons spin + disable (shared with the mobile bar). */
+  /** Decision in flight - buttons spin + disable (shared with the mobile bar). */
   submitting?: boolean;
   onApproveRequest: () => void;
   onReject: () => void;
   onAnswer: () => void;
-  /** Root-cause reject targets in chain order (vision §2) — picker shown when >1. */
+  /** Root-cause reject targets in chain order (vision §2) - picker shown when >1. */
   rejectTargets?: RejectTarget[];
   rejectTarget?: RejectTarget | null;
   onRejectTargetChange?: (t: RejectTarget) => void;
-  /** "proposed from AM-144-QA-1's root-cause trace…" — when the report proposed it. */
+  /** "proposed from AM-144-QA-1's root-cause trace…" - when the report proposed it. */
   rejectProposalNote?: string | null;
-  /** Agents downstream of the selected target — stale, re-run forward. */
+  /** Agents downstream of the selected target - stale, re-run forward. */
   rejectCascadeNames?: string[];
 }
 
@@ -148,7 +148,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
           <div className="rounded border border-status-error/40 bg-status-error/10 px-2.5 py-2 flex items-start gap-2">
             <ShieldAlert className="size-3.5 text-status-error shrink-0 mt-0.5" />
             <p className="text-[11px] text-status-error leading-relaxed">
-              {failingCount} structural {failingCount === 1 ? "check is" : "checks are"} failing —
+              {failingCount} structural {failingCount === 1 ? "check is" : "checks are"} failing -
               approving overrides {failingCount === 1 ? "it" : "them"}; your note is required.
             </p>
           </div>
@@ -157,7 +157,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
         {!isClarification && rejectTargets.length > 1 && (
           <div className="space-y-1.5">
             <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
-              Reject sends back to — the root cause
+              Reject sends back to - the root cause
             </div>
             <div className="flex flex-wrap gap-1.5" role="group" aria-label="Reject target">
               {rejectTargets.map((t) => (
@@ -182,7 +182,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
             )}
             {rejectCascadeNames.length > 0 && (
               <p className="text-[10px] font-mono text-muted-foreground">
-                {rejectTarget?.agentName} re-runs first — downstream{" "}
+                {rejectTarget?.agentName} re-runs first - downstream{" "}
                 {rejectCascadeNames.join(", ")} are stale and re-run forward.
               </p>
             )}
@@ -224,8 +224,8 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
             rows={4}
             placeholder={
               isClarification
-                ? "Type your answer — it becomes the agent's added context."
-                : "Why is this good enough to ship? Rejections require a typed reason (min 10 chars) — it becomes the agent's added context on rerun."
+                ? "Type your answer - it becomes the agent's added context."
+                : "Why is this good enough to ship? Rejections require a typed reason (min 10 chars) - it becomes the agent's added context on rerun."
             }
             className="w-full rounded-md border border-border bg-white/5 px-2.5 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/50 resize-none"
           />
@@ -258,7 +258,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
               onClick={onReject}
               title={
                 rejectDisabled
-                  ? `Reject requires a typed reason (min ${REJECT_REASON_MIN_CHARS} chars) — it becomes the agent's added context on rerun.`
+                  ? `Reject requires a typed reason (min ${REJECT_REASON_MIN_CHARS} chars) - it becomes the agent's added context on rerun.`
                   : undefined
               }
               className="h-9 rounded-md border border-status-error/50 bg-status-error/15 text-status-error text-xs font-semibold uppercase tracking-wider disabled:opacity-40 hover:bg-status-error/25 transition-colors inline-flex items-center justify-center gap-1.5"
@@ -288,7 +288,7 @@ export const DecisionPanel = forwardRef<HTMLTextAreaElement, DecisionPanelProps>
                   {p.feedback && p.feedback.length > 0 && (
                     <ul className="mt-1 space-y-0.5 text-muted-foreground">
                       {p.feedback.map((f, j) => (
-                        <li key={j} className="pl-2">— {f}</li>
+                        <li key={j} className="pl-2">- {f}</li>
                       ))}
                     </ul>
                   )}

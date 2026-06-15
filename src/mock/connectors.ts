@@ -3,10 +3,10 @@
  * standalone /connections hub.
  *
  * Selectability (owner call 2026-06-12): in the demo EVERY connector is
- * connectable via the simulated OAuth flow EXCEPT Microsoft Teams — the
+ * connectable via the simulated OAuth flow EXCEPT Microsoft Teams - the
  * one deliberate "roadmap / request access" tile, because the comms canon
  * is Slack-first (Teams follows). The PRODUCTION first wave remains
- * Teamwork/Slack/GitHub — that truth lives in the pitch copy, not in the
+ * Teamwork/Slack/GitHub - that truth lives in the pitch copy, not in the
  * tile badges (the whole wizard is simulated; see the pitch parenthetical
  * "OAuth is simulated in the demo; the real connector vault is build
  * step 3").
@@ -57,7 +57,7 @@ export const CONNECTORS: Connector[] = [
     category: "ticketing",
     availability: "live",
     direction: "inbound",
-    description: "Pulls scoped tickets from your Teamwork board — it stays the source of truth.",
+    description: "Pulls scoped tickets from your Teamwork board - it stays the source of truth.",
     scopes: [
       {
         id: "tw-read-projects",
@@ -116,7 +116,7 @@ export const CONNECTORS: Connector[] = [
     category: "scm",
     availability: "live",
     direction: "bidirectional",
-    description: "Branches, PRs and checks — where the Dev, Review and QA agents do their work.",
+    description: "Branches, PRs and checks - where the Dev, Review and QA agents do their work.",
     scopes: [
       {
         id: "gh-read-repo",
@@ -151,7 +151,7 @@ export const CONNECTORS: Connector[] = [
     category: "ticketing",
     availability: "live",
     direction: "inbound",
-    description: "Jira board intake with status write-back — the second tracker doorbell.",
+    description: "Jira board intake with status write-back - the second tracker doorbell.",
     scopes: [
       {
         id: "ji-read-issues",
@@ -239,7 +239,7 @@ export const CONNECTORS: Connector[] = [
     availability: "roadmap",
     direction: "outbound",
     description:
-      "Gates, clarifications and digests in Teams channels — Slack is first; Teams follows on our roadmap.",
+      "Gates, clarifications and digests in Teams channels - Slack is first; Teams follows on our roadmap.",
     scopes: [
       {
         id: "mt-read-channels",
@@ -387,7 +387,7 @@ export const CONNECTORS: Connector[] = [
     availability: "live",
     direction: "bidirectional",
     description:
-      "Runs the QA agent's end-to-end suites (web + mobile web) — results, traces and screenshots land in the qa-report. The QA gate can't verify without it.",
+      "Runs the QA agent's end-to-end suites (web + mobile web) - results, traces and screenshots land in the qa-report. The QA gate can't verify without it.",
     scopes: [
       {
         id: "pw-run-suites",
@@ -414,7 +414,7 @@ export const CONNECTORS: Connector[] = [
 /**
  * Mandatory connectors (owner call, 2026-06-12): the QA agent cannot verify
  * a ticket without its test runner, so Playwright ships in every blueprint
- * and is always on the suggested shelf — flagged, never skippable into a
+ * and is always on the suggested shelf - flagged, never skippable into a
  * "ready" pod (gating stays amber-flag, never hard-block, per D2).
  */
 export const MANDATORY_CONNECTOR_IDS = new Set<ConnectorId>(["playwright"]);
@@ -427,7 +427,7 @@ export function connectorById(id: ConnectorId): Connector {
 
 
 /* ------------------------------------------------------------------ */
-/* Status write-back mapping (ticketing connectors — ConnectDialog)    */
+/* Status write-back mapping (ticketing connectors - ConnectDialog)    */
 /* ------------------------------------------------------------------ */
 
 export interface StatusMapRow {
@@ -438,7 +438,7 @@ export interface StatusMapRow {
 /** Default pod-stage → client-workflow-status mapping, per ticketing connector. */
 export const STATUS_MAP_DEFAULT: Partial<Record<ConnectorId, StatusMapRow[]>> = {
   teamwork: [
-    { podStage: "Spec approved", clientStatus: "To Do — Refined" },
+    { podStage: "Spec approved", clientStatus: "To Do - Refined" },
     { podStage: "In design", clientStatus: "In Progress" },
     { podStage: "In development", clientStatus: "In Progress" },
     { podStage: "In review/QA", clientStatus: "QA" },
@@ -455,6 +455,6 @@ export const STATUS_MAP_DEFAULT: Partial<Record<ConnectorId, StatusMapRow[]>> = 
 
 /** Mocked list of the client's existing workflow statuses (the select options). */
 export const CLIENT_STATUS_OPTIONS: Partial<Record<ConnectorId, string[]>> = {
-  teamwork: ["Backlog", "To Do — Refined", "In Progress", "QA", "Blocked", "Done"],
+  teamwork: ["Backlog", "To Do - Refined", "In Progress", "QA", "Blocked", "Done"],
   jira: ["Backlog", "Selected for Development", "In Progress", "In Review", "Blocked", "Done"],
 };

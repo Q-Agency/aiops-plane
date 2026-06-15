@@ -1,8 +1,8 @@
 /**
- * RoleLandingRouter — the role-scoped "/" switch (My Workspace, mock mode).
+ * RoleLandingRouter - the role-scoped "/" switch (My Workspace, mock mode).
  *
  * Mounted at the TOP of the standard-mode Overview (RUN landing) (it wraps Row 0,
- * the RoiHeroRow slot — index.tsx itself is frozen this slice):
+ * the RoiHeroRow slot - index.tsx itself is frozen this slice):
  *   pod_admin / eng_lead → the existing PM cockpit, untouched, plus a small
  *                          ghost "Switch view" row (a PM demo affordance);
  *   qa_lead              → ScopedGateLanding (QA gate queue + posture rail);
@@ -17,7 +17,7 @@
  * <aside>, and (3) collapse the two-column grid to one column. Selectors are
  * anchored on direct-child `:has()` chains so nothing outside the frozen
  * cockpit layout can ever match. Removing the section restores the cockpit
- * byte-for-byte — zero regression for the PM view.
+ * byte-for-byte - zero regression for the PM view.
  */
 
 import type { ReactNode } from "react";
@@ -43,7 +43,7 @@ div:has(> [data-role-takeover]) + aside { display: none !important; }
 div:has(> div > [data-role-takeover]) { display: block !important; }
 `;
 
-/** The PM-cockpit "Switch view" ghost row — cycles personas for demoing. */
+/** The PM-cockpit "Switch view" ghost row - cycles personas for demoing. */
 function SwitchViewRow({ role, setRole }: { role: RoleId; setRole: (r: RoleId) => void }) {
   return (
     <div className="flex items-center justify-end gap-1 flex-wrap">
@@ -56,7 +56,7 @@ function SwitchViewRow({ role, setRole }: { role: RoleId; setRole: (r: RoleId) =
           key={r.id}
           type="button"
           onClick={() => setRole(r.id)}
-          title={`Preview the ${r.label} landing — demo affordance, no re-login`}
+          title={`Preview the ${r.label} landing - demo affordance, no re-login`}
           className={cn(
             "text-[10px] font-mono rounded px-1.5 py-0.5 border transition-colors",
             role === r.id
@@ -75,7 +75,7 @@ export function RoleLandingRouter({ children }: { children: ReactNode }) {
   const { role, setRole } = useViewRole();
   const landing = viewLandingFor(role);
 
-  // PM cockpit (pod_admin; eng_lead previews the same operator cockpit) —
+  // PM cockpit (pod_admin; eng_lead previews the same operator cockpit) -
   // children render exactly as today, plus the Switch-view ghost row.
   if (landing === "cockpit") {
     return (
@@ -86,7 +86,7 @@ export function RoleLandingRouter({ children }: { children: ReactNode }) {
     );
   }
 
-  // Non-PM landing — takeover. The RoleRibbon always offers the way home,
+  // Non-PM landing - takeover. The RoleRibbon always offers the way home,
   // so cycling personas can never strand the user.
   return (
     <section data-role-takeover className="min-w-0 space-y-4 lg:space-y-5">

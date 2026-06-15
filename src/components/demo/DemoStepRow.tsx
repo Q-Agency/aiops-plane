@@ -1,5 +1,5 @@
 /**
- * DemoStepRow (wave-2 COMPLETION) — one beat of the Demo Director's step
+ * DemoStepRow (wave-2 COMPLETION) - one beat of the Demo Director's step
  * list: state dot (pending / current / fired), mono script timestamp, and
  * the verbatim script label. The current step glows; fired steps tick.
  */
@@ -16,7 +16,7 @@ export function DemoStepRow({ step, status }: { step: DemoStep; status: DemoStep
         "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
         status === "current" && "bg-primary/10 ring-1 ring-primary/40",
       )}
-      title={`${step.at} — ${step.label}`}
+      title={`${step.at} - ${step.label}`}
     >
       <span className="w-4 shrink-0 grid place-items-center">
         {status === "fired" ? (

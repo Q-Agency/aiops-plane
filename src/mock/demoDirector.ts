@@ -1,8 +1,8 @@
 /**
- * Demo Director engine (wave-2 COMPLETION) — the staged-event driver behind
+ * Demo Director engine (wave-2 COMPLETION) - the staged-event driver behind
  * the hidden ⌘⇧D presenter overlay. Each step of the 3-minute script fires
  * a staged mutation into the EXISTING mock stores (tickets, approvals,
- * incidents, notifications) — nothing in the product is special-cased; the
+ * incidents, notifications) - nothing in the product is special-cased; the
  * surfaces just react via useDemoTick(). The same engine ships later as the
  * guided Sample-pod onboarding tour (vision: demo infra = onboarding).
  *
@@ -11,7 +11,7 @@
  *    double-seeds). The guard lives in the beat functions themselves, so any
  *    future direct binding of a beat (e.g. a landing CTA) shares it.
  *  - RESTORABLE: checkpoints restore by clear-and-reapply over the staged
- *    overlay ONLY — appended notifications are removed, flipped seed fields
+ *    overlay ONLY - appended notifications are removed, flipped seed fields
  *    are put back from captured before-values; seeded data is never reshaped.
  *  - LEDGER-HONEST: the only session-ledger write is `pod.launched` (the one
  *    staged beat inside the audit vocabulary), written at most once per
@@ -34,7 +34,7 @@ export const DEMO_POD_ID = "automarket";
 export const DEMO_SCRIPT_NAME = "3-minute pod demo";
 
 /* ------------------------------------------------------------------ */
-/* Staged overlay — everything the Director adds/flips, and how to undo */
+/* Staged overlay - everything the Director adds/flips, and how to undo */
 /* ------------------------------------------------------------------ */
 
 /** Step ids fired this session (the idempotency + step-list state). */
@@ -46,7 +46,7 @@ const stagedNotifs: AppNotification[] = [];
 /** Reverse-order undos for seed-field flips (restore = run in reverse). */
 const flipUndos: Array<() => void> = [];
 
-/** Audit rows are append-only — never re-written across checkpoint resets. */
+/** Audit rows are append-only - never re-written across checkpoint resets. */
 const auditedOnce = new Set<string>();
 
 function markFired(stepId: string): boolean {
@@ -93,16 +93,16 @@ function clearStaged(): void {
 }
 
 /* ------------------------------------------------------------------ */
-/* Beats — each mutates the existing stores, then bumps the demo bus    */
+/* Beats - each mutates the existing stores, then bumps the demo bus    */
 /* ------------------------------------------------------------------ */
 
-/** 0:00 — LAUNCH complete · pod live. */
+/** 0:00 - LAUNCH complete · pod live. */
 export function fireUpComplete(podId: string = DEMO_POD_ID): void {
   if (!markFired("fireup")) return;
   auditOncePerSession(`pod.launched:${podId}`, {
     action: "pod.launched",
     target: `pod ${podId}`,
-    detail: "LAUNCH complete — pod live (staged demo)",
+    detail: "LAUNCH complete - pod live (staged demo)",
   });
   stageNotification({
     recipientId: CURRENT_USER_ID,
@@ -118,10 +118,10 @@ export function fireUpComplete(podId: string = DEMO_POD_ID): void {
 }
 
 /**
- * 0:30 — AM-142 dragged to Ready · pod starts (the tracker-boundary beat:
+ * 0:30 - AM-142 dragged to Ready · pod starts (the tracker-boundary beat:
  * the client's drag is the doorbell; the chain runs inside Agency OS).
  * TRUTHFUL under the demo pod's confirm-first default: the drag SENT the
- * ticket and the operator's confirmation started it — so the narration
+ * ticket and the operator's confirmation started it - so the narration
  * says "sent … start confirmed", and start provenance stays the default
  * operator-confirmed ("drag-to-ready" is reserved for auto-start starts).
  */
@@ -133,7 +133,7 @@ export function seedInflow(podId: string = DEMO_POD_ID): void {
     kind: "delivered",
     severity: "info",
     title: "AM-142 dragged to Ready · pod starts",
-    body: `Vehicle search with filters — the drag on the client board sent it to ${podId}; start confirmed (confirm-first). BA picked it up (drafting spec.md).`,
+    body: `Vehicle search with filters - the drag on the client board sent it to ${podId}; start confirmed (confirm-first). BA picked it up (drafting spec.md).`,
     actorId: "ba",
     ticketId: "AM-142",
     deepLink: "/pipeline",
@@ -142,7 +142,7 @@ export function seedInflow(podId: string = DEMO_POD_ID): void {
   bumpDemo();
 }
 
-/** 0:45 — BA asks a clarification (seeded gate re-timed to "just now" + bell pulse). */
+/** 0:45 - BA asks a clarification (seeded gate re-timed to "just now" + bell pulse). */
 export function openClarification(ticketId: string = "AM-142"): void {
   if (!markFired("clarification")) return;
   flipGate(`clar-${ticketId}`);
@@ -151,7 +151,7 @@ export function openClarification(ticketId: string = "AM-142"): void {
     kind: "clarification_gate",
     severity: "warning",
     title: `Clarification needed · ${ticketId}`,
-    body: "BA Agent asks: saved filter chips — per account or per device?",
+    body: "BA Agent asks: saved filter chips - per account or per device?",
     actorId: "ba",
     ticketId,
     entityId: `clar-${ticketId}`,
@@ -164,7 +164,7 @@ export function openClarification(ticketId: string = "AM-142"): void {
   bumpDemo();
 }
 
-/** 1:30 — design gate goes stale → escalation (esc1 is seeded in comms.ts; the staged beat is the routed alert). */
+/** 1:30 - design gate goes stale → escalation (esc1 is seeded in comms.ts; the staged beat is the routed alert). */
 export function raiseEscalation(ticketId: string = "AM-138"): void {
   if (!markFired("escalation")) return;
   stageNotification({
@@ -172,7 +172,7 @@ export function raiseEscalation(ticketId: string = "AM-138"): void {
     kind: "escalation",
     severity: "critical",
     title: "Escalation · design gate stale 26h",
-    body: `${ticketId} design.md v2 over SLA — 2 downstream tickets blocked. Routed to Marin.`,
+    body: `${ticketId} design.md v2 over SLA - 2 downstream tickets blocked. Routed to Marin.`,
     actorId: "sa",
     ticketId,
     entityId: "esc1",
@@ -183,7 +183,7 @@ export function raiseEscalation(ticketId: string = "AM-138"): void {
   bumpDemo();
 }
 
-/** 1:35 — incident opens (flips the seeded QA-down incident to open/just-now). */
+/** 1:35 - incident opens (flips the seeded QA-down incident to open/just-now). */
 export function openIncident(incidentId: string = "inc-1"): void {
   if (!markFired("incident")) return;
   flipIncident(incidentId, { status: "open", openedMinAgo: 0 });
@@ -192,7 +192,7 @@ export function openIncident(incidentId: string = "inc-1"): void {
     kind: "incident_opened",
     severity: "critical",
     title: "Incident · QA Agent down",
-    body: "Liveness lost just now — suggested action: Restart agent.",
+    body: "Liveness lost just now - suggested action: Restart agent.",
     actorId: null,
     entityId: incidentId,
     deepLink: "/incidents",
@@ -203,7 +203,7 @@ export function openIncident(incidentId: string = "inc-1"): void {
   bumpDemo();
 }
 
-/** 1:50 — BA run completes · spec → review (ticket to Spec Review + gate re-timed). */
+/** 1:50 - BA run completes · spec → review (ticket to Spec Review + gate re-timed). */
 export function completeBaRun(ticketId: string = "AM-142"): void {
   if (!markFired("ba-run-complete")) return;
   flipTicket(ticketId, { stage: "spec-review", state: "waiting", updatedAt: Date.now() });
@@ -213,7 +213,7 @@ export function completeBaRun(ticketId: string = "AM-142"): void {
     kind: "approval_gate",
     severity: "warning",
     title: `Spec approval waiting · ${ticketId}`,
-    body: "spec.md v3 ready — 8/8 structural checks pass. Awaiting your sign-off.",
+    body: "spec.md v3 ready - 8/8 structural checks pass. Awaiting your sign-off.",
     actorId: "ba",
     ticketId,
     entityId: `appr-${ticketId}`,
@@ -226,14 +226,14 @@ export function completeBaRun(ticketId: string = "AM-142"): void {
   bumpDemo();
 }
 
-/** 2:45 — validator panel: the moat close (highlight-only beat — no store mutation). */
+/** 2:45 - validator panel: the moat close (highlight-only beat - no store mutation). */
 export function moatClose(): void {
   if (!markFired("moat")) return;
   bumpDemo();
 }
 
 /* ------------------------------------------------------------------ */
-/* Script — the step list the overlay renders verbatim                  */
+/* Script - the step list the overlay renders verbatim                  */
 /* ------------------------------------------------------------------ */
 
 export interface DemoStep {
@@ -242,7 +242,7 @@ export interface DemoStep {
   at: string;
   /** Parsed seconds for the auto-advance timer. */
   atSec: number;
-  /** Script beat — the row renders "{at} — {label}". */
+  /** Script beat - the row renders "{at} - {label}". */
   label: string;
   /** Idempotent staged mutation (re-fire = no-op). */
   fire: () => void;
@@ -264,7 +264,7 @@ export const DEMO_STEPS: DemoStep[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Checkpoints — snapshot/restore over the staged overlay only          */
+/* Checkpoints - snapshot/restore over the staged overlay only          */
 /* ------------------------------------------------------------------ */
 
 export interface DemoCheckpoint {

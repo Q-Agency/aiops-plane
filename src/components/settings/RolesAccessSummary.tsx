@@ -1,5 +1,5 @@
 /**
- * RolesAccessSummary — the Settings "Roles & Access" tab: an inline
+ * RolesAccessSummary - the Settings "Roles & Access" tab: an inline
  * five-role summary (member counts + read-only badges) that links out to
  * the full /settings/roles screen. Standard (mock) experience only.
  */
@@ -25,7 +25,7 @@ export function RolesAccessSummary() {
         </Button>
       </div>
       <p className="text-xs text-muted-foreground max-w-3xl">
-        Who sees what, and who can act — the five role personas that shape every member&apos;s
+        Who sees what, and who can act - the five role personas that shape every member&apos;s
         landing and gate attribution. Enforcement arrives with sign-in (auth v2).
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
@@ -49,7 +49,7 @@ export function RolesAccessSummary() {
         })}
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Mocked RBAC — roles are designed now; access is not yet enforced server-side.
+        Mocked RBAC - roles are designed now; access is not yet enforced server-side.
       </p>
     </section>
   );

@@ -1,5 +1,5 @@
 /**
- * /incidents — Incidents & Recovery (C5). Deep-linkable via ?incident=<id>
+ * /incidents - Incidents & Recovery (C5). Deep-linkable via ?incident=<id>
  * (bell notifications, ⌘K, /comms escalations).
  */
 

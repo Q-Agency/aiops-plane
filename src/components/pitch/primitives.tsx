@@ -1,9 +1,9 @@
 /**
- * /pitch primitives — building blocks for the client-clean product brief.
+ * /pitch primitives - building blocks for the client-clean product brief.
  *
  * Same client-clean approach as /share/$token (.share-clean scope in
  * styles.css): light-first, print-friendly, NO neon/glow/scanline, explicit
- * light colors only. This is a reading document — body copy ≥ 14px.
+ * light colors only. This is a reading document - body copy ≥ 14px.
  * The printed page is the approval pack: demo pills hide on print, tables
  * and cards avoid page-breaks inside themselves.
  */
@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
 /* Document section                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Anchored section block — ids come verbatim from the copy's SECTION NAV. */
+/** Anchored section block - ids come verbatim from the copy's SECTION NAV. */
 export function PitchSection({
   id,
   kicker,
@@ -39,7 +39,7 @@ export function PitchSection({
   );
 }
 
-/** Body paragraph — 15px on a 28px line; the document's reading size. */
+/** Body paragraph - 15px on a 28px line; the document's reading size. */
 export function P({ children }: { children: ReactNode }) {
   return <p className="text-[15px] leading-7 text-slate-700">{children}</p>;
 }
@@ -63,15 +63,15 @@ export function Bullet({ children }: { children: ReactNode }) {
 /* ------------------------------------------------------------------ */
 
 /**
- * [DEMO: /route — label] marker → small inline "See it live →" pill.
- * Plain <a>: these cross the auth boundary intentionally — logged-out
+ * [DEMO: /route - label] marker → small inline "See it live →" pill.
+ * Plain <a>: these cross the auth boundary intentionally - logged-out
  * viewers land on /login, which is correct. Hidden in print.
  */
 export function DemoPill({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}
-      title={`${label} — ${href}`}
+      title={`${label} - ${href}`}
       aria-label={`See it live: ${label} (${href})`}
       className="mx-1 inline-flex translate-y-[-1px] items-center gap-1.5 whitespace-nowrap rounded-full border border-indigo-300 bg-indigo-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-indigo-700 no-underline shadow-sm transition-all hover:border-indigo-500 hover:bg-indigo-100 hover:text-indigo-900 hover:shadow print:hidden"
     >
@@ -83,7 +83,7 @@ export function DemoPill({ href, label }: { href: string; label: string }) {
   );
 }
 
-/** Non-link pill for in-app shortcuts (the Copilot's ⌘J — no route to link). */
+/** Non-link pill for in-app shortcuts (the Copilot's ⌘J - no route to link). */
 export function ShortcutPill({ children, label }: { children: ReactNode; label: string }) {
   return (
     <span
@@ -105,7 +105,7 @@ export function StatChip({ children }: { children: ReactNode }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tables — clean, bordered, print-safe                                 */
+/* Tables - clean, bordered, print-safe                                 */
 /* ------------------------------------------------------------------ */
 
 export const tbl = {

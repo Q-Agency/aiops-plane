@@ -1,5 +1,5 @@
 /**
- * Validators — the shared check-id vocabulary for the zero-LLM structural moat.
+ * Validators - the shared check-id vocabulary for the zero-LLM structural moat.
  *
  * These are BA's REAL validator registry ids (mirrors `_STRUCTURAL_CHECK_IDS`
  * in the BA repo, agents/ba/pipeline/validators.py). 8 deterministic,
@@ -7,8 +7,8 @@
  *
  * Consumed by: the Gate Review validator panel (/approvals/$gateId), the
  * Governance moat walls (/governance), and any surface that renders the
- * "DETERMINISTIC — NO MODEL IN THE LOOP" badge. Define the vocabulary ONCE
- * here — never re-declare check ids elsewhere.
+ * "DETERMINISTIC - NO MODEL IN THE LOOP" badge. Define the vocabulary ONCE
+ * here - never re-declare check ids elsewhere.
  *
  * Honest language: these prove the spec is WELL-FORMED (structural), not
  * that it is the right idea (semantic).
@@ -25,7 +25,7 @@ export type ValidatorCheckId =
   | "V9_duplicate_ids"; //              no duplicate IDs within an owning section
 
 /**
- * SA design check ids (sa-design family) — the DESIGN artifact's own
+ * SA design check ids (sa-design family) - the DESIGN artifact's own
  * deterministic structural checks. Deliberately a separate, 7-check family:
  * "the 8 validators" is the BA's moat claim and never describes these.
  */
@@ -33,15 +33,15 @@ export type DesignCheckId =
   | "D1_spec_coverage" //          every spec AC maps to ≥1 design section
   | "D2_interface_contracts" //    every endpoint declares auth + notes/schema
   | "D3_data_model_integrity" //   every FK/reference resolves to a defined entity
-  | "D4_component_reachability" // no orphan components — consumed or marked entry
+  | "D4_component_reachability" // no orphan components - consumed or marked entry
   | "D5_failure_modes" //          every external dependency states timeout/retry/fallback
   | "D6_nfr_budget" //             latency budget decomposed within the spec bound
   | "D7_consumed_version_pin"; //  header pins the spec version consumed
 
 /**
- * QA check ids (qa-report family) — the QA REPORT's own deterministic
+ * QA check ids (qa-report family) - the QA REPORT's own deterministic
  * structural checks. They verify the report's shape (coverage, links,
- * evidence), never whether the product works — a structurally perfect
+ * evidence), never whether the product works - a structurally perfect
  * report can still say "HOLD".
  */
 export type QaCheckId =
@@ -62,10 +62,10 @@ export interface ValidatorCheck {
   id: AnyCheckId;
   /** Short display label, e.g. "V1 - EARS coverage". */
   label: string;
-  /** One-line "what this checks" descriptor — same on every artifact. */
+  /** One-line "what this checks" descriptor - same on every artifact. */
   descriptor: string;
   kind: "structural";
-  /** Always true — pure functions over the spec, no model in the loop. */
+  /** Always true - pure functions over the spec, no model in the loop. */
   deterministic: true;
   status: ValidatorStatus;
   /** Per-artifact result detail line. */
@@ -95,7 +95,7 @@ export const CHECK_LABELS: Record<ValidatorCheckId, string> = {
 };
 
 export const CHECK_DESCRIPTORS: Record<ValidatorCheckId, string> = {
-  V1_ears_coverage: "Every acceptance criterion is EARS-formatted — coverage ≥ 80%",
+  V1_ears_coverage: "Every acceptance criterion is EARS-formatted - coverage ≥ 80%",
   V2_missing_section: "All canonical SPEC.md sections present",
   V4_ac_id_parity: "AC IDs match between Sections 4 ↔ 11",
   V5_br_references: "Every referenced business rule exists in Section 5",
@@ -108,11 +108,11 @@ export const CHECK_DESCRIPTORS: Record<ValidatorCheckId, string> = {
 /** Family tag rendered beside BA spec-check results (matches model provenance). */
 export const BA_VALIDATOR_FAMILY = "ba-spec@1.4.2";
 
-/** Exact badge copy — reuse verbatim wherever the moat is rendered. */
-export const DETERMINISTIC_BADGE = "DETERMINISTIC — NO MODEL IN THE LOOP";
+/** Exact badge copy - reuse verbatim wherever the moat is rendered. */
+export const DETERMINISTIC_BADGE = "DETERMINISTIC - NO MODEL IN THE LOOP";
 export const LLM_ADVISORY_BADGE = "LLM-ADVISORY";
 export const STRUCTURAL_HONESTY_LINE =
-  "Structural quality, not semantic — we check the shape of the spec, not whether it's the right idea.";
+  "Structural quality, not semantic - we check the shape of the spec, not whether it's the right idea.";
 
 function check(
   id: ValidatorCheckId,
@@ -130,7 +130,7 @@ function check(
   };
 }
 
-/** Sample set — all 8 checks passing (the AM-142 approval beat). */
+/** Sample set - all 8 checks passing (the AM-142 approval beat). */
 export const VALIDATOR_SET_ALL_PASS: ValidatorCheck[] = [
   check("V1_ears_coverage", "pass", "7/7 ACs EARS-formatted · coverage 100%"),
   check("V2_missing_section", "pass", "16/16 canonical sections present"),
@@ -142,9 +142,9 @@ export const VALIDATOR_SET_ALL_PASS: ValidatorCheck[] = [
   check("V9_duplicate_ids", "pass", "0 duplicate IDs across owning sections"),
 ];
 
-/** Sample set — 6 of 8 passing (demoable imperfection: V1 fails, V6 warns). */
+/** Sample set - 6 of 8 passing (demoable imperfection: V1 fails, V6 warns). */
 export const VALIDATOR_SET_SIX_OF_EIGHT: ValidatorCheck[] = [
-  check("V1_ears_coverage", "fail", "5/7 ACs EARS-formatted · coverage 71% — below the 80% bar"),
+  check("V1_ears_coverage", "fail", "5/7 ACs EARS-formatted · coverage 71% - below the 80% bar"),
   check("V2_missing_section", "pass", "16/16 canonical sections present"),
   check("V4_ac_id_parity", "pass", "AC-1…AC-7 referenced consistently in §4 and §11"),
   check("V5_br_references", "pass", "3 business rules referenced · all defined in §5"),
@@ -163,7 +163,7 @@ export function passedCount(checks: ValidatorCheck[]): number {
   return checks.filter((c) => c.status === "pass").length;
 }
 
-/** 0–100 score = passed / total. */
+/** 0-100 score = passed / total. */
 export function validatorScore(checks: ValidatorCheck[]): number {
   if (checks.length === 0) return 0;
   return Math.round((passedCount(checks) / checks.length) * 100);
@@ -173,7 +173,7 @@ export function validatorScore(checks: ValidatorCheck[]): number {
 export function validatorHeadline(checks: ValidatorCheck[]): string {
   const p = passedCount(checks);
   return p === checks.length
-    ? `Structurally ready — ${p}/${checks.length} checks pass`
+    ? `Structurally ready - ${p}/${checks.length} checks pass`
     : `${p} of ${checks.length} structural checks pass`;
 }
 
@@ -193,7 +193,7 @@ export function validatorsFor(ticketId: string): ValidatorCheck[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* SA design checks (sa-design family) — the design review's own wall   */
+/* SA design checks (sa-design family) - the design review's own wall   */
 /* ------------------------------------------------------------------ */
 
 export const DESIGN_CHECK_LABELS: Record<DesignCheckId, string> = {
@@ -210,7 +210,7 @@ export const DESIGN_CHECK_DESCRIPTORS: Record<DesignCheckId, string> = {
   D1_spec_coverage: "Every spec acceptance criterion maps to ≥1 design section",
   D2_interface_contracts: "Every API endpoint declares auth scope and contract notes",
   D3_data_model_integrity: "Every data-model reference resolves to a defined entity",
-  D4_component_reachability: "No orphan components — each is consumed or marked an entry point",
+  D4_component_reachability: "No orphan components - each is consumed or marked an entry point",
   D5_failure_modes: "Every external dependency states timeout / retry / fallback",
   D6_nfr_budget: "Latency budget decomposed across hops within the spec's bound",
   D7_consumed_version_pin: "Header pins the exact spec version this design consumed",
@@ -218,7 +218,7 @@ export const DESIGN_CHECK_DESCRIPTORS: Record<DesignCheckId, string> = {
 
 /** Honest language for the design family (mirror of STRUCTURAL_HONESTY_LINE). */
 export const DESIGN_HONESTY_LINE =
-  "Structural quality, not semantic — we check the shape of the design, not whether it's the right architecture.";
+  "Structural quality, not semantic - we check the shape of the design, not whether it's the right architecture.";
 
 /** Family tag rendered beside design-check results (matches model provenance). */
 export const DESIGN_VALIDATOR_FAMILY = "sa-design@2.1.0";
@@ -239,7 +239,7 @@ function designCheck(
   };
 }
 
-/** Sample set — all 7 design checks passing (AM-138, the clean review). */
+/** Sample set - all 7 design checks passing (AM-138, the clean review). */
 export const DESIGN_SET_ALL_PASS: ValidatorCheck[] = [
   designCheck("D1_spec_coverage", "pass", "5/5 ACs mapped to design sections"),
   designCheck("D2_interface_contracts", "pass", "4 endpoints · auth scope + notes on all 4"),
@@ -250,9 +250,9 @@ export const DESIGN_SET_ALL_PASS: ValidatorCheck[] = [
   designCheck("D7_consumed_version_pin", "pass", "Header pins spec.md@v2 (the approved version)"),
 ];
 
-/** Sample set — 5 of 7 (AM-140: returned twice; D1 fails, D5 warns). */
+/** Sample set - 5 of 7 (AM-140: returned twice; D1 fails, D5 warns). */
 export const DESIGN_SET_FIVE_OF_SEVEN: ValidatorCheck[] = [
-  designCheck("D1_spec_coverage", "fail", "3/5 ACs mapped — AC-2 and AC-5 have no design section"),
+  designCheck("D1_spec_coverage", "fail", "3/5 ACs mapped - AC-2 and AC-5 have no design section"),
   designCheck("D2_interface_contracts", "pass", "4 endpoints · auth scope + notes on all 4"),
   designCheck("D3_data_model_integrity", "pass", "6 columns · 1 FK resolves (users.user_id)"),
   designCheck("D4_component_reachability", "pass", "5 components · all consumed or entry"),
@@ -277,7 +277,7 @@ export function designValidatorsFor(ticketId: string): ValidatorCheck[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* QA checks (qa-report family) — the QA review's own wall              */
+/* QA checks (qa-report family) - the QA review's own wall              */
 /* ------------------------------------------------------------------ */
 
 export const QA_CHECK_LABELS: Record<QaCheckId, string> = {
@@ -293,16 +293,16 @@ export const QA_CHECK_LABELS: Record<QaCheckId, string> = {
 export const QA_CHECK_DESCRIPTORS: Record<QaCheckId, string> = {
   Q1_ac_test_parity: "Every spec acceptance criterion has ≥1 mapped test",
   Q2_suite_completeness: "All suites in the test plan were executed",
-  Q3_defect_links: "Every failed test links a filed defect — no bare failures",
+  Q3_defect_links: "Every failed test links a filed defect - no bare failures",
   Q4_env_matrix: "The declared environment matrix was fully run",
   Q5_perf_evidence: "NFR criteria carry measured numbers against the budget",
-  Q6_flaky_quarantine: "Flaky/healed tests are recorded — never silently skipped",
+  Q6_flaky_quarantine: "Flaky/healed tests are recorded - never silently skipped",
   Q7_consumed_version_pin: "Report pins the exact PR and spec version it verified",
 };
 
-/** Honest language for the QA family — the sharpest structural-vs-semantic beat. */
+/** Honest language for the QA family - the sharpest structural-vs-semantic beat. */
 export const QA_HONESTY_LINE =
-  "Structural quality, not semantic — we check the shape of the report, not whether the product works. A structurally perfect report can still say HOLD.";
+  "Structural quality, not semantic - we check the shape of the report, not whether the product works. A structurally perfect report can still say HOLD.";
 
 /** Family tag rendered beside QA-check results (matches model provenance). */
 export const QA_VALIDATOR_FAMILY = "qa-report@1.0.7";
@@ -320,7 +320,7 @@ function qaCheck(id: QaCheckId, status: ValidatorStatus, detail: string): Valida
 }
 
 /**
- * AM-144's set: ALL 7 pass — deliberately, while the report itself files
+ * AM-144's set: ALL 7 pass - deliberately, while the report itself files
  * 2 defects and recommends HOLD. The checks prove the report is complete
  * and traceable; the verdict is the report's content. That distinction IS
  * the moat's honesty story.
@@ -331,7 +331,7 @@ export const QA_SET_ALL_PASS: ValidatorCheck[] = [
   qaCheck("Q3_defect_links", "pass", "2 failed tests · both link a filed defect"),
   qaCheck("Q4_env_matrix", "pass", "4/4 environment cells run (chrome/safari × ios/android)"),
   qaCheck("Q5_perf_evidence", "pass", "AC-1 carries measured p95 174ms vs the 200ms budget"),
-  qaCheck("Q6_flaky_quarantine", "pass", "1 healed selector drift recorded — none silently skipped"),
+  qaCheck("Q6_flaky_quarantine", "pass", "1 healed selector drift recorded - none silently skipped"),
   qaCheck("Q7_consumed_version_pin", "pass", "Report pins PR #421 + spec.md@v2"),
 ];
 

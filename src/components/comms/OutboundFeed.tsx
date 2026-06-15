@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Proactive outbound feed (vision §2 "Slack-first communication") — the pod
+ * Proactive outbound feed (vision §2 "Slack-first communication") - the pod
  * talks FIRST, in the tools humans already use. Read-only surface: nothing
  * here mutates or writes audit; deep links are the "optional depth".
  * Mock-only (route already experience-gated).
@@ -149,14 +149,14 @@ export function OutboundFeed() {
           </div>
           <div className="text-sm font-semibold flex items-center gap-2">
             <Megaphone className="size-4 text-primary" />
-            Pushed by the pod — on its own schedule
+            Pushed by the pod - on its own schedule
             <span className="font-mono text-[10px] text-muted-foreground">{OUTBOUND_FEED.length} sends</span>
           </div>
         </div>
         <HonestyChips />
       </div>
       <p className="text-xs text-muted-foreground mt-1 mb-3 max-w-3xl">
-        Humans answer in their own tools — the pod reaches out; the dashboard is optional depth.
+        Humans answer in their own tools - the pod reaches out; the dashboard is optional depth.
       </p>
       <ul className="space-y-1.5">
         {OUTBOUND_FEED.map((item) => (

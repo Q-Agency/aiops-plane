@@ -1,7 +1,7 @@
 /**
  * Tiny display helpers shared by the LAUNCH catalog surfaces
  * (StepBlueprint, StepAgents, PipelinePreview, AgentDetailDialog).
- * Chain facts stay in src/mock/chain.ts — this is presentation only.
+ * Chain facts stay in src/mock/chain.ts - this is presentation only.
  */
 
 import type { ChainRoleId } from "@/mock/chain";

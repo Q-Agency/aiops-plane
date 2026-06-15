@@ -33,13 +33,13 @@ export const approvals: Approval[] = tickets
   .filter(Boolean) as Approval[];
 
 /* ------------------------------------------------------------------ */
-/* Clarification gates — the second HITL gate kind (slice 2, C4)       */
+/* Clarification gates - the second HITL gate kind (slice 2, C4)       */
 /* ------------------------------------------------------------------ */
 
 /**
  * A clarification gate: the agent needs an ANSWER to proceed (vs an
  * approval gate, which is artifact sign-off). Maps to the contract's
- * HITLGate{ kind: "clarification" }. Seeded once here — the bell,
+ * HITLGate{ kind: "clarification" }. Seeded once here - the bell,
  * the Gates queue, and the gate-review surface all key off these ids.
  */
 export interface ClarificationGate {
@@ -68,7 +68,7 @@ export const clarificationGates: ClarificationGate[] = [
       "Vehicle search filters: should saved filter chips persist per account or per device?",
     options: ["Per account (requires auth)", "Per device (localStorage only)"],
     proposedAnswer:
-      "Per account — matches the saved-searches contract already specced in AM-147.",
+      "Per account - matches the saved-searches contract already specced in AM-147.",
     accountable: "ana",
     openedAt: now - 9 * min,
   },
@@ -82,7 +82,7 @@ export const clarificationGates: ClarificationGate[] = [
       "Geo search engine: PostGIS on the existing Postgres, or a dedicated Elasticsearch geo_shape cluster?",
     options: ["PostGIS on existing Postgres", "Elasticsearch geo_shape cluster"],
     proposedAnswer:
-      "PostGIS — reuses the listings DB and ops surface; revisit at >2M active listings.",
+      "PostGIS - reuses the listings DB and ops surface; revisit at >2M active listings.",
     accountable: "marin",
     openedAt: now - 65 * min,
   },
@@ -93,7 +93,7 @@ export function clarificationById(id: string): ClarificationGate | undefined {
 }
 
 /* ------------------------------------------------------------------ */
-/* Mock decision log (C4) — gate decisions write here                  */
+/* Mock decision log (C4) - gate decisions write here                  */
 /* ------------------------------------------------------------------ */
 
 export type GateDecisionVerb = "approved" | "rejected" | "answered";
@@ -114,7 +114,7 @@ export interface GateDecision {
 /**
  * Client-side, in-memory decision log. Approve/Reject/Answer on the gate
  * review surface appends here; /approvals renders resolved rows from it.
- * Mock-only — never a substitute for the real audit ledger.
+ * Mock-only - never a substitute for the real audit ledger.
  */
 export const gateDecisions: GateDecision[] = [];
 
@@ -141,7 +141,7 @@ export function openGateCount(): number {
 }
 
 /* ------------------------------------------------------------------ */
-/* Demo Director seam (wave-2 COMPLETION) — additive flag, never reshapes */
+/* Demo Director seam (wave-2 COMPLETION) - additive flag, never reshapes */
 /* ------------------------------------------------------------------ */
 
 /**

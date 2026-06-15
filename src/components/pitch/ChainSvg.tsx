@@ -1,5 +1,5 @@
 /**
- * ChainSvg (/pitch) — the artifact chain as one static inline SVG:
+ * ChainSvg (/pitch) - the artifact chain as one static inline SVG:
  * spec → design → uix-ui-spec → tasks → code → review → test → release,
  * with knowledge as a pod-wide peer below the rail (no pipeline edges).
  *
@@ -50,7 +50,7 @@ export function ChainSvg() {
       viewBox="0 0 860 178"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="The artifact chain: spec, design, uix-ui-spec, tasks, code, review, test, release — with knowledge as a pod-wide peer. Spec and knowledge operate today; design and code are under construction; uix-ui-spec and test are in preparation."
+      aria-label="The artifact chain: spec, design, uix-ui-spec, tasks, code, review, test, release - with knowledge as a pod-wide peer. Spec and knowledge operate today; design and code are under construction; uix-ui-spec and test are in preparation."
       className="h-auto w-full min-w-[640px]"
     >
       {/* "live today" tag over the spec node */}
@@ -113,7 +113,7 @@ export function ChainSvg() {
         );
       })}
 
-      {/* knowledge — pod-wide peer, deliberately off the rail (no edges); operating today */}
+      {/* knowledge - pod-wide peer, deliberately off the rail (no edges); operating today */}
       <rect
         x={X0}
         y={102}
@@ -133,7 +133,7 @@ export function ChainSvg() {
         fontSize="11.5"
         fill="#065f46"
       >
-        knowledge · pod-wide shared context — operating today
+        knowledge · pod-wide shared context - operating today
       </text>
 
       {/* legend */}

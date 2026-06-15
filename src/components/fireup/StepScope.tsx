@@ -1,5 +1,5 @@
 /**
- * Scope of Work — Connect sub-screen 3b (rendered inside StepConnect once a
+ * Scope of Work - Connect sub-screen 3b (rendered inside StepConnect once a
  * ticketing connector is connected; the canonical six step labels are
  * unchanged).
  *
@@ -124,7 +124,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
   const rule = draft?.scopeRule;
   const triggerMode = useTriggerMode();
 
-  // Mocked ticket fetch — skeleton rows on first render.
+  // Mocked ticket fetch - skeleton rows on first render.
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 550);
@@ -249,7 +249,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
             <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground flex-1">
               {scoped
                 ? `${count} of ${BACKLOG_TOTAL} tickets in scope`
-                : "No scope set — the pod will take nothing until you scope it"}
+                : "No scope set - the pod will take nothing until you scope it"}
             </span>
             {scoped && !zeroMatch && (
               <span className="text-[10px] font-mono text-status-done">
@@ -261,13 +261,13 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
           {zeroMatch && (
             <div className="px-3 py-2 border-b border-border flex items-center gap-2 text-[11px] text-status-waiting bg-status-waiting/5">
               <AlertTriangle className="size-3.5 shrink-0" />
-              This slice matches nothing — the pod will sit idle. Widen the filter?
+              This slice matches nothing - the pod will sit idle. Widen the filter?
             </div>
           )}
           {wholeBacklog && (
             <div className="px-3 py-2 border-b border-border flex items-center gap-2 text-[11px] text-status-waiting bg-status-waiting/5">
               <AlertTriangle className="size-3.5 shrink-0" />
-              This scope takes the whole backlog — confirm that&apos;s intended.
+              This scope takes the whole backlog - confirm that&apos;s intended.
             </div>
           )}
 
@@ -296,7 +296,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
         </div>
       </div>
 
-      {/* Trigger rule — what starts the pod (vision §2, the tracker boundary) */}
+      {/* Trigger rule - what starts the pod (vision §2, the tracker boundary) */}
       <div className="rounded-md border border-border bg-panel/40 backdrop-blur-md p-4 space-y-4">
         <div className="flex items-center gap-2">
           <BellRing className="size-3.5 text-muted-foreground" />
@@ -308,7 +308,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground flex items-center gap-1.5">
-              Start column — the doorbell
+              Start column - the doorbell
               <span className="px-1.5 py-0.5 rounded border border-dashed border-border bg-white/5 text-muted-foreground">
                 Roadmap
               </span>
@@ -325,7 +325,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
             </Select>
             <p className="text-[11px] text-muted-foreground">
               A scoped ticket entering &lsquo;{TRIGGER_RULE.column}&rsquo; on &lsquo;
-              {TRIGGER_RULE.board}&rsquo; is the start signal — the ticket itself stays in your
+              {TRIGGER_RULE.board}&rsquo; is the start signal - the ticket itself stays in your
               tracker.
             </p>
           </div>
@@ -352,13 +352,13 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
               <label className="flex items-start gap-2 cursor-pointer">
                 <RadioGroupItem value="operator" className="mt-0.5" />
                 <span className="text-xs leading-snug">
-                  <span className="text-foreground">Confirm-first — you approve each arrival</span>{" "}
+                  <span className="text-foreground">Confirm-first - you approve each arrival</span>{" "}
                   <span className="text-[10px] font-mono text-status-done">
                     recommended for new pods
                   </span>
                   <span className="block text-[11px] text-muted-foreground">
                     The board starts everything; each arrival waits for the operator&rsquo;s
-                    confirmation in Work Intake — until trust is earned.
+                    confirmation in Work Intake - until trust is earned.
                   </span>
                 </span>
               </label>
@@ -366,10 +366,10 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
                 <RadioGroupItem value="tracker" className="mt-0.5" />
                 <span className="text-xs leading-snug">
                   <span className="text-foreground">
-                    Auto-start — the drag starts the chain
+                    Auto-start - the drag starts the chain
                   </span>
                   <span className="block text-[11px] text-muted-foreground">
-                    Entering the start column starts the chain immediately — no confirmation step.
+                    Entering the start column starts the chain immediately - no confirmation step.
                   </span>
                 </span>
               </label>
@@ -398,7 +398,7 @@ export function StepScope({ connectorId = "teamwork" }: { connectorId?: Connecto
           <span className="text-foreground font-medium">
             Everything else stays with your team, untouched.
           </span>{" "}
-          You can widen the slice any time — re-editable post-launch from Connections.
+          You can widen the slice any time - re-editable post-launch from Connections.
         </AlertDescription>
       </Alert>
     </div>

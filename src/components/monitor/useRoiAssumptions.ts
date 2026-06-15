@@ -1,5 +1,5 @@
 /**
- * useRoiAssumptions — the client-side "Edit assumptions" seam behind every
+ * useRoiAssumptions - the client-side "Edit assumptions" seam behind every
  * ROI surface (C2). Reads/writes the localStorage override
  * (ROI_ASSUMPTIONS_STORAGE_KEY, "aiops_roi_assumptions") SSR-safely: the
  * server and first client render use the industry-standard default from
@@ -9,14 +9,14 @@
  * the same tick.
  *
  * PROVENANCE (owner call 2026-06-12): clients rarely share baselines, so
- * the default is "industry-standard" — always labeled — and any edit flips
+ * the default is "industry-standard" - always labeled - and any edit flips
  * it to "client-agreed". Every save/reset lands on the session ledger
  * (policy.changed): a baseline change changes reported ROI, so it is a
  * decision, not a preference.
  *
  * deriveRoi() is the single net-of-plan-fees math: hours→$ uses the
  * (editable) blended rate; the ROI multiple divides by compute + plan fees
- * (aggregates.pricePaidUsd) — never by raw compute alone.
+ * (aggregates.pricePaidUsd) - never by raw compute alone.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -98,7 +98,7 @@ export interface UseRoiAssumptions {
   derived: RoiDerived;
   /** True once the stored override (if any) has been hydrated. */
   mounted: boolean;
-  /** Persist an edit — provenance flips to "client-agreed" (your numbers, not ours). */
+  /** Persist an edit - provenance flips to "client-agreed" (your numbers, not ours). */
   save: (next: { blendedRateUsdPerHr: number; baselineNote: string }) => void;
   /** Drop the override and return to the industry-standard baseline. */
   reset: () => void;
@@ -122,10 +122,10 @@ export function useRoiAssumptions(): UseRoiAssumptions {
     try {
       window.localStorage.setItem(ROI_ASSUMPTIONS_STORAGE_KEY, JSON.stringify(stored));
     } catch {
-      /* storage unavailable — session-only override */
+      /* storage unavailable - session-only override */
     }
     setAssumptions(stored);
-    // A baseline change changes reported ROI — it's a decision, on the record.
+    // A baseline change changes reported ROI - it's a decision, on the record.
     appendAuditMock({
       action: "policy.changed",
       detail: `roi.baseline: $${before.blendedRateUsdPerHr}/h (${roiSourceLabel(before.source)}) → $${stored.blendedRateUsdPerHr}/h (client-agreed)`,

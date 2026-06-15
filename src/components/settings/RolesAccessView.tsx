@@ -1,7 +1,7 @@
 /**
- * RolesAccessView — the /settings/roles screen (wave-2 COMPLETION,
+ * RolesAccessView - the /settings/roles screen (wave-2 COMPLETION,
  * screens-doc "Roles & Access"): the five role personas, their default
- * landings, capability checklists (switches checked-but-disabled — RBAC is
+ * landings, capability checklists (switches checked-but-disabled - RBAC is
  * designed now, enforced when real sign-in lands), and member chips.
  * Empty roles carry the uncovered-risk amber hairline; the footer alert is
  * the auth-deferral honesty note. Standard (mock) experience only
@@ -124,7 +124,7 @@ function RoleCard({ role }: { role: Role }) {
         </Link>
       </div>
 
-      {/* Capability checklist — checked-but-disabled (deferral tooltip) */}
+      {/* Capability checklist - checked-but-disabled (deferral tooltip) */}
       <TooltipProvider delayDuration={150}>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
           {(Object.keys(CAPABILITY_LABELS) as (keyof RoleCapabilities)[]).map((cap) => (
@@ -142,7 +142,7 @@ function RoleCard({ role }: { role: Role }) {
                   <Switch
                     checked={role.capabilities[cap]}
                     disabled
-                    aria-label={`${CAPABILITY_LABELS[cap]} — locked, enforcement arrives with auth v2`}
+                    aria-label={`${CAPABILITY_LABELS[cap]} - locked, enforcement arrives with auth v2`}
                     className="scale-90"
                   />
                 </li>
@@ -161,7 +161,7 @@ function RoleCard({ role }: { role: Role }) {
           <div className="flex items-center gap-2 rounded border border-status-waiting/50 bg-status-waiting/5 px-2.5 py-2 text-[11px] text-status-waiting">
             <Users2 className="size-3.5 shrink-0" />
             <span>
-              No members yet —{" "}
+              No members yet -{" "}
               <Link to="/pod" className="underline underline-offset-2 hover:text-foreground">
                 assign from People &amp; Roles
               </Link>

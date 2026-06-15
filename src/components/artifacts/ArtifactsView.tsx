@@ -1,12 +1,12 @@
 /**
- * ArtifactsView — /artifacts "Deliverables" (wave 2, Blind spot 4): the
+ * ArtifactsView - /artifacts "Deliverables" (wave 2, Blind spot 4): the
  * shelf of everything the pod has produced, snapshotted at gate-clearance.
  *
- *   1. Header — count chip + "Export all" (mock zip → data.exported audit
+ *   1. Header - count chip + "Export all" (mock zip → data.exported audit
  *      row + toast).
- *   2. Filter bar — kind (chain.ts ArtifactKind) · ticket · period ·
+ *   2. Filter bar - kind (chain.ts ArtifactKind) · ticket · period ·
  *      approver (simple local-state selects).
- *   3. ArtifactsTable — approved-by joined from the seeds; gate links to
+ *   3. ArtifactsTable - approved-by joined from the seeds; gate links to
  *      the canonical /approvals/$gateId.
  *   4. Row click → VersionTimeline sheet (rejected-iteration diffs +
  *      SnapshotStamp).
@@ -59,7 +59,7 @@ export function ArtifactsView() {
   const [approver, setApprover] = useState<string>("all");
   const [openSnapshot, setOpenSnapshot] = useState<ArtifactSnapshot | null>(null);
 
-  // Newest clearance first — the renewal-meeting question reads top-down.
+  // Newest clearance first - the renewal-meeting question reads top-down.
   const shelf = useMemo(
     () => [...ARTIFACT_SNAPSHOTS].sort((a, b) => b.approvedAt - a.approvedAt),
     [],
@@ -101,7 +101,7 @@ export function ArtifactsView() {
       target: "artifacts · all",
       detail: `${shelf.length} deliverables · deliverables.zip (mock)`,
     });
-    toast.success("Export prepared — written to audit ledger ✓", {
+    toast.success("Export prepared - written to audit ledger ✓", {
       description: `${shelf.length} deliverables · deliverables.zip (mock) · ${entry.action}`,
     });
   };
@@ -121,7 +121,7 @@ export function ArtifactsView() {
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            What your pod produced — snapshotted at gate-clearance, owned by you.
+            What your pod produced - snapshotted at gate-clearance, owned by you.
           </p>
         </div>
         <div className="flex-1" />
@@ -219,7 +219,7 @@ export function ArtifactsView() {
         <div className="glass-panel p-8 text-center space-y-2">
           <div className="text-sm font-medium">No deliverables match these filters</div>
           <p className="text-xs text-muted-foreground">
-            Every approved artifact stays on the shelf — broaden the filters to see it.
+            Every approved artifact stays on the shelf - broaden the filters to see it.
           </p>
           <button
             type="button"

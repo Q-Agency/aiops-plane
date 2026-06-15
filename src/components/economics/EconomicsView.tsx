@@ -63,16 +63,16 @@ export function EconomicsView() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">Overview / ROI</h1>
           <div className="text-xs text-muted-foreground mt-0.5">
-            The CFO view — hours your pod freed, what shipping actually cost, and where the run-rate is headed vs. your budget cap.
+            The CFO view - hours your pod freed, what shipping actually cost, and where the run-rate is headed vs. your budget cap.
           </div>
         </div>
         <RoiHeadline />
       </div>
 
-      {/* Hero KPI band — the canonical trio, staged honestly (C2) */}
+      {/* Hero KPI band - the canonical trio, staged honestly (C2) */}
       <RoiHeroBand />
 
-      {/* Run-rate vs. budget — bound the unbounded-cost fear */}
+      {/* Run-rate vs. budget - bound the unbounded-cost fear */}
       <BudgetPanel />
 
       {/* Secondary KPI band (operator detail) */}
@@ -158,7 +158,7 @@ export function EconomicsView() {
                             <RefreshCcw className="size-3" /> {reruns}
                             <span className="text-[10px] text-status-error/70">+{fmtUsd(penalty)}</span>
                           </span>
-                        ) : <span className="text-muted-foreground/40">—</span>}
+                        ) : <span className="text-muted-foreground/40">-</span>}
                       </td>
                       <td className="px-3 py-2 text-right font-mono tabular-nums font-semibold">{fmtUsd(total)}</td>
                     </tr>

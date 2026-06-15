@@ -1,5 +1,5 @@
 /**
- * ConnectDialog — OAuth-style mock consent for a connector (LAUNCH step 3
+ * ConnectDialog - OAuth-style mock consent for a connector (LAUNCH step 3
  * + the standalone /connections hub).
  *
  * Connect mode: "{name} is asking to:" scope checklist (write scopes get an
@@ -228,7 +228,7 @@ export function ConnectDialog({
           </div>
         </div>
 
-        {/* Status write-back mapping — ticketing connectors only */}
+        {/* Status write-back mapping - ticketing connectors only */}
         {isTicketing && statusMap.length > 0 && (
           <>
             <Separator />
@@ -265,7 +265,7 @@ export function ConnectDialog({
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                The pod writes status back into <em>your</em> workflow — your board stays the source
+                The pod writes status back into <em>your</em> workflow - your board stays the source
                 of truth for your team.
               </p>
             </div>
@@ -275,7 +275,7 @@ export function ConnectDialog({
         <Alert className="bg-panel/40 border-border">
           <ShieldCheck className="size-4" />
           <AlertDescription className="text-xs text-muted-foreground">
-            Mock connect — no real credentials are stored (vault deferred).
+            Mock connect - no real credentials are stored (vault deferred).
           </AlertDescription>
         </Alert>
 

@@ -1,5 +1,5 @@
 /**
- * /settings/roles — Roles & Access (wave-2 COMPLETION).
+ * /settings/roles - Roles & Access (wave-2 COMPLETION).
  * Un-nested route (settings_.) so it does NOT mount inside /settings.
  * Mock experience only: real-mode users are redirected by mockOnlyBeforeLoad.
  */

@@ -1,9 +1,9 @@
 /**
- * useCopilotAnswers — conversation state for the Pod Copilot (⌘J).
+ * useCopilotAnswers - conversation state for the Pod Copilot (⌘J).
  *
  * Wraps matchCopilot (src/mock/copilot.ts, zero-LLM keyword matching) in a
  * small in-component history: user turns, answers-with-receipts, proposed
- * actions, honest fallbacks. NOTHING EXECUTES UNCONFIRMED — a matched NL op
+ * actions, honest fallbacks. NOTHING EXECUTES UNCONFIRMED - a matched NL op
  * only becomes a ledger row when confirmAction() appends the previewed row
  * via appendAuditMock (pod-store has no pause/resume mutations yet, so the
  * session audit ledger + toast IS the mock execution).
@@ -31,7 +31,7 @@ export type CopilotItem =
       writtenDetail?: string;
     };
 
-/** Keep the in-sheet history small — it's a copilot, not a transcript. */
+/** Keep the in-sheet history small - it's a copilot, not a transcript. */
 const MAX_ITEMS = 40;
 
 /** Mirrors the auditPreview contract: pause intents carry "reason required". */
@@ -40,7 +40,7 @@ export function actionRequiresReason(intent: ProposedAction["intent"]): boolean 
 }
 
 /**
- * The detail field of THE EXACT row a Confirm writes — shared by the
+ * The detail field of THE EXACT row a Confirm writes - shared by the
  * on-card preview and confirmAction so the preview can never drift from
  * what lands on the ledger. Empty reason on a required intent keeps the
  * template placeholder ("reason required") and Confirm stays disabled.
@@ -68,7 +68,7 @@ export interface CopilotConversation {
    * so the caller can finish intent side effects (open-gate navigation).
    */
   confirmAction: (itemId: number, reason: string) => ConfirmedAction | null;
-  /** Dismiss a pending card — nothing executed, nothing written. */
+  /** Dismiss a pending card - nothing executed, nothing written. */
   cancelAction: (itemId: number) => void;
 }
 

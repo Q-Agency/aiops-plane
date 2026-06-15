@@ -71,7 +71,7 @@ function ObservabilityView() {
         </div>
         <h1 className="text-xl font-semibold tracking-tight">Observability</h1>
         <div className="text-xs text-muted-foreground mt-0.5">
-          Cost, infra, traces, overnight reports and system health — one telemetry surface.
+          Cost, infra, traces, overnight reports and system health - one telemetry surface.
         </div>
       </div>
 

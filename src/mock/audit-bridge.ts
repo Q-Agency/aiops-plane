@@ -1,8 +1,8 @@
 /**
- * Session audit overlay (wave 2) — the in-memory ledger every wave-2 screen
+ * Session audit overlay (wave 2) - the in-memory ledger every wave-2 screen
  * writes to (welcome accept, memory ratify/forget, copilot confirms, share
  * views, artifact exports). Entries live for the browser session only and
- * render ON TOP of the seeded compliance AUDIT rows — they are the "written
+ * render ON TOP of the seeded compliance AUDIT rows - they are the "written
  * to the ledger ✓" proof behind every optimistic mock mutation.
  *
  * Ids start at 5001 so session rows are visually distinct from seeds.
@@ -24,7 +24,7 @@ export interface AuditEntryLike {
 }
 
 /* ------------------------------------------------------------------ */
-/* Store — module-level rows + subscriber set                           */
+/* Store - module-level rows + subscriber set                           */
 /* ------------------------------------------------------------------ */
 
 const rows: AuditEntryLike[] = [];
@@ -32,7 +32,7 @@ const subscribers = new Set<() => void>();
 let nextId = 5001;
 
 /**
- * Cached snapshot — useSyncExternalStore must receive a STABLE array
+ * Cached snapshot - useSyncExternalStore must receive a STABLE array
  * reference between appends (a fresh array per getSnapshot call would
  * loop React). Replaced only inside appendAuditMock.
  */

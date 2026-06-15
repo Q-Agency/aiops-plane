@@ -1,9 +1,9 @@
 /**
- * EarsCriteriaList — the EARS acceptance-criteria block of the gate
+ * EarsCriteriaList - the EARS acceptance-criteria block of the gate
  * review (C4). Renders each criterion in EARS shape with per-criterion
  * STRUCTURAL badges (has trigger? measurable response? AC-ID?).
  *
- * Read-only validator state — this is NOT a human checklist; the checks
+ * Read-only validator state - this is NOT a human checklist; the checks
  * come from the deterministic validators, a reviewer can't tick them.
  */
 
@@ -23,7 +23,7 @@ function StructBadge({ ok, label }: { ok: boolean; label: string }) {
           : "border-border bg-white/5 text-muted-foreground",
       )}
     >
-      {label} {ok ? "✓" : "–"}
+      {label} {ok ? "✓" : "-"}
     </span>
   );
 }
@@ -52,7 +52,7 @@ export function EarsCriteriaList({
         </span>
       </div>
       <p className="text-[11px] text-muted-foreground mb-3">
-        Structural readout per criterion — validator state, not a human checklist.
+        Structural readout per criterion - validator state, not a human checklist.
       </p>
       <ul className="space-y-3">
         {criteria.map((c) => (

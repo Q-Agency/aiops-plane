@@ -1,5 +1,5 @@
 /**
- * Accountability acceptance store (/welcome, P1-O2) — "coverage is
+ * Accountability acceptance store (/welcome, P1-O2) - "coverage is
  * accepted, not assigned." ONE seeded human (Ana) is assigned-but-
  * unaccepted until the Accept accountability action runs; the /pod
  * matrix renders her cells amber until then.
@@ -21,13 +21,13 @@ export const UNACCEPTED_HUMAN_ID = "ana";
 export interface AcceptanceRecord {
   /** humans.ts id of the accepting human. */
   humanId: string;
-  /** Agent ids the acceptance covers — one Accept covers all of them. */
+  /** Agent ids the acceptance covers - one Accept covers all of them. */
   agentIds: string[];
   /** Epoch millis at accept time. */
   at: number;
-  /** Session audit row id — the "ledger #{n}" pointer on the stamp. */
+  /** Session audit row id - the "ledger #{n}" pointer on the stamp. */
   ledgerId: number;
-  /** Deputy coverage (covers-not-owns) — the owner accountability stays with. */
+  /** Deputy coverage (covers-not-owns) - the owner accountability stays with. */
   deputyOf?: string;
 }
 
@@ -73,14 +73,14 @@ export function recordAcceptance(rec: AcceptanceRecord): void {
   try {
     window.localStorage.setItem(WELCOME_ACCEPTED_KEY, JSON.stringify(rec));
   } catch {
-    /* storage unavailable — session-only acceptance still works */
+    /* storage unavailable - session-only acceptance still works */
   }
   for (const fn of subscribers) fn();
 }
 
 /**
  * The current acceptance, or null while unaccepted. Server-renders null,
- * then flips to the stored record right after hydration — so /welcome and
+ * then flips to the stored record right after hydration - so /welcome and
  * the /pod matrix react in the same session without a reload.
  */
 export function useAcceptance(): AcceptanceRecord | null {

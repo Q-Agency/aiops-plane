@@ -17,7 +17,7 @@ export function lifecycleStage(status?: string): LifecycleStage | undefined {
     case "delivered":
       return "delivered";
     case "reset":
-      return "reset"; // spec cleared — a fresh run is needed
+      return "reset"; // spec cleared - a fresh run is needed
     case "blocked":
       return "blocked";
     case "error":
@@ -30,7 +30,7 @@ export function lifecycleStage(status?: string): LifecycleStage | undefined {
   }
 }
 
-/** Per-stage chip styling + short label — shared by the Overview work-items table and the
+/** Per-stage chip styling + short label - shared by the Overview work-items table and the
  *  per-agent recent-runs table so an artifact reads the same stage everywhere. Keyed by
  *  LifecycleStage, plus a "done" terminal for a finished run with no richer stage. */
 export const STAGE_META: Record<string, { label: string; cls: string }> = {
@@ -64,7 +64,7 @@ export const STAGE_META: Record<string, { label: string; cls: string }> = {
   error: { label: "error", cls: "text-status-error border-status-error/40 bg-status-error/10" },
 };
 
-/** The lifecycle stage of a single run/turn — prefer the agent's real session status
+/** The lifecycle stage of a single run/turn - prefer the agent's real session status
  *  (carried in `metadata.session_status`), else fall back to the run's execution status.
  *  Returns a key into {@link STAGE_META}. */
 export function runStage(run: Run): string {

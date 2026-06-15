@@ -1,5 +1,5 @@
 /**
- * /artifacts — Deliverables (wave 2, Blind spot 4): the shelf of everything
+ * /artifacts - Deliverables (wave 2, Blind spot 4): the shelf of everything
  * the pod has produced, snapshotted at gate-clearance.
  * Mock experience only: real-mode users are redirected by mockOnlyBeforeLoad.
  */

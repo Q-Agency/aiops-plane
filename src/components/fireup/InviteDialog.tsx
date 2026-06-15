@@ -1,5 +1,5 @@
 /**
- * InviteDialog — invite-by-email mock for the Accountable People step.
+ * InviteDialog - invite-by-email mock for the Accountable People step.
  * Email + role → "Send invite" generates a mocked one-time link, copies it,
  * fires the "Invite sent" toast and hands the invited person back to the
  * roster (optionally auto-assigned to the column that opened the dialog).
@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** Roster card for someone invited during setup (mock — local to the step). */
+/** Roster card for someone invited during setup (mock - local to the step). */
 export interface InvitedPerson {
   id: string;
   name: string;
@@ -86,13 +86,13 @@ export function InviteDialog({ open, onOpenChange, onInvite }: InviteDialogProps
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard unavailable — link is still visible to copy by hand */
+      /* clipboard unavailable - link is still visible to copy by hand */
     }
   };
 
   const handleSend = () => {
     if (!EMAIL_RE.test(email.trim())) {
-      setError("Enter a valid email — couldn't generate invite link.");
+      setError("Enter a valid email - couldn't generate invite link.");
       return;
     }
     setError(null);
@@ -128,7 +128,7 @@ export function InviteDialog({ open, onOpenChange, onInvite }: InviteDialogProps
           <div className="space-y-3">
             <div className="rounded-md border border-status-done/40 bg-status-done/10 px-3 py-2.5 text-xs text-status-done flex items-center gap-2">
               <Check className="size-3.5 shrink-0" />
-              Invitation sent — the link is active until they join.
+              Invitation sent - the link is active until they join.
             </div>
             <div className="flex items-center gap-2 rounded-md border border-border bg-white/[0.03] px-3 py-2">
               <Link2 className="size-3.5 text-muted-foreground shrink-0" />

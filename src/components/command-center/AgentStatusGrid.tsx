@@ -76,7 +76,7 @@ export function AgentStatusGrid() {
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Working on</div>
                 <div className="font-mono text-sm truncate" style={{ color }}>
-                  {a.currentTicketId ?? "—"}
+                  {a.currentTicketId ?? "-"}
                 </div>
                 <div className="text-[10px] text-muted-foreground truncate mt-0.5">
                   {a.lastArtifact ?? "no recent artifact"}

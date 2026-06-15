@@ -160,7 +160,7 @@ function ConnectionsPage() {
             <Label htmlFor="project">
               Project <span className="text-muted-foreground">(optional)</span>
             </Label>
-            <Input id="project" placeholder="—" value={project} onChange={(e) => setProject(e.target.value)} />
+            <Input id="project" placeholder="-" value={project} onChange={(e) => setProject(e.target.value)} />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="key">

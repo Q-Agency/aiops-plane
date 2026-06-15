@@ -1,16 +1,16 @@
 /**
- * LAUNCH step 4 — Accountable People (body only; chrome from WizardShell).
+ * LAUNCH step 4 - Accountable People (body only; chrome from WizardShell).
  *
- * LEFT (~30%): roster rail — org humans (src/mock/humans.ts) + invited
+ * LEFT (~30%): roster rail - org humans (src/mock/humans.ts) + invited
  * people as draggable cards, "Invite by email" pinned on top. Each card
- * shows a load chip ("covers N agents" — one human can cover several).
- * RIGHT (~70%): accountability matrix — one column per selected agent
+ * shows a load chip ("covers N agents" - one human can cover several).
+ * RIGHT (~70%): accountability matrix - one column per selected agent
  * (agent-colored header), one row of assignment slots. Assign by HTML5
  * drag or the per-column Select. An empty column renders the red
  * "⚠ uncovered" risk treatment.
  *
  * Gating per D2: warn-not-block. The WizardShell footer shows the amber
- * "{n} uncovered — you'll be blocked at launch" chip; Readiness is the
+ * "{n} uncovered - you'll be blocked at launch" chip; Readiness is the
  * single hard gate. Assignments persist via usePods().updateDraft.
  */
 
@@ -161,7 +161,7 @@ export function StepPeople() {
         </div>
         <div className="text-sm font-medium">No agents selected yet</div>
         <p className="text-xs text-muted-foreground max-w-md">
-          Accountability maps one human onto each agent — pick the pod&apos;s agents first, then
+          Accountability maps one human onto each agent - pick the pod&apos;s agents first, then
           come back to cover them.
         </p>
         <Button asChild size="sm" variant="outline">
@@ -204,7 +204,7 @@ export function StepPeople() {
           )}
         >
           {covered.length === 0
-            ? "No agents covered yet — drag a person onto each agent."
+            ? "No agents covered yet - drag a person onto each agent."
             : uncoveredCount > 0
               ? `${covered.length} of ${agentIds.length} covered · ${uncoveredCount} uncovered`
               : "Every agent has an accountable human. ✓"}
@@ -275,7 +275,7 @@ export function StepPeople() {
             })}
           </div>
           <div className="px-3 py-2 border-t border-border text-[10px] font-mono text-muted-foreground">
-            Drag a card onto an agent column — or use the column select.
+            Drag a card onto an agent column - or use the column select.
           </div>
         </div>
 
@@ -287,7 +287,7 @@ export function StepPeople() {
               Accountability matrix · {agentIds.length} agents
             </span>
           </div>
-          {/* Wrapping card grid — NEVER a horizontal scroller: with 8 agents
+          {/* Wrapping card grid - NEVER a horizontal scroller: with 8 agents
               (knowledge now mandatory) a fixed-column row forced sideways
               scrolling to reach the far agents (owner UX call, 2026-06-12). */}
           <div className="p-2">

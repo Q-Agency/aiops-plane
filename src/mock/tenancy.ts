@@ -1,10 +1,10 @@
 /**
- * Tenancy — single source of truth for the trust posture (screens-doc
+ * Tenancy - single source of truth for the trust posture (screens-doc
  * appendix, resolves coverage-review #13). Settings "Tenancy & Security"
  * + "Data & retention" read this; the TopBar TenancyBadge and
  * PodDraft.tenancy carry a subset/reference.
  *
- * Connected-tool scopes are derived from connectors.ts — deliberately
+ * Connected-tool scopes are derived from connectors.ts - deliberately
  * NOT a separate shape here.
  */
 
@@ -21,7 +21,7 @@ export interface Retention {
   dataClass: "audit_log" | "runs" | "artifacts" | "comms";
   /** 0 = no auto-delete window (see `locked`). */
   windowDays: number;
-  /** true = window not editable — audit_log is append-only by design. */
+  /** true = window not editable - audit_log is append-only by design. */
   locked: boolean;
   /** Display copy for the row, e.g. the append-only compliance note. */
   note?: string;
@@ -54,7 +54,7 @@ export const retention: Retention[] = [
     dataClass: "artifacts",
     windowDays: 730,
     locked: false,
-    note: "Specs, designs, diffs — the work product.",
+    note: "Specs, designs, diffs - the work product.",
   },
   {
     dataClass: "comms",
@@ -67,7 +67,7 @@ export const retention: Retention[] = [
 /** Options for the retention `select`s (unlocked rows only). */
 export const RETENTION_WINDOW_OPTIONS: number[] = [30, 90, 180, 365, 730];
 
-/** Verbatim Settings copy (screens doc) — the one-paragraph data answer. */
+/** Verbatim Settings copy (screens doc) - the one-paragraph data answer. */
 export const DATA_HANDLING_STATEMENT =
   "Your data lives in a dedicated, isolated database in EU-West. " +
   "Connected-tool access is scoped to the minimum required and shown at connect-time. " +

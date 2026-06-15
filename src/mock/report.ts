@@ -1,9 +1,9 @@
 /**
- * Weekly client report (C8, /reports "Client report" tab) — the
+ * Weekly client report (C8, /reports "Client report" tab) - the
  * sponsor-facing weekly status. CLIENT-CLEAN style (no neon/scanlines),
  * plain language. Headline numbers mirror economics.ts aggregates so
  * figures reconcile across MONITOR; humanHoursSaved DISPLAYS as
- * "human-hours freed" — never "saved/displaced" in sponsor copy.
+ * "human-hours freed" - never "saved/displaced" in sponsor copy.
  */
 
 import type { Stage } from "./types";
@@ -61,7 +61,7 @@ const day = 24 * hr;
 const sla = slaSummary();
 
 export const reports: WeeklyReport[] = [
-  // current week — draft
+  // current week - draft
   {
     id: "rep-2026-w24",
     podId: "automarket",
@@ -92,19 +92,19 @@ export const reports: WeeklyReport[] = [
       atRisk: sla.atRisk,
       breached: sla.breached,
       notable: [
-        "Design review clearance breached on AM-138 (26h vs 8h target) — reassignment in progress.",
+        "Design review clearance breached on AM-138 (26h vs 8h target) - reassignment in progress.",
       ],
     },
     upcoming: [
-      "AM-142 Vehicle search with filters — spec approved, design starts Monday.",
-      "AM-150 VIN decoder service — dev in progress, QA expected midweek.",
-      "AM-139 Image moderation pipeline — spec drafting begins.",
+      "AM-142 Vehicle search with filters - spec approved, design starts Monday.",
+      "AM-150 VIN decoder service - dev in progress, QA expected midweek.",
+      "AM-139 Image moderation pipeline - spec drafting begins.",
     ],
-    costNote: `Spend this period $${aggregates.totalCost.toFixed(0)} vs a $${budget.monthlyCapUsd.toLocaleString()} monthly cap — projected $${budget.projectedMonthlyUsd.toLocaleString()} by month end (${budget.capStatus === "on_track" ? "on track" : budget.capStatus === "watch" ? "watch" : "over cap"}).`,
+    costNote: `Spend this period $${aggregates.totalCost.toFixed(0)} vs a $${budget.monthlyCapUsd.toLocaleString()} monthly cap - projected $${budget.projectedMonthlyUsd.toLocaleString()} by month end (${budget.capStatus === "on_track" ? "on track" : budget.capStatus === "watch" ? "watch" : "over cap"}).`,
     narrative:
-      "A steady week: three items shipped or cleared their final gates, and every delivery passed a named human sign-off. One design review ran past its target — we flagged it the hour it breached and are reassigning the reviewer. Costs remain well inside the monthly cap.",
+      "A steady week: three items shipped or cleared their final gates, and every delivery passed a named human sign-off. One design review ran past its target - we flagged it the hour it breached and are reassigning the reviewer. Costs remain well inside the monthly cap.",
   },
-  // prior week — sent
+  // prior week - sent
   {
     id: "rep-2026-w23",
     podId: "automarket",
@@ -139,9 +139,9 @@ export const reports: WeeklyReport[] = [
     },
     upcoming: [
       "AM-142 Vehicle search with filters enters spec.",
-      "AM-138 Buyer–seller messaging design review due.",
+      "AM-138 Buyer-seller messaging design review due.",
     ],
-    costNote: "Spend this period $413 vs a $4,000 monthly cap — comfortably on track.",
+    costNote: "Spend this period $413 vs a $4,000 monthly cap - comfortably on track.",
     narrative:
       "Four items shipped, all gates cleared inside target, zero SLA breaches. The pod's cost per shipped ticket continued to fall as more steps run on local compute.",
   },

@@ -1,9 +1,9 @@
 /**
- * AcceptAccountabilityPanel (/welcome stage 3) — the duties summary + the
+ * AcceptAccountabilityPanel (/welcome stage 3) - the duties summary + the
  * primary "Accept accountability" CTA. The CTA stays disabled until the
  * first-gate walkthrough has been opened; accepting confirms via
  * alert-dialog ("Acceptance is written to the audit ledger. Coverage is
- * accepted, not assigned.") and lists every covered agent explicitly —
+ * accepted, not assigned.") and lists every covered agent explicitly -
  * one Accept covers all. "This isn't me" notifies the Pod Admin (mock).
  */
 
@@ -30,7 +30,7 @@ function agentName(id: string): string {
 
 export interface AcceptAccountabilityPanelProps {
   humanName: string;
-  /** Every agent this acceptance covers — a single Accept covers all. */
+  /** Every agent this acceptance covers - a single Accept covers all. */
   agentIds: string[];
   /** Deputy variant: owner the coverage stands in for. */
   deputyOf?: string;
@@ -53,13 +53,13 @@ export function AcceptAccountabilityPanel({
   const duties = [
     ...agentIds.map(
       (id) =>
-        `Clear the ${agentName(id)}'s gates within its SLA (${gatePolicyFor(id).slaLabel.replace("≤ ", "")}) — approve, reject, or answer.`,
+        `Clear the ${agentName(id)}'s gates within its SLA (${gatePolicyFor(id).slaLabel.replace("≤ ", "")}) - approve, reject, or answer.`,
     ),
-    "Rejecting requires a typed reason — your note becomes the agent's added context on the rerun.",
+    "Rejecting requires a typed reason - your note becomes the agent's added context on the rerun.",
     "Every decision you make lands on the immutable audit ledger under your name.",
     deputyOf
       ? `You cover when ${deputyOf} is OOO; accountability stays with ${deputyOf}.`
-      : "Going OOO? Hand coverage to a deputy — accountability stays with you.",
+      : "Going OOO? Hand coverage to a deputy - accountability stays with you.",
   ];
 
   return (
@@ -101,7 +101,7 @@ export function AcceptAccountabilityPanel({
           type="button"
           onClick={() =>
             toast.success("Pod Admin notified", {
-              description: `"This isn't me / wrong role" sent for ${humanName} — the invite will be re-issued to the right person.`,
+              description: `"This isn't me / wrong role" sent for ${humanName} - the invite will be re-issued to the right person.`,
             })
           }
           className="inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
@@ -123,7 +123,7 @@ export function AcceptAccountabilityPanel({
                 <> This single acceptance covers all listed agents: {names.join(", ")}.</>
               )}
               {deputyOf && (
-                <> Deputy coverage — accountability stays with {deputyOf}.</>
+                <> Deputy coverage - accountability stays with {deputyOf}.</>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -135,7 +135,7 @@ export function AcceptAccountabilityPanel({
                 onAccept();
               }}
             >
-              Accept — record on the ledger
+              Accept - record on the ledger
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
