@@ -1,14 +1,21 @@
 /**
- * LlmTierMenu — the mandatory "pick a model policy" selector. The user
- * chooses a TIER (Max capability / Balanced / Budget / Local-only) rather
- * than a raw model id, wherever an agent is added to a pod or modified
- * (pod wizard, agent profile, registry). Each tier shows its indicative
- * cost + latency and an in-tenant badge for local. Controlled: pass `value`
- * (null = nothing chosen yet) and `onChange`.
+ * LlmTierMenu — the mandatory model-policy selector. The user picks a TIER
+ * (Max capability / Balanced / Budget / Local-only), and each tier is a
+ * BLEND of models — a different model per sub-role (generation, supervisor,
+ * judge). The menu never presents a tier as one model: it shows the blended
+ * cost, an "N-model blend" tag, and (in `md`) the per-role composition.
+ * Controlled: pass `value` (null = nothing chosen yet) and `onChange`.
  */
 
 import { Check, Lock } from "lucide-react";
-import { LLM_TIERS, modelOptionById, type LlmTier } from "@/mock/agent-config";
+import {
+  LLM_TIERS,
+  tierComposition,
+  tierCostPerRun,
+  tierModelCount,
+  tierP50,
+  type LlmTier,
+} from "@/mock/agent-config";
 import { cn } from "@/lib/utils";
 
 export function LlmTierMenu({
@@ -19,16 +26,17 @@ export function LlmTierMenu({
 }: {
   value: LlmTier | null;
   onChange: (tier: LlmTier) => void;
-  /** "sm" hides the per-tier blurb (tight spaces like the wizard dialog). */
+  /** "sm" hides the per-role composition (tight spaces like the wizard dialog). */
   size?: "sm" | "md";
   className?: string;
 }) {
   return (
     <div className={cn("grid gap-1.5", className)} role="radiogroup" aria-label="LLM tier">
       {LLM_TIERS.map((t) => {
-        const m = modelOptionById(t.modelId);
         const active = value === t.id;
         const accent = `var(${t.accent})`;
+        const cost = tierCostPerRun(t.id);
+        const blend = tierModelCount(t.id);
         return (
           <button
             key={t.id}
@@ -67,12 +75,36 @@ export function LlmTierMenu({
                 </span>
               )}
               <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
-                ~${m.costPerRunUsd.toFixed(2)}/run · p50 {m.p50s}s
+                ~${cost.toFixed(2)}/run · p50 {tierP50(t.id)}s
               </span>
             </div>
+
+            {/* Blend tag — always shown so a tier never reads as one model */}
+            <div className="mt-1 pl-6 flex items-center gap-1.5">
+              <span
+                className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-border text-muted-foreground"
+                style={{ color: accent, borderColor: `color-mix(in oklab, ${accent} 35%, transparent)` }}
+              >
+                {blend}-model blend
+              </span>
+              {size === "sm" && (
+                <span className="font-mono text-[10px] text-muted-foreground/80 truncate">
+                  gen {tierComposition(t.id)[0].model.label}
+                </span>
+              )}
+            </div>
+
             {size === "md" && (
-              <div className="mt-1 pl-6 text-[11px] leading-snug text-muted-foreground">
-                {t.blurb} <span className="font-mono text-foreground/70">· {m.label}</span>
+              <div className="mt-1.5 pl-6 space-y-1">
+                <p className="text-[11px] leading-snug text-muted-foreground">{t.blurb}</p>
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10px]">
+                  {tierComposition(t.id).map((c) => (
+                    <span key={c.role}>
+                      <span className="text-muted-foreground/70">{c.label}:</span>{" "}
+                      <span className="text-foreground/80">{c.model.label}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </button>

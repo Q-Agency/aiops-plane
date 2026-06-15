@@ -117,25 +117,37 @@ export function modelShort(id: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* LLM tiers — the mandatory "pick a model policy" menu                 */
+/* LLM tiers — a mandatory model-POLICY menu (each tier is a BLEND)     */
 /* ------------------------------------------------------------------ */
 
 /**
- * Tier presets layered over MODEL_OPTIONS. Choosing an agent's LLM is a
- * POLICY decision (capability vs cost vs data-residency), so the product
- * makes you pick a TIER — not hunt a model id — whenever an agent is added
- * to a pod or modified. Each tier resolves to one default model; the exact
- * model stays overridable on the agent profile (advanced).
+ * A tier is NOT a single model. An agent's run is composed of sub-roles —
+ * Generation (produces the artifact), Supervisor (plans & routes the run),
+ * Judge (LLM-advisory critique before the deterministic gate) — and each
+ * tier assigns an appropriate model to EACH sub-role. So "Budget" generates
+ * on Haiku but judges on the in-tenant model; "Max" generates on Opus but
+ * supervises/judges on Sonnet. The product makes you pick a TIER (a
+ * cost/capability/residency policy), not hunt a model id; the per-role blend
+ * is shown for transparency and is the seam where finer per-role overrides
+ * can land later.
  */
 export type LlmTier = "max" | "balanced" | "budget" | "local";
+
+/** The parts of an agent's run, each backed by its own model. */
+export type LlmRole = "generation" | "supervisor" | "judge";
+export const LLM_ROLES: { id: LlmRole; label: string; blurb: string }[] = [
+  { id: "generation", label: "Generation", blurb: "Produces the artifact — the heavy lifter." },
+  { id: "supervisor", label: "Supervisor", blurb: "Plans the run and routes each step." },
+  { id: "judge", label: "Judge", blurb: "LLM-advisory critique before the deterministic gate." },
+];
 
 export interface LlmTierDef {
   id: LlmTier;
   label: string;
   /** One-line "when to pick this". */
   blurb: string;
-  /** Default model id this tier resolves to. */
-  modelId: string;
+  /** The blend — a model id per sub-role. */
+  composition: Record<LlmRole, string>;
   /** CSS var for the accent. */
   accent: string;
   /** Local/in-tenant tier — data never leaves the tenant. */
@@ -146,29 +158,45 @@ export const LLM_TIERS: LlmTierDef[] = [
   {
     id: "max",
     label: "Max capability",
-    blurb: "Frontier reasoning — the hardest specs, architecture and gnarly refactors. Premium cost.",
-    modelId: "claude-opus-4-1-20250805",
+    blurb: "Frontier reasoning where it counts — hardest specs, architecture, gnarly refactors.",
+    composition: {
+      generation: "claude-opus-4-1-20250805",
+      supervisor: "claude-sonnet-4-5-20250929",
+      judge: "claude-sonnet-4-5-20250929",
+    },
     accent: "--status-waiting",
   },
   {
     id: "balanced",
     label: "Balanced",
-    blurb: "The recommended default — strong quality at a moderate price.",
-    modelId: "claude-sonnet-4-5-20250929",
+    blurb: "The recommended default — a strong generator with cheap orchestration.",
+    composition: {
+      generation: "claude-sonnet-4-5-20250929",
+      supervisor: "claude-haiku-4-5-20251001",
+      judge: "claude-haiku-4-5-20251001",
+    },
     accent: "--primary",
   },
   {
     id: "budget",
     label: "Budget",
-    blurb: "Fast and cheap — routing, summaries, light edits and high-volume work.",
-    modelId: "claude-haiku-4-5-20251001",
+    blurb: "Fast and cheap — high-volume, light-touch work; the judge runs in-tenant.",
+    composition: {
+      generation: "claude-haiku-4-5-20251001",
+      supervisor: "claude-haiku-4-5-20251001",
+      judge: "qwen2.5-coder-32b-instruct",
+    },
     accent: "--status-done",
   },
   {
     id: "local",
     label: "Local only",
-    blurb: "Runs on Q's managed H200 rig — data never leaves your tenant.",
-    modelId: "qwen2.5-coder-32b-instruct",
+    blurb: "Every sub-role on Q's managed H200 rig — data never leaves your tenant.",
+    composition: {
+      generation: "qwen2.5-coder-32b-instruct",
+      supervisor: "qwen2.5-coder-32b-instruct",
+      judge: "qwen2.5-coder-32b-instruct",
+    },
     accent: "--agent-curator",
     inTenant: true,
   },
@@ -178,24 +206,65 @@ export function llmTierDef(tier: LlmTier): LlmTierDef {
   return LLM_TIERS.find((t) => t.id === tier) ?? LLM_TIERS[1];
 }
 
-/** Which tier a model id belongs to (frontier/in-tenant classified). */
-export function tierForModel(modelId: string): LlmTier {
-  const exact = LLM_TIERS.find((t) => t.modelId === modelId);
-  if (exact) return exact.id;
+/** The blend, role by role, resolved to model options (display order). */
+export function tierComposition(
+  tier: LlmTier,
+): { role: LlmRole; label: string; blurb: string; model: ModelOption }[] {
+  const def = llmTierDef(tier);
+  return LLM_ROLES.map((r) => ({
+    role: r.id,
+    label: r.label,
+    blurb: r.blurb,
+    model: modelOptionById(def.composition[r.id]),
+  }));
+}
+
+/** Headline (generation) model of a tier — used where one model is shown. */
+export function tierGenerationModelId(tier: LlmTier): string {
+  return llmTierDef(tier).composition.generation;
+}
+
+/** Indicative cost PER RUN — the blend touches every sub-role, so we sum. */
+export function tierCostPerRun(tier: LlmTier): number {
+  return tierComposition(tier).reduce((sum, c) => sum + c.model.costPerRunUsd, 0);
+}
+
+/** Headline latency — the generation pass dominates the critical path. */
+export function tierP50(tier: LlmTier): number {
+  return modelOptionById(tierGenerationModelId(tier)).p50s;
+}
+
+/** Distinct models in the blend (for "N-model blend" copy). */
+export function tierModelCount(tier: LlmTier): number {
+  return new Set(Object.values(llmTierDef(tier).composition)).size;
+}
+
+/** Classify a seed model id into the tier that GENERATES with it. */
+function tierForModelId(modelId: string): LlmTier {
+  const gen = LLM_TIERS.find((t) => t.composition.generation === modelId);
+  if (gen) return gen.id;
   const m = modelOptionById(modelId);
   if (m.hosting === "in-tenant") return "local";
-  if (m.id === "gpt-5.1") return "max"; // cross-vendor frontier
+  if (m.id === "gpt-5.1") return "max";
   return "balanced";
 }
 
-/** The tier an agent currently runs at (derived from its model). */
+/** The tier an agent runs (overlay, else seeded from its default model). */
 export function agentTier(agentId: string): LlmTier {
-  return tierForModel(agentModel(agentId).id);
+  return ov(agentId).tier ?? tierForModelId(defaultModelId(agentId));
 }
 
-/** Set an agent's LLM by tier — resolves to the tier's model (audited). */
+/** Set an agent's LLM tier — the whole blend (audited). */
 export function setAgentTier(agentId: string, agentName: string, tier: LlmTier): void {
-  setAgentModel(agentId, agentName, llmTierDef(tier).modelId);
+  const before = agentTier(agentId);
+  if (before === tier) return;
+  ov(agentId).tier = tier;
+  appendAuditMock({
+    action: "policy.changed",
+    target: agentName,
+    detail: `${agentId}.llm: ${llmTierDef(before).label} → ${llmTierDef(tier).label} (${tierModelCount(tier)}-model blend${llmTierDef(tier).inTenant ? ", in-tenant" : ""})`,
+  });
+  bump();
 }
 
 /**
@@ -315,7 +384,7 @@ const FALLBACK_VERSIONS: AgentVersion[] = [
 export type AutonomyLevel = "L0" | "L1" | "L2" | "L3";
 
 interface AgentOverrides {
-  modelId?: string;
+  tier?: LlmTier;
   tools?: ConnectorId[];
   ownerId?: string;
   autonomy?: AutonomyLevel;
@@ -356,8 +425,9 @@ function ov(agentId: string): AgentOverrides {
 
 /* ---------------- merged getters (defaults + overlay) ---------------- */
 
+/** The agent's headline (generation) model — derived from its tier's blend. */
 export function agentModel(agentId: string): ModelOption {
-  return modelOptionById(ov(agentId).modelId ?? defaultModelId(agentId));
+  return modelOptionById(tierGenerationModelId(agentTier(agentId)));
 }
 
 export function agentTools(agentId: string): ConnectorId[] {
@@ -381,19 +451,8 @@ export function agentVersions(agentId: string): (AgentVersion & { current: boole
 }
 
 /* ---------------- audited mutations ---------------- */
-
-export function setAgentModel(agentId: string, agentName: string, modelId: string): void {
-  const before = agentModel(agentId);
-  if (before.id === modelId) return;
-  const after = modelOptionById(modelId);
-  ov(agentId).modelId = modelId;
-  appendAuditMock({
-    action: "policy.changed",
-    target: agentName,
-    detail: `${agentId}.model: ${before.label} → ${after.label}${after.hosting === "in-tenant" ? " (in-tenant)" : ` (${after.provider})`}`,
-  });
-  bump();
-}
+/* (setAgentTier lives in the LLM-tiers section above — the agent's model is
+   a tier/blend now, not a single id, so there is no setAgentModel.)        */
 
 export function toggleAgentTool(agentId: string, agentName: string, tool: ConnectorId): void {
   if (requiredToolsFor(agentId).has(tool)) return; // required — not unplugable

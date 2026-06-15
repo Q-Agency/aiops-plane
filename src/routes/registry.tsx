@@ -35,7 +35,7 @@ import {
   type AgentDomain,
 } from "@/mock/registry";
 import { CONNECTORS, type ConnectorId } from "@/mock/connectors";
-import { llmTierDef, modelShort, type LlmTier } from "@/mock/agent-config";
+import { llmTierDef, type LlmTier } from "@/mock/agent-config";
 import { LlmTierMenu } from "@/components/agents/LlmTierMenu";
 import { humans } from "@/mock/humans";
 import { appendAuditMock } from "@/mock/audit-bridge";
@@ -120,7 +120,7 @@ function RegistryView() {
       detail: `${card.domain} · ${config.tools.length} tools · ${
         config.inference === "agent-managed"
           ? "agent-managed inference"
-          : `inference via Q model plane (${modelShort(config.inference)})`
+          : `inference via Q model plane (${llmTierDef(config.inference as LlmTier).label} blend)`
       } · owner ${ownerName} · starts at L0`,
     });
     toast.success(`${card.name} registered into the fleet`, {
@@ -367,7 +367,7 @@ function RegistryView() {
                       {c.config.tools.length} tools ·{" "}
                       {c.config.inference === "agent-managed"
                         ? "agent-managed inference"
-                        : `via Q model plane · ${modelShort(c.config.inference)}`}{" "}
+                        : `via Q model plane · ${llmTierDef(c.config.inference as LlmTier).label} blend`}{" "}
                       · {ownerName} answers for it
                     </div>
                   </div>
@@ -417,7 +417,7 @@ function CardPreview({
     onRegister({
       tools: [...tools],
       ownerId,
-      inference: inference === "agent-managed" ? "agent-managed" : llmTierDef(inference).modelId,
+      inference, // the chosen tier id (a blend) or "agent-managed"
     });
   }
 

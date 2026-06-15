@@ -46,7 +46,6 @@ import {
   RotateCcw,
   Server,
   ShieldCheck,
-  Sparkles,
   UserCheck,
   Wrench,
   X,
@@ -64,21 +63,21 @@ import {
   type RunStep,
 } from "@/mock/runs";
 import {
-  MODEL_OPTIONS,
   agentAutonomy,
-  agentModel,
   agentOwner,
   agentTier,
   agentTools,
   agentVersions,
   llmTierDef,
-  modelOptionById,
   requiredToolsFor,
   rollbackAgentVersion,
   setAgentAutonomy,
-  setAgentModel,
   setAgentOwner,
   setAgentTier,
+  tierComposition,
+  tierCostPerRun,
+  tierModelCount,
+  tierP50,
   toggleAgentTool,
   useAgentConfigTick,
   type AutonomyLevel,
@@ -122,7 +121,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
   const latData = useMemo(() => latencyHistogram(a.id), [a.id]);
   const costData = useMemo(() => tokenCostSeries(a.id), [a.id]);
 
-  const model = agentModel(a.id);
+  const tier = agentTier(a.id);
   const owner = agentOwner(a.id);
   const autonomy = agentAutonomy(a.id);
   const versions = agentVersions(a.id);
@@ -174,7 +173,11 @@ export function AgentProfile({ agent }: { agent: Agent }) {
           )}
         </div>
         <div className="ml-auto grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
-          <Meta icon={Cpu} label="model" value={model.label} />
+          <Meta
+            icon={Cpu}
+            label="llm tier"
+            value={`${llmTierDef(tier).label} · ${tierModelCount(tier)} models`}
+          />
           <Meta icon={UserCheck} label="answers for it" value={owner.name} />
           <Meta icon={Gauge} label="autonomy" value={autonomy} />
           <Meta
@@ -462,120 +465,73 @@ function PanelShell({
 }
 
 function ModelPanel({ agent }: { agent: Agent }) {
-  const [advanced, setAdvanced] = useState(false);
-  const model = agentModel(agent.id);
   const tier = agentTier(agent.id);
+  const def = llmTierDef(tier);
+  const composition = tierComposition(tier);
 
   function pickTier(t: LlmTier) {
     if (t !== tier) {
       setAgentTier(agent.id, agent.name, t);
-      toast.success(`${agent.name} → ${llmTierDef(t).label}`, {
-        description: `Now runs on ${modelOptionById(llmTierDef(t).modelId).label} — policy.changed on the ledger.`,
+      toast.success(`${agent.name} → ${llmTierDef(t).label} blend`, {
+        description: `${tierModelCount(t)} models across generation, supervisor and judge — policy.changed on the ledger.`,
       });
     }
-  }
-
-  function pick(id: string) {
-    if (id !== model.id) {
-      setAgentModel(agent.id, agent.name, id);
-      const after = MODEL_OPTIONS.find((m) => m.id === id)!;
-      toast.success(`${agent.name} now runs on ${after.label}`, {
-        description: "policy.changed written to the ledger — next run uses the new engine.",
-      });
-    }
-    setAdvanced(false);
   }
 
   return (
-    <PanelShell
-      icon={Cpu}
-      title="Model & routing"
-      sub="pick a tier — the engine is a policy, not a constant"
-    >
+    <PanelShell icon={Cpu} title="Model & routing" sub="pick a tier — each is a blend of models">
+      {/* Current blend — the models behind each sub-role */}
       <div className="rounded-md border border-border bg-white/[0.02] p-3">
         <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <div className="text-sm font-medium truncate">{model.label}</div>
-            <div className="text-[10px] font-mono text-muted-foreground truncate">
-              {model.provider} · {model.region}
-            </div>
+          <div className="text-sm font-semibold" style={{ color: `var(${def.accent})` }}>
+            {def.label}
           </div>
-          {model.hosting === "in-tenant" ? (
+          {def.inTenant ? (
             <span className="shrink-0 text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-status-done/40 text-status-done bg-status-done/10">
               in-tenant
             </span>
           ) : (
             <span className="shrink-0 text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-border text-muted-foreground">
-              ZDR API
+              {tierModelCount(tier)}-model blend
             </span>
           )}
         </div>
-        <div className="mt-2 pt-2 border-t border-border grid grid-cols-2 gap-2 text-[10px] font-mono">
-          <span className="text-muted-foreground">
-            ~<span className="text-foreground">${model.costPerRunUsd.toFixed(2)}</span> / run
-          </span>
-          <span className="text-muted-foreground text-right">
-            p50 <span className="text-foreground">{model.p50s}s</span>
-          </span>
+        <div className="mt-2 pt-2 border-t border-border space-y-1.5">
+          {composition.map((c) => (
+            <div key={c.role} className="flex items-center gap-2 text-[11px]">
+              <span className="w-[72px] shrink-0 text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+                {c.label}
+              </span>
+              <span className="font-medium truncate">{c.model.label}</span>
+              <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
+                {c.model.hosting === "in-tenant" ? "in-tenant" : c.model.provider}
+              </span>
+            </div>
+          ))}
         </div>
-        <div className="mt-1 text-[10px] text-muted-foreground/80 font-mono truncate">
-          {model.retention}
+        <div className="mt-2 pt-2 border-t border-border flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+          <span>
+            ~<span className="text-foreground">${tierCostPerRun(tier).toFixed(2)}</span> / run
+            <span className="text-muted-foreground/70"> (blended)</span>
+          </span>
+          <span>
+            p50 <span className="text-foreground">{tierP50(tier)}s</span>
+          </span>
         </div>
       </div>
 
       {/* Tier menu — the mandatory, primary control */}
       <div data-test="llm-tier-menu">
         <div className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1.5">
-          LLM tier
+          Change tier
         </div>
-        <LlmTierMenu value={tier} onChange={pickTier} size="sm" />
+        <LlmTierMenu value={tier} onChange={pickTier} size="md" />
       </div>
 
-      <button
-        onClick={() => setAdvanced((p) => !p)}
-        className="text-[11px] font-mono rounded border border-border px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors text-left inline-flex items-center gap-1.5"
-        data-test="change-model"
-      >
-        <Sparkles className="size-3" /> {advanced ? "Hide exact models" : "Advanced — exact model"}
-      </button>
-
-      {advanced && (
-        <div className="space-y-1.5" data-test="model-options">
-          {MODEL_OPTIONS.map((m) => {
-            const active = m.id === model.id;
-            return (
-              <button
-                key={m.id}
-                onClick={() => pick(m.id)}
-                className={cn(
-                  "w-full text-left rounded border px-2.5 py-2 transition-colors",
-                  active
-                    ? "border-primary/50 bg-primary/[0.07]"
-                    : "border-border bg-white/[0.02] hover:border-primary/30",
-                )}
-              >
-                <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-medium truncate">{m.label}</span>
-                  <span className="font-mono text-[10px] text-muted-foreground shrink-0">
-                    ${m.costPerRunUsd.toFixed(2)} · p50 {m.p50s}s
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 mt-0.5">
-                  <span className="text-[10px] font-mono text-muted-foreground truncate">
-                    {m.provider} · {m.hosting === "in-tenant" ? "never leaves your tenant" : m.region + " · ZDR"}
-                  </span>
-                  {active && <Check className="size-3 text-primary shrink-0" />}
-                </div>
-                <div className="text-[10px] text-muted-foreground/80 mt-0.5">{m.note}</div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-auto">
-        Cost-aware routing: iteration loops can fall back to the in-tenant model; the pinned
-        engine produces the final artifact. Disclosed per agent in Settings → Models.
+        Each tier is a blend — generation, supervisor and judge can run different models. Today the
+        tier sets all three; per-role overrides land here later. Disclosed per agent in Settings →
+        Models.
       </p>
     </PanelShell>
   );
