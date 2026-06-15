@@ -157,4 +157,4 @@ export function reportById(id: string): WeeklyReport | undefined {
 }
 
 /** Mock share link for "Copy share link" (toast-only, C8). */
-export const REPORT_SHARE_URL = "https://agencyos.q.agency/r/automarket-w24-9f3k2";
+export const REPORT_SHARE_URL = "https://podops.q.agency/r/automarket-w24-9f3k2";

@@ -46,7 +46,7 @@ import { usePods, type SlackEventId, type SlackWiringRow } from "@/lib/pods/pod-
 /* Mock Slack workspace + channels                                      */
 /* ------------------------------------------------------------------ */
 
-const WORKSPACE = { name: "Q-Agency", botName: "AgencyOS", channelsTotal: 7 };
+const WORKSPACE = { name: "Q-Agency", botName: "PodOps", channelsTotal: 7 };
 
 interface SlackChannel {
   id: string;

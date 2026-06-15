@@ -203,7 +203,7 @@ export function TicketPickerTable({ simError }: TicketPickerTableProps) {
             : `${ids.length} tickets returned to To-Do on '${TRIGGER_RULE.board}'`,
           {
             description:
-              "Comment posted to the ticket ([AgencyOS] tagged) - the row is back 'on the board'; add detail and drag to Ready again. Recorded on the ledger.",
+              "Comment posted to the ticket ([PodOps] tagged) - the row is back 'on the board'; add detail and drag to Ready again. Recorded on the ledger.",
           },
         );
         setDeclining(false);

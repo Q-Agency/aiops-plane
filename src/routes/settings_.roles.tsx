@@ -10,6 +10,6 @@ import { RolesAccessView } from "@/components/settings/RolesAccessView";
 
 export const Route = createFileRoute("/settings_/roles")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Roles & Access · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Roles & Access · AI PodOps" }] }),
   component: RolesAccessView,
 });

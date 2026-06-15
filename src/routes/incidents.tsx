@@ -9,7 +9,7 @@ import { IncidentsView } from "@/components/incidents/IncidentsView";
 
 export const Route = createFileRoute("/incidents")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Incidents & Recovery · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Incidents & Recovery · AI PodOps" }] }),
   validateSearch: (search: Record<string, unknown>): { incident?: string } =>
     typeof search.incident === "string" && search.incident.length > 0
       ? { incident: search.incident }

@@ -4,6 +4,6 @@ import { ReportsView } from "@/components/reports/ReportsView";
 
 export const Route = createFileRoute("/reports")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "SLA & Reports · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "SLA & Reports · AI PodOps" }] }),
   component: ReportsView,
 });

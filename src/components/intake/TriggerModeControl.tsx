@@ -1,6 +1,6 @@
 /**
  * Trigger-mode surfaces for Work Intake (vision §2 "The tracker boundary"):
- * the board is the doorbell, Agency OS is the house.
+ * the board is the doorbell, AI PodOps is the house.
  *
  *  - TriggerModeControl - segmented operator-driven / tracker-driven switch
  *    (per-pod policy). Switching confirms via alert-dialog ("Recorded in the
@@ -170,7 +170,7 @@ export function TriggerListeningBanner() {
       // the mechanism: the drag itself started it.
       pullTickets([arrival.ticketId], "drag-to-ready");
       toast.success(`${arrival.ticketId} arrived via drag-to-Ready - started automatically`, {
-        description: `'${arrival.title}' entered through the '${TRIGGER_RULE.column}' column and is in the pod (auto-start) - BA picks it up; the chain runs inside Agency OS.`,
+        description: `'${arrival.title}' entered through the '${TRIGGER_RULE.column}' column and is in the pod (auto-start) - BA picks it up; the chain runs inside AI PodOps.`,
       });
     } else {
       toast.success(`${arrival.ticketId} arrived via drag-to-Ready - waiting for your confirmation`, {

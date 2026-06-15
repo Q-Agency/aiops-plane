@@ -1,8 +1,8 @@
 /**
  * Tracker-trigger boundary (vision §2 "The tracker boundary") - the board is
- * the doorbell, Agency OS is the house. Tickets LIVE in Jira/Teamwork (we
+ * the doorbell, AI PodOps is the house. Tickets LIVE in Jira/Teamwork (we
  * never create/edit/close them); a scoped ticket entering the agreed column
- * IS the start signal. Agent→agent activation is ALWAYS inside Agency OS -
+ * IS the start signal. Agent→agent activation is ALWAYS inside AI PodOps -
  * nothing here ever grows agent columns on the client board.
  *
  * This module owns the mock seams for that boundary:
@@ -18,7 +18,7 @@
  *    moment-level summary the demo narrates.
  *  - simulateDragArrival(): demo seam retelling "the client drags a ticket
  *    into Ready" - the row ARRIVES (idempotent; second call returns the
- *    same ticket). Our write-backs are tagged [AgencyOS] so the listener
+ *    same ticket). Our write-backs are tagged [PodOps] so the listener
  *    ignores its own moves (echo-loop prevention); drag-back = park+notify.
  *  - START PROVENANCE: how a START happened - "drag-to-ready" (auto-start:
  *    the drag itself started it) vs "manual-pull" (confirm-first: the
@@ -45,7 +45,7 @@ export type TriggerMode = "operator" | "tracker";
  *  SINGLE DOORBELL (owner-clarified 2026-06-11): the board drag is the ONLY start
  *  signal in BOTH modes - the policy decides whether the pod starts immediately
  *  (auto-start) or waits for the operator's confirmation (confirm-first).
- *  Agency OS never originates activation. */
+ *  AI PodOps never originates activation. */
 /** Display name of the start policy (ids stay "operator"/"tracker" internally). */
 export const START_POLICY_NAME: Record<TriggerMode, string> = {
   operator: "confirm-first",
@@ -130,7 +130,7 @@ export type TicketProvenance = "manual-pull" | "drag-to-ready";
  * the board only rings the doorbell - orchestration never leaves the house.
  */
 export const TRIGGER_HONESTY =
-  "activation always comes from the board - Agency OS confirms or auto-accepts, never originates · agent-to-agent activation runs inside Agency OS";
+  "activation always comes from the board - AI PodOps confirms or auto-accepts, never originates · agent-to-agent activation runs inside AI PodOps";
 
 const provenanceById = new Map<string, TicketProvenance>();
 

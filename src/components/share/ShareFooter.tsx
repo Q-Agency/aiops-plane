@@ -1,7 +1,7 @@
 /**
  * ShareFooter (/share/$token) - the slim provenance line under an active
- * shared report: "Shared by {pod} via Agency OS · this view is recorded ·
- * expires {date}". The muted "What is Agency OS?" link is the funnel asset
+ * shared report: "Shared by {pod} via AI PodOps · this view is recorded ·
+ * expires {date}". The muted "What is AI PodOps?" link is the funnel asset
  * and the page's only navigation (spec: Shared Report Viewer, P1-H4).
  */
 
@@ -20,7 +20,7 @@ export function FunnelLink() {
       href="/"
       className="text-xs text-slate-400 underline underline-offset-2 transition-colors hover:text-slate-600"
     >
-      What is Agency OS?
+      What is AI PodOps?
     </a>
   );
 }
@@ -29,7 +29,7 @@ export function ShareFooter({ podName, expiresAt }: { podName: string; expiresAt
   return (
     <footer className="mt-6 flex flex-col items-center gap-1.5 pb-8 text-center print:pb-0">
       <p className="text-xs text-slate-500" suppressHydrationWarning>
-        Shared by {podName} via Agency OS · this view is recorded · expires{" "}
+        Shared by {podName} via AI PodOps · this view is recorded · expires{" "}
         {_date.format(new Date(expiresAt))}
       </p>
       <FunnelLink />

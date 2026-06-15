@@ -119,7 +119,7 @@ export function fireUpComplete(podId: string = DEMO_POD_ID): void {
 
 /**
  * 0:30 - AM-142 dragged to Ready · pod starts (the tracker-boundary beat:
- * the client's drag is the doorbell; the chain runs inside Agency OS).
+ * the client's drag is the doorbell; the chain runs inside AI PodOps).
  * TRUTHFUL under the demo pod's confirm-first default: the drag SENT the
  * ticket and the operator's confirmation started it - so the narration
  * says "sent … start confirmed", and start provenance stays the default

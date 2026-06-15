@@ -10,6 +10,6 @@ import { PilotView } from "@/components/pilot/PilotView";
 
 export const Route = createFileRoute("/pilot")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Pilot scorecard · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Pilot scorecard · AI PodOps" }] }),
   component: PilotView,
 });

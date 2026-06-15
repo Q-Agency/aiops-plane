@@ -19,7 +19,7 @@ export function DegradationExplainer() {
         <ShieldQuestion className="size-4 text-primary" />
         <h2 className="text-sm font-semibold tracking-tight">How degradation works</h2>
       </div>
-      <p className="text-xs text-muted-foreground">If Agency OS is unreachable:</p>
+      <p className="text-xs text-muted-foreground">If AI PodOps is unreachable:</p>
       <ul className="space-y-2.5">
         {DEGRADATION_EXPLAINER.map((line, i) => {
           const Icon = LINE_ICONS[i] ?? Bot;

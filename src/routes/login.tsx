@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Sign in · AI PodOps" }] }),
   component: LoginPage,
 });
 
@@ -138,7 +138,7 @@ function LoginPage() {
         <div className="relative flex items-center gap-3">
           <BrandMark className="size-10 text-sm" />
           <div className="leading-tight">
-            <div className="text-base font-semibold tracking-tight">Agency OS</div>
+            <div className="text-base font-semibold tracking-tight">AI PodOps</div>
             <div className="font-mono text-[11px] text-muted-foreground">v0.4.2</div>
           </div>
         </div>
@@ -187,7 +187,7 @@ function LoginPage() {
         <div className="anim-in w-full max-w-sm">
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
             <BrandMark className="size-9 text-xs" />
-            <span className="text-lg font-semibold tracking-tight">Agency OS</span>
+            <span className="text-lg font-semibold tracking-tight">AI PodOps</span>
           </div>
 
           <div className="rounded-2xl border border-border bg-card/60 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5 backdrop-blur-xl sm:p-8">

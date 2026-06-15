@@ -4,6 +4,6 @@ import { CatalogStandalone } from "@/components/fireup/CatalogStandalone";
 
 export const Route = createFileRoute("/catalog")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Catalog · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Catalog · AI PodOps" }] }),
   component: CatalogStandalone,
 });

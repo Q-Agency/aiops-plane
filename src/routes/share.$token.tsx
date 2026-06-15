@@ -12,7 +12,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ShareViewer } from "@/components/share/ShareViewer";
 
 export const Route = createFileRoute("/share/$token")({
-  head: () => ({ meta: [{ title: "Shared report · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Shared report · AI PodOps" }] }),
   component: ShareTokenRoute,
 });
 

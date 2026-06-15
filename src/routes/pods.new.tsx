@@ -10,7 +10,7 @@ const wizardSearchSchema = z.object({
 export const Route = createFileRoute("/pods/new")({
   beforeLoad: mockOnlyBeforeLoad,
   validateSearch: wizardSearchSchema,
-  head: () => ({ meta: [{ title: "New Pod · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "New Pod · AI PodOps" }] }),
   component: NewPodRoute,
 });
 

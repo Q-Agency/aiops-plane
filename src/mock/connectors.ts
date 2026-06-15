@@ -97,7 +97,7 @@ export const CONNECTORS: Connector[] = [
       },
       {
         id: "sl-post-messages",
-        label: "Post messages as AgencyOS",
+        label: "Post messages as PodOps",
         access: "write",
         reason: "Deliver gates, escalations and briefs",
       },
@@ -249,7 +249,7 @@ export const CONNECTORS: Connector[] = [
       },
       {
         id: "mt-post-messages",
-        label: "Post messages as AgencyOS",
+        label: "Post messages as PodOps",
         access: "write",
         reason: "Deliver gates, escalations and briefs",
       },

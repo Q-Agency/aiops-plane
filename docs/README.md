@@ -1,12 +1,12 @@
-# Agency OS - Product Starter Kit
+# AI PodOps - Product Starter Kit
 
-> **Start here.** This is the front door for the team building the Agency OS **product** - the governed agent-human SDLC pod platform. Everything you need exists in this repo and the BA repo; this document tells you what to read in which order, what is already decided, what the mock is (and isn't), and what to build first.
+> **Start here.** This is the front door for the team building the AI PodOps **product** - the governed agent-human SDLC pod platform. Everything you need exists in this repo and the BA repo; this document tells you what to read in which order, what is already decided, what the mock is (and isn't), and what to build first.
 
 ---
 
 ## 1. The product in one paragraph
 
-Agency OS is the operating system for **agent-human SDLC pods**: a curated team of AI agents (BA · SA · UI/UX · Developer · QA · DevOps/Release · Knowledge) paired with **one accountable human per agent**, delivering software through a governed, gated, auditable pipeline. A PM - client-side, or Q-side on Q-led projects (the internal-first adoption track) - **fires up** a pod (picks agents, connects Teamwork/Slack/GitHub, assigns accountable people), **runs** it day-to-day (gates, incidents, comms), and **monitors** it (ROI, governance, SLA, compliance). One-liner: *not an autonomous coder you must trust - a governed agent-human pipeline you can prove.*
+AI PodOps is the operating system for **agent-human SDLC pods**: a curated team of AI agents (BA · SA · UI/UX · Developer · QA · DevOps/Release · Knowledge) paired with **one accountable human per agent**, delivering software through a governed, gated, auditable pipeline. A PM - client-side, or Q-side on Q-led projects (the internal-first adoption track) - **fires up** a pod (picks agents, connects Teamwork/Slack/GitHub, assigns accountable people), **runs** it day-to-day (gates, incidents, comms), and **monitors** it (ROI, governance, SLA, compliance). One-liner: *not an autonomous coder you must trust - a governed agent-human pipeline you can prove.*
 
 **Locked decisions** (do not relitigate - context in [`product-vision.md`](./product-vision.md)):
 

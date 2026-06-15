@@ -156,7 +156,7 @@ export function LeftRail({ user }: { user: AppUser }) {
           </div>
           {!collapsed && (
             <div className="ml-2 leading-tight">
-              <div className="text-sm font-semibold">Agency OS</div>
+              <div className="text-sm font-semibold">AI PodOps</div>
               <div className="text-[10px] text-muted-foreground font-mono">v0.4.2</div>
             </div>
           )}

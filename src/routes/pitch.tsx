@@ -1,5 +1,5 @@
 /**
- * /pitch - Agency OS product brief: chrome-less, no-auth, client-clean
+ * /pitch - AI PodOps product brief: chrome-less, no-auth, client-clean
  * single-page document (the printable approval pack).
  *
  * NO mock-only guard and NO auth - it's a brief, not app data. The root
@@ -13,6 +13,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PitchPage } from "@/components/pitch/PitchPage";
 
 export const Route = createFileRoute("/pitch")({
-  head: () => ({ meta: [{ title: "Agency OS - Product Brief" }] }),
+  head: () => ({ meta: [{ title: "AI PodOps - Product Brief" }] }),
   component: PitchPage,
 });

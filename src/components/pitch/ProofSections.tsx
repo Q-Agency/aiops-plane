@@ -108,7 +108,7 @@ export function MoatSection() {
 }
 
 const FLEET: { name: string; status: string; tone: "live" | "build" | "prep" | "plan" }[] = [
-  { name: "BA Autonomous Agent", status: "live in production - federated into Agency OS", tone: "live" },
+  { name: "BA Autonomous Agent", status: "live in production - federated into AI PodOps", tone: "live" },
   { name: "Knowledge Base agent", status: "operating today - dashboard federation next", tone: "live" },
   { name: "SA agent · Development agents", status: "under construction", tone: "build" },
   { name: "UI/UX · QA agents", status: "in preparation", tone: "prep" },

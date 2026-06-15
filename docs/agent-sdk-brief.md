@@ -1,10 +1,10 @@
-# Build Brief - `agency-agent-sdk` (make an agent pluggable into Agency OS)
+# Build Brief - `agency-agent-sdk` (make an agent pluggable into AI PodOps)
 
 > **Who this is for:** the engineer / AI programmer working inside an agent's
 > codebase - **BA first**, then the Knowledge Agent (KA), SA, and others.
 > **What you're building:** a small **reusable Python SDK** that gives any agent
 > a standard observability + human-in-the-loop (HITL) + health surface and a
-> self-describing **Agent Card**, so it plugs into **Agency OS** (our fleet
+> self-describing **Agent Card**, so it plugs into **AI PodOps** (our fleet
 > control plane). Build it once (extracted from BA), then KA/SA adopt it by
 > changing only their identity + `produces`/`consumes`/`sources`.
 
@@ -14,9 +14,9 @@ This brief is self-contained - you don't need any other context to act on it.
 
 ## 0. Background (why this exists)
 
-**Agency OS** is a separate dashboard that does **not** run agents - it
+**AI PodOps** is a separate dashboard that does **not** run agents - it
 _observes and governs_ them. It reads each agent's **live API (REST + SSE)** and
-normalizes it against a shared **contract**. For an agent to appear in Agency OS
+normalizes it against a shared **contract**. For an agent to appear in AI PodOps
 it must (a) **emit the contract** (runs, events, HITL gates, health) and (b)
 **advertise itself** via an A2A-aligned **Agent Card**.
 
@@ -53,7 +53,7 @@ with `completeness`/`dimensions` as a derived readout); only genuinely freeform 
 `metadata` / event `data`.
 
 > **Canonical schema:** the authoritative contract is **`agent-contract.schema.json`**
-> (it lives in the Agency OS repo at `src/contract/`; copy it into this repo
+> (it lives in the AI PodOps repo at `src/contract/`; copy it into this repo
 > **version-pinned**). The Pydantic models below must **conform to / be generated
 > from** that schema - the conformance suite (A.7) verifies it. Treat the models
 > here as the reference shape, not a second source of truth.

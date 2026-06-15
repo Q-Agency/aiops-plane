@@ -13,7 +13,7 @@ import { GateReviewShell } from "@/components/gates/GateReviewShell";
 
 export const Route = createFileRoute("/approvals_/$gateId")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Gate Review · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Gate Review · AI PodOps" }] }),
   component: GateReviewRoute,
 });
 

@@ -1,6 +1,6 @@
 # BA task - add `GET /agent/events/recent` (lifecycle events feed)
 
-> **For the BA agent's programmer.** Self-contained. Agency OS (the dashboard)
+> **For the BA agent's programmer.** Self-contained. AI PodOps (the dashboard)
 > needs a **global, recent feed of lifecycle events** - chiefly **resets** and
 > **approvals** - so they show up in the Command Center activity feed. BA already
 > _records_ these as `ba_chore_runs` (`event_type` ∈ {`reset`, `approval`}); it

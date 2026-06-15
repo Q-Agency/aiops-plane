@@ -39,7 +39,7 @@ export interface IntakeTicket {
   /**
    * The board SENT this ticket (it sits in the agreed start column -
    * "Ready"). Only arrived rows are confirmable/declinable: the single
-   * doorbell means Agency OS never starts work the board didn't send.
+   * doorbell means AI PodOps never starts work the board didn't send.
    */
   arrived: boolean;
   component: string;
@@ -210,7 +210,7 @@ export function routingPreview(ticketId: string): RoutingPreview {
  * `provenance` records HOW the start happened - "manual-pull" (the operator
  * confirmed it; confirm-first) or "drag-to-ready" (the drag itself started
  * it; auto-start). ENFORCES the single doorbell: rows the board did not
- * send (arrived=false) are skipped - Agency OS does not originate work.
+ * send (arrived=false) are skipped - AI PodOps does not originate work.
  */
 export function pullTickets(
   ids: string[],

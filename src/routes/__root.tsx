@@ -103,20 +103,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Agency OS · Overview" },
+      { title: "AI PodOps · Overview" },
       {
         name: "description",
-        content: "AI Agency OS - mission control for an agentic software pipeline.",
+        content: "AI AI PodOps - mission control for an agentic software pipeline.",
       },
-      { property: "og:title", content: "Agency OS · Overview" },
-      { name: "twitter:title", content: "Agency OS · Overview" },
+      { property: "og:title", content: "AI PodOps · Overview" },
+      { name: "twitter:title", content: "AI PodOps · Overview" },
       {
         property: "og:description",
-        content: "AI Agency OS - mission control for an agentic software pipeline.",
+        content: "AI AI PodOps - mission control for an agentic software pipeline.",
       },
       {
         name: "twitter:description",
-        content: "AI Agency OS - mission control for an agentic software pipeline.",
+        content: "AI AI PodOps - mission control for an agentic software pipeline.",
       },
       { name: "twitter:card", content: "summary" },
       { property: "og:type", content: "website" },

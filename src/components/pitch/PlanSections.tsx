@@ -108,7 +108,7 @@ export function RoadmapSection() {
           contract, beyond the SDLC (the registry surface is already mocked for it).
         </Bullet>
         <Bullet>
-          <B>Decide whether - and how - to sell it</B> - taking Agency OS to clients as a product is
+          <B>Decide whether - and how - to sell it</B> - taking AI PodOps to clients as a product is
           a deliberate decision made once it has proven out internally, not an assumption baked in
           now.
         </Bullet>
@@ -182,7 +182,7 @@ export function TeamSection() {
   return (
     <PitchSection id="team" kicker="08" title="Team &amp; effort">
       <P>
-        <B>The team is the thesis, staffed.</B> Agency OS sells one accountable human per agent - so
+        <B>The team is the thesis, staffed.</B> AI PodOps sells one accountable human per agent - so
         we build it the same way: every agent is designed and validated by the person who does that
         job today. The PM who runs delivery shapes the orchestrator; the DevOps lead owns the
         DevOps agent; the QA engineer owns the QA agent. The platform dogfoods its own
@@ -235,7 +235,7 @@ export function AskSection() {
     <PitchSection id="ask" kicker="09" title="The ask">
       <Bullets>
         <Bullet>
-          <B>Approve the productization track</B> - Agency OS built as a product along the four-step
+          <B>Approve the productization track</B> - AI PodOps built as a product along the four-step
           plan above.
         </Bullet>
         <Bullet>
@@ -277,7 +277,7 @@ export function PitchFooter() {
       className="mt-12 scroll-mt-28 break-inside-avoid border-t border-slate-200 pb-12 pt-6"
     >
       <p className="text-[13px] leading-6 text-slate-500">
-        Sources: the Agency OS product north-star (docs/product-vision.md) and the working mock, as
+        Sources: the AI PodOps product north-star (docs/product-vision.md) and the working mock, as
         of <strong className="font-semibold text-slate-700">2026-06-10</strong>. Nothing in this
         brief claims a capability that is not live today, walkable in the demo, or explicitly
         labeled roadmap / staged / hypothesis.{" "}

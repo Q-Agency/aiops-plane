@@ -96,7 +96,7 @@ export function InviteDialog({ open, onOpenChange, onInvite }: InviteDialogProps
       return;
     }
     setError(null);
-    const link = `https://agencyos.app/invite/ix_${Math.random().toString(36).slice(2, 10)}`;
+    const link = `https://podops.app/invite/ix_${Math.random().toString(36).slice(2, 10)}`;
     const person: InvitedPerson = {
       id: `invite-${Date.now().toString(36)}`,
       name: displayName(email.trim()),

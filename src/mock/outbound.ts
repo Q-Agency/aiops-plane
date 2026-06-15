@@ -83,7 +83,7 @@ export const OUTBOUND_FEED: OutboundItem[] = [
     channels: ["slack"],
     target: "AM-142 ticket thread (Teamwork)",
     summaryMd:
-      "**Answered in Slack, echoed to the ticket** - BA asked \"saved filter chips: per account or per device?\" · Zlatko: per account. Write-back tagged [AgencyOS] so our listener ignores its own move.",
+      "**Answered in Slack, echoed to the ticket** - BA asked \"saved filter chips: per account or per device?\" · Zlatko: per account. Write-back tagged [PodOps] so our listener ignores its own move.",
     cadence: "as it happens",
   },
   {

@@ -1,8 +1,8 @@
 /**
  * TicketJourneySvg (/pitch, Act II) - "one ticket's journey" as a static
  * three-lane SVG: the client's board (Jira/Teamwork) on top, the pod
- * (Agency OS) in the middle, the channels (Slack · email) below.
- * Visualizes the tracker boundary ("the board is the doorbell; Agency OS
+ * (AI PodOps) in the middle, the channels (Slack · email) below.
+ * Visualizes the tracker boundary ("the board is the doorbell; AI PodOps
  * is the house"), per-agent artifacts (SPEC.md belongs to the BA - every
  * agent ships its own), and proactive outbound comms (digests, preps,
  * weekly reports, escalations pushed to Slack/email). Light-theme,
@@ -106,7 +106,7 @@ export function TicketJourneySvg() {
       viewBox="0 0 860 436"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="One ticket's journey: a card dragged to Ready on the Jira/Teamwork board starts the pod; agents run inside Agency OS, each producing its own artifact (the BA's SPEC.md, the SA's design, and so on) behind human gates; questions, approvals, daily digests, preparations, weekly reports, and escalations are pushed proactively to Slack and email; plain status and artifact links are written back to the board."
+      aria-label="One ticket's journey: a card dragged to Ready on the Jira/Teamwork board starts the pod; agents run inside AI PodOps, each producing its own artifact (the BA's SPEC.md, the SA's design, and so on) behind human gates; questions, approvals, daily digests, preparations, weekly reports, and escalations are pushed proactively to Slack and email; plain status and artifact links are written back to the board."
       className="h-auto w-full min-w-[640px]"
     >
       <defs>
@@ -126,7 +126,7 @@ export function TicketJourneySvg() {
       </text>
 
       {/* ---- Lane 2: the pod - each agent ships its OWN artifact ---- */}
-      <Lane y={148} h={96} label="AGENCY OS" sub="the pod - agents, gates, ledger · each agent ships its own artifact" fill="#eef2ff" stroke="#c7d2fe" />
+      <Lane y={148} h={96} label="AI PODOPS" sub="the pod - agents, gates, ledger · each agent ships its own artifact" fill="#eef2ff" stroke="#c7d2fe" />
       <Node x={170} y={186} w={92} label="BA agent" tone="live" artifact="SPEC.md" />
       <Node x={294} y={186} w={108} label="gate ✓ Ana" tone="gate" />
       <Node x={434} y={186} w={92} label="SA agent" tone="neutral" artifact="DESIGN.md" />

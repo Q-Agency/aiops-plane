@@ -10,6 +10,6 @@ import { StatusView } from "@/components/status/StatusView";
 
 export const Route = createFileRoute("/status")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Platform status · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Platform status · AI PodOps" }] }),
   component: StatusView,
 });

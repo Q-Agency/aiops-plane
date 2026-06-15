@@ -1,7 +1,7 @@
 /**
  * GateReviewShell - the client-grade gate review surface
  * (/approvals/$gateId, C4). The single most load-bearing surface in the
- * RUN cluster: a paying PM signs off HERE, inside Agency OS - never
+ * RUN cluster: a paying PM signs off HERE, inside AI PodOps - never
  * dropped into the agent's own tool except as a labeled fallback.
  *
  * Layout (approval kind): review header bar (breadcrumb · badges · SLA ·

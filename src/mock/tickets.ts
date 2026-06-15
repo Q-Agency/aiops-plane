@@ -31,7 +31,7 @@ export const tickets: Ticket[] = [
 export interface AddTicketInput {
   /**
    * Tracker id (e.g. "AM-109") - REQUIRED: every pod ticket originates on
-   * the board (the single doorbell); Agency OS never mints ticket ids.
+   * the board (the single doorbell); AI PodOps never mints ticket ids.
    */
   id: string;
   title: string;

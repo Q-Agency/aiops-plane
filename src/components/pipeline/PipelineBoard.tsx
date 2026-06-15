@@ -85,7 +85,7 @@ const WB_DONE = wbStatus("released", "Done + artifact links");
 const WB_DETAIL =
   `Write-back to Teamwork · board "${TRIGGER_RULE.board}" - ` +
   WRITE_BACK_MAPPING.map((m) => `${m.podStage} → "${m.trackerStatus}"`).join(" · ") +
-  ". Plain status + artifact links are posted on the ticket automatically, [AgencyOS]-tagged so the listener ignores our own moves. Tickets live in your tracker - we never create, edit or close them.";
+  ". Plain status + artifact links are posted on the ticket automatically, [PodOps]-tagged so the listener ignores our own moves. Tickets live in your tracker - we never create, edit or close them.";
 
 /** Stage-derived write-back state for a card (column kind ⇄ mapping moment). */
 function writeBackFor(kind: ColKind): { label: string; pending?: boolean } {

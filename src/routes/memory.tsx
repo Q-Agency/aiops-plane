@@ -10,6 +10,6 @@ import { MemoryView } from "@/components/memory/MemoryView";
 
 export const Route = createFileRoute("/memory")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Memory & Constitution · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Memory & Constitution · AI PodOps" }] }),
   component: MemoryView,
 });

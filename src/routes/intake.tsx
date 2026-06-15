@@ -11,7 +11,7 @@ import { WorkIntakeView } from "@/components/intake/WorkIntakeView";
 
 export const Route = createFileRoute("/intake")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Work Intake · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Work Intake · AI PodOps" }] }),
   validateSearch: (search: Record<string, unknown>): { sim?: "error" } =>
     search.sim === "error" ? { sim: "error" } : {},
   component: IntakeRoute,

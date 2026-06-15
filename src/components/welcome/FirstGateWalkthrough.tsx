@@ -35,7 +35,7 @@ interface CoachMark {
 const MARKS: CoachMark[] = [
   {
     title: "Read the spec",
-    body: "The artifact under review renders here, in-app - sections, business rules, acceptance criteria. You review inside Agency OS; the agent's own tool is only a labeled fallback.",
+    body: "The artifact under review renders here, in-app - sections, business rules, acceptance criteria. You review inside AI PodOps; the agent's own tool is only a labeled fallback.",
   },
   {
     title: "Check the validators",

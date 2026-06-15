@@ -308,7 +308,7 @@ export function ClientStatusReport({
       )}
 
       <footer className="px-6 sm:px-8 py-4 border-t border-slate-200 flex items-center justify-between gap-3 text-xs text-slate-400">
-        <span>Prepared by Agency OS · Q - generated from the pod&apos;s live delivery record.</span>
+        <span>Prepared by AI PodOps · Q - generated from the pod&apos;s live delivery record.</span>
         <span suppressHydrationWarning>{isSent && sentAt ? `Sent ${fmtDay(sentAt)}` : "Not sent yet"}</span>
       </footer>
     </div>

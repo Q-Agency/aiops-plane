@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/connections")({
-  head: () => ({ meta: [{ title: "Connections · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Connections · AI PodOps" }] }),
   component: ConnectionsPage,
 });
 

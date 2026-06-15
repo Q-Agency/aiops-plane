@@ -1,4 +1,4 @@
-# Agency OS - Architecture Decisions
+# AI PodOps - Architecture Decisions
 
 > **Status:** internal tool for Q Agency (not productized). Living document.
 > **Last updated:** 2026-06-07
@@ -9,12 +9,12 @@ it is intentionally not a full spec for things we haven't validated yet.
 
 ---
 
-## 1. What Agency OS is (and isn't)
+## 1. What AI PodOps is (and isn't)
 
-Agency OS is the **control plane / mission control** for a fleet of autonomous
+AI PodOps is the **control plane / mission control** for a fleet of autonomous
 agents - it **observes, governs, and routes between** them. It is **not** an
 agent runtime. The agents (BA on LangGraph, future SA, etc.) run as independent
-services; Agency OS **federates a normalized view** over them.
+services; AI PodOps **federates a normalized view** over them.
 
 Two framing decisions:
 
@@ -209,7 +209,7 @@ plumbing); SA and Dev adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-
 
 ## 5. Boundary: agent tool vs. fleet cockpit
 
-|                                                             | **flow-observer** (the agent's own UI)                       | **Agency OS** (fleet cockpit)                         |
+|                                                             | **flow-observer** (the agent's own UI)                       | **AI PodOps** (fleet cockpit)                         |
 | ----------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Role                                                        | Deep **operate + configure** for one agent                   | Cross-agent **oversight**, read-mostly                |
 | Artifact approval                                           | ✅ here - review/edit the real `SPEC.md`, EARS, completeness | shows the gate in a queue; **deep-links** down to act |
@@ -219,16 +219,16 @@ plumbing); SA and Dev adopt it. Build brief: [`agent-sdk-brief.md`](./agent-sdk-
 
 **Rule:** deep, artifact-heavy, agent-specific actions stay in the agent's own
 UI; the fleet view federates a normalized read + lightweight actions + deep-links.
-This keeps Agency OS **mostly read-only** (small blast radius, simple v1).
+This keeps AI PodOps **mostly read-only** (small blast radius, simple v1).
 
 **Deep-link, don't embed.** The drill-down to an agent's deep view is **advertised on
 the card** (`x-agency.ui.runUrlTemplate`, e.g. BA → its Flow Observer), opened with the
-run's `work_item_id` - so it generalizes to any agent and Agency OS hardcodes nothing.
+run's `work_item_id` - so it generalizes to any agent and AI PodOps hardcodes nothing.
 The agent sets it via its own admin (BA: a global setting the card resolves live, so no
 redeploy). Note the **ephemeral/durable split**: the live deep view is transient (BA
 streams it from an in-memory bus, gone ~5 min after a run finishes), so the link shows
 **only while the run is live**; the **durable** per-run record (completeness deltas,
-validation errors, the session's turns) is rendered in Agency OS itself from persisted
+validation errors, the session's turns) is rendered in AI PodOps itself from persisted
 `Run` metrics. Live detail lives with the agent; the durable summary is federated.
 
 **HITL is two moments, one contract type.** Every human gate is a `HITLGate`

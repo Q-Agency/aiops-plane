@@ -21,7 +21,7 @@ export const Route = createFileRoute("/welcome")({
     if (search.variant === "multi" || search.variant === "deputy") out.variant = search.variant;
     return out;
   },
-  head: () => ({ meta: [{ title: "Welcome · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Welcome · AI PodOps" }] }),
   component: WelcomeRoute,
 });
 

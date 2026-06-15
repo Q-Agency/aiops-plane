@@ -20,7 +20,7 @@ export const Route = createFileRoute("/notifications")({
     const tab = search.tab;
     return TABS.includes(tab as NotificationsTab) ? { tab: tab as NotificationsTab } : {};
   },
-  head: () => ({ meta: [{ title: "Notifications · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Notifications · AI PodOps" }] }),
   component: NotificationsRoute,
 });
 

@@ -72,7 +72,7 @@ function directionLine(c: Connector): string {
   const parts: string[] = [];
   if (hasRead) parts.push(`read ${CATEGORY_NOUN[c.category]} ← ${c.name}`);
   if (hasWrite) parts.push(`post updates → ${c.name}`);
-  return `Agency OS will: ${parts.join(" · ")}`;
+  return `AI PodOps will: ${parts.join(" · ")}`;
 }
 
 export function ConnectDialog({

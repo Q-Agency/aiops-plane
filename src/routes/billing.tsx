@@ -4,7 +4,7 @@ import { BillingView } from "@/components/monitor/BillingView";
 
 export const Route = createFileRoute("/billing")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Usage & Billing · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Usage & Billing · AI PodOps" }] }),
   component: BillingRoute,
 });
 

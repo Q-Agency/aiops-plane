@@ -1,5 +1,5 @@
 /**
- * PitchPage (/pitch) - Agency OS product brief: a chrome-less, no-auth,
+ * PitchPage (/pitch) - AI PodOps product brief: a chrome-less, no-auth,
  * client-clean single-page document (sections §1-§11 of the final copy,
  * rendered verbatim). Reuses the .share-clean light scope from styles.css -
  * light-first, print-friendly, no neon/glow/scanline. The sticky bar and
@@ -45,14 +45,14 @@ function Hero() {
         Product brief
       </p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-        Agency OS
+        AI PodOps
       </h1>
       <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
         Mission control for governed agent-human software delivery.{" "}
         <em className="font-medium text-slate-800">Launch a pod. Run it. Prove it.</em>
       </p>
       <p className="mt-5 max-w-3xl text-[15px] leading-7 text-slate-700">
-        Agency OS is the operating system for agent-human delivery pods: a curated team of AI
+        AI PodOps is the operating system for agent-human delivery pods: a curated team of AI
         agents, one accountable human per agent, a gated pipeline, and a ledger that proves every
         decision.
       </p>
@@ -76,7 +76,7 @@ function SummarySection() {
   return (
     <PitchSection id="summary" kicker="02" title="Executive summary">
       <P>
-        Agency OS turns Q's SDLC agents into a sellable platform: agent-human pods that deliver
+        AI PodOps turns Q's SDLC agents into a sellable platform: agent-human pods that deliver
         software through a governed, gated, auditable pipeline. A PM - client-side or Q-side, not
         an engineer - fires up a pod, runs it day-to-day, and proves what it cost and who approved
         what.
@@ -108,7 +108,7 @@ function SummarySection() {
         <strong className="font-semibold text-slate-900">Internal-first, sellable second:</strong>{" "}
         adoption starts on Q-led projects - a Q PM operating pods for client deliveries, with our
         way of work - and every such project doubles as a live reference. Client-managed teams
-        follow as the product hardens. The floor is high: even if we never sell Agency OS as a
+        follow as the product hardens. The floor is high: even if we never sell AI PodOps as a
         product, it makes our own delivery more profitable and more optimal - and when a client
         sees their project run on it, the trust bump wins the next deal. The build also compounds
         internally: it shares many elements with our IRI Estimation tool, so the overlapping work
@@ -191,7 +191,7 @@ function WedgeSection() {
             </tr>
             <tr>
               <td className={tbl.td}>
-                <strong className="font-semibold text-slate-900">Agency OS</strong>
+                <strong className="font-semibold text-slate-900">AI PodOps</strong>
               </td>
               <td className={tbl.td}>
                 A cross-tool agent-human pod under one harness: one accountable human per agent,
@@ -214,7 +214,7 @@ function WedgeSection() {
         <strong className="font-semibold text-slate-900">
           The frontier labs are our suppliers, not our competitors.
         </strong>{" "}
-        Agency OS is model-agnostic by design - agents swappable by contract, per-agent
+        AI PodOps is model-agnostic by design - agents swappable by contract, per-agent
         model-plane disclosure, local models in-tenant - so every frontier-model improvement makes
         our pods better and cheaper, and we never fund the capability race. The headline
         lab-enterprise SDLC deals are our market validation, not our threat: the giants are
@@ -243,14 +243,14 @@ function WedgeSection() {
         <strong className="font-semibold text-slate-900">take implementation headless</strong> -
         move the AI off the engineer's desk into a governed harness that runs only the approved
         tools and models, and lift the humans <em>out of the IDE and up to the gate</em>, where the
-        job is to decide and answer for the work, not to type it. Agency OS is that move: not a
+        job is to decide and answer for the work, not to type it. AI PodOps is that move: not a
         better copilot for the IDE, but the harness that removes the need to sit in one.
       </P>
 
       <P>
         <strong className="font-semibold text-slate-900">The regulatory tailwind.</strong> From 2
         August 2026, EU organizations deploying AI systems carry Article 26 deployer obligations:
-        assigned human oversight, log retention, incident reporting. Agency OS is built from those
+        assigned human oversight, log retention, incident reporting. AI PodOps is built from those
         primitives. The accountability matrix maps to assigned oversight (Art. 26(2)); the
         append-only ledger to log retention (26(6)); the incident inbox to incident reporting
         (26(5)); and every gate decision carries an attributed, typed reason - oversight evidence

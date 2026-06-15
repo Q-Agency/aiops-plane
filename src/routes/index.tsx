@@ -25,7 +25,7 @@ type CommandData =
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Overview · Agency OS" },
+      { title: "Overview · AI PodOps" },
       { name: "description", content: "Bird's-eye view of the AI agency pipeline." },
     ],
   }),

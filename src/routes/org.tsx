@@ -10,6 +10,6 @@ import { OrgView } from "@/components/org/OrgView";
 
 export const Route = createFileRoute("/org")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Your pods · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Your pods · AI PodOps" }] }),
   component: OrgView,
 });

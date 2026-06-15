@@ -1,4 +1,4 @@
-# Agency OS - Control-Plane Data Model (draft v0)
+# AI PodOps - Control-Plane Data Model (draft v0)
 
 *Status: draft v0 - entity inventory and binding rules for the product's control plane. Date: 2026-06-09. Named per the deep-dive's P0-5(d); referenced from `product-vision.md` §8.*
 

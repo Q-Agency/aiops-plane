@@ -10,6 +10,6 @@ import { ArtifactsView } from "@/components/artifacts/ArtifactsView";
 
 export const Route = createFileRoute("/artifacts")({
   beforeLoad: mockOnlyBeforeLoad,
-  head: () => ({ meta: [{ title: "Deliverables · Agency OS" }] }),
+  head: () => ({ meta: [{ title: "Deliverables · AI PodOps" }] }),
   component: ArtifactsView,
 });

@@ -6,7 +6,7 @@ export const Route = createFileRoute("/comms")({
   beforeLoad: mockOnlyBeforeLoad,
   head: () => ({
     meta: [
-      { title: "Comms & Escalations · Agency OS" },
+      { title: "Comms & Escalations · AI PodOps" },
       { name: "description", content: "Agent-initiated outbound communications and escalations." },
     ],
   }),
