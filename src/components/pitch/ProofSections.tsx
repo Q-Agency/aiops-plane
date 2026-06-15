@@ -7,7 +7,7 @@
  * leads with the agent-fleet status line; copy is verbatim from the brief.
  */
 
-import { P, PitchSection, tbl } from "./primitives";
+import { DemoPill, P, PitchSection, tbl } from "./primitives";
 
 export function MoatSection() {
   return (
@@ -21,8 +21,12 @@ export function MoatSection() {
           orchestrated agents, accountable humans, unified gates, one ledger — with first-class{" "}
           <strong className="font-semibold text-slate-900">AgentOps under the hood</strong>: evals
           before any agent version ships, run tracing, agent versioning with rollback, cost-aware
-          model routing, guardrails — plus observability, incidents, and recovery. We run the
-          fleet; the client sees the guarantees it produces. Deployment answers the four
+          model routing, guardrails — plus observability, incidents, and recovery. These are
+          controls on every agent's profile, not slideware — switch its model (self-hosted
+          in-tenant included), scope its tools, grant earned autonomy, roll a version back, every
+          change on the ledger.
+          <DemoPill href="/agents/ba" label="Agent profile — operate the BA agent" />
+          We run the fleet; the client sees the guarantees it produces. Deployment answers the four
           fears enterprise buyers actually have. <em>Data privacy and sensitivity:</em> dedicated
           per-client tenancy (isolated infra and DB; GDPR-ready by construction — EU residency, a
           signed DPA, per-class retention windows, full data export) and{" "}
@@ -33,7 +37,11 @@ export function MoatSection() {
           tenant. <em>Cost:</em> self-hosted inference where it is cheaper, and a budget cap with
           projected run-rate on every pod. <em>Third-party lock-in:</em> curated agents are
           swappable by contract, the model plane is disclosed per agent (provider, pinned model,
-          processing region, retention terms), and your artifacts and ledger are exportable.
+          processing region, retention terms), and your artifacts and ledger are exportable. The
+          harness itself is agent-agnostic: any agent that speaks the contract — yours, ours, a
+          vendor's — registers by its A2A card into the same gates, ledger and accountability,
+          with scoped tools, a named owner, and autonomy starting at L0.
+          <DemoPill href="/registry" label="Agent Registry — register any agent" />
           Competitors sell an agent or a suite; we sell the harness the whole pod runs in.
         </p>
         <p className="break-inside-avoid text-[15px] leading-7 text-slate-700">

@@ -8,6 +8,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
+  Blocks,
   BookMarked,
   Bot,
   Briefcase,
@@ -71,6 +72,7 @@ export type NavTo =
   | "/billing"
   | "/observability"
   | "/orchestration"
+  | "/registry"
   | "/flow"
   | "/traceability"
   | "/agents"
@@ -171,14 +173,18 @@ export const NAV: NavGroup[] = [
       { to: "/traceability", label: "Traceability", icon: GitBranch },
     ],
   },
-  // ADVANCED · technical = a pure platform-engineer / SRE drawer (product-vision
-  // §6 intent: "demote platform-engineer views… over-built for the PM persona").
-  // After promoting Agents → RUN and demoting Flow + Traceability → MONITOR, only
-  // the genuine deep-technical surfaces remain.
+  // ADVANCED · technical = the platform-engineer drawer (product-vision §6 intent:
+  // "demote platform-engineer views… over-built for the PM persona"). After
+  // promoting Agents → RUN and demoting Flow + Traceability → MONITOR, the SRE
+  // trio (Observability / Orchestration / Platform status) remains. Agent Registry
+  // leads it (owner call 2026-06-12): the agent-agnostic extensibility surface —
+  // "register & govern ANY agent, not just SDLC" — is the platform's deepest
+  // technical capability and the proof the control plane isn't a fixed workflow.
   {
     pillar: "ADVANCED",
     label: "ADVANCED · technical",
     items: [
+      { to: "/registry", label: "Agent Registry", icon: Blocks },
       { to: "/observability", label: "Observability", icon: Activity, live: true },
       { to: "/orchestration", label: "Orchestration", icon: Network },
       { to: "/status", label: "Platform status", icon: Signal, badgeKey: "status" },

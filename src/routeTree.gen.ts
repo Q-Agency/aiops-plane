@@ -14,6 +14,7 @@ import { Route as TraceabilityRouteImport } from './routes/traceability'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as RegistryRouteImport } from './routes/registry'
 import { Route as PodRouteImport } from './routes/pod'
 import { Route as PitchRouteImport } from './routes/pitch'
 import { Route as PipelineRouteImport } from './routes/pipeline'
@@ -68,6 +69,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegistryRoute = RegistryRouteImport.update({
+  id: '/registry',
+  path: '/registry',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PodRoute = PodRouteImport.update({
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/pipeline': typeof PipelineRoute
   '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
+  '/registry': typeof RegistryRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/status': typeof StatusRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/pipeline': typeof PipelineRoute
   '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
+  '/registry': typeof RegistryRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/status': typeof StatusRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   '/pipeline': typeof PipelineRoute
   '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
+  '/registry': typeof RegistryRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/status': typeof StatusRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/pitch'
     | '/pod'
+    | '/registry'
     | '/reports'
     | '/settings'
     | '/status'
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/pitch'
     | '/pod'
+    | '/registry'
     | '/reports'
     | '/settings'
     | '/status'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/pitch'
     | '/pod'
+    | '/registry'
     | '/reports'
     | '/settings'
     | '/status'
@@ -473,6 +485,7 @@ export interface RootRouteChildren {
   PipelineRoute: typeof PipelineRoute
   PitchRoute: typeof PitchRoute
   PodRoute: typeof PodRoute
+  RegistryRoute: typeof RegistryRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   StatusRoute: typeof StatusRoute
@@ -519,6 +532,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/registry': {
+      id: '/registry'
+      path: '/registry'
+      fullPath: '/registry'
+      preLoaderRoute: typeof RegistryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pod': {
@@ -771,6 +791,7 @@ const rootRouteChildren: RootRouteChildren = {
   PipelineRoute: PipelineRoute,
   PitchRoute: PitchRoute,
   PodRoute: PodRoute,
+  RegistryRoute: RegistryRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   StatusRoute: StatusRoute,

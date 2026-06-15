@@ -229,6 +229,25 @@ function WedgeSection() {
       </P>
 
       <P>
+        <strong className="font-semibold text-slate-900">
+          The control problem you already have.
+        </strong>{" "}
+        Your people are using AI to write code right now — every engineer, with whatever tool,
+        whatever model, whatever prompt, pasting whatever data into it. You cannot see it, cannot
+        enforce which tools or models are allowed, cannot prove a standard was followed, and cannot
+        keep sensitive code inside the building — because the AI runs{" "}
+        <em>inside the engineer's IDE</em>, on the human's side of the line, where no policy
+        reaches. A copilot is ungovernable by construction: governance that depends on the
+        developer choosing to comply isn't governance. The only way to actually enforce tooling,
+        model choice, data residency, and the quality bar is to{" "}
+        <strong className="font-semibold text-slate-900">take implementation headless</strong> —
+        move the AI off the engineer's desk into a governed harness that runs only the approved
+        tools and models, and lift the humans <em>out of the IDE and up to the gate</em>, where the
+        job is to decide and answer for the work, not to type it. Agency OS is that move: not a
+        better copilot for the IDE, but the harness that removes the need to sit in one.
+      </P>
+
+      <P>
         <strong className="font-semibold text-slate-900">The regulatory tailwind.</strong> From 2
         August 2026, EU organizations deploying AI systems carry Article 26 deployer obligations:
         assigned human oversight, log retention, incident reporting. Agency OS is built from those
