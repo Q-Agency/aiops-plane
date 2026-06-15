@@ -1,22 +1,26 @@
 /**
  * LAUNCH step 1 — Pod Blueprints (body only; chrome from WizardShell).
- * Four radio-style selectable cards (3 blueprints + Start from scratch,
- * D7) with a "what's included" stack — agent chips, connector chips
- * (live-first, Roadmap trailing as "Optional · Roadmap"), SLA + roles
- * lines — plus the tabbed pre-fill preview for the selected blueprint.
- * Selecting pre-fills the draft via usePods().updateDraft; switching a
- * customized draft asks before replacing downstream selections.
+ * Start-from-scratch is the PRIMARY path (owner call 2026-06-15): a
+ * prominent hero card first ("Recommended"), since most pods are hand-built.
+ * The ready-made templates are demoted into a collapsed-by-default
+ * "Or start from a template" section (rarely used) — each still a
+ * radio-style card with its "what's included" stack (agent chips, connector
+ * chips live-first/Roadmap-trailing, SLA + roles) plus the tabbed pre-fill
+ * preview for the selected template. Selecting pre-fills the draft via
+ * usePods().updateDraft; switching a customized draft asks before replacing.
  */
 
 import { useState } from "react";
 import {
   Bot,
   Check,
+  ChevronDown,
   Clock,
   Globe,
   Layers,
   PencilRuler,
   Smartphone,
+  Sparkles,
   Users,
   Wrench,
   type LucideIcon,
@@ -33,6 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PIPELINE_ORDER, formatLatency, type ChainRoleId } from "@/mock/chain";
@@ -326,11 +331,72 @@ function BlueprintPreview({ bp }: { bp: PodBlueprint }) {
   );
 }
 
+/** The primary, prominent path — hand-build the pod (the common case). */
+function ScratchHero({
+  bp,
+  selected,
+  onSelect,
+}: {
+  bp: PodBlueprint;
+  selected: boolean;
+  onSelect: (bp: PodBlueprint) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={() => onSelect(bp)}
+      className={cn(
+        "glass-panel hover-lift relative w-full overflow-hidden p-5 text-left flex items-center gap-4 transition-shadow",
+        selected
+          ? "shadow-[0_0_22px_color-mix(in_oklab,var(--primary)_38%,transparent)]"
+          : "border-primary/40 shadow-[0_0_14px_color-mix(in_oklab,var(--primary)_16%,transparent)]",
+      )}
+      style={{
+        borderColor: selected
+          ? "color-mix(in oklab, var(--primary) 70%, transparent)"
+          : "color-mix(in oklab, var(--primary) 45%, transparent)",
+      }}
+    >
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
+      <div className="size-12 rounded-lg grid place-items-center border border-primary/50 bg-primary/15 text-primary shrink-0">
+        <PencilRuler className="size-6" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-base font-semibold leading-tight">Start from scratch</span>
+          <span className="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
+            <Sparkles className="size-2.5" /> Recommended
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1 leading-snug max-w-prose">
+          Hand-pick your agents, tools and people — full control, nothing pre-filled. The default
+          path for a pod tailored to this client.
+        </p>
+      </div>
+      {selected ? (
+        <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-mono px-2 py-1 rounded border border-primary/50 bg-primary/15 text-primary shrink-0">
+          <Check className="size-3" /> Selected
+        </span>
+      ) : (
+        <span className="text-[11px] font-mono text-primary shrink-0">Choose →</span>
+      )}
+    </button>
+  );
+}
+
 export function StepBlueprint() {
   const { draft, updateDraft } = usePods();
   const selectedId = draft?.blueprintId ?? null;
   const selected = blueprintById(selectedId);
   const [pending, setPending] = useState<PodBlueprint | null>(null);
+
+  const scratch = BLUEPRINTS.find((b) => b.id === "scratch");
+  const templates = BLUEPRINTS.filter((b) => b.id !== "scratch");
+  const templateSelected = selectedId !== null && selectedId !== "scratch";
+  // Templates are rarely used — collapsed by default, auto-open if one is picked.
+  const [showTemplates, setShowTemplates] = useState(templateSelected);
 
   const apply = (bp: PodBlueprint) => {
     updateDraft({
@@ -355,27 +421,50 @@ export function StepBlueprint() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="space-y-4">
+      <div className="space-y-4" role="radiogroup" aria-label="Pod blueprint">
         <p className="text-xs text-muted-foreground">
-          Start from a blueprint — pick a proven pod shape and adjust, or build from scratch.
+          Most pods are built from scratch — hand-pick exactly what this client needs. Ready-made
+          templates are there for common shapes if you want a head start.
         </p>
 
-        <div
-          role="radiogroup"
-          aria-label="Pod blueprint"
-          className="grid md:grid-cols-2 xl:grid-cols-4 gap-3"
-        >
-          {BLUEPRINTS.map((bp) => (
-            <BlueprintCard
-              key={bp.id}
-              bp={bp}
-              selected={bp.id === selectedId}
-              onSelect={handleSelect}
-            />
-          ))}
-        </div>
+        {/* Primary path — prominent, first */}
+        {scratch && (
+          <ScratchHero
+            bp={scratch}
+            selected={selectedId === "scratch"}
+            onSelect={handleSelect}
+          />
+        )}
 
-        {selected && selected.id !== "scratch" && <BlueprintPreview bp={selected} />}
+        {/* Secondary path — templates, de-emphasized (rarely used) */}
+        <Collapsible open={showTemplates} onOpenChange={setShowTemplates}>
+          <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md border border-border bg-white/[0.02] px-3 py-2 text-left text-xs text-muted-foreground hover:text-foreground hover:border-white/20 transition-colors">
+            <Layers className="size-3.5 shrink-0" />
+            <span className="font-medium">Or start from a template</span>
+            <span className="font-mono text-[10px] text-muted-foreground/70">
+              {templates.length} common shapes
+            </span>
+            {templateSelected && (
+              <span className="text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
+                {selected?.name}
+              </span>
+            )}
+            <ChevronDown className="ml-auto size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-3 space-y-4">
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {templates.map((bp) => (
+                <BlueprintCard
+                  key={bp.id}
+                  bp={bp}
+                  selected={bp.id === selectedId}
+                  onSelect={handleSelect}
+                />
+              ))}
+            </div>
+            {selected && selected.id !== "scratch" && <BlueprintPreview bp={selected} />}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
