@@ -30,10 +30,12 @@ export function ActsSection() {
         <figcaption className="mt-3 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-500">
           The artifact chain: each stage consumes the artifact before it, and the chain closes with
           no gaps. <span className="font-medium text-emerald-700">spec</span> is produced by the
-          live BA agent today and <span className="font-medium text-emerald-700">knowledge</span>{" "}
-          - the pod-wide shared-context peer, never a pipeline node - is operating alongside it;
-          design (SA) and code (Dev) are under construction, uix-ui-spec (UI/UX) and test (QA) in
-          preparation. Every stage renders staged data in the demo until its agent goes live.
+          live BA agent and <span className="font-medium text-emerald-700">knowledge</span>{" "}
+          - the pod-wide shared-context peer, never a pipeline node - by the Curator agent:{" "}
+          <strong className="font-medium text-emerald-700">BA and Curator are done and operating
+          today</strong>. Every other stage (design, uix-ui-spec, tasks, code, review, test,
+          release) is <strong className="font-medium text-slate-700">under construction</strong>,
+          rendering staged data in the demo until its agent goes live.
         </figcaption>
       </figure>
 
@@ -64,6 +66,20 @@ export function ActsSection() {
             for quality, swappable by contract). The same catalog backs the wizard's team step -
             open any card for what the agent consumes, what it produces, and what it costs to run
             <DemoPill href="/catalog" label="Agent catalog" />
+          </Bullet>
+          <Bullet>
+            <strong className="font-semibold text-slate-900">An LLM tier per agent</strong> - every
+            agent takes a mandatory tier -{" "}
+            <strong className="font-semibold text-slate-900">Max capability</strong>, Balanced,
+            Budget, or <strong className="font-semibold text-slate-900">Local-only</strong> - and
+            each tier is a <em>blend</em> of models (different model per sub-role: generation,
+            supervisor, judge), not one engine. You pick the trade-off that matters for this client:{" "}
+            <strong className="font-semibold text-slate-900">price</strong>,{" "}
+            <strong className="font-semibold text-slate-900">security &amp; privacy</strong>{" "}
+            (Local-only runs every sub-role on Q's in-tenant H200 rig - data never leaves the
+            tenant), and <strong className="font-semibold text-slate-900">speed</strong>. The wizard
+            won't launch until every agent has one
+            <DemoPill href="/pods/new?step=agents" label="Pick LLM tiers" />
           </Bullet>
           <Bullet>
             <strong className="font-semibold text-slate-900">Auto-wired pipeline preview</strong> -
