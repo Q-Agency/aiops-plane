@@ -1,0 +1,39 @@
+# AWS Amplify Hosting build spec — TanStack Start (Vite + Nitro) as SSR compute.
+#
+# This app is NOT a static SPA: auth (incl. the demo login) and the audit/agent
+# gateway run as server functions, so Amplify must run it as server-side compute.
+# We build with Nitro's `aws-amplify` preset (set via NITRO_PRESET, which
+# vite.config.ts forwards) — it emits the Amplify deployment spec under
+# `.amplify-hosting/` (deploy-manifest.json + compute/default + static). Amplify
+# auto-switches to the WEB_COMPUTE platform when it sees that manifest.
+#
+# bun isn't preinstalled on the Amplify image, so we install it in preBuild
+# (the repo is locked with bun.lock). Node 20 matches the compute runtime.
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm use 20 || nvm install 20
+        - node --version
+        - curl -fsSL https://bun.sh/install | bash
+        - export BUN_INSTALL="$HOME/.bun"
+        - export PATH="$BUN_INSTALL/bin:$PATH"
+        - bun --version
+        - bun install --frozen-lockfile
+    build:
+      commands:
+        - export BUN_INSTALL="$HOME/.bun"
+        - export PATH="$BUN_INSTALL/bin:$PATH"
+        - export NITRO_PRESET=aws-amplify
+        - bun run build
+  artifacts:
+    # The Amplify deployment spec lives at the root of this dir
+    # (deploy-manifest.json). Amplify reads it and deploys compute + static.
+    baseDirectory: .amplify-hosting
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
+      - $HOME/.bun/**/*

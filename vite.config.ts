@@ -10,8 +10,29 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // force-enable Nitro so `vite build` emits a self-contained server for that
 // preset at dist/server/index.mjs. Without the env var, behavior is unchanged —
 // Lovable's sandbox still auto-runs its default Cloudflare build.
-const selfHostBuild = process.env.NITRO_PRESET
-  ? { nitro: { preset: process.env.NITRO_PRESET } }
+//
+// AWS Amplify (NITRO_PRESET=aws-amplify): the Lovable config hard-defaults
+// Nitro's output to dist/server, but Nitro's aws-amplify preset must emit into
+// `.amplify-hosting/compute/default` (its writeAmplifyFiles hook writes the
+// deploy-manifest + compute/default/server.js loader THERE). Lovable spreads
+// user `output` last, so we restore the preset's expected layout — only for
+// this preset; node-server/cloudflare builds are untouched.
+const preset = process.env.NITRO_PRESET;
+const selfHostBuild = preset
+  ? {
+      nitro: {
+        preset,
+        ...(preset === "aws-amplify"
+          ? {
+              output: {
+                dir: ".amplify-hosting",
+                serverDir: ".amplify-hosting/compute/default",
+                publicDir: ".amplify-hosting/static",
+              },
+            }
+          : {}),
+      },
+    }
   : {};
 
 export default defineConfig({
