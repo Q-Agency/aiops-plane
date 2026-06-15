@@ -81,27 +81,32 @@ export function useViewRole(): { role: RoleId; setRole: (r: RoleId) => void } {
 /* ------------------------------------------------------------------ */
 
 /**
- * cockpit - the existing mock Overview (RUN landing) (Pod Admin; Eng Lead previews
- *           the same operator cockpit in this slice);
- * qa      - the scoped QA gate queue;
- * exec    - the read-only Exec Status Digest (sponsor + viewer, and the
- *           fallback for anything unknown).
+ * Each persona lands on a view scoped to what it actually does:
+ *   cockpit - the full operator Overview (Pod Admin - runs the whole pod);
+ *   eng     - the Engineering Lead delivery floor (code/architecture gates +
+ *             flow bottlenecks + technical incidents; no billing/ROI);
+ *   qa      - the scoped QA gate queue + quality posture;
+ *   exec    - the Sponsor "what did my money buy" digest (ROI $, SLA, report);
+ *   status  - the Viewer read-only status board (pod health + pipeline + SLA,
+ *             deliberately NON-financial - the money story is the sponsor's).
  */
-export type ViewLanding = "cockpit" | "qa" | "exec";
+export type ViewLanding = "cockpit" | "eng" | "qa" | "exec" | "status";
 
 export function viewLandingFor(role: RoleId): ViewLanding {
   switch (role) {
     case "pod_admin":
-    case "eng_lead":
       return "cockpit";
+    case "eng_lead":
+      return "eng";
     case "qa_lead":
       return "qa";
     case "sponsor":
+      return "exec";
     case "viewer":
-      return "exec";
+      return "status";
     default:
-      // unknown role → read-only digest (spec fallback)
-      return "exec";
+      // unknown role → read-only status board (spec fallback)
+      return "status";
   }
 }
 
