@@ -92,17 +92,17 @@ export const reports: WeeklyReport[] = [
       atRisk: sla.atRisk,
       breached: sla.breached,
       notable: [
-        "Design review clearance breached on AM-138 (26h vs 8h target) - reassignment in progress.",
+        "Architecture review clearance breached on AM-138 (26h vs 8h target) - reassignment in progress.",
       ],
     },
     upcoming: [
-      "AM-142 Vehicle search with filters - spec approved, design starts Monday.",
+      "AM-142 Vehicle search with filters - spec approved, architecture starts Monday.",
       "AM-150 VIN decoder service - dev in progress, QA expected midweek.",
       "AM-139 Image moderation pipeline - spec drafting begins.",
     ],
     costNote: `Spend this period $${aggregates.totalCost.toFixed(0)} vs a $${budget.monthlyCapUsd.toLocaleString()} monthly cap - projected $${budget.projectedMonthlyUsd.toLocaleString()} by month end (${budget.capStatus === "on_track" ? "on track" : budget.capStatus === "watch" ? "watch" : "over cap"}).`,
     narrative:
-      "A steady week: three items shipped or cleared their final gates, and every delivery passed a named human sign-off. One design review ran past its target - we flagged it the hour it breached and are reassigning the reviewer. Costs remain well inside the monthly cap.",
+      "A steady week: three items shipped or cleared their final gates, and every delivery passed a named human sign-off. One architecture review ran past its target - we flagged it the hour it breached and are reassigning the reviewer. Costs remain well inside the monthly cap.",
   },
   // prior week - sent
   {
@@ -139,7 +139,7 @@ export const reports: WeeklyReport[] = [
     },
     upcoming: [
       "AM-142 Vehicle search with filters enters spec.",
-      "AM-138 Buyer-seller messaging design review due.",
+      "AM-138 Buyer-seller messaging architecture review due.",
     ],
     costNote: "Spend this period $413 vs a $4,000 monthly cap - comfortably on track.",
     narrative:

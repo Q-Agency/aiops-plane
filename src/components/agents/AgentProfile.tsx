@@ -87,7 +87,7 @@ import { LlmTierMenu } from "@/components/agents/LlmTierMenu";
 import { AUTONOMY_LEVELS, autonomyPreviewStat, autonomyStatusFor } from "@/mock/gate-policies";
 import { CONNECTORS } from "@/mock/connectors";
 import { humans } from "@/mock/humans";
-import { CHAIN_ROLES, isChainRoleId } from "@/mock/chain";
+import { CHAIN_ROLES, isChainRoleId, artifactKindLabel } from "@/mock/chain";
 import {
   BA_VALIDATOR_FAMILY,
   DESIGN_VALIDATOR_FAMILY,
@@ -162,12 +162,12 @@ export function AgentProfile({ agent }: { agent: Agent }) {
               <span>
                 consumes{" "}
                 <span className="text-foreground/80">
-                  {contract.consumes.length ? contract.consumes.join(", ") : "-"}
+                  {contract.consumes.length ? contract.consumes.map(artifactKindLabel).join(", ") : "-"}
                 </span>
               </span>
               <ArrowRight className="size-2.5" />
               <span>
-                produces <span className="text-foreground/80">{contract.produces}</span>
+                produces <span className="text-foreground/80">{artifactKindLabel(contract.produces)}</span>
               </span>
             </div>
           )}

@@ -173,7 +173,7 @@ export const notifications: AppNotification[] = [
     recipientId: "zlatko",
     kind: "sla_breach",
     severity: "critical",
-    title: "SLA breach · Design review clearance",
+    title: "SLA breach · Architecture review clearance",
     body: "AM-138 cleared the 8h design-review target 18h ago and still waits.",
     ts: now - 2 * hr,
     read: false,

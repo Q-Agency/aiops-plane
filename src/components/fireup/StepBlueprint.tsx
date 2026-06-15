@@ -40,7 +40,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { PIPELINE_ORDER, formatLatency, type ChainRoleId } from "@/mock/chain";
+import { PIPELINE_ORDER, formatLatency, artifactKindLabel, type ChainRoleId } from "@/mock/chain";
 import { catalogEntry } from "@/mock/catalog";
 import { connectorById, type ConnectorId } from "@/mock/connectors";
 import { BLUEPRINTS, blueprintById, type PodBlueprint } from "@/mock/blueprints";
@@ -248,7 +248,7 @@ function BlueprintPreview({ bp }: { bp: PodBlueprint }) {
                 </span>
                 <span className="ml-auto flex items-center gap-1.5 shrink-0">
                   <span className="text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
-                    {entry.produces}
+                    {artifactKindLabel(entry.produces)}
                   </span>
                   <span
                     className={cn(

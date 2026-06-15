@@ -22,7 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { agents } from "@/mock/agents";
-import { CHAIN_ROLES, formatLatency, missingInputsFor, type ChainRoleId } from "@/mock/chain";
+import { CHAIN_ROLES, formatLatency, missingInputsFor, artifactKindLabel, type ChainRoleId } from "@/mock/chain";
 import { CATALOG } from "@/mock/catalog";
 import { LlmTierMenu } from "@/components/agents/LlmTierMenu";
 import type { LlmTier } from "@/mock/agent-config";
@@ -225,7 +225,7 @@ export function AgentDetailDialog({
               <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
                 Produces
               </span>
-              <ContractChip tone="neon">{entry.produces}</ContractChip>
+              <ContractChip tone="neon">{artifactKindLabel(entry.produces)}</ContractChip>
               <ArrowRight className="size-3.5 text-muted-foreground" />
               <span className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
                 Consumes
@@ -237,7 +237,7 @@ export function AgentDetailDialog({
               ) : (
                 entry.consumes.map((c) => (
                   <ContractChip key={c} tone="muted">
-                    {c}
+                    {artifactKindLabel(c)}
                   </ContractChip>
                 ))
               )}
@@ -249,7 +249,7 @@ export function AgentDetailDialog({
                     key={gap.missing}
                     className="flex flex-wrap items-center gap-1.5 text-[11px] text-status-waiting"
                   >
-                    Consumes {gap.missing} -{" "}
+                    Consumes {artifactKindLabel(gap.missing)} -{" "}
                     {gap.fixRoleId
                       ? `add ${ROLE_SHORT[gap.fixRoleId]} to feed it.`
                       : "no producer in the catalog."}

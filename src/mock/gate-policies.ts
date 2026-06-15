@@ -7,7 +7,7 @@
  * Autonomy ladder (L0 strictest → L3 loosest). The Sample pod runs mostly
  * L0/L1 - autonomy is EARNED through validator pass-rates, never default.
  * SLA minutes align with gate-detail.ts (approvals ≤ 4h) and the report
- * seed (design review target 8h).
+ * seed (architecture review target 8h).
  */
 
 import {

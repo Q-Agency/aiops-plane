@@ -2,14 +2,14 @@ import { tickets } from "./tickets";
 import { humans, OWNERSHIP, humanByApprover } from "./humans";
 import type { AgentId } from "./types";
 
-export type ReviewGate = "Spec" | "Design" | "Tasks" | "Dev" | "QA";
+export type ReviewGate = "Spec" | "Architecture" | "Tasks" | "Dev" | "QA";
 
-export const GATES: ReviewGate[] = ["Spec", "Design", "Tasks", "Dev", "QA"];
+export const GATES: ReviewGate[] = ["Spec", "Architecture", "Tasks", "Dev", "QA"];
 
 // which agent each gate reviews -> drives accountable human
 export const GATE_AGENT: Record<ReviewGate, AgentId> = {
   Spec: "ba",
-  Design: "sa",
+  Architecture: "sa",
   Tasks: "tasklist",
   Dev: "review",
   QA: "qa",
@@ -17,7 +17,7 @@ export const GATE_AGENT: Record<ReviewGate, AgentId> = {
 
 export const GATE_SLA_MIN: Record<ReviewGate, number> = {
   Spec: 60,
-  Design: 90,
+  Architecture: 90,
   Tasks: 45,
   Dev: 120,
   QA: 60,
@@ -45,7 +45,7 @@ export interface GateStat {
 export const gateStats: GateStat[] = GATES.map((g, i) => {
   const r = seed(g.charCodeAt(0) + i * 11);
   const avg = Math.round(
-    g === "Design" ? 180 + r() * 60 :
+    g === "Architecture" ? 180 + r() * 60 :
     g === "Dev" ? 145 + r() * 50 :
     g === "QA" ? 70 + r() * 30 :
     g === "Spec" ? 38 + r() * 20 :
@@ -146,9 +146,9 @@ export const heatmap: HeatCell[] = (() => {
   GATES.forEach((g, gi) => {
     const r = seed(g.charCodeAt(0) + gi * 5);
     for (let h = 0; h < 24; h++) {
-      // workday morning spike + overnight pile-up on Design/Dev
+      // workday morning spike + overnight pile-up on Architecture/Dev
       const morningPeak = Math.exp(-Math.pow((h - 9) / 2.5, 2)) * 6;
-      const overnight = (g === "Design" || g === "Dev")
+      const overnight = (g === "Architecture" || g === "Dev")
         ? Math.exp(-Math.pow((h - 23) / 3, 2)) * 5 + (h < 6 ? 3 : 0)
         : 0;
       const depth = Math.max(0, Math.round(morningPeak + overnight + r() * 1.4));

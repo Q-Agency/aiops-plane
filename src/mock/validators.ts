@@ -25,12 +25,12 @@ export type ValidatorCheckId =
   | "V9_duplicate_ids"; //              no duplicate IDs within an owning section
 
 /**
- * SA design check ids (sa-design family) - the DESIGN artifact's own
+ * SA design check ids (sa-architecture family) - the DESIGN artifact's own
  * deterministic structural checks. Deliberately a separate, 7-check family:
  * "the 8 validators" is the BA's moat claim and never describes these.
  */
 export type DesignCheckId =
-  | "D1_spec_coverage" //          every spec AC maps to ≥1 design section
+  | "D1_spec_coverage" //          every spec AC maps to ≥1 architecture section
   | "D2_interface_contracts" //    every endpoint declares auth + notes/schema
   | "D3_data_model_integrity" //   every FK/reference resolves to a defined entity
   | "D4_component_reachability" // no orphan components - consumed or marked entry
@@ -193,7 +193,7 @@ export function validatorsFor(ticketId: string): ValidatorCheck[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* SA design checks (sa-design family) - the design review's own wall   */
+/* SA design checks (sa-architecture family) - the architecture review's own wall   */
 /* ------------------------------------------------------------------ */
 
 export const DESIGN_CHECK_LABELS: Record<DesignCheckId, string> = {
@@ -207,21 +207,21 @@ export const DESIGN_CHECK_LABELS: Record<DesignCheckId, string> = {
 };
 
 export const DESIGN_CHECK_DESCRIPTORS: Record<DesignCheckId, string> = {
-  D1_spec_coverage: "Every spec acceptance criterion maps to ≥1 design section",
+  D1_spec_coverage: "Every spec acceptance criterion maps to ≥1 architecture section",
   D2_interface_contracts: "Every API endpoint declares auth scope and contract notes",
   D3_data_model_integrity: "Every data-model reference resolves to a defined entity",
   D4_component_reachability: "No orphan components - each is consumed or marked an entry point",
   D5_failure_modes: "Every external dependency states timeout / retry / fallback",
   D6_nfr_budget: "Latency budget decomposed across hops within the spec's bound",
-  D7_consumed_version_pin: "Header pins the exact spec version this design consumed",
+  D7_consumed_version_pin: "Header pins the exact spec version this architecture consumed",
 };
 
-/** Honest language for the design family (mirror of STRUCTURAL_HONESTY_LINE). */
+/** Honest language for the architecture family (mirror of STRUCTURAL_HONESTY_LINE). */
 export const DESIGN_HONESTY_LINE =
-  "Structural quality, not semantic - we check the shape of the design, not whether it's the right architecture.";
+  "Structural quality, not semantic - we check the shape of the architecture, not whether it's the right architecture.";
 
 /** Family tag rendered beside design-check results (matches model provenance). */
-export const DESIGN_VALIDATOR_FAMILY = "sa-design@2.1.0";
+export const DESIGN_VALIDATOR_FAMILY = "sa-architecture@2.1.0";
 
 function designCheck(
   id: DesignCheckId,
@@ -241,7 +241,7 @@ function designCheck(
 
 /** Sample set - all 7 design checks passing (AM-138, the clean review). */
 export const DESIGN_SET_ALL_PASS: ValidatorCheck[] = [
-  designCheck("D1_spec_coverage", "pass", "5/5 ACs mapped to design sections"),
+  designCheck("D1_spec_coverage", "pass", "5/5 ACs mapped to architecture sections"),
   designCheck("D2_interface_contracts", "pass", "4 endpoints · auth scope + notes on all 4"),
   designCheck("D3_data_model_integrity", "pass", "6 columns · 1 FK resolves (users.user_id)"),
   designCheck("D4_component_reachability", "pass", "5 components · all consumed or entry"),
@@ -252,7 +252,7 @@ export const DESIGN_SET_ALL_PASS: ValidatorCheck[] = [
 
 /** Sample set - 5 of 7 (AM-140: returned twice; D1 fails, D5 warns). */
 export const DESIGN_SET_FIVE_OF_SEVEN: ValidatorCheck[] = [
-  designCheck("D1_spec_coverage", "fail", "3/5 ACs mapped - AC-2 and AC-5 have no design section"),
+  designCheck("D1_spec_coverage", "fail", "3/5 ACs mapped - AC-2 and AC-5 have no architecture section"),
   designCheck("D2_interface_contracts", "pass", "4 endpoints · auth scope + notes on all 4"),
   designCheck("D3_data_model_integrity", "pass", "6 columns · 1 FK resolves (users.user_id)"),
   designCheck("D4_component_reachability", "pass", "5 components · all consumed or entry"),

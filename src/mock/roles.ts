@@ -63,8 +63,8 @@ export const roles: Role[] = [
     readOnly: false,
     capabilities: { read: true, act: true, approve: true, configure: false, export: false },
     sees: [
-      "Pipeline, Gates (code/design scope), Incidents, Traceability",
-      "Approves Dev/Design review gates",
+      "Pipeline, Gates (code/architecture scope), Incidents, Traceability",
+      "Approves Dev/Architecture review gates",
       "Triggers run recovery (retry / resume)",
       "No pod configuration or billing controls",
     ],

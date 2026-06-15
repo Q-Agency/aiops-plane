@@ -108,7 +108,7 @@ export const AGENT_PACKS: AgentPack[] = [
     installed: true,
     agents: [
       { id: "ba", name: "BA Agent", role: "Turns tickets into specs" },
-      { id: "sa", name: "SA Agent", role: "Designs the technical approach" },
+      { id: "sa", name: "SA Agent", role: "Defines the technical architecture" },
       { id: "tasklist", name: "Tasklist Agent", role: "Breaks specs into tasks" },
       { id: "dev", name: "Dev Agent", role: "Implements against the spec" },
       { id: "review", name: "Review Agent", role: "Reviews diffs before merge" },

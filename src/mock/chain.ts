@@ -161,6 +161,16 @@ export function isChainRoleId(id: string): id is ChainRoleId {
   return id in CHAIN_ROLES;
 }
 
+/**
+ * Human-facing SHORT label for an artifact kind. The wire token is UNCHANGED
+ * contract vocabulary (`produces`/`consumes` stay "design"); only the SA's
+ * `design` reads as "architecture" in the UI, to disambiguate from the UI/UX
+ * agent. Use wherever a raw ArtifactKind is shown to a user.
+ */
+export function artifactKindLabel(kind: ArtifactKind): string {
+  return kind === "design" ? "architecture" : kind;
+}
+
 /** The pipeline role that produces an artifact (null for pod-wide artifacts). */
 export function producerOf(artifact: ArtifactKind): ChainRoleId | null {
   return PIPELINE_ORDER.find((id) => CHAIN_ROLES[id].produces === artifact) ?? null;

@@ -185,12 +185,12 @@ export function designMd(t: Ticket): { md: string; endpoints: Array<{ method: st
     { column: "created_at",   type: "timestamptz",   notes: "default now()" },
   ];
   return {
-    md: `# Design · ${t.id} · ${t.title}
+    md: `# Architecture · ${t.id} · ${t.title}
 
 > architecture.md@v${version} · produced by SA Agent · consumes spec.md@v2 · contract v0.5
 
 ## Approach
-Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC. The design covers every acceptance criterion of the approved spec - the coverage map below is checked deterministically (D1).
+Server-side filtering in FastAPI, exposed via a typed REST contract. Next.js consumes via a React Query hook; Flutter consumes via a generated Dio client wrapped in a BLoC. The architecture covers every acceptance criterion of the approved spec - the coverage map below is checked deterministically (D1).
 
 ## Architecture & components
 - \`search-api\` (FastAPI router) - entry point; consumes the typed contract.
@@ -222,7 +222,7 @@ Spec bound: p95 < 200ms under 50 RPS (AC-1). Decomposition: edge 15ms + API 25ms
 - Rate limited at 30 req/min per session (Redis token-bucket).
 
 ## Decisions
-Three decision records accompany this design - chosen option, alternatives and rationale render in the review's Decision-records block; one is marked Low-confidence and is surfaced for human attention.
+Three decision records accompany this architecture - chosen option, alternatives and rationale render in the review's Decision-records block; one is marked Low-confidence and is surfaced for human attention.
 `,
     endpoints,
     table,
@@ -289,7 +289,7 @@ export function reviewReport(t: Ticket) {
 
 /**
  * The full qa-report document the QA gate review renders (C4 - QA twin of
- * the spec/design reviews). Built FROM qaReport(t)'s data so the review,
+ * the spec/architecture reviews). Built FROM qaReport(t)'s data so the review,
  * Traceability and the artifact shelf stay one source of truth.
  */
 export function qaReportMd(t: Ticket): string {

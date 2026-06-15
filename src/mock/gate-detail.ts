@@ -66,7 +66,7 @@ export interface PriorDecision {
 export interface DesignTraceRow {
   acId: string; //          "AC-1"
   summary: string; //       short criterion summary for the row
-  sections: string[]; //    design section titles that address it
+  sections: string[]; //    architecture section titles that address it
   covered: boolean;
 }
 
@@ -130,7 +130,7 @@ export interface GateDetail {
   validators: ValidatorCheck[];
   /** 0-100 - passed/total. */
   validatorScore: number;
-  /** Family tag for the validator wall, e.g. "ba-spec@1.4.2" / "sa-design@2.1.0". */
+  /** Family tag for the validator wall, e.g. "ba-spec@1.4.2" / "sa-architecture@2.1.0". */
   validatorFamily?: string;
   /** Spec → architecture coverage map (architecture gates only). */
   designTrace?: DesignTraceRow[];

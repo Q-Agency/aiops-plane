@@ -124,7 +124,7 @@ export const CATALOG: CatalogEntry[] = [
       "Accessibility annotations",
     ],
     summary:
-      "Translates the approved design into UIX-UI-SPEC.md - Figma frames plus pixel-level visual specs the Dev agent can build against.",
+      "Translates the approved architecture into UIX-UI-SPEC.md - Figma frames plus pixel-level visual specs the Dev agent can build against.",
   }),
   entry("tasklist", {
     name: tasklist.name,

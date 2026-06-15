@@ -91,7 +91,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   },
   {
     q: "How is the pod doing this week?",
-    answerMd: `A steady week: **${report.headline.itemsDelivered} items delivered**, **${report.headline.gatesCleared} gates cleared**, spend ${fmtUsd(report.headline.spendUsd)} against the ${fmtUsd(budget.monthlyCapUsd)} cap. One honest miss: the **AM-138 design review breached its 8h target (26h)** - reassignment is in progress.`,
+    answerMd: `A steady week: **${report.headline.itemsDelivered} items delivered**, **${report.headline.gatesCleared} gates cleared**, spend ${fmtUsd(report.headline.spendUsd)} against the ${fmtUsd(budget.monthlyCapUsd)} cap. One honest miss: the **AM-138 architecture review breached its 8h target (26h)** - reassignment is in progress.`,
     receipts: [
       { kind: "gate", refId: "appr-AM-138", label: "gate AM-138" },
       { kind: "ledger", refId: "ae-013", label: "ledger ae-013" },
@@ -109,7 +109,7 @@ export const COPILOT_ANSWERS: CopilotAnswer[] = [
   {
     q: "Why was AM-138 rejected?",
     answerMd:
-      "Marin Crnković rejected the AM-138 messaging design at v1 with the typed reason *\"Threading model incomplete - reroute to SA\"*. His note became the SA agent's added context, and **v2 with the threaded model** landed 3 hours later.",
+      "Marin Crnković rejected the AM-138 messaging architecture at v1 with the typed reason *\"Threading model incomplete - reroute to SA\"*. His note became the SA agent's added context, and **v2 with the threaded model** landed 3 hours later.",
     receipts: [
       { kind: "ledger", refId: "ae-005", label: "ledger ae-005" },
       { kind: "ledger", refId: "ae-006", label: "ledger ae-006" },
@@ -177,7 +177,7 @@ const ANSWER_KEYWORDS: string[][] = [
   ["overnight", "last night", "changed overnight", "while i slept", "this morning"],
   ["this week", "pod doing", "how is the pod", "weekly", "doing"],
   ["am-144", "kyc", "who cleared", "who approved", "test matrix"],
-  ["am-138", "rejected", "why was", "reject", "messaging design"],
+  ["am-138", "rejected", "why was", "reject", "messaging architecture"],
   ["budget", "spend", "spent", "cost", "cap", "money"],
   ["blocked", "incident", "stuck", "escalation", "blocker"],
 ];

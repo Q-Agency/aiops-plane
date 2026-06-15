@@ -50,7 +50,7 @@ export const agents: Agent[] = [
   {
     id: "tasklist",
     name: "Tasklist Agent",
-    role: "Breaks design into tasks.json",
+    role: "Breaks architecture into tasks.json",
     color: "agent-tasklist",
     engine: "LangGraph",
     state: "idle",

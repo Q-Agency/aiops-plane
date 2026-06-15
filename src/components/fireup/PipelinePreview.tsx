@@ -18,6 +18,7 @@ import {
   estLatency,
   formatLatency,
   missingInputsFor,
+  artifactKindLabel,
   type ArtifactKind,
   type ChainGap,
   type ChainRoleId,
@@ -44,7 +45,7 @@ function ArtifactChip({ kind, tone }: { kind: ArtifactKind; tone: "neon" | "mute
           : "border-border bg-white/5 text-muted-foreground",
       )}
     >
-      {kind}
+      {artifactKindLabel(kind)}
     </span>
   );
 }
@@ -55,7 +56,7 @@ function edgeTooltip(to: ChainRoleId, selected: ChainRoleId[]): string {
     .map((artifact) => {
       const from = selected.find((id) => CHAIN_ROLES[id].produces === artifact);
       return from
-        ? `${ROLE_SHORT[from]} produces ${artifact} → ${ROLE_SHORT[to]} consumes ${artifact}`
+        ? `${ROLE_SHORT[from]} produces ${artifactKindLabel(artifact)} → ${ROLE_SHORT[to]} consumes ${artifactKindLabel(artifact)}`
         : null;
     })
     .filter(Boolean)
@@ -85,11 +86,11 @@ function GapConnector({ gaps, onAdd }: { gaps: ChainGap[]; onAdd: (id: ChainRole
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-waiting/50 bg-status-waiting/10 text-status-waiting cursor-default">
-                no {gap.missing} input
+                no {artifactKindLabel(gap.missing)} input
               </span>
             </TooltipTrigger>
             <TooltipContent side="left" className="text-[11px] max-w-56">
-              {ROLE_SHORT[gap.roleId]} consumes {gap.missing} - nothing selected produces it.
+              {ROLE_SHORT[gap.roleId]} consumes {artifactKindLabel(gap.missing)} - nothing selected produces it.
             </TooltipContent>
           </Tooltip>
           {gap.fixRoleId && (
@@ -213,9 +214,9 @@ export function PipelinePreview({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="font-mono text-[11px] max-w-64">
-                    produces {entry.produces}
+                    produces {artifactKindLabel(entry.produces)}
                     {hasConsumes
-                      ? ` · consumes ${CHAIN_ROLES[id].consumes.join(", ")}`
+                      ? ` · consumes ${CHAIN_ROLES[id].consumes.map(artifactKindLabel).join(", ")}`
                       : " · entry point"}
                   </TooltipContent>
                 </Tooltip>

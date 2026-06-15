@@ -66,7 +66,7 @@ export const COMMS: CommEntry[] = [
     trigger: "scheduled", triggerReason: "daily digest · 09:00 UTC",
     recipients: ["Zlatko"], tsOffsetMin: 42,
     preview: "Daily digest · 4 shipped · 3 at gates · 1 escalation",
-    body: "Yesterday: AM-136 shipped to prod, AM-149 merged. Pending: AM-138 design 26h, AM-142 spec 8m, AM-144 QA 18m. 1 open escalation. Overnight loops: 3 PRs, all green.",
+    body: "Yesterday: AM-136 shipped to prod, AM-149 merged. Pending: AM-138 architecture 26h, AM-142 spec 8m, AM-144 QA 18m. 1 open escalation. Overnight loops: 3 PRs, all green.",
     status: "replied",
   },
   {
@@ -82,7 +82,7 @@ export const COMMS: CommEntry[] = [
     trigger: "scheduled", triggerReason: "weekly delivery report · Fri 16:00",
     recipients: ["#automarket-leads"], tsOffsetMin: 60 * 18,
     preview: "Weekly delivery report · 23 tickets · cycle 3.4d",
-    body: "This week: 23 tickets closed (+12%). Avg cycle 3.4d (-6%). Cost $1,247 (-4%). Escape rate 1.8%. Top blocker: design reviews backed up Tue-Wed.",
+    body: "This week: 23 tickets closed (+12%). Avg cycle 3.4d (-6%). Cost $1,247 (-4%). Escape rate 1.8%. Top blocker: architecture reviews backed up Tue-Wed.",
     status: "acknowledged",
   },
   {
@@ -252,7 +252,7 @@ export const SCHEDULED: ScheduledComm[] = [
       sections: [
         { heading: "Shipped last 24h", lines: ["AM-136 · Listing detail page", "AM-133 · Payment intent callback (PR merged)"] },
         { heading: "At gates", lines: ["Spec Review · AM-142 (8m), AM-128 (110m)", "Architecture Review · AM-138 (26h ⚠), AM-140 (55m)", "QA Review · AM-144 (18m)"] },
-        { heading: "Blockers", lines: ["AM-138 design stale 26h → Marin", "AM-149 sql-injection blocker → Ivan"] },
+        { heading: "Blockers", lines: ["AM-138 architecture stale 26h → Marin", "AM-149 sql-injection blocker → Ivan"] },
         { heading: "Escalations raised", lines: ["2 open · 1 acknowledged · 1 resolved"] },
         { heading: "Overnight run", lines: ["3 PRs opened · all CI green · 28k tokens · $1.84"] },
       ],

@@ -137,10 +137,10 @@ export const AMENDMENT_PROPOSALS: AmendmentProposal[] = [
   {
     id: "amend-2",
     draftText:
-      "Designs that touch shared state declare their concurrency/threading model explicitly.",
+      "Architectures that touch shared state declare their concurrency/threading model explicitly.",
     minedFrom: {
       rejectionGateIds: ["appr-AM-138", "appr-AM-140"],
-      clusterLabel: "2 designs rejected for unstated threading models",
+      clusterLabel: "2 architectures rejected for unstated threading models",
     },
     state: "proposed",
   },

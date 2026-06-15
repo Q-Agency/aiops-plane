@@ -123,7 +123,7 @@ export const slaDefinitions: SlaDefinition[] = [
     id: "sla-design-clearance",
     podId: "automarket",
     metric: "gate_clearance",
-    label: "Design review clearance",
+    label: "Architecture review clearance",
     scope: "design-review",
     targetValue: 8,
     unit: "hr",
@@ -214,7 +214,7 @@ export const slaBreaches: SlaBreach[] = [
     workItemId: "AM-138",
     workItemTitle: "Buyer-seller messaging",
     durationOverMin: 2 * 60,
-    note: "First design pass - returned with feedback",
+    note: "First architecture pass - returned with feedback",
   },
   {
     id: "br-5",

@@ -333,7 +333,7 @@ export interface AgentVersion {
 
 /**
  * Current-first version history. ba/sa/qa versions DELIBERATELY match
- * their validator-family versions (ba-spec@1.4.2 / sa-design@2.1.0 /
+ * their validator-family versions (ba-spec@1.4.2 / sa-architecture@2.1.0 /
  * qa-report@1.0.7) - the eval family IS the agent's quality bar, one
  * version story across /governance, gate reviews and this panel.
  */
@@ -344,8 +344,8 @@ const VERSIONS: Record<string, AgentVersion[]> = {
     { version: "1.3.9", evalPct: 88, evalLine: "8 deterministic checks · 26-scenario suite", promotedAgo: "5w ago" },
   ],
   sa: [
-    { version: "2.1.0", evalPct: 93, evalLine: "7-check design family · 19-scenario suite", promotedAgo: "1w ago" },
-    { version: "2.0.4", evalPct: 89, evalLine: "7-check design family · 17-scenario suite", promotedAgo: "4w ago" },
+    { version: "2.1.0", evalPct: 93, evalLine: "7-check architecture family · 19-scenario suite", promotedAgo: "1w ago" },
+    { version: "2.0.4", evalPct: 89, evalLine: "7-check architecture family · 17-scenario suite", promotedAgo: "4w ago" },
   ],
   qa: [
     { version: "1.0.7", evalPct: 94, evalLine: "7-check report family · 24-scenario suite", promotedAgo: "5d ago" },

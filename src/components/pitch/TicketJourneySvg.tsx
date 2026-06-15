@@ -106,7 +106,7 @@ export function TicketJourneySvg() {
       viewBox="0 0 860 436"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="One ticket's journey: a card dragged to Ready on the Jira/Teamwork board starts the pod; agents run inside AI PodOps, each producing its own artifact (the BA's SPEC.md, the SA's design, and so on) behind human gates; questions, approvals, daily digests, preparations, weekly reports, and escalations are pushed proactively to Slack and email; plain status and artifact links are written back to the board."
+      aria-label="One ticket's journey: a card dragged to Ready on the Jira/Teamwork board starts the pod; agents run inside AI PodOps, each producing its own artifact (the BA's SPEC.md, the SA's architecture, and so on) behind human gates; questions, approvals, daily digests, preparations, weekly reports, and escalations are pushed proactively to Slack and email; plain status and artifact links are written back to the board."
       className="h-auto w-full min-w-[640px]"
     >
       <defs>

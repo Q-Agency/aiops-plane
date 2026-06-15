@@ -135,7 +135,7 @@ export interface ModelProvenance {
 
 export const PROVENANCE: ModelProvenance[] = [
   { artifactRef: "AM-142/spec.md@v1", ticketId: "AM-142", agent: "ba", model: "gpt-5-mini", modelVersion: "2026-04-12", promptVersion: "ba-spec@1.4.2", residency: "cloud-eu" },
-  { artifactRef: "AM-138/architecture.md@v2", ticketId: "AM-138", agent: "sa", model: "claude-sonnet-4.5", modelVersion: "2026-03-08", promptVersion: "sa-design@2.1.0", residency: "cloud-eu" },
+  { artifactRef: "AM-138/architecture.md@v2", ticketId: "AM-138", agent: "sa", model: "claude-sonnet-4.5", modelVersion: "2026-03-08", promptVersion: "sa-architecture@2.1.0", residency: "cloud-eu" },
   { artifactRef: "AM-131/qa.md@v1", ticketId: "AM-131", agent: "qa", model: "qwen2.5-72b", modelVersion: "local-2025-12", promptVersion: "qa-report@1.0.7", residency: "on-prem" },
   { artifactRef: "AM-150/pr#421", ticketId: "AM-150", agent: "dev", model: "qwen2.5-coder-32b", modelVersion: "local-2025-12", promptVersion: "dev-impl@3.0.1", residency: "on-prem" },
   { artifactRef: "AM-149/review.md@v1", ticketId: "AM-149", agent: "review", model: "claude-sonnet-4.5", modelVersion: "2026-03-08", promptVersion: "review@1.2.0", residency: "cloud-eu" },

@@ -54,7 +54,7 @@ export const retention: Retention[] = [
     dataClass: "artifacts",
     windowDays: 730,
     locked: false,
-    note: "Specs, designs, diffs - the work product.",
+    note: "Specs, architectures, diffs - the work product.",
   },
   {
     dataClass: "comms",
