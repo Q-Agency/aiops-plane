@@ -24,8 +24,9 @@ export function PitchTopBar() {
       <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-4 px-4 pt-2.5 sm:px-6">
         <a
           href="#hero"
-          className="truncate text-sm font-semibold tracking-tight text-slate-900 no-underline hover:text-slate-600"
+          className="inline-flex items-center gap-2 truncate text-sm font-semibold tracking-tight text-slate-900 no-underline hover:text-slate-600"
         >
+          <img src="/logo.svg" alt="Q Agency" draggable={false} className="size-5 shrink-0 object-contain" />
           AI PodOps - Product Brief
         </a>
         <div className="flex shrink-0 flex-col items-end gap-0.5">

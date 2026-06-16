@@ -1,0 +1,18 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" fill="none" role="img" aria-label="Q Agency">
+  <!--
+    PLACEHOLDER recreation of the Q Agency mark (hexagon + slash + cyan cursor,
+    green->cyan gradient). Replace this whole file with the exact original SVG/PNG
+    (keep the name public/logo.svg) and the brand updates everywhere automatically.
+  -->
+  <defs>
+    <linearGradient id="qbrand" x1="20" y1="16" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1CF58A" />
+      <stop offset="0.5" stop-color="#14E4B4" />
+      <stop offset="1" stop-color="#10D0FF" />
+    </linearGradient>
+  </defs>
+  <polygon points="64,12 112,39 112,89 64,116 16,89 16,39"
+           stroke="url(#qbrand)" stroke-width="12" stroke-linejoin="round" />
+  <path d="M44 48 L84 76" stroke="url(#qbrand)" stroke-width="12" stroke-linecap="round" />
+  <path d="M98 82 L122 96 L106 118 Z" fill="#10D0FF" />
+</svg>

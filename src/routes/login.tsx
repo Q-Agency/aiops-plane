@@ -53,14 +53,12 @@ const DEMO_CREDENTIALS = { email: "qai@q.agency", password: "demo" } as const;
 
 function BrandMark({ className }: { className?: string }) {
   return (
-    <div
-      className={cn(
-        "grid place-items-center rounded-lg border border-primary/40 bg-primary/20 font-mono font-bold text-primary",
-        className,
-      )}
-    >
-      AI
-    </div>
+    <img
+      src="/logo.svg"
+      alt="Q Agency"
+      draggable={false}
+      className={cn("object-contain select-none", className)}
+    />
   );
 }
 

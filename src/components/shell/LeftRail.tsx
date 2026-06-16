@@ -7,6 +7,7 @@ import { isReadOnlyViewRole, useViewRole } from "@/mock/view-role";
 import type { AppUser } from "@/lib/auth/types";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { BrandMark } from "./BrandMark";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { NAV, SETTINGS_ITEM, navBadgeCount, type NavGroup, type NavItem } from "./nav";
@@ -152,9 +153,7 @@ export function LeftRail({ user }: { user: AppUser }) {
         )}
       >
         <div className="h-14 flex items-center px-3 border-b border-border shrink-0">
-          <div className="size-7 rounded-md bg-primary/20 border border-primary/40 grid place-items-center text-primary font-bold text-xs font-mono">
-            AI
-          </div>
+          <BrandMark className="size-7" />
           {!collapsed && (
             <div className="ml-2 leading-tight">
               <div className="text-sm font-semibold">AI PodOps</div>
