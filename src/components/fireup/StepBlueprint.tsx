@@ -27,16 +27,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -390,7 +380,6 @@ export function StepBlueprint() {
   const { draft, updateDraft } = usePods();
   const selectedId = draft?.blueprintId ?? null;
   const selected = blueprintById(selectedId);
-  const [pending, setPending] = useState<PodBlueprint | null>(null);
 
   const scratch = BLUEPRINTS.find((b) => b.id === "scratch");
   const templates = BLUEPRINTS.filter((b) => b.id !== "scratch");
@@ -414,9 +403,7 @@ export function StepBlueprint() {
 
   const handleSelect = (bp: PodBlueprint) => {
     if (!draft || bp.id === selectedId) return;
-    const customized = draft.agentIds.length > 0 || draft.connections.length > 0;
-    if (customized) setPending(bp);
-    else apply(bp);
+    apply(bp);
   };
 
   return (
@@ -466,28 +453,6 @@ export function StepBlueprint() {
           </CollapsibleContent>
         </Collapsible>
       </div>
-
-      <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Replace current selections?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Switching blueprint will replace your current agent/connector selections. Keep going?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep my picks</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (pending) apply(pending);
-                setPending(null);
-              }}
-            >
-              Switch blueprint
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </TooltipProvider>
   );
 }
