@@ -5,6 +5,7 @@ import { useLive } from "@/hooks/useLiveTicker";
 import { cn } from "@/lib/utils";
 import { Cpu, Zap, DollarSign } from "lucide-react";
 import { accountableFor } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 
 const stateLabel = {
   running: "RUNNING",
@@ -96,13 +97,7 @@ export function AgentStatusGrid() {
                 className="inline-flex items-center gap-1 hover:text-foreground"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = "/pod"; }}
               >
-                <span
-                  className="size-4 rounded-full grid place-items-center text-[8px] font-semibold border"
-                  style={{
-                    color, borderColor: `color-mix(in oklab, ${color} 55%, transparent)`,
-                    background: `color-mix(in oklab, ${color} 15%, transparent)`,
-                  }}
-                >{human.initials}</span>
+                <HumanAvatar human={human} size="xs" />
                 <span className="text-foreground/80 truncate">{human.name}</span>
               </span>
             </div>

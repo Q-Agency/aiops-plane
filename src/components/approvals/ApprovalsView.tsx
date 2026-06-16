@@ -36,7 +36,8 @@ import type { Approval, Ticket } from "@/mock/types";
 import {
   SpecPreview, DesignPreview, TasksPreview, CodePreview, QaPreview,
 } from "@/components/traceability/TraceabilityView";
-import { accountableFor, activeHumans } from "@/mock/humans";
+import { accountableFor, activeHumans, humanByApprover } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import { agents as allAgents } from "@/mock/agents";
 import {
   clarificationGates, gateDecisions, recordGateDecision,
@@ -359,7 +360,6 @@ export function ApprovalsView() {
       {/* per-human summaries (desktop) */}
       <div className="hidden md:grid sm:grid-cols-2 lg:grid-cols-5 gap-2">
         {perHuman.map(({ human, count, gates }) => {
-          const color = `var(--agent-${human.primaryAgentId})`;
           const active = humanFilter === human.id;
           return (
             <button
@@ -372,14 +372,7 @@ export function ApprovalsView() {
               title={`Filter by accountable: ${human.name}`}
             >
               <div className="flex items-center gap-2">
-                <span
-                  className="size-7 rounded-full grid place-items-center text-[10px] font-mono font-semibold border"
-                  style={{
-                    color,
-                    borderColor: `color-mix(in oklab, ${color} 55%, transparent)`,
-                    background: `color-mix(in oklab, ${color} 14%, transparent)`,
-                  }}
-                >{human.initials}</span>
+                <HumanAvatar human={human} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-semibold truncate">{human.name}</div>
                   <div className="text-[10px] text-muted-foreground truncate">
@@ -528,18 +521,10 @@ export function ApprovalsView() {
         {groupByHuman && humansInPod.map((h) => {
           const items = filtered.filter((r) => humanForRow(r) === h.id);
           if (items.length === 0) return null;
-          const color = `var(--agent-${h.primaryAgentId})`;
           return (
             <div key={h.id} className="space-y-2">
               <div className="flex items-center gap-2 pt-2 pb-1 border-b border-border">
-                <span
-                  className="size-6 rounded-full grid place-items-center text-[10px] font-mono font-semibold border"
-                  style={{
-                    color,
-                    borderColor: `color-mix(in oklab, ${color} 55%, transparent)`,
-                    background: `color-mix(in oklab, ${color} 14%, transparent)`,
-                  }}
-                >{h.initials}</span>
+                <HumanAvatar human={h} size="sm" />
                 <span className="text-sm font-semibold">{h.name}</span>
                 <span className="text-[11px] font-mono text-muted-foreground">
                   · {items.length} pending
@@ -685,6 +670,7 @@ export function ApprovalRow({
   const m = ageMin(approval.openedAt);
   const breached = m >= SLA_MIN;
   const mine = approval.approver === ME;
+  const approverHuman = humanByApprover(approval.approver);
   const fullReviewPrimary = FULL_REVIEW_PRIMARY.has(approval.gate);
   // P1-G1 - the gate's policy regime, keyed by artifact kind
   const policy = gatePolicyFor(GATE_AGENT_ID[approval.gate]);
@@ -726,8 +712,12 @@ export function ApprovalRow({
         <span className="font-mono text-xs text-foreground/90">{approval.ticketId}</span>
         <span className="text-sm truncate flex-1">{ticket.title}</span>
 
-        <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
-          <UserCircle2 className="size-3.5" />
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
+          {approverHuman ? (
+            <HumanAvatar human={approverHuman} size="xs" />
+          ) : (
+            <UserCircle2 className="size-3.5" />
+          )}
           {approval.approver}{mine && <span className="text-primary">·me</span>}
         </span>
 
@@ -864,8 +854,8 @@ export function ClarificationRow({
         <span className="font-mono text-xs text-foreground/90">{gate.ticketId}</span>
         <span className="text-sm truncate flex-1">{gate.question}</span>
 
-        <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
-          <UserCircle2 className="size-3.5" />
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
+          <HumanAvatar human={accountable} size="xs" />
           {accountable.name.split(" ")[0]}{mine && <span className="text-primary">·me</span>}
         </span>
 

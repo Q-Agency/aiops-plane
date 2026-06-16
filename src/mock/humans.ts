@@ -5,6 +5,8 @@ export interface Human {
   name: string;
   role: string;
   initials: string;
+  /** Real-looking portrait (randomuser.me). Initials are the offline fallback. */
+  avatarUrl: string;
   /** Primary agent - used for avatar color */
   primaryAgentId: AgentId;
   /** Workload telemetry (mock, deterministic per human) */
@@ -34,6 +36,7 @@ export const humans: Human[] = [
     name: "Ana Kovač",
     role: "Lead Business Analyst",
     initials: "AK",
+    avatarUrl: "https://randomuser.me/api/portraits/women/68.jpg",
     primaryAgentId: "ba",
     workload: { pendingApprovals: 3, decisionsToday: 11, avgApprovalMin: 14, slaBreaches: 0 },
     workingHours: { tz: "Europe/Zagreb", start: "08:00", end: "16:00", days: "Mon-Fri" },
@@ -45,6 +48,7 @@ export const humans: Human[] = [
     name: "Marin Crnković",
     role: "Solution Architect",
     initials: "MC",
+    avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
     primaryAgentId: "sa",
     workload: { pendingApprovals: 2, decisionsToday: 7, avgApprovalMin: 26, slaBreaches: 1 },
     workingHours: { tz: "Europe/Zagreb", start: "09:00", end: "17:00", days: "Mon-Fri" },
@@ -59,6 +63,7 @@ export const humans: Human[] = [
     name: "Ivan Horvat",
     role: "Engineering Lead",
     initials: "IH",
+    avatarUrl: "https://randomuser.me/api/portraits/men/75.jpg",
     primaryAgentId: "dev",
     workload: { pendingApprovals: 4, decisionsToday: 9, avgApprovalMin: 38, slaBreaches: 1 },
     workingHours: { tz: "Europe/Zagreb", start: "10:00", end: "18:00", days: "Mon-Fri" },
@@ -71,6 +76,7 @@ export const humans: Human[] = [
     name: "Petra Novak",
     role: "QA Lead",
     initials: "PN",
+    avatarUrl: "https://randomuser.me/api/portraits/women/44.jpg",
     primaryAgentId: "qa",
     workload: { pendingApprovals: 2, decisionsToday: 6, avgApprovalMin: 22, slaBreaches: 0 },
     workingHours: { tz: "Europe/Zagreb", start: "09:00", end: "17:00", days: "Mon-Fri" },
@@ -82,6 +88,7 @@ export const humans: Human[] = [
     name: "Zlatko",
     role: "AI Department Lead",
     initials: "ZL",
+    avatarUrl: "https://randomuser.me/api/portraits/men/52.jpg",
     primaryAgentId: "curator",
     workload: { pendingApprovals: 1, decisionsToday: 4, avgApprovalMin: 9, slaBreaches: 0 },
     workingHours: { tz: "Europe/Zagreb", start: "07:00", end: "15:00", days: "Mon-Fri" },

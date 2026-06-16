@@ -6,6 +6,7 @@ import { useLive } from "@/hooks/useLiveTicker";
 import type { Stage, Ticket, AgentId } from "@/mock/types";
 import { cn } from "@/lib/utils";
 import { accountableFor } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import { appendAuditMock } from "@/mock/audit-bridge";
 import { bumpDemo, useDemoTick } from "@/mock/demo-bus";
 import { TRIGGER_RULE, WRITE_BACK_MAPPING } from "@/mock/trigger";
@@ -256,17 +257,9 @@ export function PipelineBoard({ highlightTicketId }: { highlightTicketId?: strin
                       const prevCol = COLS.find((c) => c.id === col.prev);
                       const aid = (prevCol?.agent ?? "ba") as AgentId;
                       const human = accountableFor(aid);
-                      const color = `var(--agent-${aid})`;
                       return (
                         <span className="inline-flex items-center gap-1.5 text-foreground/90">
-                          <span
-                            className="size-4 rounded-full grid place-items-center text-[8px] font-semibold border"
-                            style={{
-                              color,
-                              borderColor: `color-mix(in oklab, ${color} 55%, transparent)`,
-                              background: `color-mix(in oklab, ${color} 14%, transparent)`,
-                            }}
-                          >{human.initials}</span>
+                          <HumanAvatar human={human} size="xs" />
                           <span className="truncate" title={`Accountable: ${human.name}`}>{human.name}</span>
                         </span>
                       );

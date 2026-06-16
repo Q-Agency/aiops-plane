@@ -134,6 +134,7 @@ export interface ExternalMember {
   name: string;
   role: string;
   initials: string;
+  avatarUrl: string;
 }
 
 /** The client-side sponsor seat (kept OUT of humans.ts so rosters/matrices don't change). */
@@ -142,6 +143,7 @@ export const sponsorMember: ExternalMember = {
   name: "Sandra Weiss",
   role: "Client Sponsor · AutoMarket GmbH",
   initials: "SW",
+  avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg",
 };
 
 export function roleById(id: RoleId): Role {

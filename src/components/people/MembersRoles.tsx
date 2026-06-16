@@ -14,6 +14,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, MailPlus, ShieldAlert, UserMinus, Users2 } from "lucide-react";
+import { PersonAvatar } from "./PersonAvatar";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -47,6 +48,7 @@ interface MemberDisplay {
   name: string;
   subtitle: string;
   initials: string;
+  avatarUrl?: string;
   /** css color value for the avatar ring (agent color or muted). */
   color: string;
   external: boolean;
@@ -63,6 +65,7 @@ function resolveMember(humanId: string): MemberDisplay | null {
       name: h.name,
       subtitle: h.role,
       initials: h.initials,
+      avatarUrl: h.avatarUrl,
       color: agent ? `var(--${agent.color})` : "var(--muted-foreground)",
       external: false,
       agentCount: owned.length,
@@ -74,6 +77,7 @@ function resolveMember(humanId: string): MemberDisplay | null {
       name: sponsorMember.name,
       subtitle: sponsorMember.role,
       initials: sponsorMember.initials,
+      avatarUrl: sponsorMember.avatarUrl,
       color: "var(--muted-foreground)",
       external: true,
       agentCount: 0,
@@ -158,19 +162,14 @@ export function MembersRoles() {
             const role = roleById(roleId);
             return (
               <div key={humanId} className="flex items-center gap-3 px-3 py-2.5">
-                <span
-                  className={cn(
-                    "size-9 shrink-0 rounded-full grid place-items-center font-mono font-semibold text-xs border",
-                    member.external && "border-dashed",
-                  )}
-                  style={{
-                    color: member.color,
-                    borderColor: `color-mix(in oklab, ${member.color} 50%, transparent)`,
-                    background: `color-mix(in oklab, ${member.color} 12%, transparent)`,
-                  }}
-                >
-                  {member.initials}
-                </span>
+                <PersonAvatar
+                  name={member.name}
+                  initials={member.initials}
+                  src={member.avatarUrl}
+                  color={member.color}
+                  size="lg"
+                  className={cn(member.external && "border-dashed")}
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate">{member.name}</span>
