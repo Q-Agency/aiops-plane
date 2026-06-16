@@ -6,6 +6,7 @@
  */
 
 const NAV: { id: string; label: string }[] = [
+  { id: "platform", label: "The big picture" },
   { id: "summary", label: "Executive summary" },
   { id: "wedge", label: "Why now" },
   { id: "acts", label: "The product in three acts" },

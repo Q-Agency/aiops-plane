@@ -20,6 +20,7 @@ export function PitchPage() {
       <PitchTopBar />
       <article className="mx-auto w-full max-w-4xl px-4 pb-4 sm:px-6 print:max-w-none print:px-0">
         <Hero />
+        <BigPictureSection />
         <SummarySection />
         <WedgeSection />
         <ActsSection />
@@ -64,6 +65,68 @@ function Hero() {
         <StatChip>7-role curated SDLC catalog</StatChip>
         <StatChip>Append-only audit ledger - live in production</StatChip>
       </ul>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* THE BIG PICTURE - platform-first framing (SDLC = the first flavor)   */
+/* ------------------------------------------------------------------ */
+
+function BigPictureSection() {
+  return (
+    <section id="platform" className="mt-10 scroll-mt-28">
+      <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-6 shadow-sm sm:p-8 print:shadow-none">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-indigo-500">
+          Read this first - the big picture
+        </p>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          AI PodOps is the platform for governed agent-human operations.{" "}
+          <span className="text-indigo-700">SDLC is its first specialized flavor.</span>
+        </h2>
+        <div className="mt-4 space-y-3.5">
+          <p className="text-[15px] leading-7 text-slate-700">
+            At its core is{" "}
+            <strong className="font-semibold text-slate-900">one reusable harness</strong> - a
+            versioned agent contract, one named accountable human per agent, human-in-the-loop gates,
+            a deterministic quality floor, and an append-only ledger. That harness does not care what
+            the agents <em>do</em> - it governs them.{" "}
+            <strong className="font-semibold text-slate-900">The harness is the product</strong>, and
+            its core is built to be reused across every kind of agent work - AIOps / AgentOps for any
+            fleet of agents.
+          </p>
+          <p className="text-[15px] leading-7 text-slate-700">
+            What we ship <strong className="font-semibold text-slate-900">first</strong> is that core
+            wrapped in a specialized flavor for software delivery -{" "}
+            <strong className="font-semibold text-slate-900">SDLC human-pods</strong> - because it is
+            the biggest reach for Q&apos;s current and future clients, who still need delivery done by
+            our teams, now as governed agent-human pods. So read everything that follows as the{" "}
+            <strong className="font-semibold text-slate-900">SDLC flavor of the platform</strong>, not
+            a standalone tool - the same core opens to generic agents and agentic systems in phase
+            two.
+          </p>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-indigo-200/70 bg-white/70 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
+            Reusable core - contract · accountability · gates · quality floor · ledger
+          </p>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-100 px-3 py-1.5 text-sm font-semibold text-indigo-900">
+              SDLC human-pods
+              <span className="rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                Shipping now
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-500">
+              Generic agents &amp; agentic systems
+              <span className="rounded-full border border-slate-300 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                Phase two
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
