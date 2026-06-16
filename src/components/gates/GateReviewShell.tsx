@@ -53,6 +53,7 @@ import { GatePolicyChip } from "./GatePolicyChip";
 import { SpecDocument, splitSections } from "./SpecDocument";
 import { EarsCriteriaList, EARS_BLOCK_ID } from "./EarsCriteriaList";
 import { DesignTraceMap, DESIGN_TRACE_BLOCK_ID } from "./DesignTraceMap";
+import { ArchitectureDiagram } from "./ArchitectureDiagram";
 import { DecisionRecordsList, DESIGN_ADR_BLOCK_ID } from "./DecisionRecordsList";
 import { QaCoverageMap, QA_COVERAGE_BLOCK_ID } from "./QaCoverageMap";
 import { DefectsList, QA_DEFECTS_BLOCK_ID } from "./DefectsList";
@@ -588,6 +589,7 @@ function GateReviewBody({ detail }: { detail: GateDetail }) {
                 {detail.designTrace && (
                   <DesignTraceMap rows={detail.designTrace} highlight={earsFlash} />
                 )}
+                {detail.designTrace && <ArchitectureDiagram ticketId={detail.ticketId} />}
                 {detail.decisionRecords && (
                   <DecisionRecordsList records={detail.decisionRecords} />
                 )}
