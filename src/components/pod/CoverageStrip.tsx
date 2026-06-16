@@ -18,6 +18,7 @@ import {
   activeHumans, capacityInfo, coverageGaps, coverageWindow, delegateOf,
   hmToMin, THROTTLE_POLICY_LINE, type Human,
 } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import type { AgentId } from "@/mock/types";
 import { fmtDateTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -166,16 +167,7 @@ function HumanBand({ human: h }: { human: Human }) {
   return (
     <div className="flex items-center gap-2">
       <div className={cn(LABEL_W, "shrink-0 flex items-center gap-2 min-w-0")}>
-        <span
-          className="size-5 shrink-0 rounded-full grid place-items-center text-[9px] font-mono font-semibold border"
-          style={{
-            color,
-            borderColor: `color-mix(in oklab, ${color} 50%, transparent)`,
-            background: `color-mix(in oklab, ${color} 12%, transparent)`,
-          }}
-        >
-          {h.initials}
-        </span>
+        <HumanAvatar human={h} size="sm" />
         <div className="min-w-0">
           <div className="text-[11px] font-medium truncate leading-tight">{h.name}</div>
           {isOoo && deputy ? (

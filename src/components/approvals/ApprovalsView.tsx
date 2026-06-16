@@ -456,7 +456,7 @@ export function ApprovalsView() {
           <Chip active={humanFilter === "all"} onClick={() => setHumanFilter("all")}>all</Chip>
           {humansInPod.map((h) => (
             <Chip key={h.id} active={humanFilter === h.id} onClick={() => setHumanFilter(h.id)}>
-              {h.initials}
+              <HumanAvatar human={h} size="xs" ring={false} />
             </Chip>
           ))}
         </FilterGroup>

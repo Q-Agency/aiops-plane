@@ -7,6 +7,7 @@ import {
   flowAggregates, GATE_AGENT, fmtDur,
   type ReviewGate,
 } from "@/mock/flow";
+import { PersonAvatar } from "@/components/people/PersonAvatar";
 import { agents as allAgents } from "@/mock/agents";
 import { cn } from "@/lib/utils";
 
@@ -138,7 +139,7 @@ export function FlowView() {
                   <tr key={r.humanId} className="border-b border-border/60">
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <span className="size-6 grid place-items-center rounded-full bg-white/5 border border-border text-[10px] font-mono">{r.initials}</span>
+                        <PersonAvatar name={r.name} initials={r.initials} src={r.avatarUrl} agentId={r.agents[0]} size="sm" />
                         <span>{r.name}</span>
                       </div>
                     </td>

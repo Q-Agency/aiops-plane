@@ -15,6 +15,7 @@ import { aggregates, ticketEconomics } from "@/mock/economics";
 import { useRoiAssumptions } from "@/components/monitor/useRoiAssumptions";
 import { slaTargets } from "@/mock/sla";
 import { activeHumans, agentsOf, OWNERSHIP } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import { openGateCount } from "@/mock/approvals";
 import { appendAuditMock } from "@/mock/audit-bridge";
 import { sponsorMember, roleById, type RoleId } from "@/mock/roles";
@@ -232,19 +233,9 @@ export function ExecDigest({ role }: { role: RoleId }) {
             </div>
             <div className="mt-3 space-y-1.5">
               {owners.map((h) => {
-                const color = `var(--agent-${h.primaryAgentId})`;
                 return (
                   <div key={h.id} className="flex items-center gap-2">
-                    <span
-                      className="size-5 rounded-full grid place-items-center text-[9px] font-mono font-semibold border shrink-0"
-                      style={{
-                        color,
-                        borderColor: `color-mix(in oklab, ${color} 55%, transparent)`,
-                        background: `color-mix(in oklab, ${color} 14%, transparent)`,
-                      }}
-                    >
-                      {h.initials}
-                    </span>
+                    <HumanAvatar human={h} size="sm" />
                     <span className="text-xs truncate flex-1">{h.name}</span>
                     <span className="text-[10px] font-mono text-muted-foreground shrink-0">
                       {agentsOf(h.id).length} agents

@@ -104,6 +104,7 @@ export interface ReviewerLoad {
   humanId: string;
   name: string;
   initials: string;
+  avatarUrl: string;
   agents: AgentId[];
   queueDepth: number;
   avgApprovalMin: number;
@@ -122,6 +123,7 @@ export const reviewerLoad: ReviewerLoad[] = humans
       humanId: h.id,
       name: h.name,
       initials: h.initials,
+      avatarUrl: h.avatarUrl,
       agents: owned,
       queueDepth: h.workload.pendingApprovals,
       avgApprovalMin: h.workload.avgApprovalMin,

@@ -26,6 +26,7 @@ import { agents } from "@/mock/agents";
 import { COMMS, ESCALATIONS } from "@/mock/comms";
 import { connectorById } from "@/mock/connectors";
 import { humans } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import {
   INCIDENT_TYPE_LABELS,
   RECOVERY_ACTION_LABELS,
@@ -143,16 +144,7 @@ export function IncidentDetail({ incident, status, onAction }: IncidentDetailPro
           )}
           {accountable && (
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <span
-                className="size-4 rounded-full grid place-items-center text-[8px] font-semibold border"
-                style={{
-                  color: `var(--agent-${accountable.primaryAgentId})`,
-                  borderColor: `color-mix(in oklab, var(--agent-${accountable.primaryAgentId}) 55%, transparent)`,
-                  background: `color-mix(in oklab, var(--agent-${accountable.primaryAgentId}) 14%, transparent)`,
-                }}
-              >
-                {accountable.initials}
-              </span>
+              <HumanAvatar human={accountable} size="xs" />
               {accountable.name} accountable
             </span>
           )}

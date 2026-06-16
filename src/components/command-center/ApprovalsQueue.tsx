@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Check, X, FileText } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import { cn } from "@/lib/utils";
+import { humanByApprover } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 
 function ageMs(ts: number) {
   return Date.now() - ts;
@@ -60,7 +62,14 @@ export function ApprovalsQueue() {
                 <button className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 cursor-pointer">
                   <FileText className="size-3" />{a.artifact}
                 </button>
-                <div className="text-[10px] text-muted-foreground">→ {a.approver}</div>
+                <div className="text-[10px] text-muted-foreground inline-flex items-center gap-1">
+                  →
+                  {(() => {
+                    const h = humanByApprover(a.approver);
+                    return h ? <HumanAvatar human={h} size="xs" /> : null;
+                  })()}
+                  {a.approver}
+                </div>
               </div>
               <div className="mt-2 flex gap-1.5">
                 <button

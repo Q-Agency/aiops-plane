@@ -35,6 +35,7 @@ import { catalogEntry, TOGGLABLE_IDS } from "@/mock/catalog";
 import type { ChainRoleId } from "@/mock/chain";
 import { agents } from "@/mock/agents";
 import { humans } from "@/mock/humans";
+import { PersonAvatar as Avatar } from "@/components/people/PersonAvatar";
 import { InviteDialog, type InvitedPerson } from "./InviteDialog";
 
 const INVITE_SENTINEL = "__invite__";
@@ -44,6 +45,7 @@ interface Person {
   name: string;
   role: string;
   initials: string;
+  avatarUrl?: string;
   /** CSS color value (var(--agent-*) for org humans, var(--primary) for invited). */
   color: string;
   invited: boolean;
@@ -54,21 +56,20 @@ function orgColor(primaryAgentId: string): string {
   return a ? `var(--${a.color})` : "var(--primary)";
 }
 
+const AVATAR_SIZE: Record<string, "xs" | "sm" | "md" | "lg"> = {
+  "size-5": "xs",
+  "size-7": "sm",
+  "size-9": "lg",
+};
 function PersonAvatar({ person, size = "size-9" }: { person: Person; size?: string }) {
   return (
-    <span
-      className={cn(
-        size,
-        "rounded-full grid place-items-center font-mono font-semibold text-xs border shrink-0",
-      )}
-      style={{
-        color: person.color,
-        borderColor: `color-mix(in oklab, ${person.color} 50%, transparent)`,
-        background: `color-mix(in oklab, ${person.color} 12%, transparent)`,
-      }}
-    >
-      {person.initials}
-    </span>
+    <Avatar
+      name={person.name}
+      initials={person.initials}
+      src={person.avatarUrl}
+      color={person.color}
+      size={AVATAR_SIZE[size] ?? "md"}
+    />
   );
 }
 
@@ -93,6 +94,7 @@ export function StepPeople() {
         name: h.name,
         role: h.role,
         initials: h.initials,
+        avatarUrl: h.avatarUrl,
         color: orgColor(h.primaryAgentId),
         invited: false,
       })),

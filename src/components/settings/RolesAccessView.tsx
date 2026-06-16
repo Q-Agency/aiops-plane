@@ -29,6 +29,7 @@ import {
   type Role,
   type RoleCapabilities,
 } from "@/mock/roles";
+import { PersonAvatar } from "@/components/people/PersonAvatar";
 import { cn } from "@/lib/utils";
 
 const DEFERRAL_TOOLTIP = "Roles are designed now; enforced when real sign-in lands.";
@@ -39,6 +40,7 @@ interface MemberChipData {
   id: string;
   name: string;
   initials: string;
+  avatarUrl?: string;
   color: string;
 }
 
@@ -50,6 +52,7 @@ function resolveMemberChip(humanId: string): MemberChipData | null {
       id: h.id,
       name: h.name,
       initials: h.initials,
+      avatarUrl: h.avatarUrl,
       color: agent ? `var(--${agent.color})` : "var(--muted-foreground)",
     };
   }
@@ -58,6 +61,7 @@ function resolveMemberChip(humanId: string): MemberChipData | null {
       id: sponsorMember.id,
       name: sponsorMember.name,
       initials: sponsorMember.initials,
+      avatarUrl: sponsorMember.avatarUrl,
       color: "var(--muted-foreground)",
     };
   }
@@ -67,12 +71,7 @@ function resolveMemberChip(humanId: string): MemberChipData | null {
 function MemberChip({ m }: { m: MemberChipData }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 pl-0.5 pr-2 py-0.5">
-      <span
-        className="grid size-5 place-items-center rounded-full text-[8px] font-semibold text-white"
-        style={{ backgroundColor: m.color }}
-      >
-        {m.initials}
-      </span>
+      <PersonAvatar name={m.name} initials={m.initials} src={m.avatarUrl} color={m.color} size="xs" />
       <span className="text-[11px] text-foreground">{m.name}</span>
     </span>
   );

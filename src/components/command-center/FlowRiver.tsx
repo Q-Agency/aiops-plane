@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import { useLive } from "@/hooks/useLiveTicker";
 import { cn } from "@/lib/utils";
 import { accountableFor } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import type { AgentId, Stage } from "@/mock/types";
 
 interface StageDef {
@@ -130,14 +131,7 @@ export function FlowRiver() {
               {/* Accountable */}
               {showAcct && (
                 <div className="flex items-center gap-1.5 pt-2 border-t border-border text-[10px] font-mono text-muted-foreground">
-                  <span
-                    className="size-5 rounded-full grid place-items-center text-[8px] font-semibold border shrink-0"
-                    style={{
-                      color,
-                      borderColor: `color-mix(in oklab, ${color} 45%, transparent)`,
-                      background: `color-mix(in oklab, ${color} 10%, transparent)`,
-                    }}
-                  >{r.human.initials}</span>
+                  <HumanAvatar human={r.human} size="xs" />
                   <span className="truncate text-foreground/80">{r.human.name.split(" ")[0]}</span>
                 </div>
               )}

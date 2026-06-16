@@ -16,6 +16,7 @@ import {
   activeHumans, capacityInfo, delegateOf, humanById, ownershipMap,
   THROTTLE_POLICY_LINE,
 } from "@/mock/humans";
+import { HumanAvatar } from "@/components/people/PersonAvatar";
 import { appendAuditMock } from "@/mock/audit-bridge";
 import type { AgentId } from "@/mock/types";
 import { MembersRoles } from "@/components/people/MembersRoles";
@@ -111,16 +112,7 @@ export function PodView() {
                 className="glass-panel p-4 hover-lift block group"
               >
                 <div className="flex items-start gap-3">
-                  <div
-                    className="size-11 rounded-full grid place-items-center font-mono font-semibold text-sm border"
-                    style={{
-                      color: primary.color,
-                      borderColor: `color-mix(in oklab, ${primary.color} 50%, transparent)`,
-                      background: `color-mix(in oklab, ${primary.color} 12%, transparent)`,
-                    }}
-                  >
-                    {h.initials}
-                  </div>
+                  <HumanAvatar human={h} size="lg" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="font-semibold text-sm truncate">{h.name}</div>
@@ -246,16 +238,7 @@ export function PodView() {
                   >
                     <td className="sticky left-0 z-10 bg-panel/95 px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <span
-                          className="size-6 rounded-full grid place-items-center text-[10px] font-mono font-semibold border"
-                          style={{
-                            color: agentMeta(h.primaryAgentId).color,
-                            borderColor: `color-mix(in oklab, ${agentMeta(h.primaryAgentId).color} 50%, transparent)`,
-                            background: `color-mix(in oklab, ${agentMeta(h.primaryAgentId).color} 12%, transparent)`,
-                          }}
-                        >
-                          {h.initials}
-                        </span>
+                        <HumanAvatar human={h} size="sm" />
                         <div className="min-w-0">
                           <div className="text-[12px] font-medium truncate">{h.name}</div>
                           <div className="text-[10px] text-muted-foreground truncate">{h.role}</div>
