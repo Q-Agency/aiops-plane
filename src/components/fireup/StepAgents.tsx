@@ -17,7 +17,6 @@ import { Cpu, Lock, Plus, RotateCcw, ShieldCheck, Sparkles } from "lucide-react"
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { agents } from "@/mock/agents";
 import {
@@ -102,7 +101,7 @@ function CatalogCard({
         />
       )}
 
-      {/* Header: name/role + Add switch */}
+      {/* Header: name/role + status (add/remove happens in the agent dialog) */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="text-xs font-semibold truncate" style={{ color }}>
@@ -112,43 +111,25 @@ function CatalogCard({
             {entry.engine}
           </div>
         </div>
-        {/* Switch zone - never opens the dialog */}
-        <span
-          className="flex items-center gap-1.5 shrink-0"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          {mandatory && selected ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary cursor-default">
-                  <Lock className="size-2.5" />
-                  Mandatory
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-60 text-[11px]">
-                Every pod ships with the Knowledge Base agent - it holds the shared context
-                (SOW, decisions, domain truth) every other agent and human draws on.
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <>
-              <span
-                className={cn(
-                  "text-[9px] uppercase tracking-wider font-mono",
-                  selected ? "text-status-done" : "text-muted-foreground",
-                )}
-              >
-                {selected ? "Added" : "Add"}
+        {/* status only - the toggle moved into the agent dialog */}
+        {mandatory && selected ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary cursor-default shrink-0">
+                <Lock className="size-2.5" />
+                Mandatory
               </span>
-              <Switch
-                checked={selected}
-                onCheckedChange={(next) => onToggle(entry.id, next)}
-                aria-label={selected ? `Remove ${entry.name}` : `Add ${entry.name}`}
-              />
-            </>
-          )}
-        </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-60 text-[11px]">
+              Every pod ships with the Knowledge Base agent - it holds the shared context
+              (SOW, decisions, domain truth) every other agent and human draws on.
+            </TooltipContent>
+          </Tooltip>
+        ) : selected ? (
+          <span className="text-[9px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-status-done/40 bg-status-done/10 text-status-done shrink-0">
+            Added
+          </span>
+        ) : null}
       </div>
 
       {/* Badges: availability + contract + conformance */}
