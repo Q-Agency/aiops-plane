@@ -18,7 +18,6 @@ import { Route as RegistryRouteImport } from './routes/registry'
 import { Route as PodRouteImport } from './routes/pod'
 import { Route as PitchRouteImport } from './routes/pitch'
 import { Route as PipelineRouteImport } from './routes/pipeline'
-import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as OrgRouteImport } from './routes/org'
 import { Route as OrchestrationRouteImport } from './routes/orchestration'
 import { Route as ObservabilityRouteImport } from './routes/observability'
@@ -89,11 +88,6 @@ const PitchRoute = PitchRouteImport.update({
 const PipelineRoute = PipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PilotRoute = PilotRouteImport.update({
-  id: '/pilot',
-  path: '/pilot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrgRoute = OrgRouteImport.update({
@@ -249,7 +243,6 @@ export interface FileRoutesByFullPath {
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/org': typeof OrgRoute
-  '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
   '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
@@ -287,7 +280,6 @@ export interface FileRoutesByTo {
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/org': typeof OrgRoute
-  '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
   '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
@@ -326,7 +318,6 @@ export interface FileRoutesById {
   '/observability': typeof ObservabilityRoute
   '/orchestration': typeof OrchestrationRoute
   '/org': typeof OrgRoute
-  '/pilot': typeof PilotRoute
   '/pipeline': typeof PipelineRoute
   '/pitch': typeof PitchRoute
   '/pod': typeof PodRoute
@@ -366,7 +357,6 @@ export interface FileRouteTypes {
     | '/observability'
     | '/orchestration'
     | '/org'
-    | '/pilot'
     | '/pipeline'
     | '/pitch'
     | '/pod'
@@ -404,7 +394,6 @@ export interface FileRouteTypes {
     | '/observability'
     | '/orchestration'
     | '/org'
-    | '/pilot'
     | '/pipeline'
     | '/pitch'
     | '/pod'
@@ -442,7 +431,6 @@ export interface FileRouteTypes {
     | '/observability'
     | '/orchestration'
     | '/org'
-    | '/pilot'
     | '/pipeline'
     | '/pitch'
     | '/pod'
@@ -481,7 +469,6 @@ export interface RootRouteChildren {
   ObservabilityRoute: typeof ObservabilityRoute
   OrchestrationRoute: typeof OrchestrationRoute
   OrgRoute: typeof OrgRoute
-  PilotRoute: typeof PilotRoute
   PipelineRoute: typeof PipelineRoute
   PitchRoute: typeof PitchRoute
   PodRoute: typeof PodRoute
@@ -560,13 +547,6 @@ declare module '@tanstack/react-router' {
       path: '/pipeline'
       fullPath: '/pipeline'
       preLoaderRoute: typeof PipelineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pilot': {
-      id: '/pilot'
-      path: '/pilot'
-      fullPath: '/pilot'
-      preLoaderRoute: typeof PilotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/org': {
@@ -787,7 +767,6 @@ const rootRouteChildren: RootRouteChildren = {
   ObservabilityRoute: ObservabilityRoute,
   OrchestrationRoute: OrchestrationRoute,
   OrgRoute: OrgRoute,
-  PilotRoute: PilotRoute,
   PipelineRoute: PipelineRoute,
   PitchRoute: PitchRoute,
   PodRoute: PodRoute,

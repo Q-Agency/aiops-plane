@@ -61,13 +61,6 @@ export function ActsSection() {
             <DemoPill href="/pods/new?step=blueprint" label="New-Pod wizard" />
           </Bullet>
           <Bullet>
-            <strong className="font-semibold text-slate-900">Curated agent catalog</strong> - 7
-            roles with capability, cost band, and a contract-version + conformance badge (curated
-            for quality, swappable by contract). The same catalog backs the wizard's team step -
-            open any card for what the agent consumes, what it produces, and what it costs to run
-            <DemoPill href="/catalog" label="Agent catalog" />
-          </Bullet>
-          <Bullet>
             <strong className="font-semibold text-slate-900">An LLM tier per agent</strong> - every
             agent takes a mandatory tier -{" "}
             <strong className="font-semibold text-slate-900">Max capability</strong>, Balanced,
@@ -86,7 +79,7 @@ export function ActsSection() {
             adding Dev suggests <em>+ Add Tasklist</em>, adding QA suggests <em>+ Add Review</em>;
             the chain closes with no gaps. The preview re-renders as you add or remove roles, so a
             broken handoff is visible before launch, not after
-            <DemoPill href="/catalog" label="Pipeline preview" />
+            <DemoPill href="/pods/new?step=agents" label="Pipeline preview" />
           </Bullet>
           <Bullet>
             <strong className="font-semibold text-slate-900">Connect tiles</strong> - OAuth-style
@@ -289,13 +282,9 @@ export function ActsSection() {
             the rejected ones, diffable
           </Bullet>
           <Bullet>
-            <strong className="font-semibold text-slate-900">Pilot scorecard</strong>
-            <DemoPill href="/pilot" label="Pilot scorecard" />
-            and the multi-pod portfolio rollup
+            <strong className="font-semibold text-slate-900">Multi-pod portfolio rollup</strong>
             <DemoPill href="/org" label="Portfolio" />
-            - the agreed pilot metrics tracked against targets (the artifact the go/no-go
-            decision reads from), and the same health/ROI view rolled up across every pod once
-            there is more than one
+            - the same health and ROI view rolled up across every pod once there is more than one
           </Bullet>
           <Bullet>
             <strong className="font-semibold text-slate-900">

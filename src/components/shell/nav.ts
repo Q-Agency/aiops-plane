@@ -16,7 +16,6 @@ import {
   CreditCard,
   DollarSign,
   FileBarChart,
-  FlaskConical,
   GitBranch,
   Hourglass,
   Inbox,
@@ -79,7 +78,6 @@ export type NavTo =
   | "/knowledge"
   | "/settings"
   | "/memory"
-  | "/pilot"
   | "/org"
   | "/artifacts"
   | "/status"
@@ -158,7 +156,6 @@ export const NAV: NavGroup[] = [
       // two "Overview" entries.
       { to: "/economics", label: "ROI & Economics", icon: DollarSign, live: true },
       { to: "/billing", label: "Usage & Billing", icon: CreditCard },
-      { to: "/pilot", label: "Pilot", icon: FlaskConical, tag: "PILOT" },
       { to: "/org", label: "Portfolio", icon: Briefcase },
       // govern - the two "rules the pod runs under", now adjacent.
       { to: "/governance", label: "Governance", icon: Scale, live: true },

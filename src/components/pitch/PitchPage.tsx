@@ -62,7 +62,7 @@ function Hero() {
       </p>
       <ul className="mt-7 flex flex-wrap gap-2.5">
         <StatChip>BA + Knowledge Base agents - operating today</StatChip>
-        <StatChip>7-role curated SDLC catalog</StatChip>
+        <StatChip>7 curated SDLC roles</StatChip>
         <StatChip>Append-only audit ledger - live in production</StatChip>
       </ul>
     </section>
