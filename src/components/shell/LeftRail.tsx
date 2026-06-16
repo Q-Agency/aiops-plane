@@ -102,7 +102,8 @@ function PitchLink({ collapsed }: { collapsed: boolean }) {
 
 export function LeftRail({ user }: { user: AppUser }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  // Open by default so the ADVANCED · technical surfaces are never missed.
+  const [advancedOpen, setAdvancedOpen] = useState(true);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // EXPERIENCE GATE: real-mode accounts see ONLY live-connected destinations -
