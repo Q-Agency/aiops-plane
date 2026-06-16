@@ -106,7 +106,7 @@ function ScopedLanding({ role }: { role: RoleId }) {
   }
 }
 
-export function RoleLandingRouter({ children }: { children: ReactNode }) {
+export function RoleLandingRouter({ children }: { children?: ReactNode }) {
   const { role, setRole } = useViewRole();
   const landing = viewLandingFor(role);
 
@@ -116,8 +116,8 @@ export function RoleLandingRouter({ children }: { children: ReactNode }) {
       <SwitchViewBar role={role} setRole={setRole} />
 
       {landing === "cockpit" ? (
-        // PM cockpit - children render exactly as today.
-        children
+        // PM cockpit - children (if any) render exactly as today.
+        (children ?? null)
       ) : (
         // Non-PM landing - takeover. The switcher above always offers the way
         // home (the Pod Admin pill), so cycling personas can never strand the user.

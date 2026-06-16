@@ -7,6 +7,7 @@ import { ApprovalsQueue } from "@/components/command-center/ApprovalsQueue";
 import { ActivityFeed } from "@/components/command-center/ActivityFeed";
 import { FirstRunRibbon } from "@/components/fireup/FirstRunRibbon";
 import { RoiHeroRow } from "@/components/monitor/RoiHeroRow";
+import { RoleLandingRouter } from "@/components/roles/RoleLandingRouter";
 import { RealCommandCenter } from "@/components/command-center/RealCommandCenter";
 import { getCommandCenterFn } from "@/lib/api/fleet.functions";
 import type { AgentEvent, AgentHealth, HITLGate, Run } from "@/contract";
@@ -63,8 +64,8 @@ function MockCommandCenter() {
   return (
     <div className="p-4 lg:p-6 grid gap-4 lg:gap-5 xl:grid-cols-[1fr_360px]">
       <div className="space-y-4 lg:space-y-5 min-w-0">
-        {/* Row 0 - the ROI wow-moment teaser (full reveal on /economics, C2) */}
-        <RoiHeroRow />
+        {/* role-scoped landing switch - persona switcher + scoped-landing takeover */}
+        <RoleLandingRouter />
         <FirstRunRibbon />
         <FlowRiver />
         <KpiStrip />
@@ -79,6 +80,8 @@ function MockCommandCenter() {
           </div>
           <AgentStatusGrid />
         </section>
+        {/* ROI wow-moment teaser - moved to the bottom (full reveal on /economics, C2) */}
+        <RoiHeroRow />
       </div>
       <aside className="space-y-4 lg:space-y-5 xl:sticky xl:top-4 self-start min-w-0 flex flex-col">
         <ApprovalsQueue />

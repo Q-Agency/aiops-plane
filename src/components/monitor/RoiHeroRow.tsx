@@ -6,18 +6,16 @@
  * ("promoted here, full story there" - the full reveal + Edit assumptions
  * live on Overview / ROI).
  *
- * ROLES slice: the exported RoiHeroRow now wraps the hero in the
- * RoleLandingRouter - this is Row 0 of the standard-mode "/" cockpit, and
- * index.tsx is frozen, so the role-scoped landing switch (PM cockpit /
- * QA gate queue / sponsor digest) mounts HERE. PM view renders the hero
- * exactly as before.
+ * It renders ONLY the ROI metrics band - the role-landing switch (persona
+ * switcher + scoped-landing takeover) mounts separately at the top of the
+ * cockpit (RoleLandingRouter, wired in index.tsx). The Overview places this
+ * band at the BOTTOM of the main column.
  */
 
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { aggregates, liveTier } from "@/mock/economics";
 import { cn } from "@/lib/utils";
-import { RoleLandingRouter } from "@/components/roles/RoleLandingRouter";
 import { useRoiAssumptions } from "./useRoiAssumptions";
 
 const usd = (n: number) =>
@@ -61,13 +59,11 @@ function Metric({
   );
 }
 
-/** Standard-mode "/" Row 0 - hosts the role-landing switch (see header). */
+/** The ROI wow-moment teaser band (deep-links to /economics). The role-landing
+ *  switch now mounts separately at the top of the cockpit, so this is just the
+ *  metrics - the Overview places it at the bottom of the column. */
 export function RoiHeroRow() {
-  return (
-    <RoleLandingRouter>
-      <RoiHeroRowCore />
-    </RoleLandingRouter>
-  );
+  return <RoiHeroRowCore />;
 }
 
 function RoiHeroRowCore() {
