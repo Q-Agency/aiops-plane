@@ -20,6 +20,14 @@ export const VIEW_ROLE_STORAGE_KEY = "aiops_view_role_v1";
 
 const DEFAULT_ROLE: RoleId = "pod_admin";
 
+/**
+ * Owner request: the "Viewing as" persona switcher is hidden on the Overview
+ * for now. While disabled, every consumer (the landing router + the read-only
+ * LeftRail) sees the default Pod Admin, so nothing is stranded on a persisted
+ * non-PM role. Flip to `true` to bring the demo control back.
+ */
+export const VIEW_AS_ENABLED: boolean = false;
+
 const VALID_ROLE_IDS = new Set<string>(roles.map((r) => r.id));
 
 /* ------------------------------------------------------------------ */
@@ -72,8 +80,12 @@ export function setViewRole(next: RoleId): void {
 
 /** The viewing-as persona + setter. Reload restores the persisted role. */
 export function useViewRole(): { role: RoleId; setRole: (r: RoleId) => void } {
-  const role = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  return { role, setRole: setViewRole };
+  const stored = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // While the switcher is hidden, pin everyone to the default cockpit so the
+  // landing + rail never reflect a persisted non-PM role with no way back.
+  return VIEW_AS_ENABLED
+    ? { role: stored, setRole: setViewRole }
+    : { role: DEFAULT_ROLE, setRole: () => {} };
 }
 
 /* ------------------------------------------------------------------ */

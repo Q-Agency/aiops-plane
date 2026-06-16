@@ -28,7 +28,7 @@ import type { ReactNode } from "react";
 import { Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { roles, roleById, type RoleId } from "@/mock/roles";
-import { useViewRole, viewLandingFor } from "@/mock/view-role";
+import { useViewRole, viewLandingFor, VIEW_AS_ENABLED } from "@/mock/view-role";
 import { ExecDigest } from "./ExecDigest";
 import { ScopedGateLanding } from "./ScopedGateLanding";
 import { EngLeadLanding } from "./EngLeadLanding";
@@ -109,6 +109,10 @@ function ScopedLanding({ role }: { role: RoleId }) {
 export function RoleLandingRouter({ children }: { children?: ReactNode }) {
   const { role, setRole } = useViewRole();
   const landing = viewLandingFor(role);
+
+  // "Viewing as" switcher hidden on the Overview for now (owner request). The
+  // cockpit renders straight through; re-enable via VIEW_AS_ENABLED.
+  if (!VIEW_AS_ENABLED) return <>{children}</>;
 
   return (
     <>
